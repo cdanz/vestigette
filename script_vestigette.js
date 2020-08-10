@@ -1,0 +1,160 @@
+"use strict";
+
+let mode = null;
+let panel = null;
+let pctRE = /pct\d+\_\d/;
+
+/*
+Capitalize a given str.
+*/
+function capitalize(str) {
+	return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+
+/*
+Return pctX_Y from element's classList.
+*/
+function getPct(element) {
+	let pctmatch = element.className.match(pctRE);
+	return pctmatch[0];
+}
+
+
+/*
+Set up accordion and assign click handlers.
+*/
+function init() {
+	panel = document.querySelector(".argument .panel");
+	let acc = document.getElementsByClassName("accordion");
+	let i;
+	let limit;
+	limit = acc.length;
+	for (i = 0; i < limit; i++) {
+		acc[i].addEventListener("click", function() {
+			panel.classList.toggle("expanded");
+			panel = this.querySelector(".panel");
+			panel.classList.toggle("expanded");
+		});
+	}
+	//Grow main phrasing if character count is low
+	let phrasing = document.querySelector(".argument .panel p");
+	if (phrasing.innerText.length < 20) {
+		phrasing.style.fontSize = "2rem";
+	} else if (phrasing.innerText.length < 75) {
+		phrasing.style.fontSize = "1.5rem";
+	}
+	// Assign click handlers for .container elements
+	let containers = document.querySelectorAll(".container .panel");
+	limit = containers.length;
+	for (i = 0; i < limit; i++) {
+		containers[i].addEventListener("click", function(evt) {
+			// TODO: placeholder for now
+			console.log(`${evt.target.parentElement.nodeName} with classes: ${evt.target.parentElement.className}`);
+		});
+	}
+}
+
+
+/*
+Retrieve weights from .wrapper, via attribute data-user_weight.
+Replace pctX_Y value with those weights and store the original in data-aggregate-weight.
+*/
+function loadUserWeights(type) {
+	if (mode != 'edit') {
+		// load values for editing (initial setting is editing from 0)
+		let args = document.querySelectorAll(`.container.${type} .wrapper`);
+		let limit = args.length;
+		let i;
+		for (i = 0; i < limit; i++) {
+			let weight = args[i].getAttribute('data-user-weight');
+			// get pct being used, store it
+			let pct = getPct(args[i]);
+			args[i].setAttribute('data-aggregate-weight', pct);
+			let newpct;
+			if (weight.length == 0) {
+				// no user weight to show
+				newpct = 'pct0_0';
+			} else {
+				// create value for newpct
+				let [whole, decimal] = weight.split('.');
+				newpct = `pct${whole}_${decimal}`;
+			}
+			args[i].classList.remove(type, "half1", "half2", pct);
+			args[i].classList.add(newpct);
+		}
+	}
+}
+
+
+/*
+Docs TBD
+*/
+function bump(element, type, argID) {
+	let found = false;
+	let iterator = 0;
+	let foundIndex;
+	let genericTotalClicks;
+	let genericClickArr = [];
+	switch(type) {
+		case 'Because':
+			genericTotalClicks = becauseTotalClicks;
+			genericClickArr = becauseClickArr;		 /* arrays copy by reference... */
+			break;
+		case 'Therefore':
+			genericTotalClicks = thereforeTotalClicks;
+			genericClickArr = thereforeClickArr;
+			break;
+		case 'Rebuttal':
+			genericTotalClicks = rebuttalTotalClicks;
+			genericClickArr = rebuttalClickArr;
+			break;
+	}
+	genericTotalClicks++;
+	while (!found && iterator < genericClickArr.length) {
+		if (genericClickArr[iterator][0] == argID) {
+			found = true;
+			genericClickArr[iterator][1]++;
+			foundIndex = iterator;
+		}
+		iterator++;
+	}
+	if (found == false) {
+		foundIndex = genericClickArr.length;
+		genericClickArr.push([argID, 1]);
+		let btn = document.getElementById("displayBtn"+type+argID);
+		btn.className = "";
+	}
+	for (let i = 0, limit = genericClickArr.length; i < limit; i++) {
+		rateAsString = ((genericClickArr[i][1]/genericTotalClicks)*100).toFixed(1);
+		let [whole, decimal] = rateAsString.split('.');
+		let newpct = `pct${whole}_${decimal}`;
+		element.classList.add(newpct);
+		let text = element.querySelector("p .inLinePct");
+		text.innerHTML = `${rateAsString}%`;
+	}
+	switch(type) {
+		case 'Because':
+			becauseTotalClicks = genericTotalClicks;
+			becauseClickArr = genericClickArr.slice();		 /* arrays copy by reference, but you don't want genericClickArr to go out of scope. */
+			updateBecauseWeighInValue();
+			break;
+		case 'Therefore':
+			thereforeTotalClicks = genericTotalClicks;
+			thereforeClickArr = genericClickArr.slice();
+			updateThereforeWeighInValue();
+			break;
+		case 'Rebuttal':
+			rebuttalTotalClicks = genericTotaliClicks;
+			rebuttalClickArr = genericClickArr.slice();
+			updateRebuttalWeighInValue();
+			break;
+	}
+}
+
+/*
+Initialize after DOM content is loaded.
+*/
+document.addEventListener('DOMContentLoaded', function() {
+	init();
+});

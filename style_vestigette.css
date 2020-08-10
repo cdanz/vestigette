@@ -1,0 +1,3445 @@
+/* Color palette */
+:root{ 
+	--cddbRed: #af1a17;
+	--cddbGreen: #10a020;
+	--cddbBlue: #2d58a8;
+	--cddbBlack: #0e0e0e;
+	--cddbWhite: white;
+	--cddbGrey: #939393;
+	--cddbLiteGrey: #ebebeb;
+	--percentage_bg: #eee;
+	--percentage_bg_page: var(--cddbWhite);
+	--because: var(--cddbBlue);
+	--rebuttal: var(--cddbRed);
+	--therefore: var(--cddbGreen);
+}
+
+/* Apply palette coloring */
+/*
+.primaryColor {
+	color: var(--cddbWhite);
+	background-color:var(--cddbBlack);
+	border-color: var(--cddbWhite);
+}
+.primaryInvert {
+	color: var(--cddbBlack);
+	background-color: var(--cddbWhite);
+}
+.primaryContent {
+	color: var(--cddbBlack);
+	background-color: var(--cddbWhite);
+	border-color: var(--cddbBlack);
+}
+.becauseColor {
+	color: var(--cddbWhite);
+	background-color:var(--cddbBlue);
+}
+.becauseInvert {
+	color: var(--cddbBlue);
+	background-color: var(--cddbWhite);
+}
+.becauseContent {
+	color: var(--cddbBlack);
+	background-color: var(--cddbWhite);
+	border-color: var(--cddbBlue);
+}
+.thereforeColor {
+	color: var(--cddbWhite);
+	background-color:var(--cddbGreen);
+}
+.thereforeInvert {
+	color: var(--cddbGreen);
+	background-color: var(--cddbWhite);
+}
+.thereforeContent {
+	color: var(--cddbBlack);
+	background-color: var(--cddbWhite);
+	border-color: var(--cddbGreen);
+}
+.rebuttalColor {
+	color: var(--cddbWhite);
+	background-color:var(--cddbRed);
+}
+.rebuttalInvert {
+	color: var(--cddbRed);
+	background-color: var(--cddbWhite);
+}
+.rebuttalContent {
+	color: var(--cddbBlack);
+	background-color: var(--cddbWhite);
+	border-color: var(--cddbRed);
+}
+.neutralColor {
+	color: var(--cddbWhite);
+	background-color:var(--cddbGrey);
+}
+.neutralInvert {
+	color: var(--cddbGrey);
+	background-color: var(--cddbWhite);
+}
+.neutralContent {
+	color: var(--cddbBlack);
+	background-color: var(--cddbWhite);
+	border-color: var(--cddbGrey);
+}
+*/
+
+/*This is a global, some add padding and margin where you don't call for it and this will 
+ensure things defined here are not applied automatically.*/
+* {
+	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+	box-sizing: border-box;
+	padding: 0;
+	margin: 0;
+}
+body {
+	background-color:var(--cddbGrey);
+}
+a:link{
+	color: inherit;
+	text-decoration: none;
+}
+a:visited {
+	color: inherit;
+	text-decoration: none;
+}
+a:hover{
+	color: inherit;
+}
+a:active {
+	color: inherit;
+}
+h1 {
+	color: var(--cddbWhite);
+	font-size: 2.5rem;
+	font-weight: normal;
+	text-shadow: 0.2em 0.2em 0.2em var(--cddbRed);
+}
+h2 {
+	font-weight: bold;
+	font-size: 2rem;
+	width: 90%;
+}
+
+/* buttons */
+button {
+	background-color: inherit;
+	border-color: var(--cddbWhite);
+	border-radius: 2rem;
+	border-style: solid;
+	border-width: 0.2rem;
+	color: var(--cddbWhite);
+	cursor: pointer;
+	font-weight: bold;
+	height: 2rem;
+	margin:0;
+	text-align: center;
+}
+.because button {
+	border-radius: 0;
+	padding-left: 1em;
+	padding-right: 1em;
+}
+.because button:hover {
+	background-color: var(--cddbWhite);
+	color: var(--cddbBlue);
+}
+.because button.restart {
+	position: relative;
+	width: 2rem;
+}
+.because button.restart span {
+	font-size: 250%;
+	left: 0.1rem;
+	position: absolute;
+	top: -0.42rem;
+}
+.argument button {
+	padding-left: 0.5rem;
+	padding-right: 0.5rem;
+}
+.opinion button {
+	cursor: pointer; /* Pointer/hand icon */
+}
+.opinion button:not(:last-child) {
+	border-right: none; /* Prevent double borders */
+}
+button.accept {
+	border-right-width: 0.1rem;
+	border-top-right-radius: 0;
+	border-bottom-right-radius: 0;
+}
+button.reject {
+	border-left-width: 0.1rem;
+	border-top-left-radius: 0;
+	border-bottom-left-radius: 0;
+}
+button.acceptOpen, 
+button.rejectOpen {
+	background-color: var(--cddbGrey);
+}
+button.acceptOpen:hover, 
+button.acceptSet {
+	background-color: var(--cddbGreen);
+}
+button.rejectOpen:hover, 
+button.rejectSet {
+	background-color: var(--cddbRed);
+}
+
+/* sections & containers */
+.mastHead {
+	align-items: flex-end;
+	border: none;
+	display: flex;
+	font-size: 0.8em;
+	justify-content: space-around;
+	outline: none;
+	padding: 0.5rem;
+	text-align: left;
+	width: 100%;
+}
+.accordion {
+	border: none;
+	cursor: pointer;
+	display: flex;
+	flex-flow: row wrap;
+	justify-content: space-between;
+	outline: none;
+	padding: 0.5rem 0.5rem 0 0.5rem;
+	text-align: left;
+	transition: 0.4s;
+	width: 100%;
+}
+.container {
+	background-color:var(--cddbBlack);
+	border-color: var(--cddbWhite);
+	color: var(--cddbWhite);
+}
+.container.because {
+	background-color:var(--cddbBlue);
+}
+.container.rebuttal {
+	background-color:var(--cddbRed);
+}
+.container.therefore {
+	background-color:var(--cddbGreen);
+}
+.container.argument {
+	align-items: center;
+	border-color: var(--cddbWhite);
+	display: flex;
+	justify-content: space-between;
+}
+.container div {
+	align-items: flex-start;
+	display: flex;
+	flex-flow: row nowrap;
+}
+.container .buttons {
+	align-items: center;
+	padding-bottom: 1px; /* hahaha */
+}
+.because form {
+	margin-left: 1rem;
+}
+.opinion form {
+	display: flex;
+	flex-flow: row nowrap;
+	justify-content: flex-start;
+}
+.panel {
+	background-color: white;
+	border: none;
+	border-color: var(--cddbBlack);
+	border-color: yellow !important;
+	color: var(--cddbBlack);
+	display: flex;
+	flex-flow: column nowrap;
+	margin-top: 0.5rem;
+	max-height: 0;
+	overflow: auto;
+	transition: max-height 0.3s ease-out, margin-bottom 0.1s ease-out 0.1s;
+	width: 100%;
+}
+.because .panel {
+	border-color: var(--cddbBlue);
+}
+.rebuttal .panel {
+	border-color: var(--cddbRed);
+}
+.therefore .panel {
+	border-color: var(--cddbGreen);
+}
+.panel ul {
+	list-style: none;
+	width: 100%;
+}
+.panel li {
+	align-items: center;
+	border-bottom: 2px var(--cddbLiteGrey) solid;
+	color: var(--cddbBlack);
+	display: flex;
+	flex-flow: row nowrap;
+	justify-content: flex-start;
+	min-height: 4rem;
+}
+.panel li:last-child {
+	border-bottom: none;
+}
+.panel.expanded {
+	margin-bottom: 0.5rem;
+	max-height: 338px;
+}
+.panel .inLinePct {
+	font-weight: bold;
+}
+.because .inLinePct {
+	color: var(--cddbBlue);
+}
+.rebuttal .inLinePct {
+	color: var(--cddbRed);
+}
+.therefore .inLinePct {
+	color: var(--cddbGreen);
+}
+.argument .panel {
+	flex-flow: row wrap;
+}
+.argument .panel .rate_phrase {
+	align-items: center;
+	justify-content: flex-start;
+	min-height: 4rem;
+	background-color: white;
+	transition: max-height 0.3s ease-out;
+	width: 100%;
+}
+.argument .panel .stat {
+	align-items: baseline;
+	display: flex;
+	flex-flow: row wrap;
+}
+.stat {
+	align-content: flex-start;
+	align-items: baseline;
+	display: flex;
+	flex-flow: row wrap;
+	justify-content: center;
+	width: auto;
+}
+.statBig{
+	color: var(--cddbBlack);
+	font-size: 3rem;
+	font-weight: bold;
+	position: relative;
+}
+.statSmall{
+	bottom: 0.1rem;
+	color: var(--cddbBlack);
+	font-size: 1rem;
+	font-weight: bold;
+	position: relative;
+}
+.statDetail{
+	display: block;
+	font-size: 0.5rem;
+	color: var(--cddbGrey);
+	background-color: pink;
+	width: 90%;
+}
+.argument .panel p {
+	align-self: center;
+	border: 2px var(--cddbLiteGrey) solid;
+	font-size: 1rem;
+	margin: 0.3rem;
+	padding: 0.3rem;
+	width: 100%;
+}
+.argument .panel button {
+	align-self: stretch;
+	background-color: var(--cddbBlack);
+	border: 1px var(--cddbWhite) solid;
+	border-bottom-left-radius: 0;
+	border-bottom-right-radius: 50%;
+	border-top-left-radius: 0;
+	border-top-right-radius: 50%;
+	color: var(--cddbWhite);
+	cursor: pointer;
+	font-size: 2rem;
+	font-weight: normal;
+	height: auto;
+	min-width: 2.5rem;
+	padding-left: 0.1rem;
+	padding-right: 0.3rem;
+}
+.argument .panel .explicationBox {
+	align-items: center;
+	min-height: 4rem;
+	width: 100%;
+}
+.explicationBox a {
+	border: 2px var(--cddbLiteGrey) solid;
+	margin: 0.3rem;
+	padding: 0.3rem;
+	width: 100%;
+}
+
+/* percentages */
+.wrapper {
+	position: relative;
+	margin: 0.2rem;
+	height: 4rem;
+	width: 5rem;
+}
+.pointBtn {
+	position: absolute;
+	top: 0.25rem;
+	left: 0;
+	border-radius: 50%;
+	border-style: solid;
+	border-width: 1rem;
+	transform: rotate(-50grad);
+	width: 3.5rem;
+	height: 3.5rem;
+}
+/* arc1 */
+.pointBtn.arc1 {
+	border-color: var(--cddbBlack) var(--percentage_bg) var(--percentage_bg) var(--cddbBlack) ;
+	background-color: var(--percentage_bg_page);
+}
+.rebuttal .pointBtn.arc1 {
+	border-color: var(--rebuttal) var(--percentage_bg) var(--percentage_bg) var(--rebuttal);
+}
+.therefore .pointBtn.arc1 {
+	border-color: var(--therefore) var(--percentage_bg) var(--percentage_bg) var(--therefore);
+}
+.because .pointBtn.arc1 {
+	border-color: var(--because) var(--percentage_bg) var(--percentage_bg) var(--because);
+}
+.neutral .pointBtn.arc1 {
+	border-color: var(--percentage_bg) var(--percentage_bg) var(--percentage_bg) var(--percentage_bg);
+	background-color: var(--cddbGrey);
+}
+/* arc 2 */
+.half1 .pointBtn.arc2 {
+	border-color: var(--percentage_bg) transparent transparent var(--percentage_bg);
+}
+.half2 .pointBtn.arc2 {
+	border-color: transparent var(--cddbBlack) var(--cddbBlack) transparent;
+}
+.half2.rebuttal .pointBtn.arc2 {
+	border-color: transparent var(--rebuttal) var(--rebuttal) transparent;
+}
+.half2.therefore .pointBtn.arc2 {
+	border-color: transparent var(--therefore) var(--therefore) transparent;
+}
+.half2.because .pointBtn.arc2 {
+	border-color: transparent var(--because) var(--because) transparent;
+}
+.neutral .pointBtn.arc2 {
+	border-color: transparent;
+}
+
+.pct0_0 .pointBtn.arc2 {
+	transform: rotate(-50.00grad);
+}
+.pct0_1 .pointBtn.arc2 {
+	transform: rotate(-50.40grad);
+}
+.pct0_2 .pointBtn.arc2 {
+	transform: rotate(-50.80grad);
+}
+.pct0_3 .pointBtn.arc2 {
+	transform: rotate(-51.20grad);
+}
+.pct0_4 .pointBtn.arc2 {
+	transform: rotate(-51.60grad);
+}
+.pct0_5 .pointBtn.arc2 {
+	transform: rotate(-52.00grad);
+}
+.pct0_6 .pointBtn.arc2 {
+	transform: rotate(-52.40grad);
+}
+.pct0_7 .pointBtn.arc2 {
+	transform: rotate(-52.80grad);
+}
+.pct0_8 .pointBtn.arc2 {
+	transform: rotate(-53.20grad);
+}
+.pct0_9 .pointBtn.arc2 {
+	transform: rotate(-53.60grad);
+}
+.pct1_0 .pointBtn.arc2 {
+	transform: rotate(-54.00grad);
+}
+.pct1_1 .pointBtn.arc2 {
+	transform: rotate(-54.40grad);
+}
+.pct1_2 .pointBtn.arc2 {
+	transform: rotate(-54.80grad);
+}
+.pct1_3 .pointBtn.arc2 {
+	transform: rotate(-55.20grad);
+}
+.pct1_4 .pointBtn.arc2 {
+	transform: rotate(-55.60grad);
+}
+.pct1_5 .pointBtn.arc2 {
+	transform: rotate(-56.00grad);
+}
+.pct1_6 .pointBtn.arc2 {
+	transform: rotate(-56.40grad);
+}
+.pct1_7 .pointBtn.arc2 {
+	transform: rotate(-56.80grad);
+}
+.pct1_8 .pointBtn.arc2 {
+	transform: rotate(-57.20grad);
+}
+.pct1_9 .pointBtn.arc2 {
+	transform: rotate(-57.60grad);
+}
+.pct2_0 .pointBtn.arc2 {
+	transform: rotate(-58.00grad);
+}
+.pct2_1 .pointBtn.arc2 {
+	transform: rotate(-58.40grad);
+}
+.pct2_2 .pointBtn.arc2 {
+	transform: rotate(-58.80grad);
+}
+.pct2_3 .pointBtn.arc2 {
+	transform: rotate(-59.20grad);
+}
+.pct2_4 .pointBtn.arc2 {
+	transform: rotate(-59.60grad);
+}
+.pct2_5 .pointBtn.arc2 {
+	transform: rotate(-60.00grad);
+}
+.pct2_6 .pointBtn.arc2 {
+	transform: rotate(-60.40grad);
+}
+.pct2_7 .pointBtn.arc2 {
+	transform: rotate(-60.80grad);
+}
+.pct2_8 .pointBtn.arc2 {
+	transform: rotate(-61.20grad);
+}
+.pct2_9 .pointBtn.arc2 {
+	transform: rotate(-61.60grad);
+}
+.pct3_0 .pointBtn.arc2 {
+	transform: rotate(-62.00grad);
+}
+.pct3_1 .pointBtn.arc2 {
+	transform: rotate(-62.40grad);
+}
+.pct3_2 .pointBtn.arc2 {
+	transform: rotate(-62.80grad);
+}
+.pct3_3 .pointBtn.arc2 {
+	transform: rotate(-63.20grad);
+}
+.pct3_4 .pointBtn.arc2 {
+	transform: rotate(-63.60grad);
+}
+.pct3_5 .pointBtn.arc2 {
+	transform: rotate(-64.00grad);
+}
+.pct3_6 .pointBtn.arc2 {
+	transform: rotate(-64.40grad);
+}
+.pct3_7 .pointBtn.arc2 {
+	transform: rotate(-64.80grad);
+}
+.pct3_8 .pointBtn.arc2 {
+	transform: rotate(-65.20grad);
+}
+.pct3_9 .pointBtn.arc2 {
+	transform: rotate(-65.60grad);
+}
+.pct4_0 .pointBtn.arc2 {
+	transform: rotate(-66.00grad);
+}
+.pct4_1 .pointBtn.arc2 {
+	transform: rotate(-66.40grad);
+}
+.pct4_2 .pointBtn.arc2 {
+	transform: rotate(-66.80grad);
+}
+.pct4_3 .pointBtn.arc2 {
+	transform: rotate(-67.20grad);
+}
+.pct4_4 .pointBtn.arc2 {
+	transform: rotate(-67.60grad);
+}
+.pct4_5 .pointBtn.arc2 {
+	transform: rotate(-68.00grad);
+}
+.pct4_6 .pointBtn.arc2 {
+	transform: rotate(-68.40grad);
+}
+.pct4_7 .pointBtn.arc2 {
+	transform: rotate(-68.80grad);
+}
+.pct4_8 .pointBtn.arc2 {
+	transform: rotate(-69.20grad);
+}
+.pct4_9 .pointBtn.arc2 {
+	transform: rotate(-69.60grad);
+}
+.pct5_0 .pointBtn.arc2 {
+	transform: rotate(-70.00grad);
+}
+.pct5_1 .pointBtn.arc2 {
+	transform: rotate(-70.40grad);
+}
+.pct5_2 .pointBtn.arc2 {
+	transform: rotate(-70.80grad);
+}
+.pct5_3 .pointBtn.arc2 {
+	transform: rotate(-71.20grad);
+}
+.pct5_4 .pointBtn.arc2 {
+	transform: rotate(-71.60grad);
+}
+.pct5_5 .pointBtn.arc2 {
+	transform: rotate(-72.00grad);
+}
+.pct5_6 .pointBtn.arc2 {
+	transform: rotate(-72.40grad);
+}
+.pct5_7 .pointBtn.arc2 {
+	transform: rotate(-72.80grad);
+}
+.pct5_8 .pointBtn.arc2 {
+	transform: rotate(-73.20grad);
+}
+.pct5_9 .pointBtn.arc2 {
+	transform: rotate(-73.60grad);
+}
+.pct6_0 .pointBtn.arc2 {
+	transform: rotate(-74.00grad);
+}
+.pct6_1 .pointBtn.arc2 {
+	transform: rotate(-74.40grad);
+}
+.pct6_2 .pointBtn.arc2 {
+	transform: rotate(-74.80grad);
+}
+.pct6_3 .pointBtn.arc2 {
+	transform: rotate(-75.20grad);
+}
+.pct6_4 .pointBtn.arc2 {
+	transform: rotate(-75.60grad);
+}
+.pct6_5 .pointBtn.arc2 {
+	transform: rotate(-76.00grad);
+}
+.pct6_6 .pointBtn.arc2 {
+	transform: rotate(-76.40grad);
+}
+.pct6_7 .pointBtn.arc2 {
+	transform: rotate(-76.80grad);
+}
+.pct6_8 .pointBtn.arc2 {
+	transform: rotate(-77.20grad);
+}
+.pct6_9 .pointBtn.arc2 {
+	transform: rotate(-77.60grad);
+}
+.pct7_0 .pointBtn.arc2 {
+	transform: rotate(-78.00grad);
+}
+.pct7_1 .pointBtn.arc2 {
+	transform: rotate(-78.40grad);
+}
+.pct7_2 .pointBtn.arc2 {
+	transform: rotate(-78.80grad);
+}
+.pct7_3 .pointBtn.arc2 {
+	transform: rotate(-79.20grad);
+}
+.pct7_4 .pointBtn.arc2 {
+	transform: rotate(-79.60grad);
+}
+.pct7_5 .pointBtn.arc2 {
+	transform: rotate(-80.00grad);
+}
+.pct7_6 .pointBtn.arc2 {
+	transform: rotate(-80.40grad);
+}
+.pct7_7 .pointBtn.arc2 {
+	transform: rotate(-80.80grad);
+}
+.pct7_8 .pointBtn.arc2 {
+	transform: rotate(-81.20grad);
+}
+.pct7_9 .pointBtn.arc2 {
+	transform: rotate(-81.60grad);
+}
+.pct8_0 .pointBtn.arc2 {
+	transform: rotate(-82.00grad);
+}
+.pct8_1 .pointBtn.arc2 {
+	transform: rotate(-82.40grad);
+}
+.pct8_2 .pointBtn.arc2 {
+	transform: rotate(-82.80grad);
+}
+.pct8_3 .pointBtn.arc2 {
+	transform: rotate(-83.20grad);
+}
+.pct8_4 .pointBtn.arc2 {
+	transform: rotate(-83.60grad);
+}
+.pct8_5 .pointBtn.arc2 {
+	transform: rotate(-84.00grad);
+}
+.pct8_6 .pointBtn.arc2 {
+	transform: rotate(-84.40grad);
+}
+.pct8_7 .pointBtn.arc2 {
+	transform: rotate(-84.80grad);
+}
+.pct8_8 .pointBtn.arc2 {
+	transform: rotate(-85.20grad);
+}
+.pct8_9 .pointBtn.arc2 {
+	transform: rotate(-85.60grad);
+}
+.pct9_0 .pointBtn.arc2 {
+	transform: rotate(-86.00grad);
+}
+.pct9_1 .pointBtn.arc2 {
+	transform: rotate(-86.40grad);
+}
+.pct9_2 .pointBtn.arc2 {
+	transform: rotate(-86.80grad);
+}
+.pct9_3 .pointBtn.arc2 {
+	transform: rotate(-87.20grad);
+}
+.pct9_4 .pointBtn.arc2 {
+	transform: rotate(-87.60grad);
+}
+.pct9_5 .pointBtn.arc2 {
+	transform: rotate(-88.00grad);
+}
+.pct9_6 .pointBtn.arc2 {
+	transform: rotate(-88.40grad);
+}
+.pct9_7 .pointBtn.arc2 {
+	transform: rotate(-88.80grad);
+}
+.pct9_8 .pointBtn.arc2 {
+	transform: rotate(-89.20grad);
+}
+.pct9_9 .pointBtn.arc2 {
+	transform: rotate(-89.60grad);
+}
+.pct10_0 .pointBtn.arc2 {
+	transform: rotate(-90.00grad);
+}
+.pct10_1 .pointBtn.arc2 {
+	transform: rotate(-90.40grad);
+}
+.pct10_2 .pointBtn.arc2 {
+	transform: rotate(-90.80grad);
+}
+.pct10_3 .pointBtn.arc2 {
+	transform: rotate(-91.20grad);
+}
+.pct10_4 .pointBtn.arc2 {
+	transform: rotate(-91.60grad);
+}
+.pct10_5 .pointBtn.arc2 {
+	transform: rotate(-92.00grad);
+}
+.pct10_6 .pointBtn.arc2 {
+	transform: rotate(-92.40grad);
+}
+.pct10_7 .pointBtn.arc2 {
+	transform: rotate(-92.80grad);
+}
+.pct10_8 .pointBtn.arc2 {
+	transform: rotate(-93.20grad);
+}
+.pct10_9 .pointBtn.arc2 {
+	transform: rotate(-93.60grad);
+}
+.pct11_0 .pointBtn.arc2 {
+	transform: rotate(-94.00grad);
+}
+.pct11_1 .pointBtn.arc2 {
+	transform: rotate(-94.40grad);
+}
+.pct11_2 .pointBtn.arc2 {
+	transform: rotate(-94.80grad);
+}
+.pct11_3 .pointBtn.arc2 {
+	transform: rotate(-95.20grad);
+}
+.pct11_4 .pointBtn.arc2 {
+	transform: rotate(-95.60grad);
+}
+.pct11_5 .pointBtn.arc2 {
+	transform: rotate(-96.00grad);
+}
+.pct11_6 .pointBtn.arc2 {
+	transform: rotate(-96.40grad);
+}
+.pct11_7 .pointBtn.arc2 {
+	transform: rotate(-96.80grad);
+}
+.pct11_8 .pointBtn.arc2 {
+	transform: rotate(-97.20grad);
+}
+.pct11_9 .pointBtn.arc2 {
+	transform: rotate(-97.60grad);
+}
+.pct12_0 .pointBtn.arc2 {
+	transform: rotate(-98.00grad);
+}
+.pct12_1 .pointBtn.arc2 {
+	transform: rotate(-98.40grad);
+}
+.pct12_2 .pointBtn.arc2 {
+	transform: rotate(-98.80grad);
+}
+.pct12_3 .pointBtn.arc2 {
+	transform: rotate(-99.20grad);
+}
+.pct12_4 .pointBtn.arc2 {
+	transform: rotate(-99.60grad);
+}
+.pct12_5 .pointBtn.arc2 {
+	transform: rotate(-100.00grad);
+}
+.pct12_6 .pointBtn.arc2 {
+	transform: rotate(-100.40grad);
+}
+.pct12_7 .pointBtn.arc2 {
+	transform: rotate(-100.80grad);
+}
+.pct12_8 .pointBtn.arc2 {
+	transform: rotate(-101.20grad);
+}
+.pct12_9 .pointBtn.arc2 {
+	transform: rotate(-101.60grad);
+}
+.pct13_0 .pointBtn.arc2 {
+	transform: rotate(-102.00grad);
+}
+.pct13_1 .pointBtn.arc2 {
+	transform: rotate(-102.40grad);
+}
+.pct13_2 .pointBtn.arc2 {
+	transform: rotate(-102.80grad);
+}
+.pct13_3 .pointBtn.arc2 {
+	transform: rotate(-103.20grad);
+}
+.pct13_4 .pointBtn.arc2 {
+	transform: rotate(-103.60grad);
+}
+.pct13_5 .pointBtn.arc2 {
+	transform: rotate(-104.00grad);
+}
+.pct13_6 .pointBtn.arc2 {
+	transform: rotate(-104.40grad);
+}
+.pct13_7 .pointBtn.arc2 {
+	transform: rotate(-104.80grad);
+}
+.pct13_8 .pointBtn.arc2 {
+	transform: rotate(-105.20grad);
+}
+.pct13_9 .pointBtn.arc2 {
+	transform: rotate(-105.60grad);
+}
+.pct14_0 .pointBtn.arc2 {
+	transform: rotate(-106.00grad);
+}
+.pct14_1 .pointBtn.arc2 {
+	transform: rotate(-106.40grad);
+}
+.pct14_2 .pointBtn.arc2 {
+	transform: rotate(-106.80grad);
+}
+.pct14_3 .pointBtn.arc2 {
+	transform: rotate(-107.20grad);
+}
+.pct14_4 .pointBtn.arc2 {
+	transform: rotate(-107.60grad);
+}
+.pct14_5 .pointBtn.arc2 {
+	transform: rotate(-108.00grad);
+}
+.pct14_6 .pointBtn.arc2 {
+	transform: rotate(-108.40grad);
+}
+.pct14_7 .pointBtn.arc2 {
+	transform: rotate(-108.80grad);
+}
+.pct14_8 .pointBtn.arc2 {
+	transform: rotate(-109.20grad);
+}
+.pct14_9 .pointBtn.arc2 {
+	transform: rotate(-109.60grad);
+}
+.pct15_0 .pointBtn.arc2 {
+	transform: rotate(-110.00grad);
+}
+.pct15_1 .pointBtn.arc2 {
+	transform: rotate(-110.40grad);
+}
+.pct15_2 .pointBtn.arc2 {
+	transform: rotate(-110.80grad);
+}
+.pct15_3 .pointBtn.arc2 {
+	transform: rotate(-111.20grad);
+}
+.pct15_4 .pointBtn.arc2 {
+	transform: rotate(-111.60grad);
+}
+.pct15_5 .pointBtn.arc2 {
+	transform: rotate(-112.00grad);
+}
+.pct15_6 .pointBtn.arc2 {
+	transform: rotate(-112.40grad);
+}
+.pct15_7 .pointBtn.arc2 {
+	transform: rotate(-112.80grad);
+}
+.pct15_8 .pointBtn.arc2 {
+	transform: rotate(-113.20grad);
+}
+.pct15_9 .pointBtn.arc2 {
+	transform: rotate(-113.60grad);
+}
+.pct16_0 .pointBtn.arc2 {
+	transform: rotate(-114.00grad);
+}
+.pct16_1 .pointBtn.arc2 {
+	transform: rotate(-114.40grad);
+}
+.pct16_2 .pointBtn.arc2 {
+	transform: rotate(-114.80grad);
+}
+.pct16_3 .pointBtn.arc2 {
+	transform: rotate(-115.20grad);
+}
+.pct16_4 .pointBtn.arc2 {
+	transform: rotate(-115.60grad);
+}
+.pct16_5 .pointBtn.arc2 {
+	transform: rotate(-116.00grad);
+}
+.pct16_6 .pointBtn.arc2 {
+	transform: rotate(-116.40grad);
+}
+.pct16_7 .pointBtn.arc2 {
+	transform: rotate(-116.80grad);
+}
+.pct16_8 .pointBtn.arc2 {
+	transform: rotate(-117.20grad);
+}
+.pct16_9 .pointBtn.arc2 {
+	transform: rotate(-117.60grad);
+}
+.pct17_0 .pointBtn.arc2 {
+	transform: rotate(-118.00grad);
+}
+.pct17_1 .pointBtn.arc2 {
+	transform: rotate(-118.40grad);
+}
+.pct17_2 .pointBtn.arc2 {
+	transform: rotate(-118.80grad);
+}
+.pct17_3 .pointBtn.arc2 {
+	transform: rotate(-119.20grad);
+}
+.pct17_4 .pointBtn.arc2 {
+	transform: rotate(-119.60grad);
+}
+.pct17_5 .pointBtn.arc2 {
+	transform: rotate(-120.00grad);
+}
+.pct17_6 .pointBtn.arc2 {
+	transform: rotate(-120.40grad);
+}
+.pct17_7 .pointBtn.arc2 {
+	transform: rotate(-120.80grad);
+}
+.pct17_8 .pointBtn.arc2 {
+	transform: rotate(-121.20grad);
+}
+.pct17_9 .pointBtn.arc2 {
+	transform: rotate(-121.60grad);
+}
+.pct18_0 .pointBtn.arc2 {
+	transform: rotate(-122.00grad);
+}
+.pct18_1 .pointBtn.arc2 {
+	transform: rotate(-122.40grad);
+}
+.pct18_2 .pointBtn.arc2 {
+	transform: rotate(-122.80grad);
+}
+.pct18_3 .pointBtn.arc2 {
+	transform: rotate(-123.20grad);
+}
+.pct18_4 .pointBtn.arc2 {
+	transform: rotate(-123.60grad);
+}
+.pct18_5 .pointBtn.arc2 {
+	transform: rotate(-124.00grad);
+}
+.pct18_6 .pointBtn.arc2 {
+	transform: rotate(-124.40grad);
+}
+.pct18_7 .pointBtn.arc2 {
+	transform: rotate(-124.80grad);
+}
+.pct18_8 .pointBtn.arc2 {
+	transform: rotate(-125.20grad);
+}
+.pct18_9 .pointBtn.arc2 {
+	transform: rotate(-125.60grad);
+}
+.pct19_0 .pointBtn.arc2 {
+	transform: rotate(-126.00grad);
+}
+.pct19_1 .pointBtn.arc2 {
+	transform: rotate(-126.40grad);
+}
+.pct19_2 .pointBtn.arc2 {
+	transform: rotate(-126.80grad);
+}
+.pct19_3 .pointBtn.arc2 {
+	transform: rotate(-127.20grad);
+}
+.pct19_4 .pointBtn.arc2 {
+	transform: rotate(-127.60grad);
+}
+.pct19_5 .pointBtn.arc2 {
+	transform: rotate(-128.00grad);
+}
+.pct19_6 .pointBtn.arc2 {
+	transform: rotate(-128.40grad);
+}
+.pct19_7 .pointBtn.arc2 {
+	transform: rotate(-128.80grad);
+}
+.pct19_8 .pointBtn.arc2 {
+	transform: rotate(-129.20grad);
+}
+.pct19_9 .pointBtn.arc2 {
+	transform: rotate(-129.60grad);
+}
+.pct20_0 .pointBtn.arc2 {
+	transform: rotate(-130.00grad);
+}
+.pct20_1 .pointBtn.arc2 {
+	transform: rotate(-130.40grad);
+}
+.pct20_2 .pointBtn.arc2 {
+	transform: rotate(-130.80grad);
+}
+.pct20_3 .pointBtn.arc2 {
+	transform: rotate(-131.20grad);
+}
+.pct20_4 .pointBtn.arc2 {
+	transform: rotate(-131.60grad);
+}
+.pct20_5 .pointBtn.arc2 {
+	transform: rotate(-132.00grad);
+}
+.pct20_6 .pointBtn.arc2 {
+	transform: rotate(-132.40grad);
+}
+.pct20_7 .pointBtn.arc2 {
+	transform: rotate(-132.80grad);
+}
+.pct20_8 .pointBtn.arc2 {
+	transform: rotate(-133.20grad);
+}
+.pct20_9 .pointBtn.arc2 {
+	transform: rotate(-133.60grad);
+}
+.pct21_0 .pointBtn.arc2 {
+	transform: rotate(-134.00grad);
+}
+.pct21_1 .pointBtn.arc2 {
+	transform: rotate(-134.40grad);
+}
+.pct21_2 .pointBtn.arc2 {
+	transform: rotate(-134.80grad);
+}
+.pct21_3 .pointBtn.arc2 {
+	transform: rotate(-135.20grad);
+}
+.pct21_4 .pointBtn.arc2 {
+	transform: rotate(-135.60grad);
+}
+.pct21_5 .pointBtn.arc2 {
+	transform: rotate(-136.00grad);
+}
+.pct21_6 .pointBtn.arc2 {
+	transform: rotate(-136.40grad);
+}
+.pct21_7 .pointBtn.arc2 {
+	transform: rotate(-136.80grad);
+}
+.pct21_8 .pointBtn.arc2 {
+	transform: rotate(-137.20grad);
+}
+.pct21_9 .pointBtn.arc2 {
+	transform: rotate(-137.60grad);
+}
+.pct22_0 .pointBtn.arc2 {
+	transform: rotate(-138.00grad);
+}
+.pct22_1 .pointBtn.arc2 {
+	transform: rotate(-138.40grad);
+}
+.pct22_2 .pointBtn.arc2 {
+	transform: rotate(-138.80grad);
+}
+.pct22_3 .pointBtn.arc2 {
+	transform: rotate(-139.20grad);
+}
+.pct22_4 .pointBtn.arc2 {
+	transform: rotate(-139.60grad);
+}
+.pct22_5 .pointBtn.arc2 {
+	transform: rotate(-140.00grad);
+}
+.pct22_6 .pointBtn.arc2 {
+	transform: rotate(-140.40grad);
+}
+.pct22_7 .pointBtn.arc2 {
+	transform: rotate(-140.80grad);
+}
+.pct22_8 .pointBtn.arc2 {
+	transform: rotate(-141.20grad);
+}
+.pct22_9 .pointBtn.arc2 {
+	transform: rotate(-141.60grad);
+}
+.pct23_0 .pointBtn.arc2 {
+	transform: rotate(-142.00grad);
+}
+.pct23_1 .pointBtn.arc2 {
+	transform: rotate(-142.40grad);
+}
+.pct23_2 .pointBtn.arc2 {
+	transform: rotate(-142.80grad);
+}
+.pct23_3 .pointBtn.arc2 {
+	transform: rotate(-143.20grad);
+}
+.pct23_4 .pointBtn.arc2 {
+	transform: rotate(-143.60grad);
+}
+.pct23_5 .pointBtn.arc2 {
+	transform: rotate(-144.00grad);
+}
+.pct23_6 .pointBtn.arc2 {
+	transform: rotate(-144.40grad);
+}
+.pct23_7 .pointBtn.arc2 {
+	transform: rotate(-144.80grad);
+}
+.pct23_8 .pointBtn.arc2 {
+	transform: rotate(-145.20grad);
+}
+.pct23_9 .pointBtn.arc2 {
+	transform: rotate(-145.60grad);
+}
+.pct24_0 .pointBtn.arc2 {
+	transform: rotate(-146.00grad);
+}
+.pct24_1 .pointBtn.arc2 {
+	transform: rotate(-146.40grad);
+}
+.pct24_2 .pointBtn.arc2 {
+	transform: rotate(-146.80grad);
+}
+.pct24_3 .pointBtn.arc2 {
+	transform: rotate(-147.20grad);
+}
+.pct24_4 .pointBtn.arc2 {
+	transform: rotate(-147.60grad);
+}
+.pct24_5 .pointBtn.arc2 {
+	transform: rotate(-148.00grad);
+}
+.pct24_6 .pointBtn.arc2 {
+	transform: rotate(-148.40grad);
+}
+.pct24_7 .pointBtn.arc2 {
+	transform: rotate(-148.80grad);
+}
+.pct24_8 .pointBtn.arc2 {
+	transform: rotate(-149.20grad);
+}
+.pct24_9 .pointBtn.arc2 {
+	transform: rotate(-149.60grad);
+}
+.pct25_0 .pointBtn.arc2 {
+	transform: rotate(-150.00grad);
+}
+.pct25_1 .pointBtn.arc2 {
+	transform: rotate(-150.40grad);
+}
+.pct25_2 .pointBtn.arc2 {
+	transform: rotate(-150.80grad);
+}
+.pct25_3 .pointBtn.arc2 {
+	transform: rotate(-151.20grad);
+}
+.pct25_4 .pointBtn.arc2 {
+	transform: rotate(-151.60grad);
+}
+.pct25_5 .pointBtn.arc2 {
+	transform: rotate(-152.00grad);
+}
+.pct25_6 .pointBtn.arc2 {
+	transform: rotate(-152.40grad);
+}
+.pct25_7 .pointBtn.arc2 {
+	transform: rotate(-152.80grad);
+}
+.pct25_8 .pointBtn.arc2 {
+	transform: rotate(-153.20grad);
+}
+.pct25_9 .pointBtn.arc2 {
+	transform: rotate(-153.60grad);
+}
+.pct26_0 .pointBtn.arc2 {
+	transform: rotate(-154.00grad);
+}
+.pct26_1 .pointBtn.arc2 {
+	transform: rotate(-154.40grad);
+}
+.pct26_2 .pointBtn.arc2 {
+	transform: rotate(-154.80grad);
+}
+.pct26_3 .pointBtn.arc2 {
+	transform: rotate(-155.20grad);
+}
+.pct26_4 .pointBtn.arc2 {
+	transform: rotate(-155.60grad);
+}
+.pct26_5 .pointBtn.arc2 {
+	transform: rotate(-156.00grad);
+}
+.pct26_6 .pointBtn.arc2 {
+	transform: rotate(-156.40grad);
+}
+.pct26_7 .pointBtn.arc2 {
+	transform: rotate(-156.80grad);
+}
+.pct26_8 .pointBtn.arc2 {
+	transform: rotate(-157.20grad);
+}
+.pct26_9 .pointBtn.arc2 {
+	transform: rotate(-157.60grad);
+}
+.pct27_0 .pointBtn.arc2 {
+	transform: rotate(-158.00grad);
+}
+.pct27_1 .pointBtn.arc2 {
+	transform: rotate(-158.40grad);
+}
+.pct27_2 .pointBtn.arc2 {
+	transform: rotate(-158.80grad);
+}
+.pct27_3 .pointBtn.arc2 {
+	transform: rotate(-159.20grad);
+}
+.pct27_4 .pointBtn.arc2 {
+	transform: rotate(-159.60grad);
+}
+.pct27_5 .pointBtn.arc2 {
+	transform: rotate(-160.00grad);
+}
+.pct27_6 .pointBtn.arc2 {
+	transform: rotate(-160.40grad);
+}
+.pct27_7 .pointBtn.arc2 {
+	transform: rotate(-160.80grad);
+}
+.pct27_8 .pointBtn.arc2 {
+	transform: rotate(-161.20grad);
+}
+.pct27_9 .pointBtn.arc2 {
+	transform: rotate(-161.60grad);
+}
+.pct28_0 .pointBtn.arc2 {
+	transform: rotate(-162.00grad);
+}
+.pct28_1 .pointBtn.arc2 {
+	transform: rotate(-162.40grad);
+}
+.pct28_2 .pointBtn.arc2 {
+	transform: rotate(-162.80grad);
+}
+.pct28_3 .pointBtn.arc2 {
+	transform: rotate(-163.20grad);
+}
+.pct28_4 .pointBtn.arc2 {
+	transform: rotate(-163.60grad);
+}
+.pct28_5 .pointBtn.arc2 {
+	transform: rotate(-164.00grad);
+}
+.pct28_6 .pointBtn.arc2 {
+	transform: rotate(-164.40grad);
+}
+.pct28_7 .pointBtn.arc2 {
+	transform: rotate(-164.80grad);
+}
+.pct28_8 .pointBtn.arc2 {
+	transform: rotate(-165.20grad);
+}
+.pct28_9 .pointBtn.arc2 {
+	transform: rotate(-165.60grad);
+}
+.pct29_0 .pointBtn.arc2 {
+	transform: rotate(-166.00grad);
+}
+.pct29_1 .pointBtn.arc2 {
+	transform: rotate(-166.40grad);
+}
+.pct29_2 .pointBtn.arc2 {
+	transform: rotate(-166.80grad);
+}
+.pct29_3 .pointBtn.arc2 {
+	transform: rotate(-167.20grad);
+}
+.pct29_4 .pointBtn.arc2 {
+	transform: rotate(-167.60grad);
+}
+.pct29_5 .pointBtn.arc2 {
+	transform: rotate(-168.00grad);
+}
+.pct29_6 .pointBtn.arc2 {
+	transform: rotate(-168.40grad);
+}
+.pct29_7 .pointBtn.arc2 {
+	transform: rotate(-168.80grad);
+}
+.pct29_8 .pointBtn.arc2 {
+	transform: rotate(-169.20grad);
+}
+.pct29_9 .pointBtn.arc2 {
+	transform: rotate(-169.60grad);
+}
+.pct30_0 .pointBtn.arc2 {
+	transform: rotate(-170.00grad);
+}
+.pct30_1 .pointBtn.arc2 {
+	transform: rotate(-170.40grad);
+}
+.pct30_2 .pointBtn.arc2 {
+	transform: rotate(-170.80grad);
+}
+.pct30_3 .pointBtn.arc2 {
+	transform: rotate(-171.20grad);
+}
+.pct30_4 .pointBtn.arc2 {
+	transform: rotate(-171.60grad);
+}
+.pct30_5 .pointBtn.arc2 {
+	transform: rotate(-172.00grad);
+}
+.pct30_6 .pointBtn.arc2 {
+	transform: rotate(-172.40grad);
+}
+.pct30_7 .pointBtn.arc2 {
+	transform: rotate(-172.80grad);
+}
+.pct30_8 .pointBtn.arc2 {
+	transform: rotate(-173.20grad);
+}
+.pct30_9 .pointBtn.arc2 {
+	transform: rotate(-173.60grad);
+}
+.pct31_0 .pointBtn.arc2 {
+	transform: rotate(-174.00grad);
+}
+.pct31_1 .pointBtn.arc2 {
+	transform: rotate(-174.40grad);
+}
+.pct31_2 .pointBtn.arc2 {
+	transform: rotate(-174.80grad);
+}
+.pct31_3 .pointBtn.arc2 {
+	transform: rotate(-175.20grad);
+}
+.pct31_4 .pointBtn.arc2 {
+	transform: rotate(-175.60grad);
+}
+.pct31_5 .pointBtn.arc2 {
+	transform: rotate(-176.00grad);
+}
+.pct31_6 .pointBtn.arc2 {
+	transform: rotate(-176.40grad);
+}
+.pct31_7 .pointBtn.arc2 {
+	transform: rotate(-176.80grad);
+}
+.pct31_8 .pointBtn.arc2 {
+	transform: rotate(-177.20grad);
+}
+.pct31_9 .pointBtn.arc2 {
+	transform: rotate(-177.60grad);
+}
+.pct32_0 .pointBtn.arc2 {
+	transform: rotate(-178.00grad);
+}
+.pct32_1 .pointBtn.arc2 {
+	transform: rotate(-178.40grad);
+}
+.pct32_2 .pointBtn.arc2 {
+	transform: rotate(-178.80grad);
+}
+.pct32_3 .pointBtn.arc2 {
+	transform: rotate(-179.20grad);
+}
+.pct32_4 .pointBtn.arc2 {
+	transform: rotate(-179.60grad);
+}
+.pct32_5 .pointBtn.arc2 {
+	transform: rotate(-180.00grad);
+}
+.pct32_6 .pointBtn.arc2 {
+	transform: rotate(-180.40grad);
+}
+.pct32_7 .pointBtn.arc2 {
+	transform: rotate(-180.80grad);
+}
+.pct32_8 .pointBtn.arc2 {
+	transform: rotate(-181.20grad);
+}
+.pct32_9 .pointBtn.arc2 {
+	transform: rotate(-181.60grad);
+}
+.pct33_0 .pointBtn.arc2 {
+	transform: rotate(-182.00grad);
+}
+.pct33_1 .pointBtn.arc2 {
+	transform: rotate(-182.40grad);
+}
+.pct33_2 .pointBtn.arc2 {
+	transform: rotate(-182.80grad);
+}
+.pct33_3 .pointBtn.arc2 {
+	transform: rotate(-183.20grad);
+}
+.pct33_4 .pointBtn.arc2 {
+	transform: rotate(-183.60grad);
+}
+.pct33_5 .pointBtn.arc2 {
+	transform: rotate(-184.00grad);
+}
+.pct33_6 .pointBtn.arc2 {
+	transform: rotate(-184.40grad);
+}
+.pct33_7 .pointBtn.arc2 {
+	transform: rotate(-184.80grad);
+}
+.pct33_8 .pointBtn.arc2 {
+	transform: rotate(-185.20grad);
+}
+.pct33_9 .pointBtn.arc2 {
+	transform: rotate(-185.60grad);
+}
+.pct34_0 .pointBtn.arc2 {
+	transform: rotate(-186.00grad);
+}
+.pct34_1 .pointBtn.arc2 {
+	transform: rotate(-186.40grad);
+}
+.pct34_2 .pointBtn.arc2 {
+	transform: rotate(-186.80grad);
+}
+.pct34_3 .pointBtn.arc2 {
+	transform: rotate(-187.20grad);
+}
+.pct34_4 .pointBtn.arc2 {
+	transform: rotate(-187.60grad);
+}
+.pct34_5 .pointBtn.arc2 {
+	transform: rotate(-188.00grad);
+}
+.pct34_6 .pointBtn.arc2 {
+	transform: rotate(-188.40grad);
+}
+.pct34_7 .pointBtn.arc2 {
+	transform: rotate(-188.80grad);
+}
+.pct34_8 .pointBtn.arc2 {
+	transform: rotate(-189.20grad);
+}
+.pct34_9 .pointBtn.arc2 {
+	transform: rotate(-189.60grad);
+}
+.pct35_0 .pointBtn.arc2 {
+	transform: rotate(-190.00grad);
+}
+.pct35_1 .pointBtn.arc2 {
+	transform: rotate(-190.40grad);
+}
+.pct35_2 .pointBtn.arc2 {
+	transform: rotate(-190.80grad);
+}
+.pct35_3 .pointBtn.arc2 {
+	transform: rotate(-191.20grad);
+}
+.pct35_4 .pointBtn.arc2 {
+	transform: rotate(-191.60grad);
+}
+.pct35_5 .pointBtn.arc2 {
+	transform: rotate(-192.00grad);
+}
+.pct35_6 .pointBtn.arc2 {
+	transform: rotate(-192.40grad);
+}
+.pct35_7 .pointBtn.arc2 {
+	transform: rotate(-192.80grad);
+}
+.pct35_8 .pointBtn.arc2 {
+	transform: rotate(-193.20grad);
+}
+.pct35_9 .pointBtn.arc2 {
+	transform: rotate(-193.60grad);
+}
+.pct36_0 .pointBtn.arc2 {
+	transform: rotate(-194.00grad);
+}
+.pct36_1 .pointBtn.arc2 {
+	transform: rotate(-194.40grad);
+}
+.pct36_2 .pointBtn.arc2 {
+	transform: rotate(-194.80grad);
+}
+.pct36_3 .pointBtn.arc2 {
+	transform: rotate(-195.20grad);
+}
+.pct36_4 .pointBtn.arc2 {
+	transform: rotate(-195.60grad);
+}
+.pct36_5 .pointBtn.arc2 {
+	transform: rotate(-196.00grad);
+}
+.pct36_6 .pointBtn.arc2 {
+	transform: rotate(-196.40grad);
+}
+.pct36_7 .pointBtn.arc2 {
+	transform: rotate(-196.80grad);
+}
+.pct36_8 .pointBtn.arc2 {
+	transform: rotate(-197.20grad);
+}
+.pct36_9 .pointBtn.arc2 {
+	transform: rotate(-197.60grad);
+}
+.pct37_0 .pointBtn.arc2 {
+	transform: rotate(-198.00grad);
+}
+.pct37_1 .pointBtn.arc2 {
+	transform: rotate(-198.40grad);
+}
+.pct37_2 .pointBtn.arc2 {
+	transform: rotate(-198.80grad);
+}
+.pct37_3 .pointBtn.arc2 {
+	transform: rotate(-199.20grad);
+}
+.pct37_4 .pointBtn.arc2 {
+	transform: rotate(-199.60grad);
+}
+.pct37_5 .pointBtn.arc2 {
+	transform: rotate(-200.00grad);
+}
+.pct37_6 .pointBtn.arc2 {
+	transform: rotate(-200.40grad);
+}
+.pct37_7 .pointBtn.arc2 {
+	transform: rotate(-200.80grad);
+}
+.pct37_8 .pointBtn.arc2 {
+	transform: rotate(-201.20grad);
+}
+.pct37_9 .pointBtn.arc2 {
+	transform: rotate(-201.60grad);
+}
+.pct38_0 .pointBtn.arc2 {
+	transform: rotate(-202.00grad);
+}
+.pct38_1 .pointBtn.arc2 {
+	transform: rotate(-202.40grad);
+}
+.pct38_2 .pointBtn.arc2 {
+	transform: rotate(-202.80grad);
+}
+.pct38_3 .pointBtn.arc2 {
+	transform: rotate(-203.20grad);
+}
+.pct38_4 .pointBtn.arc2 {
+	transform: rotate(-203.60grad);
+}
+.pct38_5 .pointBtn.arc2 {
+	transform: rotate(-204.00grad);
+}
+.pct38_6 .pointBtn.arc2 {
+	transform: rotate(-204.40grad);
+}
+.pct38_7 .pointBtn.arc2 {
+	transform: rotate(-204.80grad);
+}
+.pct38_8 .pointBtn.arc2 {
+	transform: rotate(-205.20grad);
+}
+.pct38_9 .pointBtn.arc2 {
+	transform: rotate(-205.60grad);
+}
+.pct39_0 .pointBtn.arc2 {
+	transform: rotate(-206.00grad);
+}
+.pct39_1 .pointBtn.arc2 {
+	transform: rotate(-206.40grad);
+}
+.pct39_2 .pointBtn.arc2 {
+	transform: rotate(-206.80grad);
+}
+.pct39_3 .pointBtn.arc2 {
+	transform: rotate(-207.20grad);
+}
+.pct39_4 .pointBtn.arc2 {
+	transform: rotate(-207.60grad);
+}
+.pct39_5 .pointBtn.arc2 {
+	transform: rotate(-208.00grad);
+}
+.pct39_6 .pointBtn.arc2 {
+	transform: rotate(-208.40grad);
+}
+.pct39_7 .pointBtn.arc2 {
+	transform: rotate(-208.80grad);
+}
+.pct39_8 .pointBtn.arc2 {
+	transform: rotate(-209.20grad);
+}
+.pct39_9 .pointBtn.arc2 {
+	transform: rotate(-209.60grad);
+}
+.pct40_0 .pointBtn.arc2 {
+	transform: rotate(-210.00grad);
+}
+.pct40_1 .pointBtn.arc2 {
+	transform: rotate(-210.40grad);
+}
+.pct40_2 .pointBtn.arc2 {
+	transform: rotate(-210.80grad);
+}
+.pct40_3 .pointBtn.arc2 {
+	transform: rotate(-211.20grad);
+}
+.pct40_4 .pointBtn.arc2 {
+	transform: rotate(-211.60grad);
+}
+.pct40_5 .pointBtn.arc2 {
+	transform: rotate(-212.00grad);
+}
+.pct40_6 .pointBtn.arc2 {
+	transform: rotate(-212.40grad);
+}
+.pct40_7 .pointBtn.arc2 {
+	transform: rotate(-212.80grad);
+}
+.pct40_8 .pointBtn.arc2 {
+	transform: rotate(-213.20grad);
+}
+.pct40_9 .pointBtn.arc2 {
+	transform: rotate(-213.60grad);
+}
+.pct41_0 .pointBtn.arc2 {
+	transform: rotate(-214.00grad);
+}
+.pct41_1 .pointBtn.arc2 {
+	transform: rotate(-214.40grad);
+}
+.pct41_2 .pointBtn.arc2 {
+	transform: rotate(-214.80grad);
+}
+.pct41_3 .pointBtn.arc2 {
+	transform: rotate(-215.20grad);
+}
+.pct41_4 .pointBtn.arc2 {
+	transform: rotate(-215.60grad);
+}
+.pct41_5 .pointBtn.arc2 {
+	transform: rotate(-216.00grad);
+}
+.pct41_6 .pointBtn.arc2 {
+	transform: rotate(-216.40grad);
+}
+.pct41_7 .pointBtn.arc2 {
+	transform: rotate(-216.80grad);
+}
+.pct41_8 .pointBtn.arc2 {
+	transform: rotate(-217.20grad);
+}
+.pct41_9 .pointBtn.arc2 {
+	transform: rotate(-217.60grad);
+}
+.pct42_0 .pointBtn.arc2 {
+	transform: rotate(-218.00grad);
+}
+.pct42_1 .pointBtn.arc2 {
+	transform: rotate(-218.40grad);
+}
+.pct42_2 .pointBtn.arc2 {
+	transform: rotate(-218.80grad);
+}
+.pct42_3 .pointBtn.arc2 {
+	transform: rotate(-219.20grad);
+}
+.pct42_4 .pointBtn.arc2 {
+	transform: rotate(-219.60grad);
+}
+.pct42_5 .pointBtn.arc2 {
+	transform: rotate(-220.00grad);
+}
+.pct42_6 .pointBtn.arc2 {
+	transform: rotate(-220.40grad);
+}
+.pct42_7 .pointBtn.arc2 {
+	transform: rotate(-220.80grad);
+}
+.pct42_8 .pointBtn.arc2 {
+	transform: rotate(-221.20grad);
+}
+.pct42_9 .pointBtn.arc2 {
+	transform: rotate(-221.60grad);
+}
+.pct43_0 .pointBtn.arc2 {
+	transform: rotate(-222.00grad);
+}
+.pct43_1 .pointBtn.arc2 {
+	transform: rotate(-222.40grad);
+}
+.pct43_2 .pointBtn.arc2 {
+	transform: rotate(-222.80grad);
+}
+.pct43_3 .pointBtn.arc2 {
+	transform: rotate(-223.20grad);
+}
+.pct43_4 .pointBtn.arc2 {
+	transform: rotate(-223.60grad);
+}
+.pct43_5 .pointBtn.arc2 {
+	transform: rotate(-224.00grad);
+}
+.pct43_6 .pointBtn.arc2 {
+	transform: rotate(-224.40grad);
+}
+.pct43_7 .pointBtn.arc2 {
+	transform: rotate(-224.80grad);
+}
+.pct43_8 .pointBtn.arc2 {
+	transform: rotate(-225.20grad);
+}
+.pct43_9 .pointBtn.arc2 {
+	transform: rotate(-225.60grad);
+}
+.pct44_0 .pointBtn.arc2 {
+	transform: rotate(-226.00grad);
+}
+.pct44_1 .pointBtn.arc2 {
+	transform: rotate(-226.40grad);
+}
+.pct44_2 .pointBtn.arc2 {
+	transform: rotate(-226.80grad);
+}
+.pct44_3 .pointBtn.arc2 {
+	transform: rotate(-227.20grad);
+}
+.pct44_4 .pointBtn.arc2 {
+	transform: rotate(-227.60grad);
+}
+.pct44_5 .pointBtn.arc2 {
+	transform: rotate(-228.00grad);
+}
+.pct44_6 .pointBtn.arc2 {
+	transform: rotate(-228.40grad);
+}
+.pct44_7 .pointBtn.arc2 {
+	transform: rotate(-228.80grad);
+}
+.pct44_8 .pointBtn.arc2 {
+	transform: rotate(-229.20grad);
+}
+.pct44_9 .pointBtn.arc2 {
+	transform: rotate(-229.60grad);
+}
+.pct45_0 .pointBtn.arc2 {
+	transform: rotate(-230.00grad);
+}
+.pct45_1 .pointBtn.arc2 {
+	transform: rotate(-230.40grad);
+}
+.pct45_2 .pointBtn.arc2 {
+	transform: rotate(-230.80grad);
+}
+.pct45_3 .pointBtn.arc2 {
+	transform: rotate(-231.20grad);
+}
+.pct45_4 .pointBtn.arc2 {
+	transform: rotate(-231.60grad);
+}
+.pct45_5 .pointBtn.arc2 {
+	transform: rotate(-232.00grad);
+}
+.pct45_6 .pointBtn.arc2 {
+	transform: rotate(-232.40grad);
+}
+.pct45_7 .pointBtn.arc2 {
+	transform: rotate(-232.80grad);
+}
+.pct45_8 .pointBtn.arc2 {
+	transform: rotate(-233.20grad);
+}
+.pct45_9 .pointBtn.arc2 {
+	transform: rotate(-233.60grad);
+}
+.pct46_0 .pointBtn.arc2 {
+	transform: rotate(-234.00grad);
+}
+.pct46_1 .pointBtn.arc2 {
+	transform: rotate(-234.40grad);
+}
+.pct46_2 .pointBtn.arc2 {
+	transform: rotate(-234.80grad);
+}
+.pct46_3 .pointBtn.arc2 {
+	transform: rotate(-235.20grad);
+}
+.pct46_4 .pointBtn.arc2 {
+	transform: rotate(-235.60grad);
+}
+.pct46_5 .pointBtn.arc2 {
+	transform: rotate(-236.00grad);
+}
+.pct46_6 .pointBtn.arc2 {
+	transform: rotate(-236.40grad);
+}
+.pct46_7 .pointBtn.arc2 {
+	transform: rotate(-236.80grad);
+}
+.pct46_8 .pointBtn.arc2 {
+	transform: rotate(-237.20grad);
+}
+.pct46_9 .pointBtn.arc2 {
+	transform: rotate(-237.60grad);
+}
+.pct47_0 .pointBtn.arc2 {
+	transform: rotate(-238.00grad);
+}
+.pct47_1 .pointBtn.arc2 {
+	transform: rotate(-238.40grad);
+}
+.pct47_2 .pointBtn.arc2 {
+	transform: rotate(-238.80grad);
+}
+.pct47_3 .pointBtn.arc2 {
+	transform: rotate(-239.20grad);
+}
+.pct47_4 .pointBtn.arc2 {
+	transform: rotate(-239.60grad);
+}
+.pct47_5 .pointBtn.arc2 {
+	transform: rotate(-240.00grad);
+}
+.pct47_6 .pointBtn.arc2 {
+	transform: rotate(-240.40grad);
+}
+.pct47_7 .pointBtn.arc2 {
+	transform: rotate(-240.80grad);
+}
+.pct47_8 .pointBtn.arc2 {
+	transform: rotate(-241.20grad);
+}
+.pct47_9 .pointBtn.arc2 {
+	transform: rotate(-241.60grad);
+}
+.pct48_0 .pointBtn.arc2 {
+	transform: rotate(-242.00grad);
+}
+.pct48_1 .pointBtn.arc2 {
+	transform: rotate(-242.40grad);
+}
+.pct48_2 .pointBtn.arc2 {
+	transform: rotate(-242.80grad);
+}
+.pct48_3 .pointBtn.arc2 {
+	transform: rotate(-243.20grad);
+}
+.pct48_4 .pointBtn.arc2 {
+	transform: rotate(-243.60grad);
+}
+.pct48_5 .pointBtn.arc2 {
+	transform: rotate(-244.00grad);
+}
+.pct48_6 .pointBtn.arc2 {
+	transform: rotate(-244.40grad);
+}
+.pct48_7 .pointBtn.arc2 {
+	transform: rotate(-244.80grad);
+}
+.pct48_8 .pointBtn.arc2 {
+	transform: rotate(-245.20grad);
+}
+.pct48_9 .pointBtn.arc2 {
+	transform: rotate(-245.60grad);
+}
+.pct49_0 .pointBtn.arc2 {
+	transform: rotate(-246.00grad);
+}
+.pct49_1 .pointBtn.arc2 {
+	transform: rotate(-246.40grad);
+}
+.pct49_2 .pointBtn.arc2 {
+	transform: rotate(-246.80grad);
+}
+.pct49_3 .pointBtn.arc2 {
+	transform: rotate(-247.20grad);
+}
+.pct49_4 .pointBtn.arc2 {
+	transform: rotate(-247.60grad);
+}
+.pct49_5 .pointBtn.arc2 {
+	transform: rotate(-248.00grad);
+}
+.pct49_6 .pointBtn.arc2 {
+	transform: rotate(-248.40grad);
+}
+.pct49_7 .pointBtn.arc2 {
+	transform: rotate(-248.80grad);
+}
+.pct49_8 .pointBtn.arc2 {
+	transform: rotate(-249.20grad);
+}
+.pct49_9 .pointBtn.arc2 {
+	transform: rotate(-249.60grad);
+}
+.pct50_0 .pointBtn.arc2 {
+	transform: rotate(-250.00grad);
+}
+.pct50_1 .pointBtn.arc2 {
+	transform: rotate(-250.40grad);
+}
+.pct50_2 .pointBtn.arc2 {
+	transform: rotate(-250.80grad);
+}
+.pct50_3 .pointBtn.arc2 {
+	transform: rotate(-251.20grad);
+}
+.pct50_4 .pointBtn.arc2 {
+	transform: rotate(-251.60grad);
+}
+.pct50_5 .pointBtn.arc2 {
+	transform: rotate(-252.00grad);
+}
+.pct50_6 .pointBtn.arc2 {
+	transform: rotate(-252.40grad);
+}
+.pct50_7 .pointBtn.arc2 {
+	transform: rotate(-252.80grad);
+}
+.pct50_8 .pointBtn.arc2 {
+	transform: rotate(-253.20grad);
+}
+.pct50_9 .pointBtn.arc2 {
+	transform: rotate(-253.60grad);
+}
+.pct51_0 .pointBtn.arc2 {
+	transform: rotate(-254.00grad);
+}
+.pct51_1 .pointBtn.arc2 {
+	transform: rotate(-254.40grad);
+}
+.pct51_2 .pointBtn.arc2 {
+	transform: rotate(-254.80grad);
+}
+.pct51_3 .pointBtn.arc2 {
+	transform: rotate(-255.20grad);
+}
+.pct51_4 .pointBtn.arc2 {
+	transform: rotate(-255.60grad);
+}
+.pct51_5 .pointBtn.arc2 {
+	transform: rotate(-256.00grad);
+}
+.pct51_6 .pointBtn.arc2 {
+	transform: rotate(-256.40grad);
+}
+.pct51_7 .pointBtn.arc2 {
+	transform: rotate(-256.80grad);
+}
+.pct51_8 .pointBtn.arc2 {
+	transform: rotate(-257.20grad);
+}
+.pct51_9 .pointBtn.arc2 {
+	transform: rotate(-257.60grad);
+}
+.pct52_0 .pointBtn.arc2 {
+	transform: rotate(-258.00grad);
+}
+.pct52_1 .pointBtn.arc2 {
+	transform: rotate(-258.40grad);
+}
+.pct52_2 .pointBtn.arc2 {
+	transform: rotate(-258.80grad);
+}
+.pct52_3 .pointBtn.arc2 {
+	transform: rotate(-259.20grad);
+}
+.pct52_4 .pointBtn.arc2 {
+	transform: rotate(-259.60grad);
+}
+.pct52_5 .pointBtn.arc2 {
+	transform: rotate(-260.00grad);
+}
+.pct52_6 .pointBtn.arc2 {
+	transform: rotate(-260.40grad);
+}
+.pct52_7 .pointBtn.arc2 {
+	transform: rotate(-260.80grad);
+}
+.pct52_8 .pointBtn.arc2 {
+	transform: rotate(-261.20grad);
+}
+.pct52_9 .pointBtn.arc2 {
+	transform: rotate(-261.60grad);
+}
+.pct53_0 .pointBtn.arc2 {
+	transform: rotate(-262.00grad);
+}
+.pct53_1 .pointBtn.arc2 {
+	transform: rotate(-262.40grad);
+}
+.pct53_2 .pointBtn.arc2 {
+	transform: rotate(-262.80grad);
+}
+.pct53_3 .pointBtn.arc2 {
+	transform: rotate(-263.20grad);
+}
+.pct53_4 .pointBtn.arc2 {
+	transform: rotate(-263.60grad);
+}
+.pct53_5 .pointBtn.arc2 {
+	transform: rotate(-264.00grad);
+}
+.pct53_6 .pointBtn.arc2 {
+	transform: rotate(-264.40grad);
+}
+.pct53_7 .pointBtn.arc2 {
+	transform: rotate(-264.80grad);
+}
+.pct53_8 .pointBtn.arc2 {
+	transform: rotate(-265.20grad);
+}
+.pct53_9 .pointBtn.arc2 {
+	transform: rotate(-265.60grad);
+}
+.pct54_0 .pointBtn.arc2 {
+	transform: rotate(-266.00grad);
+}
+.pct54_1 .pointBtn.arc2 {
+	transform: rotate(-266.40grad);
+}
+.pct54_2 .pointBtn.arc2 {
+	transform: rotate(-266.80grad);
+}
+.pct54_3 .pointBtn.arc2 {
+	transform: rotate(-267.20grad);
+}
+.pct54_4 .pointBtn.arc2 {
+	transform: rotate(-267.60grad);
+}
+.pct54_5 .pointBtn.arc2 {
+	transform: rotate(-268.00grad);
+}
+.pct54_6 .pointBtn.arc2 {
+	transform: rotate(-268.40grad);
+}
+.pct54_7 .pointBtn.arc2 {
+	transform: rotate(-268.80grad);
+}
+.pct54_8 .pointBtn.arc2 {
+	transform: rotate(-269.20grad);
+}
+.pct54_9 .pointBtn.arc2 {
+	transform: rotate(-269.60grad);
+}
+.pct55_0 .pointBtn.arc2 {
+	transform: rotate(-270.00grad);
+}
+.pct55_1 .pointBtn.arc2 {
+	transform: rotate(-270.40grad);
+}
+.pct55_2 .pointBtn.arc2 {
+	transform: rotate(-270.80grad);
+}
+.pct55_3 .pointBtn.arc2 {
+	transform: rotate(-271.20grad);
+}
+.pct55_4 .pointBtn.arc2 {
+	transform: rotate(-271.60grad);
+}
+.pct55_5 .pointBtn.arc2 {
+	transform: rotate(-272.00grad);
+}
+.pct55_6 .pointBtn.arc2 {
+	transform: rotate(-272.40grad);
+}
+.pct55_7 .pointBtn.arc2 {
+	transform: rotate(-272.80grad);
+}
+.pct55_8 .pointBtn.arc2 {
+	transform: rotate(-273.20grad);
+}
+.pct55_9 .pointBtn.arc2 {
+	transform: rotate(-273.60grad);
+}
+.pct56_0 .pointBtn.arc2 {
+	transform: rotate(-274.00grad);
+}
+.pct56_1 .pointBtn.arc2 {
+	transform: rotate(-274.40grad);
+}
+.pct56_2 .pointBtn.arc2 {
+	transform: rotate(-274.80grad);
+}
+.pct56_3 .pointBtn.arc2 {
+	transform: rotate(-275.20grad);
+}
+.pct56_4 .pointBtn.arc2 {
+	transform: rotate(-275.60grad);
+}
+.pct56_5 .pointBtn.arc2 {
+	transform: rotate(-276.00grad);
+}
+.pct56_6 .pointBtn.arc2 {
+	transform: rotate(-276.40grad);
+}
+.pct56_7 .pointBtn.arc2 {
+	transform: rotate(-276.80grad);
+}
+.pct56_8 .pointBtn.arc2 {
+	transform: rotate(-277.20grad);
+}
+.pct56_9 .pointBtn.arc2 {
+	transform: rotate(-277.60grad);
+}
+.pct57_0 .pointBtn.arc2 {
+	transform: rotate(-278.00grad);
+}
+.pct57_1 .pointBtn.arc2 {
+	transform: rotate(-278.40grad);
+}
+.pct57_2 .pointBtn.arc2 {
+	transform: rotate(-278.80grad);
+}
+.pct57_3 .pointBtn.arc2 {
+	transform: rotate(-279.20grad);
+}
+.pct57_4 .pointBtn.arc2 {
+	transform: rotate(-279.60grad);
+}
+.pct57_5 .pointBtn.arc2 {
+	transform: rotate(-280.00grad);
+}
+.pct57_6 .pointBtn.arc2 {
+	transform: rotate(-280.40grad);
+}
+.pct57_7 .pointBtn.arc2 {
+	transform: rotate(-280.80grad);
+}
+.pct57_8 .pointBtn.arc2 {
+	transform: rotate(-281.20grad);
+}
+.pct57_9 .pointBtn.arc2 {
+	transform: rotate(-281.60grad);
+}
+.pct58_0 .pointBtn.arc2 {
+	transform: rotate(-282.00grad);
+}
+.pct58_1 .pointBtn.arc2 {
+	transform: rotate(-282.40grad);
+}
+.pct58_2 .pointBtn.arc2 {
+	transform: rotate(-282.80grad);
+}
+.pct58_3 .pointBtn.arc2 {
+	transform: rotate(-283.20grad);
+}
+.pct58_4 .pointBtn.arc2 {
+	transform: rotate(-283.60grad);
+}
+.pct58_5 .pointBtn.arc2 {
+	transform: rotate(-284.00grad);
+}
+.pct58_6 .pointBtn.arc2 {
+	transform: rotate(-284.40grad);
+}
+.pct58_7 .pointBtn.arc2 {
+	transform: rotate(-284.80grad);
+}
+.pct58_8 .pointBtn.arc2 {
+	transform: rotate(-285.20grad);
+}
+.pct58_9 .pointBtn.arc2 {
+	transform: rotate(-285.60grad);
+}
+.pct59_0 .pointBtn.arc2 {
+	transform: rotate(-286.00grad);
+}
+.pct59_1 .pointBtn.arc2 {
+	transform: rotate(-286.40grad);
+}
+.pct59_2 .pointBtn.arc2 {
+	transform: rotate(-286.80grad);
+}
+.pct59_3 .pointBtn.arc2 {
+	transform: rotate(-287.20grad);
+}
+.pct59_4 .pointBtn.arc2 {
+	transform: rotate(-287.60grad);
+}
+.pct59_5 .pointBtn.arc2 {
+	transform: rotate(-288.00grad);
+}
+.pct59_6 .pointBtn.arc2 {
+	transform: rotate(-288.40grad);
+}
+.pct59_7 .pointBtn.arc2 {
+	transform: rotate(-288.80grad);
+}
+.pct59_8 .pointBtn.arc2 {
+	transform: rotate(-289.20grad);
+}
+.pct59_9 .pointBtn.arc2 {
+	transform: rotate(-289.60grad);
+}
+.pct60_0 .pointBtn.arc2 {
+	transform: rotate(-290.00grad);
+}
+.pct60_1 .pointBtn.arc2 {
+	transform: rotate(-290.40grad);
+}
+.pct60_2 .pointBtn.arc2 {
+	transform: rotate(-290.80grad);
+}
+.pct60_3 .pointBtn.arc2 {
+	transform: rotate(-291.20grad);
+}
+.pct60_4 .pointBtn.arc2 {
+	transform: rotate(-291.60grad);
+}
+.pct60_5 .pointBtn.arc2 {
+	transform: rotate(-292.00grad);
+}
+.pct60_6 .pointBtn.arc2 {
+	transform: rotate(-292.40grad);
+}
+.pct60_7 .pointBtn.arc2 {
+	transform: rotate(-292.80grad);
+}
+.pct60_8 .pointBtn.arc2 {
+	transform: rotate(-293.20grad);
+}
+.pct60_9 .pointBtn.arc2 {
+	transform: rotate(-293.60grad);
+}
+.pct61_0 .pointBtn.arc2 {
+	transform: rotate(-294.00grad);
+}
+.pct61_1 .pointBtn.arc2 {
+	transform: rotate(-294.40grad);
+}
+.pct61_2 .pointBtn.arc2 {
+	transform: rotate(-294.80grad);
+}
+.pct61_3 .pointBtn.arc2 {
+	transform: rotate(-295.20grad);
+}
+.pct61_4 .pointBtn.arc2 {
+	transform: rotate(-295.60grad);
+}
+.pct61_5 .pointBtn.arc2 {
+	transform: rotate(-296.00grad);
+}
+.pct61_6 .pointBtn.arc2 {
+	transform: rotate(-296.40grad);
+}
+.pct61_7 .pointBtn.arc2 {
+	transform: rotate(-296.80grad);
+}
+.pct61_8 .pointBtn.arc2 {
+	transform: rotate(-297.20grad);
+}
+.pct61_9 .pointBtn.arc2 {
+	transform: rotate(-297.60grad);
+}
+.pct62_0 .pointBtn.arc2 {
+	transform: rotate(-298.00grad);
+}
+.pct62_1 .pointBtn.arc2 {
+	transform: rotate(-298.40grad);
+}
+.pct62_2 .pointBtn.arc2 {
+	transform: rotate(-298.80grad);
+}
+.pct62_3 .pointBtn.arc2 {
+	transform: rotate(-299.20grad);
+}
+.pct62_4 .pointBtn.arc2 {
+	transform: rotate(-299.60grad);
+}
+.pct62_5 .pointBtn.arc2 {
+	transform: rotate(-300.00grad);
+}
+.pct62_6 .pointBtn.arc2 {
+	transform: rotate(-300.40grad);
+}
+.pct62_7 .pointBtn.arc2 {
+	transform: rotate(-300.80grad);
+}
+.pct62_8 .pointBtn.arc2 {
+	transform: rotate(-301.20grad);
+}
+.pct62_9 .pointBtn.arc2 {
+	transform: rotate(-301.60grad);
+}
+.pct63_0 .pointBtn.arc2 {
+	transform: rotate(-302.00grad);
+}
+.pct63_1 .pointBtn.arc2 {
+	transform: rotate(-302.40grad);
+}
+.pct63_2 .pointBtn.arc2 {
+	transform: rotate(-302.80grad);
+}
+.pct63_3 .pointBtn.arc2 {
+	transform: rotate(-303.20grad);
+}
+.pct63_4 .pointBtn.arc2 {
+	transform: rotate(-303.60grad);
+}
+.pct63_5 .pointBtn.arc2 {
+	transform: rotate(-304.00grad);
+}
+.pct63_6 .pointBtn.arc2 {
+	transform: rotate(-304.40grad);
+}
+.pct63_7 .pointBtn.arc2 {
+	transform: rotate(-304.80grad);
+}
+.pct63_8 .pointBtn.arc2 {
+	transform: rotate(-305.20grad);
+}
+.pct63_9 .pointBtn.arc2 {
+	transform: rotate(-305.60grad);
+}
+.pct64_0 .pointBtn.arc2 {
+	transform: rotate(-306.00grad);
+}
+.pct64_1 .pointBtn.arc2 {
+	transform: rotate(-306.40grad);
+}
+.pct64_2 .pointBtn.arc2 {
+	transform: rotate(-306.80grad);
+}
+.pct64_3 .pointBtn.arc2 {
+	transform: rotate(-307.20grad);
+}
+.pct64_4 .pointBtn.arc2 {
+	transform: rotate(-307.60grad);
+}
+.pct64_5 .pointBtn.arc2 {
+	transform: rotate(-308.00grad);
+}
+.pct64_6 .pointBtn.arc2 {
+	transform: rotate(-308.40grad);
+}
+.pct64_7 .pointBtn.arc2 {
+	transform: rotate(-308.80grad);
+}
+.pct64_8 .pointBtn.arc2 {
+	transform: rotate(-309.20grad);
+}
+.pct64_9 .pointBtn.arc2 {
+	transform: rotate(-309.60grad);
+}
+.pct65_0 .pointBtn.arc2 {
+	transform: rotate(-310.00grad);
+}
+.pct65_1 .pointBtn.arc2 {
+	transform: rotate(-310.40grad);
+}
+.pct65_2 .pointBtn.arc2 {
+	transform: rotate(-310.80grad);
+}
+.pct65_3 .pointBtn.arc2 {
+	transform: rotate(-311.20grad);
+}
+.pct65_4 .pointBtn.arc2 {
+	transform: rotate(-311.60grad);
+}
+.pct65_5 .pointBtn.arc2 {
+	transform: rotate(-312.00grad);
+}
+.pct65_6 .pointBtn.arc2 {
+	transform: rotate(-312.40grad);
+}
+.pct65_7 .pointBtn.arc2 {
+	transform: rotate(-312.80grad);
+}
+.pct65_8 .pointBtn.arc2 {
+	transform: rotate(-313.20grad);
+}
+.pct65_9 .pointBtn.arc2 {
+	transform: rotate(-313.60grad);
+}
+.pct66_0 .pointBtn.arc2 {
+	transform: rotate(-314.00grad);
+}
+.pct66_1 .pointBtn.arc2 {
+	transform: rotate(-314.40grad);
+}
+.pct66_2 .pointBtn.arc2 {
+	transform: rotate(-314.80grad);
+}
+.pct66_3 .pointBtn.arc2 {
+	transform: rotate(-315.20grad);
+}
+.pct66_4 .pointBtn.arc2 {
+	transform: rotate(-315.60grad);
+}
+.pct66_5 .pointBtn.arc2 {
+	transform: rotate(-316.00grad);
+}
+.pct66_6 .pointBtn.arc2 {
+	transform: rotate(-316.40grad);
+}
+.pct66_7 .pointBtn.arc2 {
+	transform: rotate(-316.80grad);
+}
+.pct66_8 .pointBtn.arc2 {
+	transform: rotate(-317.20grad);
+}
+.pct66_9 .pointBtn.arc2 {
+	transform: rotate(-317.60grad);
+}
+.pct67_0 .pointBtn.arc2 {
+	transform: rotate(-318.00grad);
+}
+.pct67_1 .pointBtn.arc2 {
+	transform: rotate(-318.40grad);
+}
+.pct67_2 .pointBtn.arc2 {
+	transform: rotate(-318.80grad);
+}
+.pct67_3 .pointBtn.arc2 {
+	transform: rotate(-319.20grad);
+}
+.pct67_4 .pointBtn.arc2 {
+	transform: rotate(-319.60grad);
+}
+.pct67_5 .pointBtn.arc2 {
+	transform: rotate(-320.00grad);
+}
+.pct67_6 .pointBtn.arc2 {
+	transform: rotate(-320.40grad);
+}
+.pct67_7 .pointBtn.arc2 {
+	transform: rotate(-320.80grad);
+}
+.pct67_8 .pointBtn.arc2 {
+	transform: rotate(-321.20grad);
+}
+.pct67_9 .pointBtn.arc2 {
+	transform: rotate(-321.60grad);
+}
+.pct68_0 .pointBtn.arc2 {
+	transform: rotate(-322.00grad);
+}
+.pct68_1 .pointBtn.arc2 {
+	transform: rotate(-322.40grad);
+}
+.pct68_2 .pointBtn.arc2 {
+	transform: rotate(-322.80grad);
+}
+.pct68_3 .pointBtn.arc2 {
+	transform: rotate(-323.20grad);
+}
+.pct68_4 .pointBtn.arc2 {
+	transform: rotate(-323.60grad);
+}
+.pct68_5 .pointBtn.arc2 {
+	transform: rotate(-324.00grad);
+}
+.pct68_6 .pointBtn.arc2 {
+	transform: rotate(-324.40grad);
+}
+.pct68_7 .pointBtn.arc2 {
+	transform: rotate(-324.80grad);
+}
+.pct68_8 .pointBtn.arc2 {
+	transform: rotate(-325.20grad);
+}
+.pct68_9 .pointBtn.arc2 {
+	transform: rotate(-325.60grad);
+}
+.pct69_0 .pointBtn.arc2 {
+	transform: rotate(-326.00grad);
+}
+.pct69_1 .pointBtn.arc2 {
+	transform: rotate(-326.40grad);
+}
+.pct69_2 .pointBtn.arc2 {
+	transform: rotate(-326.80grad);
+}
+.pct69_3 .pointBtn.arc2 {
+	transform: rotate(-327.20grad);
+}
+.pct69_4 .pointBtn.arc2 {
+	transform: rotate(-327.60grad);
+}
+.pct69_5 .pointBtn.arc2 {
+	transform: rotate(-328.00grad);
+}
+.pct69_6 .pointBtn.arc2 {
+	transform: rotate(-328.40grad);
+}
+.pct69_7 .pointBtn.arc2 {
+	transform: rotate(-328.80grad);
+}
+.pct69_8 .pointBtn.arc2 {
+	transform: rotate(-329.20grad);
+}
+.pct69_9 .pointBtn.arc2 {
+	transform: rotate(-329.60grad);
+}
+.pct70_0 .pointBtn.arc2 {
+	transform: rotate(-330.00grad);
+}
+.pct70_1 .pointBtn.arc2 {
+	transform: rotate(-330.40grad);
+}
+.pct70_2 .pointBtn.arc2 {
+	transform: rotate(-330.80grad);
+}
+.pct70_3 .pointBtn.arc2 {
+	transform: rotate(-331.20grad);
+}
+.pct70_4 .pointBtn.arc2 {
+	transform: rotate(-331.60grad);
+}
+.pct70_5 .pointBtn.arc2 {
+	transform: rotate(-332.00grad);
+}
+.pct70_6 .pointBtn.arc2 {
+	transform: rotate(-332.40grad);
+}
+.pct70_7 .pointBtn.arc2 {
+	transform: rotate(-332.80grad);
+}
+.pct70_8 .pointBtn.arc2 {
+	transform: rotate(-333.20grad);
+}
+.pct70_9 .pointBtn.arc2 {
+	transform: rotate(-333.60grad);
+}
+.pct71_0 .pointBtn.arc2 {
+	transform: rotate(-334.00grad);
+}
+.pct71_1 .pointBtn.arc2 {
+	transform: rotate(-334.40grad);
+}
+.pct71_2 .pointBtn.arc2 {
+	transform: rotate(-334.80grad);
+}
+.pct71_3 .pointBtn.arc2 {
+	transform: rotate(-335.20grad);
+}
+.pct71_4 .pointBtn.arc2 {
+	transform: rotate(-335.60grad);
+}
+.pct71_5 .pointBtn.arc2 {
+	transform: rotate(-336.00grad);
+}
+.pct71_6 .pointBtn.arc2 {
+	transform: rotate(-336.40grad);
+}
+.pct71_7 .pointBtn.arc2 {
+	transform: rotate(-336.80grad);
+}
+.pct71_8 .pointBtn.arc2 {
+	transform: rotate(-337.20grad);
+}
+.pct71_9 .pointBtn.arc2 {
+	transform: rotate(-337.60grad);
+}
+.pct72_0 .pointBtn.arc2 {
+	transform: rotate(-338.00grad);
+}
+.pct72_1 .pointBtn.arc2 {
+	transform: rotate(-338.40grad);
+}
+.pct72_2 .pointBtn.arc2 {
+	transform: rotate(-338.80grad);
+}
+.pct72_3 .pointBtn.arc2 {
+	transform: rotate(-339.20grad);
+}
+.pct72_4 .pointBtn.arc2 {
+	transform: rotate(-339.60grad);
+}
+.pct72_5 .pointBtn.arc2 {
+	transform: rotate(-340.00grad);
+}
+.pct72_6 .pointBtn.arc2 {
+	transform: rotate(-340.40grad);
+}
+.pct72_7 .pointBtn.arc2 {
+	transform: rotate(-340.80grad);
+}
+.pct72_8 .pointBtn.arc2 {
+	transform: rotate(-341.20grad);
+}
+.pct72_9 .pointBtn.arc2 {
+	transform: rotate(-341.60grad);
+}
+.pct73_0 .pointBtn.arc2 {
+	transform: rotate(-342.00grad);
+}
+.pct73_1 .pointBtn.arc2 {
+	transform: rotate(-342.40grad);
+}
+.pct73_2 .pointBtn.arc2 {
+	transform: rotate(-342.80grad);
+}
+.pct73_3 .pointBtn.arc2 {
+	transform: rotate(-343.20grad);
+}
+.pct73_4 .pointBtn.arc2 {
+	transform: rotate(-343.60grad);
+}
+.pct73_5 .pointBtn.arc2 {
+	transform: rotate(-344.00grad);
+}
+.pct73_6 .pointBtn.arc2 {
+	transform: rotate(-344.40grad);
+}
+.pct73_7 .pointBtn.arc2 {
+	transform: rotate(-344.80grad);
+}
+.pct73_8 .pointBtn.arc2 {
+	transform: rotate(-345.20grad);
+}
+.pct73_9 .pointBtn.arc2 {
+	transform: rotate(-345.60grad);
+}
+.pct74_0 .pointBtn.arc2 {
+	transform: rotate(-346.00grad);
+}
+.pct74_1 .pointBtn.arc2 {
+	transform: rotate(-346.40grad);
+}
+.pct74_2 .pointBtn.arc2 {
+	transform: rotate(-346.80grad);
+}
+.pct74_3 .pointBtn.arc2 {
+	transform: rotate(-347.20grad);
+}
+.pct74_4 .pointBtn.arc2 {
+	transform: rotate(-347.60grad);
+}
+.pct74_5 .pointBtn.arc2 {
+	transform: rotate(-348.00grad);
+}
+.pct74_6 .pointBtn.arc2 {
+	transform: rotate(-348.40grad);
+}
+.pct74_7 .pointBtn.arc2 {
+	transform: rotate(-348.80grad);
+}
+.pct74_8 .pointBtn.arc2 {
+	transform: rotate(-349.20grad);
+}
+.pct74_9 .pointBtn.arc2 {
+	transform: rotate(-349.60grad);
+}
+.pct75_0 .pointBtn.arc2 {
+	transform: rotate(-350.00grad);
+}
+.pct75_1 .pointBtn.arc2 {
+	transform: rotate(-350.40grad);
+}
+.pct75_2 .pointBtn.arc2 {
+	transform: rotate(-350.80grad);
+}
+.pct75_3 .pointBtn.arc2 {
+	transform: rotate(-351.20grad);
+}
+.pct75_4 .pointBtn.arc2 {
+	transform: rotate(-351.60grad);
+}
+.pct75_5 .pointBtn.arc2 {
+	transform: rotate(-352.00grad);
+}
+.pct75_6 .pointBtn.arc2 {
+	transform: rotate(-352.40grad);
+}
+.pct75_7 .pointBtn.arc2 {
+	transform: rotate(-352.80grad);
+}
+.pct75_8 .pointBtn.arc2 {
+	transform: rotate(-353.20grad);
+}
+.pct75_9 .pointBtn.arc2 {
+	transform: rotate(-353.60grad);
+}
+.pct76_0 .pointBtn.arc2 {
+	transform: rotate(-354.00grad);
+}
+.pct76_1 .pointBtn.arc2 {
+	transform: rotate(-354.40grad);
+}
+.pct76_2 .pointBtn.arc2 {
+	transform: rotate(-354.80grad);
+}
+.pct76_3 .pointBtn.arc2 {
+	transform: rotate(-355.20grad);
+}
+.pct76_4 .pointBtn.arc2 {
+	transform: rotate(-355.60grad);
+}
+.pct76_5 .pointBtn.arc2 {
+	transform: rotate(-356.00grad);
+}
+.pct76_6 .pointBtn.arc2 {
+	transform: rotate(-356.40grad);
+}
+.pct76_7 .pointBtn.arc2 {
+	transform: rotate(-356.80grad);
+}
+.pct76_8 .pointBtn.arc2 {
+	transform: rotate(-357.20grad);
+}
+.pct76_9 .pointBtn.arc2 {
+	transform: rotate(-357.60grad);
+}
+.pct77_0 .pointBtn.arc2 {
+	transform: rotate(-358.00grad);
+}
+.pct77_1 .pointBtn.arc2 {
+	transform: rotate(-358.40grad);
+}
+.pct77_2 .pointBtn.arc2 {
+	transform: rotate(-358.80grad);
+}
+.pct77_3 .pointBtn.arc2 {
+	transform: rotate(-359.20grad);
+}
+.pct77_4 .pointBtn.arc2 {
+	transform: rotate(-359.60grad);
+}
+.pct77_5 .pointBtn.arc2 {
+	transform: rotate(-360.00grad);
+}
+.pct77_6 .pointBtn.arc2 {
+	transform: rotate(-360.40grad);
+}
+.pct77_7 .pointBtn.arc2 {
+	transform: rotate(-360.80grad);
+}
+.pct77_8 .pointBtn.arc2 {
+	transform: rotate(-361.20grad);
+}
+.pct77_9 .pointBtn.arc2 {
+	transform: rotate(-361.60grad);
+}
+.pct78_0 .pointBtn.arc2 {
+	transform: rotate(-362.00grad);
+}
+.pct78_1 .pointBtn.arc2 {
+	transform: rotate(-362.40grad);
+}
+.pct78_2 .pointBtn.arc2 {
+	transform: rotate(-362.80grad);
+}
+.pct78_3 .pointBtn.arc2 {
+	transform: rotate(-363.20grad);
+}
+.pct78_4 .pointBtn.arc2 {
+	transform: rotate(-363.60grad);
+}
+.pct78_5 .pointBtn.arc2 {
+	transform: rotate(-364.00grad);
+}
+.pct78_6 .pointBtn.arc2 {
+	transform: rotate(-364.40grad);
+}
+.pct78_7 .pointBtn.arc2 {
+	transform: rotate(-364.80grad);
+}
+.pct78_8 .pointBtn.arc2 {
+	transform: rotate(-365.20grad);
+}
+.pct78_9 .pointBtn.arc2 {
+	transform: rotate(-365.60grad);
+}
+.pct79_0 .pointBtn.arc2 {
+	transform: rotate(-366.00grad);
+}
+.pct79_1 .pointBtn.arc2 {
+	transform: rotate(-366.40grad);
+}
+.pct79_2 .pointBtn.arc2 {
+	transform: rotate(-366.80grad);
+}
+.pct79_3 .pointBtn.arc2 {
+	transform: rotate(-367.20grad);
+}
+.pct79_4 .pointBtn.arc2 {
+	transform: rotate(-367.60grad);
+}
+.pct79_5 .pointBtn.arc2 {
+	transform: rotate(-368.00grad);
+}
+.pct79_6 .pointBtn.arc2 {
+	transform: rotate(-368.40grad);
+}
+.pct79_7 .pointBtn.arc2 {
+	transform: rotate(-368.80grad);
+}
+.pct79_8 .pointBtn.arc2 {
+	transform: rotate(-369.20grad);
+}
+.pct79_9 .pointBtn.arc2 {
+	transform: rotate(-369.60grad);
+}
+.pct80_0 .pointBtn.arc2 {
+	transform: rotate(-370.00grad);
+}
+.pct80_1 .pointBtn.arc2 {
+	transform: rotate(-370.40grad);
+}
+.pct80_2 .pointBtn.arc2 {
+	transform: rotate(-370.80grad);
+}
+.pct80_3 .pointBtn.arc2 {
+	transform: rotate(-371.20grad);
+}
+.pct80_4 .pointBtn.arc2 {
+	transform: rotate(-371.60grad);
+}
+.pct80_5 .pointBtn.arc2 {
+	transform: rotate(-372.00grad);
+}
+.pct80_6 .pointBtn.arc2 {
+	transform: rotate(-372.40grad);
+}
+.pct80_7 .pointBtn.arc2 {
+	transform: rotate(-372.80grad);
+}
+.pct80_8 .pointBtn.arc2 {
+	transform: rotate(-373.20grad);
+}
+.pct80_9 .pointBtn.arc2 {
+	transform: rotate(-373.60grad);
+}
+.pct81_0 .pointBtn.arc2 {
+	transform: rotate(-374.00grad);
+}
+.pct81_1 .pointBtn.arc2 {
+	transform: rotate(-374.40grad);
+}
+.pct81_2 .pointBtn.arc2 {
+	transform: rotate(-374.80grad);
+}
+.pct81_3 .pointBtn.arc2 {
+	transform: rotate(-375.20grad);
+}
+.pct81_4 .pointBtn.arc2 {
+	transform: rotate(-375.60grad);
+}
+.pct81_5 .pointBtn.arc2 {
+	transform: rotate(-376.00grad);
+}
+.pct81_6 .pointBtn.arc2 {
+	transform: rotate(-376.40grad);
+}
+.pct81_7 .pointBtn.arc2 {
+	transform: rotate(-376.80grad);
+}
+.pct81_8 .pointBtn.arc2 {
+	transform: rotate(-377.20grad);
+}
+.pct81_9 .pointBtn.arc2 {
+	transform: rotate(-377.60grad);
+}
+.pct82_0 .pointBtn.arc2 {
+	transform: rotate(-378.00grad);
+}
+.pct82_1 .pointBtn.arc2 {
+	transform: rotate(-378.40grad);
+}
+.pct82_2 .pointBtn.arc2 {
+	transform: rotate(-378.80grad);
+}
+.pct82_3 .pointBtn.arc2 {
+	transform: rotate(-379.20grad);
+}
+.pct82_4 .pointBtn.arc2 {
+	transform: rotate(-379.60grad);
+}
+.pct82_5 .pointBtn.arc2 {
+	transform: rotate(-380.00grad);
+}
+.pct82_6 .pointBtn.arc2 {
+	transform: rotate(-380.40grad);
+}
+.pct82_7 .pointBtn.arc2 {
+	transform: rotate(-380.80grad);
+}
+.pct82_8 .pointBtn.arc2 {
+	transform: rotate(-381.20grad);
+}
+.pct82_9 .pointBtn.arc2 {
+	transform: rotate(-381.60grad);
+}
+.pct83_0 .pointBtn.arc2 {
+	transform: rotate(-382.00grad);
+}
+.pct83_1 .pointBtn.arc2 {
+	transform: rotate(-382.40grad);
+}
+.pct83_2 .pointBtn.arc2 {
+	transform: rotate(-382.80grad);
+}
+.pct83_3 .pointBtn.arc2 {
+	transform: rotate(-383.20grad);
+}
+.pct83_4 .pointBtn.arc2 {
+	transform: rotate(-383.60grad);
+}
+.pct83_5 .pointBtn.arc2 {
+	transform: rotate(-384.00grad);
+}
+.pct83_6 .pointBtn.arc2 {
+	transform: rotate(-384.40grad);
+}
+.pct83_7 .pointBtn.arc2 {
+	transform: rotate(-384.80grad);
+}
+.pct83_8 .pointBtn.arc2 {
+	transform: rotate(-385.20grad);
+}
+.pct83_9 .pointBtn.arc2 {
+	transform: rotate(-385.60grad);
+}
+.pct84_0 .pointBtn.arc2 {
+	transform: rotate(-386.00grad);
+}
+.pct84_1 .pointBtn.arc2 {
+	transform: rotate(-386.40grad);
+}
+.pct84_2 .pointBtn.arc2 {
+	transform: rotate(-386.80grad);
+}
+.pct84_3 .pointBtn.arc2 {
+	transform: rotate(-387.20grad);
+}
+.pct84_4 .pointBtn.arc2 {
+	transform: rotate(-387.60grad);
+}
+.pct84_5 .pointBtn.arc2 {
+	transform: rotate(-388.00grad);
+}
+.pct84_6 .pointBtn.arc2 {
+	transform: rotate(-388.40grad);
+}
+.pct84_7 .pointBtn.arc2 {
+	transform: rotate(-388.80grad);
+}
+.pct84_8 .pointBtn.arc2 {
+	transform: rotate(-389.20grad);
+}
+.pct84_9 .pointBtn.arc2 {
+	transform: rotate(-389.60grad);
+}
+.pct85_0 .pointBtn.arc2 {
+	transform: rotate(-390.00grad);
+}
+.pct85_1 .pointBtn.arc2 {
+	transform: rotate(-390.40grad);
+}
+.pct85_2 .pointBtn.arc2 {
+	transform: rotate(-390.80grad);
+}
+.pct85_3 .pointBtn.arc2 {
+	transform: rotate(-391.20grad);
+}
+.pct85_4 .pointBtn.arc2 {
+	transform: rotate(-391.60grad);
+}
+.pct85_5 .pointBtn.arc2 {
+	transform: rotate(-392.00grad);
+}
+.pct85_6 .pointBtn.arc2 {
+	transform: rotate(-392.40grad);
+}
+.pct85_7 .pointBtn.arc2 {
+	transform: rotate(-392.80grad);
+}
+.pct85_8 .pointBtn.arc2 {
+	transform: rotate(-393.20grad);
+}
+.pct85_9 .pointBtn.arc2 {
+	transform: rotate(-393.60grad);
+}
+.pct86_0 .pointBtn.arc2 {
+	transform: rotate(-394.00grad);
+}
+.pct86_1 .pointBtn.arc2 {
+	transform: rotate(-394.40grad);
+}
+.pct86_2 .pointBtn.arc2 {
+	transform: rotate(-394.80grad);
+}
+.pct86_3 .pointBtn.arc2 {
+	transform: rotate(-395.20grad);
+}
+.pct86_4 .pointBtn.arc2 {
+	transform: rotate(-395.60grad);
+}
+.pct86_5 .pointBtn.arc2 {
+	transform: rotate(-396.00grad);
+}
+.pct86_6 .pointBtn.arc2 {
+	transform: rotate(-396.40grad);
+}
+.pct86_7 .pointBtn.arc2 {
+	transform: rotate(-396.80grad);
+}
+.pct86_8 .pointBtn.arc2 {
+	transform: rotate(-397.20grad);
+}
+.pct86_9 .pointBtn.arc2 {
+	transform: rotate(-397.60grad);
+}
+.pct87_0 .pointBtn.arc2 {
+	transform: rotate(-398.00grad);
+}
+.pct87_1 .pointBtn.arc2 {
+	transform: rotate(-398.40grad);
+}
+.pct87_2 .pointBtn.arc2 {
+	transform: rotate(-398.80grad);
+}
+.pct87_3 .pointBtn.arc2 {
+	transform: rotate(-399.20grad);
+}
+.pct87_4 .pointBtn.arc2 {
+	transform: rotate(-399.60grad);
+}
+.pct87_5 .pointBtn.arc2 {
+	transform: rotate(-400.00grad);
+}
+.pct87_6 .pointBtn.arc2 {
+	transform: rotate(-400.40grad);
+}
+.pct87_7 .pointBtn.arc2 {
+	transform: rotate(-400.80grad);
+}
+.pct87_8 .pointBtn.arc2 {
+	transform: rotate(-401.20grad);
+}
+.pct87_9 .pointBtn.arc2 {
+	transform: rotate(-401.60grad);
+}
+.pct88_0 .pointBtn.arc2 {
+	transform: rotate(-402.00grad);
+}
+.pct88_1 .pointBtn.arc2 {
+	transform: rotate(-402.40grad);
+}
+.pct88_2 .pointBtn.arc2 {
+	transform: rotate(-402.80grad);
+}
+.pct88_3 .pointBtn.arc2 {
+	transform: rotate(-403.20grad);
+}
+.pct88_4 .pointBtn.arc2 {
+	transform: rotate(-403.60grad);
+}
+.pct88_5 .pointBtn.arc2 {
+	transform: rotate(-404.00grad);
+}
+.pct88_6 .pointBtn.arc2 {
+	transform: rotate(-404.40grad);
+}
+.pct88_7 .pointBtn.arc2 {
+	transform: rotate(-404.80grad);
+}
+.pct88_8 .pointBtn.arc2 {
+	transform: rotate(-405.20grad);
+}
+.pct88_9 .pointBtn.arc2 {
+	transform: rotate(-405.60grad);
+}
+.pct89_0 .pointBtn.arc2 {
+	transform: rotate(-406.00grad);
+}
+.pct89_1 .pointBtn.arc2 {
+	transform: rotate(-406.40grad);
+}
+.pct89_2 .pointBtn.arc2 {
+	transform: rotate(-406.80grad);
+}
+.pct89_3 .pointBtn.arc2 {
+	transform: rotate(-407.20grad);
+}
+.pct89_4 .pointBtn.arc2 {
+	transform: rotate(-407.60grad);
+}
+.pct89_5 .pointBtn.arc2 {
+	transform: rotate(-408.00grad);
+}
+.pct89_6 .pointBtn.arc2 {
+	transform: rotate(-408.40grad);
+}
+.pct89_7 .pointBtn.arc2 {
+	transform: rotate(-408.80grad);
+}
+.pct89_8 .pointBtn.arc2 {
+	transform: rotate(-409.20grad);
+}
+.pct89_9 .pointBtn.arc2 {
+	transform: rotate(-409.60grad);
+}
+.pct90_0 .pointBtn.arc2 {
+	transform: rotate(-410.00grad);
+}
+.pct90_1 .pointBtn.arc2 {
+	transform: rotate(-410.40grad);
+}
+.pct90_2 .pointBtn.arc2 {
+	transform: rotate(-410.80grad);
+}
+.pct90_3 .pointBtn.arc2 {
+	transform: rotate(-411.20grad);
+}
+.pct90_4 .pointBtn.arc2 {
+	transform: rotate(-411.60grad);
+}
+.pct90_5 .pointBtn.arc2 {
+	transform: rotate(-412.00grad);
+}
+.pct90_6 .pointBtn.arc2 {
+	transform: rotate(-412.40grad);
+}
+.pct90_7 .pointBtn.arc2 {
+	transform: rotate(-412.80grad);
+}
+.pct90_8 .pointBtn.arc2 {
+	transform: rotate(-413.20grad);
+}
+.pct90_9 .pointBtn.arc2 {
+	transform: rotate(-413.60grad);
+}
+.pct91_0 .pointBtn.arc2 {
+	transform: rotate(-414.00grad);
+}
+.pct91_1 .pointBtn.arc2 {
+	transform: rotate(-414.40grad);
+}
+.pct91_2 .pointBtn.arc2 {
+	transform: rotate(-414.80grad);
+}
+.pct91_3 .pointBtn.arc2 {
+	transform: rotate(-415.20grad);
+}
+.pct91_4 .pointBtn.arc2 {
+	transform: rotate(-415.60grad);
+}
+.pct91_5 .pointBtn.arc2 {
+	transform: rotate(-416.00grad);
+}
+.pct91_6 .pointBtn.arc2 {
+	transform: rotate(-416.40grad);
+}
+.pct91_7 .pointBtn.arc2 {
+	transform: rotate(-416.80grad);
+}
+.pct91_8 .pointBtn.arc2 {
+	transform: rotate(-417.20grad);
+}
+.pct91_9 .pointBtn.arc2 {
+	transform: rotate(-417.60grad);
+}
+.pct92_0 .pointBtn.arc2 {
+	transform: rotate(-418.00grad);
+}
+.pct92_1 .pointBtn.arc2 {
+	transform: rotate(-418.40grad);
+}
+.pct92_2 .pointBtn.arc2 {
+	transform: rotate(-418.80grad);
+}
+.pct92_3 .pointBtn.arc2 {
+	transform: rotate(-419.20grad);
+}
+.pct92_4 .pointBtn.arc2 {
+	transform: rotate(-419.60grad);
+}
+.pct92_5 .pointBtn.arc2 {
+	transform: rotate(-420.00grad);
+}
+.pct92_6 .pointBtn.arc2 {
+	transform: rotate(-420.40grad);
+}
+.pct92_7 .pointBtn.arc2 {
+	transform: rotate(-420.80grad);
+}
+.pct92_8 .pointBtn.arc2 {
+	transform: rotate(-421.20grad);
+}
+.pct92_9 .pointBtn.arc2 {
+	transform: rotate(-421.60grad);
+}
+.pct93_0 .pointBtn.arc2 {
+	transform: rotate(-422.00grad);
+}
+.pct93_1 .pointBtn.arc2 {
+	transform: rotate(-422.40grad);
+}
+.pct93_2 .pointBtn.arc2 {
+	transform: rotate(-422.80grad);
+}
+.pct93_3 .pointBtn.arc2 {
+	transform: rotate(-423.20grad);
+}
+.pct93_4 .pointBtn.arc2 {
+	transform: rotate(-423.60grad);
+}
+.pct93_5 .pointBtn.arc2 {
+	transform: rotate(-424.00grad);
+}
+.pct93_6 .pointBtn.arc2 {
+	transform: rotate(-424.40grad);
+}
+.pct93_7 .pointBtn.arc2 {
+	transform: rotate(-424.80grad);
+}
+.pct93_8 .pointBtn.arc2 {
+	transform: rotate(-425.20grad);
+}
+.pct93_9 .pointBtn.arc2 {
+	transform: rotate(-425.60grad);
+}
+.pct94_0 .pointBtn.arc2 {
+	transform: rotate(-426.00grad);
+}
+.pct94_1 .pointBtn.arc2 {
+	transform: rotate(-426.40grad);
+}
+.pct94_2 .pointBtn.arc2 {
+	transform: rotate(-426.80grad);
+}
+.pct94_3 .pointBtn.arc2 {
+	transform: rotate(-427.20grad);
+}
+.pct94_4 .pointBtn.arc2 {
+	transform: rotate(-427.60grad);
+}
+.pct94_5 .pointBtn.arc2 {
+	transform: rotate(-428.00grad);
+}
+.pct94_6 .pointBtn.arc2 {
+	transform: rotate(-428.40grad);
+}
+.pct94_7 .pointBtn.arc2 {
+	transform: rotate(-428.80grad);
+}
+.pct94_8 .pointBtn.arc2 {
+	transform: rotate(-429.20grad);
+}
+.pct94_9 .pointBtn.arc2 {
+	transform: rotate(-429.60grad);
+}
+.pct95_0 .pointBtn.arc2 {
+	transform: rotate(-430.00grad);
+}
+.pct95_1 .pointBtn.arc2 {
+	transform: rotate(-430.40grad);
+}
+.pct95_2 .pointBtn.arc2 {
+	transform: rotate(-430.80grad);
+}
+.pct95_3 .pointBtn.arc2 {
+	transform: rotate(-431.20grad);
+}
+.pct95_4 .pointBtn.arc2 {
+	transform: rotate(-431.60grad);
+}
+.pct95_5 .pointBtn.arc2 {
+	transform: rotate(-432.00grad);
+}
+.pct95_6 .pointBtn.arc2 {
+	transform: rotate(-432.40grad);
+}
+.pct95_7 .pointBtn.arc2 {
+	transform: rotate(-432.80grad);
+}
+.pct95_8 .pointBtn.arc2 {
+	transform: rotate(-433.20grad);
+}
+.pct95_9 .pointBtn.arc2 {
+	transform: rotate(-433.60grad);
+}
+.pct96_0 .pointBtn.arc2 {
+	transform: rotate(-434.00grad);
+}
+.pct96_1 .pointBtn.arc2 {
+	transform: rotate(-434.40grad);
+}
+.pct96_2 .pointBtn.arc2 {
+	transform: rotate(-434.80grad);
+}
+.pct96_3 .pointBtn.arc2 {
+	transform: rotate(-435.20grad);
+}
+.pct96_4 .pointBtn.arc2 {
+	transform: rotate(-435.60grad);
+}
+.pct96_5 .pointBtn.arc2 {
+	transform: rotate(-436.00grad);
+}
+.pct96_6 .pointBtn.arc2 {
+	transform: rotate(-436.40grad);
+}
+.pct96_7 .pointBtn.arc2 {
+	transform: rotate(-436.80grad);
+}
+.pct96_8 .pointBtn.arc2 {
+	transform: rotate(-437.20grad);
+}
+.pct96_9 .pointBtn.arc2 {
+	transform: rotate(-437.60grad);
+}
+.pct97_0 .pointBtn.arc2 {
+	transform: rotate(-438.00grad);
+}
+.pct97_1 .pointBtn.arc2 {
+	transform: rotate(-438.40grad);
+}
+.pct97_2 .pointBtn.arc2 {
+	transform: rotate(-438.80grad);
+}
+.pct97_3 .pointBtn.arc2 {
+	transform: rotate(-439.20grad);
+}
+.pct97_4 .pointBtn.arc2 {
+	transform: rotate(-439.60grad);
+}
+.pct97_5 .pointBtn.arc2 {
+	transform: rotate(-440.00grad);
+}
+.pct97_6 .pointBtn.arc2 {
+	transform: rotate(-440.40grad);
+}
+.pct97_7 .pointBtn.arc2 {
+	transform: rotate(-440.80grad);
+}
+.pct97_8 .pointBtn.arc2 {
+	transform: rotate(-441.20grad);
+}
+.pct97_9 .pointBtn.arc2 {
+	transform: rotate(-441.60grad);
+}
+.pct98_0 .pointBtn.arc2 {
+	transform: rotate(-442.00grad);
+}
+.pct98_1 .pointBtn.arc2 {
+	transform: rotate(-442.40grad);
+}
+.pct98_2 .pointBtn.arc2 {
+	transform: rotate(-442.80grad);
+}
+.pct98_3 .pointBtn.arc2 {
+	transform: rotate(-443.20grad);
+}
+.pct98_4 .pointBtn.arc2 {
+	transform: rotate(-443.60grad);
+}
+.pct98_5 .pointBtn.arc2 {
+	transform: rotate(-444.00grad);
+}
+.pct98_6 .pointBtn.arc2 {
+	transform: rotate(-444.40grad);
+}
+.pct98_7 .pointBtn.arc2 {
+	transform: rotate(-444.80grad);
+}
+.pct98_8 .pointBtn.arc2 {
+	transform: rotate(-445.20grad);
+}
+.pct98_9 .pointBtn.arc2 {
+	transform: rotate(-445.60grad);
+}
+.pct99_0 .pointBtn.arc2 {
+	transform: rotate(-446.00grad);
+}
+.pct99_1 .pointBtn.arc2 {
+	transform: rotate(-446.40grad);
+}
+.pct99_2 .pointBtn.arc2 {
+	transform: rotate(-446.80grad);
+}
+.pct99_3 .pointBtn.arc2 {
+	transform: rotate(-447.20grad);
+}
+.pct99_4 .pointBtn.arc2 {
+	transform: rotate(-447.60grad);
+}
+.pct99_5 .pointBtn.arc2 {
+	transform: rotate(-448.00grad);
+}
+.pct99_6 .pointBtn.arc2 {
+	transform: rotate(-448.40grad);
+}
+.pct99_7 .pointBtn.arc2 {
+	transform: rotate(-448.80grad);
+}
+.pct99_8 .pointBtn.arc2 {
+	transform: rotate(-449.20grad);
+}
+.pct99_9 .pointBtn.arc2 {
+	transform: rotate(-449.60grad);
+}
+.pct100_0 .pointBtn.arc2 {
+	transform: rotate(-450.00grad);
+}
