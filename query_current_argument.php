@@ -1,14 +1,16 @@
 <?php
-  
-  $argID = $_SESSION['currentArg'];
-  $proID = (isset($_SESSION['profile'])) ? $_SESSION['profile'] : '';
-
+$argID = $_SESSION['currentArg'];
+$opinion = 0;
 $sql = "CALL getAssociated($argID);";
 $sql .= "CALL getDetail($argID);";
 $sql .= "CALL getExplication($argID);";
-$sql .= "CALL getOpinion($argID,$proID);";
-$sql .= "CALL getAltPhrasing($argID);";
-$sql .= "CALL getUserAssociated($argID,$proID)";
+if (isset($_SESSION['profile'])) {
+  $proID = $_SESSION['profile'];
+  $sql .= "CALL getOpinion($argID,$proID);";
+  $sql .= "CALL getUserAssociated($argID,$proID);";
+}
+$sql .= "CALL getAltPhrasing($argID)";
+
 
 if (mysqli_multi_query($db, $sql)) {
   $result = mysqli_store_result($db);
@@ -54,11 +56,11 @@ if (mysqli_multi_query($db, $sql)) {
       }
     }
   mysqli_free_result($result);
-mysqli_next_result($db);
-mysqli_next_result($db);
-mysqli_next_result($db);
+  mysqli_next_result($db);
+  mysqli_next_result($db);
+  mysqli_next_result($db);
 
-$result = mysqli_store_result($db);
+  $result = mysqli_store_result($db);
   if (mysqli_num_rows($result) > 0) {
     $row = mysqli_fetch_row($result);
     $rate = number_format($row[4]*100,1);
@@ -72,11 +74,11 @@ $result = mysqli_store_result($db);
   }
   mysqli_free_result($result);
   mysqli_next_result($db);
-mysqli_next_result($db);
-mysqli_next_result($db);
-
-$result = mysqli_store_result($db);
-if (mysqli_num_rows($result) > 0) {
+  mysqli_next_result($db);
+  mysqli_next_result($db);
+  
+  $result = mysqli_store_result($db);
+  if (mysqli_num_rows($result) > 0) {
     $iterator = 0;
     $links = array();
     while ($row = mysqli_fetch_row($result)) {
@@ -104,36 +106,21 @@ if (mysqli_num_rows($result) > 0) {
   mysqli_next_result($db);
   mysqli_next_result($db);
   mysqli_next_result($db);
-
-  $result = mysqli_store_result($db);
+  
+  if (isset($_SESSION['profile'])) {
+    $result = mysqli_store_result($db);
     if (mysqli_num_rows($result) > 0) {
       $row = mysqli_fetch_row($result);
       if ($row[0])
-        $_SESSION['opinion']=1;
+      $opinion = 1;
       else
-        $_SESSION['opinion']=-1;
+      $opinion = -1;
     }
   mysqli_free_result($result);
   mysqli_next_result($db);
   mysqli_next_result($db);
   mysqli_next_result($db);
-
-$result = mysqli_store_result($db);
-  if (mysqli_num_rows($result) > 0) { 
-    $iterator = 0;
-    $altPhrasings = array();
-    while ($row = mysqli_fetch_row($result)) {
-      $altPhrasings[$iterator] = array();
-      $altPhrasings[$iterator][0] = $row[0];
-      $altPhrasings[$iterator][1] = $row[1];
-      $iterator++;
-    }
-  }
-  mysqli_free_result($result);
-  mysqli_next_result($db);
-  mysqli_next_result($db);
-  mysqli_next_result($db);
-$result = mysqli_store_result($db);
+  $result = mysqli_store_result($db);
   if (mysqli_num_rows($result) > 0) {
     while ($row = mysqli_fetch_row($result)) {
         switch ($row[1]) {
@@ -164,11 +151,28 @@ $result = mysqli_store_result($db);
         }
       }
     }
-  mysqli_free_result($result);
-  mysqli_next_result($db);
-
-
-
+    mysqli_free_result($result);
+    mysqli_next_result($db);
+    mysqli_next_result($db);
+    mysqli_next_result($db);
+  }
+  $result = mysqli_store_result($db);
+  if (mysqli_num_rows($result) > 0) { 
+    $iterator = 0;
+    $altPhrasings = array();
+    while ($row = mysqli_fetch_row($result)) {
+      $altPhrasings[$iterator] = array();
+      $altPhrasings[$iterator][0] = $row[0];
+      $altPhrasings[$iterator][1] = $row[1];
+      $iterator++;
+    }
+  }
+  //Clear all remaining results from multi-query if any
+  do {
+    if ($result = mysqli_store_result($db)) {
+      mysqli_free_result($result);
+    }
+  } while (mysqli_next_result($db));
 }
 else {
     echo "ERROR - MULTIPLE QUERIES FAILED";
