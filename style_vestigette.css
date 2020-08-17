@@ -118,7 +118,6 @@ h1 {
 h2 {
 	font-weight: bold;
 	font-size: 2rem;
-	width: 90%;
 }
 
 /* buttons */
@@ -252,7 +251,6 @@ button.rejectSet {
 	background-color: white;
 	border: none;
 	border-color: var(--cddbBlack);
-	border-color: yellow !important;
 	color: var(--cddbBlack);
 	display: flex;
 	flex-flow: column nowrap;
