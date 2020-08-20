@@ -384,6 +384,7 @@ button.rejectSet {
 
 /* percentages */
 .wrapper {
+	flex: none;
 	position: relative;
 	margin: 0.2rem;
 	height: 4rem;
