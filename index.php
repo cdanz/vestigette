@@ -74,7 +74,7 @@ unset($onClick);
 			<div><a href="http://www.vestigette.org/About.php?arg=<?php echo $_SESSION['currentArg'];?>">About</a></div>
 			<div><a href="http://www.vestigette.org/Explore.php?arg=<?php echo $_SESSION['currentArg'];?>">Explore</a></div>
 			<div><a href="http://www.vestigette.org/Profile.php?arg=<?php echo $_SESSION['currentArg'];?>">Profile</a></div>
-			<div><a href="login.php?arg=<?php echo $_SESSION['currentArg'];?>">Login</a></div> 
+			<div><a href="<?php echo ($profile) ? 'logout' : 'login'; ?>.php?arg=<?php echo $_SESSION['currentArg'];?>"><?php echo ($profile) ? 'Logout' : 'Login'; ?></a></div> 
 		</div>
 
 		<div class="accordion container because">
@@ -109,8 +109,8 @@ if (isset($because)) {
 <?php /* refactored */
 $accept = 'Open';
 $reject = 'Set';
-echo "<form method=\"POST\" class=\"buttons\" >";
 if (isset($_SESSION['profile'])) {
+	echo "<form method=\"POST\" class=\"buttons\" >";
 	if ($opinion == 0) { 
 		$reject = 'Open';
 	}
@@ -122,7 +122,7 @@ if (isset($_SESSION['profile'])) {
 		<button type=\"submit\" class=\"button accept accept$accept\" name=\"buttonAccept\" value=\"accept\">Accept" . (($accept == 'Set') ? "ed" : "") . "</button>
 		<button type=\"submit\" class=\"button reject reject$reject\" name=\"buttonReject\" value=\"reject\">Reject" . (($reject == 'Set') ? "ed" : "") . "</button>";
 } else {
-	echo "action=\"login.php?arg=" . $_SESSION['currentArg'] . "\">
+	echo "<form method=\"GET\" class=\"buttons\" action=\"login.php?arg=" . $_SESSION['currentArg'] . "\">
 	<button type=\"submit\" class=\"button accept acceptOpen\" name=\"buttonClicked\">Accept</button>
 	<button type=\"submit\" class=\"button reject rejectOpen\" name=\"buttonClicked\">Reject</button>";
 }
