@@ -172,7 +172,7 @@ if (mysqli_multi_query($db, $sql)) {
 		if ($result = mysqli_store_result($db)) {
 			mysqli_free_result($result);
 		}
-	} while (mysqli_next_result($db));
+	} while (mysqli_more_results($db) and mysqli_next_result($db));
 }
 else {
 		echo "ERROR - MULTIPLE QUERIES FAILED";

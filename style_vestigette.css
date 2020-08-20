@@ -380,6 +380,8 @@ button.rejectSet {
 	margin: 0.3rem;
 	padding: 0.3rem;
 	width: 100%;
+	word-break: break-all;
+	/* overflow-wrap: break-word;  apparently not relevant in this case */
 }
 
 /* percentages */
