@@ -77,7 +77,6 @@ unset($onClick);
 			<div><a href="login.php?arg=<?php echo $_SESSION['currentArg'];?>">Login</a></div> 
 		</div>
 
-<?php /* to refactor, also look at JS */ ?>
 		<div class="accordion container because">
 			<h2>Because</h2>
 <?php
