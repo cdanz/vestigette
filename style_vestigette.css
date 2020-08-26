@@ -185,6 +185,9 @@ button.rejectOpen:hover,
 button.rejectSet {
 	background-color: var(--cddbRed);
 }
+button.hidden {
+	display: none;
+}
 
 /* sections & containers */
 .mastHead {

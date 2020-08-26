@@ -83,12 +83,13 @@ unset($onClick);
 if ((isset($opinion)) && ($opinion > 0)) { 
 ?>
 	<div class="buttons">
-		<button onclick="becauseClearData()" class="button weighBecause restart" name="buttonClicked" value="weighBecause"><span>&#x27F2;</span></button> 
+		<button onclick="becauseClearData()" class="button because reset hidden" name="buttonClicked" value="weighBecause"><span>&#x27F2;</span></button> 
 		<form method="POST"> 
-			<button type="submit" class="button weighBecause" name="buttonClicked" value="weighBecause">Weigh In</button>
+			<button type="submit" class="button because endorse hidden" name="buttonClicked" value="weighBecause">Endorse</button>
 <!-- This hidden field has its value updated with an array as a string serving as the "weigh in" input -->
 			<input type="hidden" name="becauseWeighInWith" id="becauseWeighInWith" value="" /> 
 		</form>
+		<button class="button because weighIn" name="buttonClicked" value="weighInBecause">Weigh In</button>
 	</div>
 <?php
 } 

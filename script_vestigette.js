@@ -2,6 +2,7 @@
 
 let mode = null;
 let panel = null;
+let editMode = null;
 let pctRE = /pct\d+\_\d/;
 
 /*
@@ -28,7 +29,9 @@ function init() {
 	panel = document.querySelector(".argument .panel");
 	let acc = document.getElementsByClassName("accordion");
 	let i;
+	let j;
 	let limit;
+	let subLimit;
 	limit = acc.length;
 	for (i = 0; i < limit; i++) {
 		acc[i].addEventListener("click", function() {
@@ -53,8 +56,43 @@ function init() {
 			console.log(`${evt.target.parentElement.nodeName} with classes: ${evt.target.parentElement.className}`);
 		});
 	}
+	// Assign click handlers for weighIn buttons
+	let weighIns = document.querySelectorAll(".weighIn");
+	let resets = document.querySelectorAll(".reset");
+	let endorses = document.querySelectorAll(".endorse");
+	let typeClass = "";
+	let resetEl = null;
+    let endorseEl = null;
+	limit = weighIns.length;
+	for (i = 0; i < limit; i++) {
+		if (weighIns[i].classList.contains("because")) {
+			typeClass = "because";
+		}
+		else if (weighIns[i].classList.contains("rebuttal")) {
+			typeClass = "rebuttal";
+		}
+		else {
+			typeClass = "therefore";
+		}
+		subLimit = resets.length;
+		for (j = 0; j < subLimit; j++) {
+			if (resets[j].classList.contains(typeClass)) {
+				resetEl = resets[j];
+			}
+		}
+		subLimit = endorses.length;
+		for (j = 0; j < subLimit; j++) {
+			if (endorses[j].classList.contains(typeClass)) {
+				endorseEl = endorses[j];
+			}
+		}
+		weighIns[i].addEventListener("click", function(evt) {
+            this.classList.toggle("hidden");
+            resetEl.classList.toggle("hidden");
+            endorseEl.classList.toggle("hidden");
+		});	
+	}	
 }
-
 
 /*
 Retrieve weights from .wrapper, via attribute data-user_weight.
