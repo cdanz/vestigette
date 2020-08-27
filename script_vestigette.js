@@ -4,6 +4,8 @@ let mode = null;
 let panel = null;
 let editMode = null;
 let pctRE = /pct\d+\_\d/;
+let genericTotalClicks = 0;
+let genericClickArr = [];
 
 /*
 Capitalize a given str.
@@ -73,7 +75,7 @@ function init() {
 		}
 		else {
 			typeClass = "therefore";
-		}
+		}	
 		subLimit = resets.length;
 		for (j = 0; j < subLimit; j++) {
 			if (resets[j].classList.contains(typeClass)) {
@@ -90,8 +92,50 @@ function init() {
             this.classList.toggle("hidden");
             resetEl.classList.toggle("hidden");
             endorseEl.classList.toggle("hidden");
+            //TODO make it toggle hide buttons of other sections
+            goNeutral(typeClass);
+            loadUserWeights(typeClass); /*TODO add data for this to reference*/
 		});	
-	}	
+	}
+	//Assign goNeutral function to the reset button
+	limit = resets.length;
+	for (i = 0; i < limit; i++) {
+		if (weighIns[i].classList.contains("because")) {
+			typeClass = "because";
+		}
+		else if (weighIns[i].classList.contains("rebuttal")) {
+			typeClass = "rebuttal";
+		}
+		else {
+			typeClass = "therefore";
+		}
+		resets[i].addEventListener("click", function(evt) {
+            goNeutral(typeClass);
+		});		
+	}
+
+}
+
+/*
+Set all selected type class to neutral. Set inline percentage to zero. 
+*/
+function goNeutral(type) {
+	let circles = document.querySelectorAll(`.container.${type} .wrapper`);
+	let limit = circles.length;
+	let i;
+	/*Make circles grey and no arc*/
+	for (i = 0; i < limit; i++) {
+		circles[i].classList.replace(type, "neutral");
+	}
+	/*Make inline percentage 0%*/
+	let text = document.querySelectorAll(`.container.${type} p .inLinePct`);
+	limit = text.length;
+	for (i = 0; i < limit; i++) {
+		text[i].innerHTML = "0.00% - ";
+	}
+	/*empty array tracking clicks and reset counter of total clicks*/
+	genericClickArr.length = 0;
+	genericTotalClicks = 0;
 }
 
 /*
@@ -134,6 +178,7 @@ function bump(element, type, argID) {
 	let foundIndex;
 	let genericTotalClicks;
 	let genericClickArr = [];
+	/*Does this switch by case section have a purpose anymore?*/
 	switch(type) {
 		case 'Because':
 			genericTotalClicks = becauseTotalClicks;
@@ -171,6 +216,7 @@ function bump(element, type, argID) {
 		let text = element.querySelector("p .inLinePct");
 		text.innerHTML = `${rateAsString}%`;
 	}
+	/*May only need the update function*/
 	switch(type) {
 		case 'Because':
 			becauseTotalClicks = genericTotalClicks;
