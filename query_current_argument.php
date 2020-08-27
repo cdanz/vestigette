@@ -168,12 +168,10 @@ if (mysqli_multi_query($db, $sql)) {
 		}
 	}
 	//Clear all remaining results from multi-query if any
-
-  while (mysqli_more_results($db)) {
-    mysqli_next_result($db);
-  }
-}
-else {
-		echo "ERROR - MULTIPLE QUERIES FAILED";
+	while (mysqli_more_results($db)) {
+		mysqli_next_result($db);
+	}
+} else {
+	echo "ERROR - MULTIPLE QUERIES FAILED";
 }
 ?>
