@@ -136,24 +136,45 @@ function goNeutral(type) {
 	/*empty array tracking clicks and reset counter of total clicks*/
 	genericClickArr.length = 0;
 	genericTotalClicks = 0;
+	loadUserWeights(type);
 }
 
 /*
-Retrieve weights from .wrapper, via attribute data-user_weight.
+Retrieve weights from .wrapper, via attribute data-user-weight.
 Replace pctX_Y value with those weights and store the original in data-aggregate-weight.
 */
 function loadUserWeights(type) {
-	if (mode != 'edit') {
+	//if (mode != 'edit') {
 		// load values for editing (initial setting is editing from 0)
 		let args = document.querySelectorAll(`.container.${type} .wrapper`);
+		let text = document.querySelectorAll(`.container.${type} p .inLinePct`);
 		let limit = args.length;
 		let i;
 		for (i = 0; i < limit; i++) {
-			let weight = args[i].getAttribute('data-user-weight');
+			console.log("in the for loop");
+			let weight = parseInt(args[i].getAttribute('data-user-weight')).toFixed(1);
+			let newpct;
 			// get pct being used, store it
 			let pct = getPct(args[i]);
-			args[i].setAttribute('data-aggregate-weight', pct);
-			let newpct;
+			//UPDATE: already stored as data attribute   args[i].setAttribute('data-aggregate-weight', pct);
+			if (weight !== 0) {
+				let [whole, decimal] = weight.split('.');
+				newpct = `pct${whole}_${decimal}`;
+				args[i].classList.remove("neutral", "half1", "half2", pct);
+				if (weight <= 50) {
+					args[i].classList.add("half1");
+				}
+				else {
+					args[i].classList.add("half2");
+				}
+				args[i].classList.add(newpct);
+				args[i].classList.add(type);
+				//FIX ME This is unreliable assuming the same place in the array as args
+				text[i].innerHTML = args[i].getAttribute('data-user-weight') + "% - ";
+				//TODO You still need to load up the click array appropriately
+				//args[i].classList.replace("neutral", type);
+			}
+			/*let newpct;
 			if (weight.length == 0) {
 				// no user weight to show
 				newpct = 'pct0_0';
@@ -163,9 +184,9 @@ function loadUserWeights(type) {
 				newpct = `pct${whole}_${decimal}`;
 			}
 			args[i].classList.remove(type, "half1", "half2", pct);
-			args[i].classList.add(newpct);
+			args[i].classList.add(newpct);*/
 		}
-	}
+	//}
 }
 
 
