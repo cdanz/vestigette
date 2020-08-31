@@ -113,6 +113,7 @@ function init() {
             goNeutral(typeClass);
 		});		
 	}
+	//TODO Still would like a history button. resets back historical weights by user, just uses loadUserWeights function. No button to give this fuctionality to yet. 
 
 }
 
@@ -136,7 +137,6 @@ function goNeutral(type) {
 	/*empty array tracking clicks and reset counter of total clicks*/
 	genericClickArr.length = 0;
 	genericTotalClicks = 0;
-	loadUserWeights(type);
 }
 
 /*

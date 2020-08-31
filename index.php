@@ -35,7 +35,7 @@ unset($onClick);
 			}
 			$pct = strval(number_format($line[1], 1, '_', ''));
 			echo "			<li class=\"lineItem\">
-				<div class=\"wrapper ${half} pct${pct} ${type}\" data-aggregate-weight=\"" . strval(number_format($line[1], 2, '.', '')) . "\" data-user-weight=\"" . ((isset($line[3])) ? strval(number_format($line[3], 2, '.', '')) : 0) . "\"" . ((isset($onClick)) ? $onClick : "") . ">
+				<div class=\"wrapper ${half} pct${pct} ${type}\" data-aggregate-weight=\"" . strval(number_format($line[1], 2, '.', '')) . "\" data-user-weight=\"" . ((isset($line[3])) ? strval(number_format($line[3], 2, '.', '')) : "0.00") . "\"" . ((isset($onClick)) ? $onClick : "") . ">
 					<div class=\"pointBtn arc1\"></div>
 					<div class=\"pointBtn arc2\"></div>
 				</div>
