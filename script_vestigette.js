@@ -23,6 +23,49 @@ function getPct(element) {
 	return pctmatch[0];
 }
 
+/*
+Return multidimensional array with number of clicks pushed to end of row that already includes percents, el gives position of el to perform on
+*/
+function pctToClicks(arr, el) { 
+	let min = 100;
+	let limit = arr.length;
+	let i;
+	let splitBy = 1;
+	let commonMultiplier;
+	let isMultiple = true;
+	let number;
+	let whole;
+	let leftover;
+	let clickNum;
+	for (i = 0; i < limit; i++) {
+		if (parseFloat(arr[i][el]) < min) {
+			min = parseFloat(arr[i][el]);
+		}
+	}
+	do {
+		commonMultiplier = min / splitBy;
+		isMultiple = true;
+		for (i = 0; i < limit; i++) {
+			if (arr[i][el]) {
+				number = parseFloat(arr[i][el]) / commonMultiplier;
+				whole = Math.round(number);
+				leftover = Math.abs(number - whole);
+				if (leftover > 0.0001) {
+					isMultiple = false;	
+				}
+			}
+		}
+		splitBy++;
+	} while (!isMultiple);
+	for (i = 0; i < limit; i++) {
+		if (arr[i][el]) {
+			clickNum = parseFloat(arr[i][el]) / commonMultiplier;
+			arr[i].push(clickNum);
+		}
+	}
+	return arr;
+}
+
 
 /*
 Set up accordion and assign click handlers.
@@ -62,9 +105,11 @@ function init() {
 	let weighIns = document.querySelectorAll(".weighIn");
 	let resets = document.querySelectorAll(".reset");
 	let endorses = document.querySelectorAll(".endorse");
+	let histories = document.querySelectorAll(".history");
 	let typeClass = "";
 	let resetEl = null;
     let endorseEl = null;
+    let historyEl = null;
 	limit = weighIns.length;
 	for (i = 0; i < limit; i++) {
 		if (weighIns[i].classList.contains("because")) {
@@ -88,10 +133,17 @@ function init() {
 				endorseEl = endorses[j];
 			}
 		}
+		subLimit = histories.length;
+		for (j = 0; j < subLimit; j++) {
+			if (histories[j].classList.contains(typeClass)) {
+				historyEl = histories[j];
+			}
+		}
 		weighIns[i].addEventListener("click", function(evt) {
             this.classList.toggle("hidden");
             resetEl.classList.toggle("hidden");
             endorseEl.classList.toggle("hidden");
+            historyEl.classList.toggle("hidden");
             //TODO make it toggle hide buttons of other sections
             goNeutral(typeClass);
             loadUserWeights(typeClass); /*TODO add data for this to reference*/
@@ -151,7 +203,6 @@ function loadUserWeights(type) {
 		let limit = args.length;
 		let i;
 		for (i = 0; i < limit; i++) {
-			console.log("in the for loop");
 			let weight = parseInt(args[i].getAttribute('data-user-weight')).toFixed(1);
 			let newpct;
 			// get pct being used, store it
@@ -186,6 +237,29 @@ function loadUserWeights(type) {
 			args[i].classList.remove(type, "half1", "half2", pct);
 			args[i].classList.add(newpct);*/
 		}
+		//get click values to load up generic click array
+		let arr;
+		switch(type) {
+			case 'because':
+				arr = pctToClicks(because,3);
+				break;
+			case 'therefore':
+				arr = pctToClicks(therefore,3);
+				break;
+			case 'rebuttal':
+				arr = pctToClicks(rebuttal,3);
+				break;
+		}
+		console.log(arr);
+		limit = arr.length;
+		for (i = 0; i < limit; i++) {
+			if (arr[i][3]) {
+				genericClickArr.push([(arr[i][1]),(arr[i][4])]);
+				genericTotalClicks = genericTotalClicks + arr[i][4];
+			}
+		}
+		console.log(genericClickArr);
+		console.log(genericTotalClicks);
 	//}
 }
 
