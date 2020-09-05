@@ -6,6 +6,8 @@ let editMode = null;
 let pctRE = /pct\d+\_\d/;
 let genericTotalClicks = 0;
 let genericClickArr = [];
+let DEBUG = false;
+
 
 /*
 Capitalize a given str.
@@ -18,9 +20,69 @@ function capitalize(str) {
 /*
 Return pctX_Y from element's classList.
 */
-function getPct(element) {
+function getExistingPct(element) {
 	let pctmatch = element.className.match(pctRE);
 	return pctmatch[0];
+}
+
+
+/*
+Return the class representing the passed-in float; 0 otherwise.
+*/
+function getPctClass(float) {
+	let value = float;
+	if (typeof value !== 'number') {
+		value = parseInt(value, 10);
+		if (isNaN(value)) value = '0.0';
+	}
+	let [whole, decimal] = value.toFixed(1).split('.');
+	return `pct${whole}_${decimal}`;
+}
+
+
+/*
+Return type from given string.
+*/
+function getType(string) {
+	// type: because, rebuttal, therefore
+	if (string.indexOf('because') > 0) return 'because';
+	if (string.indexOf('rebuttal') > 0) return 'rebuttal';
+	if (string.indexOf('therefore') > 0) return 'therefore';
+	return undefined;
+}
+
+
+/*
+For a given element, set its child with class inLinePct to value
+*/
+function setInlinePct(el, value) {
+	let inLinePct = el.querySelector(".inLinePct");
+	inLinePct.innerHTML = `${value.toString()}% - `;
+}
+
+
+/*
+Actually do actions upon click.
+*/
+function fireClick(type) {
+	if (DEBUG) console.log(`fireClick: click occurred on ${type} wrapper; mode is ${mode}`);
+}
+
+
+/*
+For a given element el, set all of its wrapper children to neutral.
+*/
+function neutralizeSection(id) {
+	let x = document.querySelectorAll(`#${id} .lineItem`);
+	let i;
+	let limit = x.length;
+	for (i = 0; i < limit; i++) {
+		x[i].classList.replace(getExistingPct(x[i]), 'pct0_0');
+		setInlinePct(x[i], 0);
+	}
+	/*empty array tracking clicks and reset counter of total clicks*/
+	genericClickArr.length = 0;
+	genericTotalClicks = 0;
 }
 
 
@@ -28,7 +90,7 @@ function getPct(element) {
 Set up accordion and assign click handlers.
 */
 function init() {
-	panel = document.querySelector(".argument .panel");
+	panel = document.querySelector("#argument .panel");
 	let acc = document.getElementsByClassName("accordion");
 	let i;
 	let j;
@@ -43,7 +105,7 @@ function init() {
 		});
 	}
 	//Grow main phrasing if character count is low
-	let phrasing = document.querySelector(".argument .panel p");
+	let phrasing = document.querySelector("#argument .panel p");
 	if (phrasing.innerText.length < 20) {
 		phrasing.style.fontSize = "2rem";
 	} else if (phrasing.innerText.length < 75) {
@@ -54,139 +116,92 @@ function init() {
 	limit = containers.length;
 	for (i = 0; i < limit; i++) {
 		containers[i].addEventListener("click", function(evt) {
-			// TODO: placeholder for now
-			console.log(`${evt.target.parentElement.nodeName} with classes: ${evt.target.parentElement.className}`);
+			let type = this.dataset.containerId;
+			if (type != undefined) {
+				if (evt.target.classList.contains('wrapper')) { // don't allow the click on just any click on that panel
+					// TODO: technically, this should be a circle and not a square... something to tweak later.
+					fireClick(type);
+				}
+			}
 		});
 	}
 	// Assign click handlers for weighIn buttons
 	let weighIns = document.querySelectorAll(".weighIn");
-	let resets = document.querySelectorAll(".reset");
-	let endorses = document.querySelectorAll(".endorse");
 	let typeClass = "";
 	let resetEl = null;
-    let endorseEl = null;
+	let endorseEl = null;
 	limit = weighIns.length;
 	for (i = 0; i < limit; i++) {
-		if (weighIns[i].classList.contains("because")) {
-			typeClass = "because";
-		}
-		else if (weighIns[i].classList.contains("rebuttal")) {
-			typeClass = "rebuttal";
-		}
-		else {
-			typeClass = "therefore";
-		}	
-		subLimit = resets.length;
-		for (j = 0; j < subLimit; j++) {
-			if (resets[j].classList.contains(typeClass)) {
-				resetEl = resets[j];
-			}
-		}
-		subLimit = endorses.length;
-		for (j = 0; j < subLimit; j++) {
-			if (endorses[j].classList.contains(typeClass)) {
-				endorseEl = endorses[j];
-			}
-		}
 		weighIns[i].addEventListener("click", function(evt) {
-            this.classList.toggle("hidden");
-            resetEl.classList.toggle("hidden");
-            endorseEl.classList.toggle("hidden");
-            //TODO make it toggle hide buttons of other sections
-            goNeutral(typeClass);
-            loadUserWeights(typeClass); /*TODO add data for this to reference*/
-		});	
+			// 1) set mode to edit, 2) toggle hidden of other buttons, 3) set all "type" circles to neutral
+/*
+			if (mode != 'EDIT') {
+				mode = 'EDIT';
+			}
+*/
+			/* hide this, unhide rest and endorse */
+			this.classList.toggle("hidden");
+			resetEl = document.querySelector(`#${this.dataset.containerId} .reset`);
+			resetEl.classList.toggle("hidden");
+			endorseEl = document.querySelector(`#${this.dataset.containerId} .endorse`);
+			endorseEl.classList.toggle("hidden");
+			neutralizeSection(this.dataset.containerId);
+			// if there is data for this, set the wrappers to reflect the user's values
+			loadUserWeights(this.dataset.containerId);
+		});
 	}
-	//Assign goNeutral function to the reset button
+	// reset button -- just go neutral
+	let resets = document.querySelectorAll(".reset");
 	limit = resets.length;
 	for (i = 0; i < limit; i++) {
-		if (weighIns[i].classList.contains("because")) {
-			typeClass = "because";
-		}
-		else if (weighIns[i].classList.contains("rebuttal")) {
-			typeClass = "rebuttal";
-		}
-		else {
-			typeClass = "therefore";
-		}
 		resets[i].addEventListener("click", function(evt) {
-            goNeutral(typeClass);
-		});		
-	}
-	//TODO Still would like a history button. resets back historical weights by user, just uses loadUserWeights function. No button to give this fuctionality to yet. 
+			neutralizeSection(this.dataset.containerId);
 
+		});
+	}
+	// endorse button -- submit form
+	let endorses = document.querySelectorAll(".endorse");
+	// TODO Still would like a history button. resets back historical weights by user, just uses 
+	// loadUserWeights function. No button to give this fuctionality to yet. 
 }
 
-/*
-Set all selected type class to neutral. Set inline percentage to zero. 
-*/
-function goNeutral(type) {
-	let circles = document.querySelectorAll(`.container.${type} .wrapper`);
-	let limit = circles.length;
-	let i;
-	/*Make circles grey and no arc*/
-	for (i = 0; i < limit; i++) {
-		circles[i].classList.replace(type, "neutral");
-	}
-	/*Make inline percentage 0%*/
-	let text = document.querySelectorAll(`.container.${type} p .inLinePct`);
-	limit = text.length;
-	for (i = 0; i < limit; i++) {
-		text[i].innerHTML = "0.00% - ";
-	}
-	/*empty array tracking clicks and reset counter of total clicks*/
-	genericClickArr.length = 0;
-	genericTotalClicks = 0;
-}
 
 /*
 Retrieve weights from .wrapper, via attribute data-user-weight.
 Replace pctX_Y value with those weights and store the original in data-aggregate-weight.
 */
-function loadUserWeights(type) {
+function loadUserWeights(id) {
+	if (DEBUG) console.log(`loadUserWeights: ${id}`);
 	//if (mode != 'edit') {
 		// load values for editing (initial setting is editing from 0)
-		let args = document.querySelectorAll(`.container.${type} .wrapper`);
-		let text = document.querySelectorAll(`.container.${type} p .inLinePct`);
-		let limit = args.length;
-		let i;
-		for (i = 0; i < limit; i++) {
-			console.log("in the for loop");
-			let weight = parseInt(args[i].getAttribute('data-user-weight')).toFixed(1);
-			let newpct;
-			// get pct being used, store it
-			let pct = getPct(args[i]);
-			//UPDATE: already stored as data attribute   args[i].setAttribute('data-aggregate-weight', pct);
-			if (weight !== 0) {
-				let [whole, decimal] = weight.split('.');
-				newpct = `pct${whole}_${decimal}`;
-				args[i].classList.remove("neutral", "half1", "half2", pct);
-				if (weight <= 50) {
-					args[i].classList.add("half1");
-				}
-				else {
-					args[i].classList.add("half2");
-				}
-				args[i].classList.add(newpct);
-				args[i].classList.add(type);
-				//FIX ME This is unreliable assuming the same place in the array as args
-				text[i].innerHTML = args[i].getAttribute('data-user-weight') + "% - ";
-				//TODO You still need to load up the click array appropriately
-				//args[i].classList.replace("neutral", type);
+	let args = document.querySelectorAll(`#${id} .lineItem`);
+//	let text = document.querySelectorAll(`.container.${type} p .inLinePct`);
+	let limit = args.length;
+	let i;
+	for (i = 0; i < limit; i++) {
+		if (DEBUG) console.log("loadUserWeights: for loop");
+		let weight = parseInt(args[i].dataset.userWeight);
+		if (DEBUG) console.log(`loadUserWeights: weight: ${weight} as ${typeof weight}`);
+		// get pct being used, store it
+		let pct = getExistingPct(args[i]);
+		//UPDATE: already stored as data attribute   args[i].setAttribute('data-aggregate-weight', pct);
+		if (weight !== 0) {
+			let newpct = getPctClass(weight);
+			if (DEBUG) console.log(`loadUserWeights: newpct: ${newpct}`);
+			args[i].classList.remove("half1", "half2", pct);
+			if (weight <= 50) {
+				args[i].classList.add("half1");
 			}
-			/*let newpct;
-			if (weight.length == 0) {
-				// no user weight to show
-				newpct = 'pct0_0';
-			} else {
-				// create value for newpct
-				let [whole, decimal] = weight.split('.');
-				newpct = `pct${whole}_${decimal}`;
+			else {
+				args[i].classList.add("half2");
 			}
-			args[i].classList.remove(type, "half1", "half2", pct);
-			args[i].classList.add(newpct);*/
+			if (DEBUG) console.log(`loadUserWeights: adding ${newpct}...`)
+			args[i].classList.add(newpct);
+			setInlinePct(args[i], weight);
+			//TODO You still need to load up the click array appropriately
+			//args[i].classList.replace("neutral", type);
 		}
-	//}
+	}
 }
 
 
@@ -231,8 +246,7 @@ function bump(element, type, argID) {
 	}
 	for (let i = 0, limit = genericClickArr.length; i < limit; i++) {
 		rateAsString = ((genericClickArr[i][1]/genericTotalClicks)*100).toFixed(1);
-		let [whole, decimal] = rateAsString.split('.');
-		let newpct = `pct${whole}_${decimal}`;
+		let newpct = getPctClass(rateAsString);
 		element.classList.add(newpct);
 		let text = element.querySelector("p .inLinePct");
 		text.innerHTML = `${rateAsString}%`;

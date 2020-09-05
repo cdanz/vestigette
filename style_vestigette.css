@@ -14,76 +14,6 @@
 	--therefore: var(--cddbGreen);
 }
 
-/* Apply palette coloring */
-/*
-.primaryColor {
-	color: var(--cddbWhite);
-	background-color:var(--cddbBlack);
-	border-color: var(--cddbWhite);
-}
-.primaryInvert {
-	color: var(--cddbBlack);
-	background-color: var(--cddbWhite);
-}
-.primaryContent {
-	color: var(--cddbBlack);
-	background-color: var(--cddbWhite);
-	border-color: var(--cddbBlack);
-}
-.becauseColor {
-	color: var(--cddbWhite);
-	background-color:var(--cddbBlue);
-}
-.becauseInvert {
-	color: var(--cddbBlue);
-	background-color: var(--cddbWhite);
-}
-.becauseContent {
-	color: var(--cddbBlack);
-	background-color: var(--cddbWhite);
-	border-color: var(--cddbBlue);
-}
-.thereforeColor {
-	color: var(--cddbWhite);
-	background-color:var(--cddbGreen);
-}
-.thereforeInvert {
-	color: var(--cddbGreen);
-	background-color: var(--cddbWhite);
-}
-.thereforeContent {
-	color: var(--cddbBlack);
-	background-color: var(--cddbWhite);
-	border-color: var(--cddbGreen);
-}
-.rebuttalColor {
-	color: var(--cddbWhite);
-	background-color:var(--cddbRed);
-}
-.rebuttalInvert {
-	color: var(--cddbRed);
-	background-color: var(--cddbWhite);
-}
-.rebuttalContent {
-	color: var(--cddbBlack);
-	background-color: var(--cddbWhite);
-	border-color: var(--cddbRed);
-}
-.neutralColor {
-	color: var(--cddbWhite);
-	background-color:var(--cddbGrey);
-}
-.neutralInvert {
-	color: var(--cddbGrey);
-	background-color: var(--cddbWhite);
-}
-.neutralContent {
-	color: var(--cddbBlack);
-	background-color: var(--cddbWhite);
-	border-color: var(--cddbGrey);
-}
-*/
-
 /*This is a global, some add padding and margin where you don't call for it and this will 
 ensure things defined here are not applied automatically.*/
 * {
@@ -134,26 +64,26 @@ button {
 	margin:0;
 	text-align: center;
 }
-.because button {
+#because button {
 	border-radius: 0;
 	padding-left: 1em;
 	padding-right: 1em;
 }
-.because button:hover {
+#because button:hover {
 	background-color: var(--cddbWhite);
 	color: var(--cddbBlue);
 }
-.because button.restart {
+#because button.reset {
 	position: relative;
 	width: 2rem;
 }
-.because button.restart span {
+#because button.reset span {
 	font-size: 250%;
 	left: 0.1rem;
 	position: absolute;
 	top: -0.42rem;
 }
-.argument button {
+#argument button {
 	padding-left: 0.5rem;
 	padding-right: 0.5rem;
 }
@@ -190,7 +120,7 @@ button.hidden {
 }
 
 /* sections & containers */
-.mastHead {
+#mastHead {
 	align-items: flex-end;
 	border: none;
 	display: flex;
@@ -218,16 +148,16 @@ button.hidden {
 	border-color: var(--cddbWhite);
 	color: var(--cddbWhite);
 }
-.container.because {
+#because.container {
 	background-color:var(--cddbBlue);
 }
-.container.rebuttal {
+#rebuttal.container {
 	background-color:var(--cddbRed);
 }
-.container.therefore {
+#therefore.container {
 	background-color:var(--cddbGreen);
 }
-.container.argument {
+#argument.container {
 	align-items: center;
 	border-color: var(--cddbWhite);
 	display: flex;
@@ -242,7 +172,7 @@ button.hidden {
 	align-items: center;
 	padding-bottom: 1px; /* hahaha */
 }
-.because form {
+#because form {
 	margin-left: 1rem;
 }
 .opinion form {
@@ -263,13 +193,13 @@ button.hidden {
 	transition: max-height 0.3s ease-out, margin-bottom 0.1s ease-out 0.1s;
 	width: 100%;
 }
-.because .panel {
+#because .panel {
 	border-color: var(--cddbBlue);
 }
-.rebuttal .panel {
+#rebuttal .panel {
 	border-color: var(--cddbRed);
 }
-.therefore .panel {
+#therefore .panel {
 	border-color: var(--cddbGreen);
 }
 .panel ul {
@@ -295,19 +225,24 @@ button.hidden {
 .panel .inLinePct {
 	font-weight: bold;
 }
-.because .inLinePct {
+#because .inLinePct {
 	color: var(--cddbBlue);
 }
-.rebuttal .inLinePct {
+#rebuttal .inLinePct {
 	color: var(--cddbRed);
 }
-.therefore .inLinePct {
+#therefore .inLinePct {
 	color: var(--cddbGreen);
 }
-.argument .panel {
+#because .pct0_0 .inLinePct, 
+#rebuttal .pct0_0 .inLinePct, 
+#therefore .pct0_0 .inLinePct {
+	color: var(--cddbGrey);
+}
+#argument .panel {
 	flex-flow: row wrap;
 }
-.argument .panel .rate_phrase {
+#argument .panel .rate_phrase {
 	align-items: center;
 	justify-content: flex-start;
 	min-height: 4rem;
@@ -315,7 +250,7 @@ button.hidden {
 	transition: max-height 0.3s ease-out;
 	width: 100%;
 }
-.argument .panel .stat {
+#argument .panel .stat {
 	align-items: baseline;
 	display: flex;
 	flex-flow: row wrap;
@@ -348,7 +283,7 @@ button.hidden {
 	background-color: pink;
 	width: 90%;
 }
-.argument .panel p {
+#argument .panel p {
 	align-self: center;
 	border: 2px var(--cddbLiteGrey) solid;
 	font-size: 1rem;
@@ -356,7 +291,7 @@ button.hidden {
 	padding: 0.3rem;
 	width: 100%;
 }
-.argument .panel button {
+#argument .panel button {
 	align-self: stretch;
 	background-color: var(--cddbBlack);
 	border: 1px var(--cddbWhite) solid;
@@ -373,7 +308,7 @@ button.hidden {
 	padding-left: 0.1rem;
 	padding-right: 0.3rem;
 }
-.argument .panel .explicationBox {
+#argument .panel .explicationBox {
 	align-items: center;
 	min-height: 4rem;
 	width: 100%;
@@ -391,9 +326,9 @@ button.hidden {
 .wrapper {
 	flex: none;
 	position: relative;
-	margin: 0.2rem;
+	margin: 0.2rem 1.4rem 0.2rem 0.2rem;
 	height: 4rem;
-	width: 5rem;
+	width: 3.6rem;
 }
 .pointBtn {
 	position: absolute;
@@ -411,19 +346,25 @@ button.hidden {
 	border-color: var(--cddbBlack) var(--percentage_bg) var(--percentage_bg) var(--cddbBlack) ;
 	background-color: var(--percentage_bg_page);
 }
-.rebuttal .pointBtn.arc1 {
+#rebuttal .pointBtn.arc1 {
 	border-color: var(--rebuttal) var(--percentage_bg) var(--percentage_bg) var(--rebuttal);
 }
-.therefore .pointBtn.arc1 {
+#therefore .pointBtn.arc1 {
 	border-color: var(--therefore) var(--percentage_bg) var(--percentage_bg) var(--therefore);
 }
-.because .pointBtn.arc1 {
+#because .pointBtn.arc1 {
 	border-color: var(--because) var(--percentage_bg) var(--percentage_bg) var(--because);
 }
-.neutral .pointBtn.arc1 {
+.lineItem.pct0_0 .pointBtn.arc1 {
+	border-color: transparent;
+	background-color: var(--cddbGrey);
+}
+/*
+.lineItem.pct0_0 .pointBtn.arc1 {
 	border-color: var(--percentage_bg) var(--percentage_bg) var(--percentage_bg) var(--percentage_bg);
 	background-color: var(--cddbGrey);
 }
+*/
 /* arc 2 */
 .half1 .pointBtn.arc2 {
 	border-color: var(--percentage_bg) transparent transparent var(--percentage_bg);
@@ -431,18 +372,20 @@ button.hidden {
 .half2 .pointBtn.arc2 {
 	border-color: transparent var(--cddbBlack) var(--cddbBlack) transparent;
 }
-.half2.rebuttal .pointBtn.arc2 {
+#rebuttal .half2 .pointBtn.arc2 {
 	border-color: transparent var(--rebuttal) var(--rebuttal) transparent;
 }
-.half2.therefore .pointBtn.arc2 {
+#therefore .half2 .pointBtn.arc2 {
 	border-color: transparent var(--therefore) var(--therefore) transparent;
 }
-.half2.because .pointBtn.arc2 {
+#because .half2 .pointBtn.arc2 {
 	border-color: transparent var(--because) var(--because) transparent;
 }
-.neutral .pointBtn.arc2 {
+/*
+.lineItem.pct0_0 .pointBtn.arc2 {
 	border-color: transparent;
 }
+*/
 
 .pct0_0 .pointBtn.arc2 {
 	transform: rotate(-50.00grad);

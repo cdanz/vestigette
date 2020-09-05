@@ -10,9 +10,9 @@ $profile = isset($_SESSION['profile']) ? $_SESSION['profile'] : null;
 $assocWeights = isset($_SESSION['assocWeights']) ? $_SESSION['assocWeights'] : null;
 
 
-if(isset($_POST["buttonClicked"])) {
-  include("${_SERVER['DOCUMENT_ROOT']}/functions.php");
-	}
+if (isset($_POST["buttonClicked"])) {
+	include("${_SERVER['DOCUMENT_ROOT']}/functions.php");
+}
 mysqli_close($db);
 
 
@@ -34,8 +34,8 @@ unset($onClick);
 				$half = "half2";
 			}
 			$pct = strval(number_format($line[1], 1, '_', ''));
-			echo "			<li class=\"lineItem\">
-				<div class=\"wrapper ${half} pct${pct} ${type}\" data-aggregate-weight=\"" . strval(number_format($line[1], 2, '.', '')) . "\" data-user-weight=\"" . ((isset($line[3])) ? strval(number_format($line[3], 2, '.', '')) : "0.00") . "\"" . ((isset($onClick)) ? $onClick : "") . ">
+			echo "			<li class=\"lineItem ${half} pct${pct}\" data-aggregate-weight=\"" . strval(number_format($line[1], 2, '.', '')) . "\" data-user-weight=\"" . ((isset($line[3])) ? strval(number_format($line[3], 2, '.', '')) : "0.00") . "\">
+				<div class=\"wrapper\"" . ((isset($onClick)) ? $onClick : "") . ">
 					<div class=\"pointBtn arc1\"></div>
 					<div class=\"pointBtn arc2\"></div>
 				</div>
@@ -69,7 +69,7 @@ unset($onClick);
 	</head>
 	<body>
 
-		<div class="mastHead container">
+		<div id="mastHead" class="container">
 			<h1>Vestigette</h1>
 			<div><a href="http://www.vestigette.org/About.php?arg=<?php echo $_SESSION['currentArg'];?>">About</a></div>
 			<div><a href="http://www.vestigette.org/Explore.php?arg=<?php echo $_SESSION['currentArg'];?>">Explore</a></div>
@@ -77,24 +77,24 @@ unset($onClick);
 			<div><a href="<?php echo ($profile) ? 'logout' : 'login'; ?>.php?arg=<?php echo $_SESSION['currentArg'];?>"><?php echo ($profile) ? 'Logout' : 'Login'; ?></a></div> 
 		</div>
 
-		<div class="accordion container because">
+		<div id="because" class="accordion container">
 			<h2>Because</h2>
 <?php
 if ((isset($opinion)) && ($opinion > 0)) { 
 ?>
 	<div class="buttons">
-		<button onclick="becauseClearData()" class="button because reset hidden" name="buttonClicked" value="weighBecause"><span>&#x27F2;</span></button> 
+		<button class="button reset hidden" name="buttonClicked" value="weighBecause" data-container-id="because"><span>&#x27F2;</span></button>
 		<form method="POST"> 
-			<button type="submit" class="button because endorse hidden" name="buttonClicked" value="weighBecause">Endorse</button>
+			<button type="submit" class="button endorse hidden" name="buttonClicked" value="weighBecause">Endorse</button>
 <!-- This hidden field has its value updated with an array as a string serving as the "weigh in" input -->
-			<input type="hidden" name="becauseWeighInWith" id="becauseWeighInWith" value="" /> 
+			<input type="hidden" name="becauseWeighInWith" id="becauseWeighInWith" value="" />
 		</form>
-		<button class="button because weighIn" name="buttonClicked" value="weighInBecause">Weigh In</button>
+		<button class="button weighIn" name="buttonClicked" value="weighInBecause" data-container-id="because">Weigh In</button>
 	</div>
 <?php
 } 
 ?>
-			<div class="panel">
+			<div class="panel" data-container-id="because">
 <?php
 if (isset($because)) {
 	generateTypeLines("because", $because);
@@ -104,7 +104,7 @@ if (isset($because)) {
 		</div>
 
 
-		<div class="accordion container argument">
+		<div id="argument" class="accordion container">
 			<h2>Argument ID</h2>
 			<div class="opinion">
 <?php /* refactored */
@@ -130,7 +130,7 @@ if (isset($_SESSION['profile'])) {
 echo "\n</form>";
 ?>
 			</div>
-			<div class="panel expanded">
+			<div class="panel expanded" data-container-id="argument">
 				<div class="rate_phrase">
 					<div class="stat">
 						<span class="statBig"><?php echo explode('.', $rate)[0]; ?></span>
@@ -147,9 +147,9 @@ echo "\n</form>";
 			</div>
 		</div>
 
-		<div class="accordion container rebuttal">
+		<div id="rebuttal" class="accordion container">
 			<h2>Rebuttal</h2>
-			<div class="panel">
+			<div class="panel" data-container-id="rebuttal">
 <?php
 if (isset($rebuttal)) {
 	generateTypeLines("rebuttal", $rebuttal);
@@ -158,9 +158,9 @@ if (isset($rebuttal)) {
 			</div>
 		</div> 
 
-		<div class="accordion container therefore">
+		<div id="therefore" class="accordion container">
 			<h2>Therefore</h2>
-			<div class="panel">
+			<div class="panel" data-container-id="therefore">
 <?php
 if (isset($therefore)) {
 	generateTypeLines("therefore", $therefore);
@@ -169,9 +169,9 @@ if (isset($therefore)) {
 			</div>
 		</div>
 
-		<div class="accordion container filter">
+		<div id="filter" class="accordion container">
 			<h2>Filter</h2>
-			<div class="panel">
+			<div class="panel" data-container-id="filter">
 				<p>Coming "Soon"<br/><br/></p>
 			</div>
 		</div>
