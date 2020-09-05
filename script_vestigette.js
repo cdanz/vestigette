@@ -27,6 +27,51 @@ function getExistingPct(element) {
 
 
 /*
+Return multidimensional array with number of clicks pushed to end of row that 
+already includes percents, el gives position of el to perform on
+*/
+function pctToClicks(arr, el) { 
+	let min = 100;
+	let limit = arr.length;
+	let i;
+	let splitBy = 1;
+	let commonMultiplier;
+	let isMultiple = true;
+	let number;
+	let whole;
+	let leftover;
+	let clickNum;
+	for (i = 0; i < limit; i++) {
+		if (parseFloat(arr[i][el]) < min) {
+			min = parseFloat(arr[i][el]);
+		}
+	}
+	do {
+		commonMultiplier = min / splitBy;
+		isMultiple = true;
+		for (i = 0; i < limit; i++) {
+			if (arr[i][el]) {
+				number = parseFloat(arr[i][el]) / commonMultiplier;
+				whole = Math.round(number);
+				leftover = Math.abs(number - whole);
+				if (leftover > 0.0001) {
+					isMultiple = false;
+				}
+			}
+		}
+		splitBy++;
+	} while (!isMultiple);
+	for (i = 0; i < limit; i++) {
+		if (arr[i][el]) {
+			clickNum = parseFloat(arr[i][el]) / commonMultiplier;
+			arr[i].push(clickNum);
+		}
+	}
+	return arr;
+}
+
+
+/*
 Return the class representing the passed-in float; 0 otherwise.
 */
 function getPctClass(float) {
@@ -175,11 +220,10 @@ function loadUserWeights(id) {
 	//if (mode != 'edit') {
 		// load values for editing (initial setting is editing from 0)
 	let args = document.querySelectorAll(`#${id} .lineItem`);
-//	let text = document.querySelectorAll(`.container.${type} p .inLinePct`);
 	let limit = args.length;
 	let i;
 	for (i = 0; i < limit; i++) {
-		if (DEBUG) console.log("loadUserWeights: for loop");
+		if (DEBUG) console.log(`loadUserWeights: for loop (${i.toString()} < ${limit.toString()})`);
 		let weight = parseInt(args[i].dataset.userWeight);
 		if (DEBUG) console.log(`loadUserWeights: weight: ${weight} as ${typeof weight}`);
 		// get pct being used, store it
@@ -202,6 +246,29 @@ function loadUserWeights(id) {
 			//args[i].classList.replace("neutral", type);
 		}
 	}
+	//get click values to load up generic click array
+	let arr;
+	switch(id) {
+		case 'because':
+			arr = pctToClicks(because, 3);
+			break;
+		case 'therefore':
+			arr = pctToClicks(therefore, 3);
+			break;
+		case 'rebuttal':
+			arr = pctToClicks(rebuttal, 3);
+			break;
+	}
+	if (DEBUG) console.log(`loadUserWeights: arr: ${arr}`);
+	limit = arr.length;
+	for (i = 0; i < limit; i++) {
+		if (arr[i][3]) {
+			genericClickArr.push([(arr[i][1]),(arr[i][4])]);
+			genericTotalClicks = genericTotalClicks + arr[i][4];
+		}
+	}
+	if (DEBUG) console.log(`loadUserWeights: genericClickArr: ${genericClickArr}`);
+	if (DEBUG) console.log(`loadUserWeights: genericTotalClicks: ${genericTotalClicks}`);
 }
 
 

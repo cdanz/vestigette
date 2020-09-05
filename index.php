@@ -7,7 +7,7 @@ $baseURL = "/index.php";
 $arg = isset($_SESSION['currentArg']) ? $_SESSION['currentArg'] : null;
 $profile = isset($_SESSION['profile']) ? $_SESSION['profile'] : null;
 // made obsolete $opinion = isset($_SESSION['opinion']) ? $_SESSION['opinion'] : null;
-$assocWeights = isset($_SESSION['assocWeights']) ? $_SESSION['assocWeights'] : null;
+$assocWeights = isset($_SESSION['assocWeights']) ? $_SESSION['assocWeights'] : null; //not used
 
 
 if (isset($_POST["buttonClicked"])) {
@@ -64,7 +64,10 @@ unset($onClick);
 			let arg = <?php echo isset($arg) ? $arg : 'undefined'; ?>,
 				profile = <?php echo isset($profile) ? $profile : 'undefined'; ?>,
 				opinion = <?php echo isset($opinion) ? $opinion : 'undefined'; ?>,
-				assoc = <?php echo isset($assocWeights) ? "JSON.parse(" + $assocWeights + ")" : 'undefined'; ?>;
+				assoc = <?php echo isset($assocWeights) ? "JSON.parse(" + $assocWeights + ")" : 'undefined'; ?>, //not used
+				because = <?php echo json_encode($because); ?>,
+				therefore = <?php echo json_encode($therefore); ?>,
+				rebuttal = <?php echo json_encode($rebuttal); ?>;
 		</script>
 	</head>
 	<body>
