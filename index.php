@@ -108,7 +108,7 @@ if (isset($because)) {
 
 
 		<div id="argument" class="accordion container">
-			<h2>Argument ID</h2>
+			<h2>Argument <?php echo $arg; ?></h2>
 			<div class="opinion">
 <?php /* refactored */
 $accept = 'Open';
