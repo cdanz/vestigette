@@ -6,7 +6,7 @@ let editMode = null;
 let pctRE = /pct\d+\_\d/;
 let genericTotalClicks = 0;
 let genericClickArr = [];
-let DEBUG = false;
+let DEBUG = true;
 
 
 /*
@@ -110,7 +110,7 @@ function setInlinePct(el, value) {
 Actually do actions upon click.
 */
 function fireClick(type) {
-	if (DEBUG) console.log(`fireClick: click occurred on ${type} wrapper; mode is ${mode}`);
+	if (DEBUG) console.log(`fireClick: click occurred in ${type}; mode is ${mode}`);
 }
 
 
@@ -161,9 +161,10 @@ function init() {
 	limit = containers.length;
 	for (i = 0; i < limit; i++) {
 		containers[i].addEventListener("click", function(evt) {
+			if (DEBUG) console.log(`click: ${evt.target.nodeName} with classes ${evt.target.className}`);
 			let type = this.dataset.containerId;
 			if (type != undefined) {
-				if (evt.target.classList.contains('wrapper')) { // don't allow the click on just any click on that panel
+				if (evt.target.classList.contains('pointBtn')) { // don't allow the click on just any click on that panel
 					// TODO: technically, this should be a circle and not a square... something to tweak later.
 					fireClick(type);
 				}
