@@ -31,9 +31,10 @@ Return multidimensional array with number of clicks pushed to end of row that
 already includes percents, el gives position of el to perform on
 */
 function pctToClicks(arr, el) { 
+	let clickArr = [];
 	let min = 100;
 	let limit = arr.length;
-	let i;
+	let i; 
 	let splitBy = 1;
 	let commonMultiplier;
 	let isMultiple = true;
@@ -64,10 +65,10 @@ function pctToClicks(arr, el) {
 	for (i = 0; i < limit; i++) {
 		if (arr[i][el]) {
 			clickNum = parseFloat(arr[i][el]) / commonMultiplier;
-			arr[i].push(clickNum);
+			clickArr.push([arr[i][0],clickNum]);
 		}
 	}
-	return arr;
+	return clickArr;
 }
 
 
@@ -260,16 +261,14 @@ function loadUserWeights(id) {
 			arr = pctToClicks(rebuttal, 3);
 			break;
 	}
-	if (DEBUG) console.log(`loadUserWeights: arr: ${arr}`);
+	console.log(`loadUserWeights: arr: ${arr}`);
 	limit = arr.length;
 	for (i = 0; i < limit; i++) {
-		if (arr[i][3]) {
-			genericClickArr.push([(arr[i][1]),(arr[i][4])]);
-			genericTotalClicks = genericTotalClicks + arr[i][4];
-		}
+		genericClickArr.push([(arr[i][0]),(arr[i][1])]);
+		genericTotalClicks = genericTotalClicks + arr[i][1];
 	}
-	if (DEBUG) console.log(`loadUserWeights: genericClickArr: ${genericClickArr}`);
-	if (DEBUG) console.log(`loadUserWeights: genericTotalClicks: ${genericTotalClicks}`);
+	console.log(`loadUserWeights: genericClickArr: ${genericClickArr}`);
+	console.log(`loadUserWeights: genericTotalClicks: ${genericTotalClicks}`);
 }
 
 
