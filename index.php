@@ -14,7 +14,7 @@ if (isset($_POST["buttonClicked"])) {
 	include("${_SERVER['DOCUMENT_ROOT']}/functions.php");
 }
 mysqli_close($db);
-
+	
 
 function generateTypeLines($type, $typeArray) {
 	global $baseURL;
@@ -34,7 +34,7 @@ unset($onClick);
 				$half = "half2";
 			}
 			$pct = strval(number_format($line[1], 1, '_', ''));
-			echo "			<li class=\"lineItem ${half} pct${pct}\" data-aggregate-weight=\"" . strval(number_format($line[1], 2, '.', '')) . "\" data-user-weight=\"" . ((isset($line[3])) ? strval(number_format($line[3], 2, '.', '')) : "0.00") . "\">
+			echo "			<li class=\"lineItem ${half} pct${pct}\" data-arg-id=\"${line[0]}\" data-aggregate-weight=\"" . strval(number_format($line[1], 2, '.', '')) . "\" data-user-weight=\"" . ((isset($line[3])) ? strval(number_format($line[3], 2, '.', '')) : "0.00") . "\">
 				<div class=\"wrapper\"" . ((isset($onClick)) ? $onClick : "") . ">
 					<div class=\"pointBtn arc1\"></div>
 					<div class=\"pointBtn arc2\"></div>

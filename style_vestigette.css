@@ -280,7 +280,6 @@ button.hidden {
 	display: block;
 	font-size: 0.5rem;
 	color: var(--cddbGrey);
-	background-color: pink;
 	width: 90%;
 }
 #argument .panel p {

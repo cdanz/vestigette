@@ -168,6 +168,7 @@ function init() {
 				if (evt.target.classList.contains('pointBtn')) { // don't allow the click on just any click on that panel
 					// TODO: technically, this should be a circle and not a square... something to tweak later.
 					fireClick(type);
+					bump(type, evt.target.parentNode.parentNode.dataset.argId);	
 				}
 			}
 		});
@@ -244,7 +245,6 @@ function loadUserWeights(id) {
 			if (DEBUG) console.log(`loadUserWeights: adding ${newpct}...`)
 			args[i].classList.add(newpct);
 			setInlinePct(args[i], weight);
-			//TODO You still need to load up the click array appropriately
 			//args[i].classList.replace("neutral", type);
 		}
 	}
@@ -275,67 +275,46 @@ function loadUserWeights(id) {
 /*
 Docs TBD
 */
-function bump(element, type, argID) {
+function bump(type, argID) {
 	let found = false;
 	let iterator = 0;
-	let foundIndex;
-	let genericTotalClicks;
-	let genericClickArr = [];
-	/*Does this switch by case section have a purpose anymore?*/
-	switch(type) {
-		case 'Because':
-			genericTotalClicks = becauseTotalClicks;
-			genericClickArr = becauseClickArr;		 /* arrays copy by reference... */
-			break;
-		case 'Therefore':
-			genericTotalClicks = thereforeTotalClicks;
-			genericClickArr = thereforeClickArr;
-			break;
-		case 'Rebuttal':
-			genericTotalClicks = rebuttalTotalClicks;
-			genericClickArr = rebuttalClickArr;
-			break;
-	}
+	let rateAsString;
+	let element;
 	genericTotalClicks++;
 	while (!found && iterator < genericClickArr.length) {
 		if (genericClickArr[iterator][0] == argID) {
 			found = true;
 			genericClickArr[iterator][1]++;
-			foundIndex = iterator;
 		}
 		iterator++;
 	}
 	if (found == false) {
-		foundIndex = genericClickArr.length;
 		genericClickArr.push([argID, 1]);
-		let btn = document.getElementById("displayBtn"+type+argID);
-		btn.className = "";
 	}
 	for (let i = 0, limit = genericClickArr.length; i < limit; i++) {
-		rateAsString = ((genericClickArr[i][1]/genericTotalClicks)*100).toFixed(1);
-		let newpct = getPctClass(rateAsString);
-		element.classList.add(newpct);
-		let text = element.querySelector("p .inLinePct");
-		text.innerHTML = `${rateAsString}%`;
+		let args = document.querySelectorAll(`#${type} .lineItem`);
+		let sublimit = args.length;
+		let j;
+		for (j = 0; j < sublimit; j++) {
+			if (args[j].dataset.argId == genericClickArr[i][0]) {
+				rateAsString = ((genericClickArr[i][1]/genericTotalClicks)*100).toFixed(2);
+				let pct = getExistingPct(args[j]);
+				let newpct = getPctClass((genericClickArr[i][1]/genericTotalClicks)*100);
+				args[j].classList.remove("half1", "half2", pct);
+				if (((genericClickArr[i][1]/genericTotalClicks)*100) <= 50) {
+					args[j].classList.add("half1");
+				}
+				else {
+					args[j].classList.add("half2");
+				}	
+				if (DEBUG) console.log(`loadUserWeights: adding ${newpct}...`)
+				args[j].classList.add(newpct);
+				setInlinePct(args[j], rateAsString);
+			}
+		}
 	}
-	/*May only need the update function*/
-	switch(type) {
-		case 'Because':
-			becauseTotalClicks = genericTotalClicks;
-			becauseClickArr = genericClickArr.slice();		 /* arrays copy by reference, but you don't want genericClickArr to go out of scope. */
-			updateBecauseWeighInValue();
-			break;
-		case 'Therefore':
-			thereforeTotalClicks = genericTotalClicks;
-			thereforeClickArr = genericClickArr.slice();
-			updateThereforeWeighInValue();
-			break;
-		case 'Rebuttal':
-			rebuttalTotalClicks = genericTotaliClicks;
-			rebuttalClickArr = genericClickArr.slice();
-			updateRebuttalWeighInValue();
-			break;
-	}
+	console.log(genericClickArr);
+	//TODO make a generic version of update{type}WeighInValue();
 }
 
 /*
