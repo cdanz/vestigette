@@ -129,6 +129,19 @@ function neutralizeSection(id) {
 	/*empty array tracking clicks and reset counter of total clicks*/
 	genericClickArr.length = 0;
 	genericTotalClicks = 0;
+	updateWeighInValue(id);
+}
+
+/*
+Update hidden value submitted with endorse button.
+*/
+function updateWeighInValue(type) {
+  var arrayAsString = "";
+  for (var i = 0; i < genericClickArr.length; i++) {
+      arrayAsString = arrayAsString + genericClickArr[i][0] + ","; 
+      arrayAsString = arrayAsString + ((genericClickArr[i][1]/genericTotalClicks)*100).toFixed(5) + ",";
+  }
+  document.getElementById(`${type}WeighInWith`).value = arrayAsString;
 }
 
 
@@ -209,7 +222,7 @@ function init() {
 	}
 	// endorse button -- submit form
 	// endorse click handler needs to EXIT edit mode -- but since it's submitting, the page will reload anyway
-	let endorses = document.querySelectorAll(".endorse");
+	// let endorses = document.querySelectorAll(".endorse");
 	// TODO Still would like a history button. resets back historical weights by user, just uses 
 	// loadUserWeights function. No button to give this fuctionality to yet. 
 }
@@ -270,6 +283,7 @@ function loadUserWeights(id) {
 	}
 	console.log(`loadUserWeights: genericClickArr: ${genericClickArr}`);
 	console.log(`loadUserWeights: genericTotalClicks: ${genericTotalClicks}`);
+	updateWeighInValue(type)
 }
 
 
@@ -361,7 +375,7 @@ function bump(type, argID) {
 	}
 */
 	console.log(genericClickArr);
-	//TODO make a generic version of update{type}WeighInValue();
+	updateWeighInValue(type);
 }
 
 /*

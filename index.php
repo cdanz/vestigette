@@ -92,7 +92,7 @@ if ((isset($opinion)) && ($opinion > 0)) {
 <!-- This hidden field has its value updated with an array as a string serving as the "weigh in" input -->
 			<input type="hidden" name="becauseWeighInWith" id="becauseWeighInWith" value="" />
 		</form>
-		<button class="button weighIn" name="buttonClicked" value="weighInBecause" data-container-id="because">Weigh In</button>
+		<button class="button weighIn" data-container-id="because">Weigh In</button>
 	</div>
 <?php
 } 
