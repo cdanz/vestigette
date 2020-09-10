@@ -88,7 +88,7 @@ if ((isset($opinion)) && ($opinion > 0)) {
 	<div class="buttons">
 		<button class="button reset hidden" name="buttonClicked" value="weighBecause" data-container-id="because"><span>&#x27F2;</span></button>
 		<form method="POST"> 
-			<button type="submit" class="button endorse hidden" name="buttonClicked" value="weighBecause">Endorse</button>
+			<button type="submit" class="button endorse hidden" name="buttonClicked" value="weighBecause" data-container-id="because">Endorse</button>
 <!-- This hidden field has its value updated with an array as a string serving as the "weigh in" input -->
 			<input type="hidden" name="becauseWeighInWith" id="becauseWeighInWith" value="" />
 		</form>

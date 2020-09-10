@@ -168,7 +168,9 @@ function init() {
 				if (evt.target.classList.contains('pointBtn')) { // don't allow the click on just any click on that panel
 					// TODO: technically, this should be a circle and not a square... something to tweak later.
 					fireClick(type);
-					bump(type, evt.target.parentNode.parentNode.dataset.argId);	
+					if (mode == 'EDIT') {
+						bump(type, evt.target.parentNode.parentNode.dataset.argId);
+					}
 				}
 			}
 		});
@@ -182,11 +184,9 @@ function init() {
 	for (i = 0; i < limit; i++) {
 		weighIns[i].addEventListener("click", function(evt) {
 			// 1) set mode to edit, 2) toggle hidden of other buttons, 3) set all "type" circles to neutral
-/*
 			if (mode != 'EDIT') {
 				mode = 'EDIT';
 			}
-*/
 			/* hide this, unhide rest and endorse */
 			this.classList.toggle("hidden");
 			resetEl = document.querySelector(`#${this.dataset.containerId} .reset`);
@@ -208,6 +208,7 @@ function init() {
 		});
 	}
 	// endorse button -- submit form
+	// endorse click handler needs to EXIT edit mode -- but since it's submitting, the page will reload anyway
 	let endorses = document.querySelectorAll(".endorse");
 	// TODO Still would like a history button. resets back historical weights by user, just uses 
 	// loadUserWeights function. No button to give this fuctionality to yet. 
@@ -219,7 +220,7 @@ Retrieve weights from .wrapper, via attribute data-user-weight.
 Replace pctX_Y value with those weights and store the original in data-aggregate-weight.
 */
 function loadUserWeights(id) {
-	if (DEBUG) console.log(`loadUserWeights: ${id}`);
+	if (DEBUG) console.log(`loadUserWeights: id: ${id}`);
 	//if (mode != 'edit') {
 		// load values for editing (initial setting is editing from 0)
 	let args = document.querySelectorAll(`#${id} .lineItem`);
@@ -280,7 +281,52 @@ function bump(type, argID) {
 	let iterator = 0;
 	let rateAsString;
 	let element;
+
+	function getValueFrom2DArray(array, key) {
+		let returnval = 0;
+		for (let i=0; i < array.length; i++) {
+			if (array[i][0] == key) {
+				return array[i][1]; // this can't be zero
+			}
+		}
+		return returnval; // this is zero
+	}
+
+// increment genericTotalClicks because a click has happened
 	genericTotalClicks++;
+//	if (genericClickArr.some(row => row.includes(argID))) { // this one shows if something exists
+	let ndx = genericClickArr.findIndex((tuple) => tuple[0] == argID); // this returns the index of something that exists or -1 if it doesn't
+	if (ndx >= 0) { // found
+		// go through the type's lineItems and do that stuff below
+		genericClickArr[ndx][1] += 1;
+	} else { // argID not in genericClickArr, so add its initial state
+		genericClickArr.push([argID, 1]);
+	}
+	// now genericClickArr reflects reality, so update display
+	let args = document.querySelectorAll(`#${type} .lineItem`);
+	let i;
+	let limit = args.length;
+	for (i = 0; i < limit; i++) {
+		// for every argID in our panel, if it's in genericClickArr, update its display
+		let value = getValueFrom2DArray(genericClickArr, args[i].dataset.argId);
+		if (value > 0) {
+			// update
+			let rate = (value/genericTotalClicks) * 100;
+			rateAsString = rate.toFixed(2);
+			let pct = getExistingPct(args[i]);
+			let newpct = getPctClass(rate);
+			args[i].classList.remove("half1", "half2", pct);
+			if (rate <= 50) {
+				args[i].classList.add("half1");
+			} else {
+				args[i].classList.add("half2");
+			}
+			if (DEBUG) console.log(`bump: adding ${newpct}...`)
+			args[i].classList.add(newpct);
+			setInlinePct(args[i], rateAsString);
+		}
+	}
+/*
 	while (!found && iterator < genericClickArr.length) {
 		if (genericClickArr[iterator][0] == argID) {
 			found = true;
@@ -313,6 +359,7 @@ function bump(type, argID) {
 			}
 		}
 	}
+*/
 	console.log(genericClickArr);
 	//TODO make a generic version of update{type}WeighInValue();
 }
