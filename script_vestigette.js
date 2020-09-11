@@ -123,6 +123,9 @@ function neutralizeSection(id) {
 	let i;
 	let limit = x.length;
 	for (i = 0; i < limit; i++) {
+		if (x[i].classList.contains("half2")) {
+			x[i].classList.replace("half2", "half1");
+		}
 		x[i].classList.replace(getExistingPct(x[i]), 'pct0_0');
 		setInlinePct(x[i], 0);
 	}
