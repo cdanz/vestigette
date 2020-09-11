@@ -157,18 +157,30 @@ function init() {
 	} else if (phrasing.innerText.length < 75) {
 		phrasing.style.fontSize = "1.5rem";
 	}
+
 	// Assign click handlers for .container elements
+	function inCircle(evt, el) {
+		let rect = el.getBoundingClientRect();
+		let radius = ((rect.right - rect.x) / 2);
+		let [centerX, centerY] = [rect.x + radius, rect.y + radius];
+		let [x1, y1] = [evt.clientX, evt.clientY];
+		let d = Math.sqrt(Math.pow(x1-centerX,2) + Math.pow(y1-centerY,2));
+		if (DEBUG) console.log(`inCircle: ${el.nodeName}.${el.className}: 0=[${centerX},${centerY}], 1=[${x1},${y1}], radius: ${radius}, d: ${d}`);
+		return (d < radius);
+	}
+
 	let containers = document.querySelectorAll(".container .panel");
 	limit = containers.length;
 	for (i = 0; i < limit; i++) {
 		containers[i].addEventListener("click", function(evt) {
-			if (DEBUG) console.log(`click: ${evt.target.nodeName} with classes ${evt.target.className}`);
+			if (DEBUG) console.log(`click: ${evt.target.nodeName} with classes ${evt.target.className} (via ${evt.currentTarget.nodeName}, ${evt.currentTarget.className})`);
 			let type = this.dataset.containerId;
 			if (type != undefined) {
 				if (evt.target.classList.contains('pointBtn')) { // don't allow the click on just any click on that panel
 					// TODO: technically, this should be a circle and not a square... something to tweak later.
 					fireClick(type);
-					if (mode == 'EDIT') {
+					if (mode == 'EDIT' && inCircle(evt, evt.target)) {
+						if (DEBUG) console.log(`in circle ${evt.target.parentNode.nextElementSibling.children[0].innerHTML}`);
 						bump(type, evt.target.parentNode.parentNode.dataset.argId);
 					}
 				}
@@ -186,6 +198,7 @@ function init() {
 			// 1) set mode to edit, 2) toggle hidden of other buttons, 3) set all "type" circles to neutral
 			if (mode != 'EDIT') {
 				mode = 'EDIT';
+				document.querySelector(`#${this.dataset.containerId}`).classList.toggle('edit');
 			}
 			/* hide this, unhide rest and endorse */
 			this.classList.toggle("hidden");
@@ -209,7 +222,7 @@ function init() {
 	}
 	// endorse button -- submit form
 	// endorse click handler needs to EXIT edit mode -- but since it's submitting, the page will reload anyway
-	let endorses = document.querySelectorAll(".endorse");
+	//let endorses = document.querySelectorAll(".endorse");
 	// TODO Still would like a history button. resets back historical weights by user, just uses 
 	// loadUserWeights function. No button to give this fuctionality to yet. 
 }
