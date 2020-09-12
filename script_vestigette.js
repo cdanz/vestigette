@@ -103,7 +103,7 @@ For a given element, set its child with class inLinePct to value
 */
 function setInlinePct(el, value) {
 	let inLinePct = el.querySelector(".inLinePct");
-	inLinePct.innerHTML = `${value.toString()}% - `;
+	inLinePct.innerHTML = `${value.toFixed(2)}% - `;
 }
 
 
@@ -299,7 +299,7 @@ function loadUserWeights(id) {
 	}
 	console.log(`loadUserWeights: genericClickArr: ${genericClickArr}`);
 	console.log(`loadUserWeights: genericTotalClicks: ${genericTotalClicks}`);
-	updateWeighInValue(type)
+	updateWeighInValue(id)
 }
 
 
@@ -342,7 +342,6 @@ function bump(type, argID) {
 		if (value > 0) {
 			// update
 			let rate = (value/genericTotalClicks) * 100;
-			rateAsString = rate.toFixed(2);
 			let pct = getExistingPct(args[i]);
 			let newpct = getPctClass(rate);
 			args[i].classList.remove("half1", "half2", pct);
@@ -353,7 +352,7 @@ function bump(type, argID) {
 			}
 			if (DEBUG) console.log(`bump: adding ${newpct}...`)
 			args[i].classList.add(newpct);
-			setInlinePct(args[i], rateAsString);
+			setInlinePct(args[i], rate);
 		}
 	}
 /*
@@ -391,7 +390,7 @@ function bump(type, argID) {
 	}
 */
 	console.log(genericClickArr);
-	updateWeighInValue(type);
+	updateWeighInValue(id);
 }
 
 /*
