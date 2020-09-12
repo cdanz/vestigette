@@ -180,7 +180,7 @@ button.hidden {
 	flex-flow: row nowrap;
 	justify-content: flex-start;
 }
-.panel {
+.container .panel {
 	background-color: white;
 	border: none;
 	border-color: var(--cddbBlack);
