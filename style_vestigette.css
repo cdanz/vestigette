@@ -64,12 +64,35 @@ button {
 	margin:0;
 	text-align: center;
 }
+.assert.hidden{
+	display: none !important;
+}
+.form-inline {
+	width: 100%;
+	display: flex;
+	flex-flow: row nowrap;
+}
+
+.form-inline > * {
+	margin-right: 0.2rem;
+}
 #because button {
 	border-radius: 0;
 	padding-left: 1em;
 	padding-right: 1em;
 }
 #because button:hover {
+	background-color: var(--cddbWhite);
+	color: var(--cddbBlue);
+}
+#because .panel button {
+	background-color: var(--cddbBlue);
+	border-color: var(--cddbBlue);
+	border-radius: 0;
+	padding-left: 1em;
+	padding-right: 1em;
+}
+#because .panel button:hover {
 	background-color: var(--cddbWhite);
 	color: var(--cddbBlue);
 }
@@ -225,6 +248,20 @@ button.hidden {
 }
 .panel .inLinePct {
 	font-weight: bold;
+}
+.panel .assert {
+	align-items: center;
+	width: 100%;
+	border-top: 2px var(--cddbLiteGrey) solid;
+	color: var(--cddbBlack);
+	display: flex;
+	flex-flow: row nowrap;
+	justify-content: flex-start;
+	min-height: 4rem;
+}
+.assert input[type=text] {
+	width: 100%;
+	padding-left: 0.4rem;
 }
 #because .inLinePct {
 	color: var(--cddbBlue);

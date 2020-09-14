@@ -7,7 +7,7 @@
 	            $param3 = $_SESSION['profile'];
 				$sql = "CALL assertOpinion($param1,$param2,$param3)";
 				mysqli_query($db, $sql);
-					
+				header('Location: /index.php?arg='.$_SESSION['currentArg']);	
 	            break;
 	        case "reject":
 	            $opinion=-1;
@@ -16,7 +16,7 @@
 	            $param3 = $_SESSION['profile'];
 				$sql = "CALL assertOpinion($param1,$param2,$param3)";
 				mysqli_query($db, $sql);
-				
+				header('Location: /index.php?arg='.$_SESSION['currentArg']);
 	            break;
 	        case "weighBecause":
 	        	$arrayOfWeighIns = explode(",",$_POST["becauseWeighInWith"]);
@@ -34,7 +34,7 @@
 				
 				/*Execute queries */
 				if(mysqli_multi_query($db, $query)){
-					
+					header('Location: /index.php?arg='.$_SESSION['currentArg']);
 				}
 				else 
 					echo "Query Failed";
@@ -62,7 +62,7 @@
 				echo $query;
 				/*Execute queries */
 				if(mysqli_multi_query($db, $query)){
-					
+					header('Location: /index.php?arg='.$_SESSION['currentArg']);
 				}
 				else 
 					echo "Query Failed";
@@ -88,13 +88,13 @@
 				echo $query;
 				/*Execute queries */
 				if(mysqli_multi_query($db, $query)){
-					
+					header('Location: /index.php?arg='.$_SESSION['currentArg']);
 				}
 				else 
 					echo "Query Failed";
 				
 	            break;
-	        case "becauseAddAssertion":
+	        case "addAssertion":
 	        /*TODO can't handle special characters. They fail and show up with blank phrasing.	
 	        	MySQL recognizes the following escape sequences.
 					\0     An ASCII NUL (0x00) character.
@@ -109,15 +109,15 @@
 					\%     A “%” character. See note following the table.
 					\_     A “_” character. See note following the table.
 			*/
-	        	$assertion = $_POST["becauseAddAssertion"];
-	            $type = "Because";
+	        	$assertion = $_POST["assertion"];
+	            $type = $_POST["type"];
 	            $argAtHand = intval($_SESSION['currentArg']);
 	            $profileID = intval($_SESSION['profile']);
 	            $query = "CALL foldInAssertion(\"".$assertion."\",\"".$type."\",".$argAtHand.",".$profileID.");";
 
 				/*Execute queries */
 				if(mysqli_query($db, $query)){
-					
+					header('Location: /index.php?arg='.$_SESSION['currentArg']);
 				}
 				else 
 					echo "Query Failed";
@@ -134,28 +134,13 @@
 
 				/*Execute queries */
 				if(mysqli_query($db, $query)){
-					
+					header('Location: /index.php?arg='.$_SESSION['currentArg']);
 				}
 				else 
 					echo "Query Failed";
 	            break;
-	        case "thereforeAddAssertion":
-	        	$assertion = $_POST["thereforeAddAssertion"];
-	            $type = "Therefore";
-	            $argAtHand = intval($_SESSION['currentArg']);
-	            $profileID = intval($_SESSION['profile']);
-	            $query = "CALL foldInAssertion(\"".$assertion."\",\"".$type."\",".$argAtHand.",".$profileID.");";
-				
-				/*Execute queries */
-				if(mysqli_query($db, $query)){
-					
-				}
-				else 
-					echo "Query Failed";
-				
-	            break;
-	        	//TODO THIS IS NOT NEARLY DONE - YOU HAVE AN UNTESTED SQL STORED PROCEDURE
-	            //Make the button pass the arg ID
+			//TODO THIS IS NOT NEARLY DONE - YOU HAVE AN UNTESTED SQL STORED PROCEDURE
+			//Make the button pass the arg ID
 	        case "thereforeUseInstead": 
 	        	$existing = $_POST["thereforeUseInstead"]; 
 	            $type = "Therefore";
@@ -165,29 +150,14 @@
 
 				/*Execute queries */
 				if(mysqli_query($db, $query)){
-					
+					header('Location: /index.php?arg='.$_SESSION['currentArg']);
 				}
 				else 
 					echo "Query Failed";
 				
 	            break;
-	        case "rebuttalAddAssertion":
-	        	$assertion = $_POST["rebuttalAddAssertion"];
-	            $type = "Rebuttal";
-	            $argAtHand = intval($_SESSION['currentArg']);
-	            $profileID = intval($_SESSION['profile']);
-	            $query = "CALL foldInAssertion(\"".$assertion."\",\"".$type."\",".$argAtHand.",".$profileID.");";
-				
-				/*Execute queries */
-				if(mysqli_query($db, $query)){
-					
-				}
-				else 
-					echo "Query Failed";
-				
-	            break;
-	        	//TODO THIS IS NOT NEARLY DONE - YOU HAVE AN UNTESTED SQL STORED PROCEDURE
-	            //Make the button pass the arg ID
+			//TODO THIS IS NOT NEARLY DONE - YOU HAVE AN UNTESTED SQL STORED PROCEDURE
+			//Make the button pass the arg ID
 	        case "rebuttalUseInstead": 
 	        	$existing = $_POST["rebuttalUseInstead"]; 
 	            $type = "Rebuttal";
@@ -197,7 +167,7 @@
 
 				/*Execute queries */
 				if(mysqli_query($db, $query)){
-					
+					header('Location: /index.php?arg='.$_SESSION['currentArg']);
 				}
 				else 
 					echo "Query Failed";
@@ -213,7 +183,7 @@
 
 				/*Execute queries */
 				if(mysqli_query($db, $query)){
-					
+					header('Location: /index.php?arg='.$_SESSION['currentArg']);
 				}
 				else 
 					echo "Query Failed";
@@ -228,7 +198,7 @@
 
 				/*Execute queries */
 				if(mysqli_query($db, $query)){
-					
+					header('Location: /index.php?arg='.$_SESSION['currentArg']);
 				}
 				else 
 					echo "Query Failed";
@@ -245,7 +215,7 @@
 
 				//Execute queries
 				if(mysqli_query($db, $query)){
-					
+					header('Location: /index.php?arg='.$_SESSION['currentArg']);
 				}
 				else 
 					echo "Query Failed";
@@ -261,7 +231,7 @@
 
 				//Execute queries 
 				if(mysqli_query($db, $query)){
-					
+					header('Location: /index.php?arg='.$_SESSION['currentArg']);
 				}
 				else 
 					echo "Query Failed";
@@ -280,8 +250,7 @@
 
 				/*Execute queries */
 				if(mysqli_query($db, $query)){
-					
-					
+					header('Location: /index.php?arg='.$_SESSION['currentArg']);
 				}
 				else 
 					echo "Query Failed";

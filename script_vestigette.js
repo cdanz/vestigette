@@ -208,6 +208,7 @@ function init() {
 	let typeClass = "";
 	let resetEl = null;
 	let endorseEl = null;
+	let assertEl = null;
 	limit = weighIns.length;
 	for (i = 0; i < limit; i++) {
 		weighIns[i].addEventListener("click", function(evt) {
@@ -222,6 +223,8 @@ function init() {
 			resetEl.classList.toggle("hidden");
 			endorseEl = document.querySelector(`#${this.dataset.containerId} .endorse`);
 			endorseEl.classList.toggle("hidden");
+			assertEl = document.querySelector(`#${this.dataset.containerId} .assert`);
+			assertEl.classList.toggle("hidden");
 			neutralizeSection(this.dataset.containerId);
 			// if there is data for this, set the wrappers to reflect the user's values
 			loadUserWeights(this.dataset.containerId);
@@ -257,7 +260,7 @@ function loadUserWeights(id) {
 	let i;
 	for (i = 0; i < limit; i++) {
 		if (DEBUG) console.log(`loadUserWeights: for loop (${i.toString()} < ${limit.toString()})`);
-		let weight = parseInt(args[i].dataset.userWeight);
+		let weight = parseFloat(args[i].dataset.userWeight);
 		if (DEBUG) console.log(`loadUserWeights: weight: ${weight} as ${typeof weight}`);
 		// get pct being used, store it
 		let pct = getExistingPct(args[i]);
@@ -390,7 +393,7 @@ function bump(type, argID) {
 	}
 */
 	console.log(genericClickArr);
-	updateWeighInValue(id);
+	updateWeighInValue(type);
 }
 
 /*

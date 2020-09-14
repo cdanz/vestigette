@@ -103,6 +103,14 @@ if (isset($because)) {
 	generateTypeLines("because", $because);
 }
 ?>
+				<div class="assert hidden">
+					<form class="form-inline" method="POST">
+						<label for="assertion">Add Unique:</label>
+						<input type="text" placeholder="An assertion not yet listed here" name="assertion">
+						<input type="hidden" name="type" value="Because" />
+						<button type="submit" class="button addNew" name="buttonClicked" value="addAssertion" data-container-id="because">Submit</button>
+					</form>
+				</div>
 			</div>
 		</div>
 
