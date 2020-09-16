@@ -64,7 +64,7 @@ button {
 	margin:0;
 	text-align: center;
 }
-.assert.hidden{
+.hidden{
 	display: none !important;
 }
 .form-inline {
@@ -141,6 +141,51 @@ button.rejectSet {
 button.hidden {
 	display: none;
 }
+/* overlay section */
+#overlay {
+  position: absolute;
+  margin-right: auto;
+  margin-left: auto;
+  margin-top: 2%;
+  margin-bottom: 2%;
+  background: var(--cddbWhite);
+  flex-direction: column;
+  top: 30px;
+  bottom: 30px;
+  right: 0;
+  left: 0;
+  width: 90%;
+  height: auto;
+  z-index: 2;
+  overflow: auto;
+  border: 0px;
+}
+#phrasing {
+  margin: 0;
+  background: var(--cddbWhite);
+  flex-flow: column;
+  height: 100%;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  left: 0;
+  z-index: 3;
+  border-color: var(--cddbGrey);
+  border: 8px solid var(--cddbGrey);
+}
+#explication {
+  margin: 0;
+  background: var(--cddbWhite);
+  flex-flow: column;
+  height: 100%;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  left: 0;
+  z-index: 3;
+  border-color: var(--cddbGrey);
+  border: 8px solid var(--cddbGrey);
+}
 
 /* sections & containers */
 #mastHead {
@@ -186,6 +231,9 @@ button.hidden {
 	display: flex;
 	justify-content: space-between;
 }
+#phrasing.container {
+	background-color:var(--cddbGrey);
+}
 .container div {
 	align-items: flex-start;
 	display: flex;
@@ -216,6 +264,16 @@ button.hidden {
 	cursor: default;
 	transition: max-height 0.3s ease-out, margin-bottom 0.1s ease-out 0.1s;
 	width: 100%;
+}
+.container .panel2 {
+	background-color: white;
+	color: var(--cddbBlack);
+	display: flex;
+	flex-flow: column nowrap;
+	margin-top: 0.5rem;
+	cursor: default;
+	width: 100%;
+	height: 100%;
 }
 #because .panel {
 	border-color: var(--cddbBlue);

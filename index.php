@@ -187,5 +187,21 @@ if (isset($therefore)) {
 			</div>
 		</div>
 
+
+		<!-- TODO I clearly can't figure out how to properly adjust the height of this overlay window -->
+			<div id="overlay" class="hidden">
+				<div id="phrasing" class="container hidden">
+					<h2>Title</h2>
+					<div class="buttons">
+					<button id="close" class="button">X</button> 
+					</div>
+					<div class="panel2">
+					
+					<p>Testing</p>
+				</div>
+			</div>
+
+
+
 	</body>
 </html>

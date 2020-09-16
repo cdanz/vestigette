@@ -239,6 +239,29 @@ function init() {
 
 		});
 	}
+	// buttons for editing and viewing phrasing or explication with overlays
+	let overlay = document.querySelector("#overlay");
+	let putforth = document.querySelector("#phrasing");
+
+	// edit putforth button -- open overlay
+	let editPutForth = document.querySelectorAll(".altPhraseBtn");
+	limit = editPutForth.length;
+	for (i = 0; i < limit; i++) {
+		editPutForth[i].addEventListener("click", function(evt) {
+			overlay.classList.toggle("hidden");
+			putforth.classList.toggle("hidden");
+		});
+	}
+	
+	// close button -- remove overlay
+	let closers = document.querySelectorAll("#close");
+	limit = closers.length;
+	for (i = 0; i < limit; i++) {
+		closers[i].addEventListener("click", function(evt) {
+			overlay.classList.toggle("hidden");
+			putforth.classList.toggle("hidden");
+		});
+	}
 	// endorse button -- submit form
 	// endorse click handler needs to EXIT edit mode -- but since it's submitting, the page will reload anyway
 	// let endorses = document.querySelectorAll(".endorse");
