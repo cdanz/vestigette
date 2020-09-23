@@ -138,6 +138,14 @@ button.rejectOpen:hover,
 button.rejectSet {
 	background-color: var(--cddbRed);
 }
+button.instead {
+	background-color: var(--cddbBlack);
+	border-color: var(--cddbBlack);
+	
+}
+button.instead:hover {
+	background-color: var(--cddbLiteGrey);
+}
 button.hidden {
 	display: none;
 }
@@ -284,6 +292,9 @@ button.hidden {
 #therefore .panel {
 	border-color: var(--cddbGreen);
 }
+#checkpoint .panel {
+	border-color: var(--cddbGrey);
+}
 .panel ul {
 	list-style: none;
 	width: 100%;
@@ -303,6 +314,10 @@ button.hidden {
 .panel.expanded {
 	margin-bottom: 0.5rem;
 	max-height: 338px;
+}
+.panel.fullExpand {
+	margin-bottom: 0.5rem;
+	max-height: 100%;
 }
 .panel .inLinePct {
 	font-weight: bold;
