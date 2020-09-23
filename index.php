@@ -193,10 +193,8 @@ if (isset($therefore)) {
 				<div id="phrasing" class="container hidden">
 					<h2>Title</h2>
 					<div class="buttons">
-					<button id="close" class="button">X</button> 
+						<button id="close" class="button">X</button> 
 					</div>
-					<div class="panel2">
-					
 					<p>Testing</p>
 				</div>
 			</div>

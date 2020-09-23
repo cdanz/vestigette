@@ -76,6 +76,12 @@ button {
 .form-inline > * {
 	margin-right: 0.2rem;
 }
+/*
+
+TODO: Let's not forget to genericize these buttons to apply to more than just #because.
+
+*/
+
 #because button {
 	border-radius: 0;
 	padding-left: 1em;
@@ -141,38 +147,24 @@ button.rejectSet {
 button.hidden {
 	display: none;
 }
+
 /* overlay section */
 #overlay {
-  position: absolute;
-  margin-right: auto;
-  margin-left: auto;
-  margin-top: 2%;
-  margin-bottom: 2%;
-  background: var(--cddbWhite);
-  flex-direction: column;
-  top: 30px;
-  bottom: 30px;
-  right: 0;
-  left: 0;
-  width: 90%;
-  height: auto;
-  z-index: 2;
-  overflow: auto;
-  border: 0px;
+	background-color: rgba(0,0,0,0.65);
+	height: 100%;
+	position: fixed;
+	top: 0;
+	width: 100%;
 }
-#phrasing {
-  margin: 0;
-  background: var(--cddbWhite);
-  flex-flow: column;
-  height: 100%;
-  top: 0;
-  bottom: 0;
-  right: 0;
-  left: 0;
-  z-index: 3;
-  border-color: var(--cddbGrey);
-  border: 8px solid var(--cddbGrey);
+
+#overlay .buttons {
+	align-self: center;
 }
+#overlay button {
+	padding-left: 0.6rem;
+	padding-right: 0.6rem;
+}
+
 #explication {
   margin: 0;
   background: var(--cddbWhite);
@@ -232,7 +224,20 @@ button.hidden {
 	justify-content: space-between;
 }
 #phrasing.container {
+	align-items: flex-start;
 	background-color:var(--cddbGrey);
+	border-color: var(--cddbGrey);
+	border: 8px solid var(--cddbGrey);
+	display: flex;
+	flex-flow: row wrap;
+	justify-content: space-between;
+	left: 50%;
+	overflow: auto;
+	position: absolute;
+	top: 1rem;
+	transform: translate(-50%);
+	width: 90%;
+	z-index: 3;
 }
 .container div {
 	align-items: flex-start;
@@ -265,15 +270,14 @@ button.hidden {
 	transition: max-height 0.3s ease-out, margin-bottom 0.1s ease-out 0.1s;
 	width: 100%;
 }
-.container .panel2 {
+#phrasing p {
 	background-color: white;
 	color: var(--cddbBlack);
-	display: flex;
-	flex-flow: column nowrap;
+	min-height: 60vh;
 	margin-top: 0.5rem;
-	cursor: default;
+	overflow: hidden;
+	padding: 0.5rem;
 	width: 100%;
-	height: 100%;
 }
 #because .panel {
 	border-color: var(--cddbBlue);
