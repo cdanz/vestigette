@@ -7,7 +7,7 @@ $argID = $_SESSION['currentArg'];
 $type = $_POST["type"];
 
 function IsNullOrEmptyString($str){
-    return (!isset($str) || trim($str) === '');
+	return (!isset($str) || trim($str) === '');
 }
 
 function generateTypeLines($results) {
@@ -217,7 +217,7 @@ $results = array_merge($results, $leftovers);
 					<button type="submit" name="buttonClicked" value="addAssertion" data-container-id="because">STICK WITH THIS</button>
 				</form>
 			</div>
-			<div class="panel fullExpand">
+			<div class="panel expanded">
 <?php
 if (isset($results)) {
 	generateTypeLines($results);

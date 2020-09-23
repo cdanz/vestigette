@@ -117,7 +117,11 @@ TODO: Let's not forget to genericize these buttons to apply to more than just #b
 	padding-right: 0.5rem;
 }
 .opinion button {
+	border-width: 0.1rem;
 	cursor: pointer; /* Pointer/hand icon */
+	height: 1.5rem;
+	padding-left: 0.3rem;
+	padding-right: 0.3rem;
 }
 .opinion button:not(:last-child) {
 	border-right: none; /* Prevent double borders */
@@ -147,10 +151,11 @@ button.rejectSet {
 button.instead {
 	background-color: var(--cddbBlack);
 	border-color: var(--cddbBlack);
-	
+	border-radius: 11px;
 }
 button.instead:hover {
 	background-color: var(--cddbLiteGrey);
+	color: var(--cddbBlack);
 }
 button.hidden {
 	display: none;
@@ -314,6 +319,13 @@ button.hidden {
 }
 .panel li:last-child {
 	border-bottom: none;
+}
+#checkpoint .panel li {
+	justify-content: space-between;
+	padding: 0.5rem;
+}
+#checkpoint .panel li .assocArg {
+	width: 75%;
 }
 .panel.expanded {
 	margin-bottom: 0.5rem;

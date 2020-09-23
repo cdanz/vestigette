@@ -104,7 +104,7 @@ if (isset($because)) {
 }
 ?>
 				<div class="assert hidden">
-					<form class="form-inline" method="POST" action="checkpoint.php">
+					<form class="form-inline" method="POST">
 						<label for="assertion">Add Unique:</label>
 						<input type="text" placeholder="An assertion not yet listed here" name="assertion">
 						<input type="hidden" name="type" value="Because" />
@@ -195,7 +195,7 @@ if (isset($therefore)) {
 					<div class="buttons">
 						<button id="close" class="button">X</button> 
 					</div>
-					<p>Testing</p>
+					<textarea>Testing</textarea>
 				</div>
 			</div>
 

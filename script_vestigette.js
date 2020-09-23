@@ -139,12 +139,12 @@ function neutralizeSection(id) {
 Update hidden value submitted with endorse button.
 */
 function updateWeighInValue(type) {
-  var arrayAsString = "";
-  for (var i = 0; i < genericClickArr.length; i++) {
-      arrayAsString = arrayAsString + genericClickArr[i][0] + ","; 
-      arrayAsString = arrayAsString + ((genericClickArr[i][1]/genericTotalClicks)*100).toFixed(5) + ",";
-  }
-  document.getElementById(`${type}WeighInWith`).value = arrayAsString;
+	var arrayAsString = "";
+	for (var i = 0; i < genericClickArr.length; i++) {
+		arrayAsString = arrayAsString + genericClickArr[i][0] + ","; 
+		arrayAsString = arrayAsString + ((genericClickArr[i][1]/genericTotalClicks)*100).toFixed(5) + ",";
+	}
+	document.getElementById(`${type}WeighInWith`).value = arrayAsString;
 }
 
 
