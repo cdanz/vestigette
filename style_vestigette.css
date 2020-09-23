@@ -331,8 +331,7 @@ button.hidden {
 	margin-bottom: 0.5rem;
 	max-height: 338px;
 }
-.panel.fullExpand {
-	margin-bottom: 0.5rem;
+.opinion + .panel.expanded {
 	max-height: 100%;
 }
 .panel .inLinePct {
