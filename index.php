@@ -104,7 +104,7 @@ if (isset($because)) {
 }
 ?>
 				<div class="assert hidden">
-					<form class="form-inline" method="POST">
+					<form class="form-inline" method="POST" action="checkpoint.php">
 						<label for="assertion">Add Unique:</label>
 						<input type="text" placeholder="An assertion not yet listed here" name="assertion">
 						<input type="hidden" name="type" value="Because" />

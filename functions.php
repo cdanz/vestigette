@@ -125,6 +125,20 @@
 	            break;
 	            //TODO THIS IS NOT NEARLY DONE - YOU HAVE AN UNTESTED SQL STORED PROCEDURE
 	            //Make the button pass the arg ID
+	        case "useInstead": 
+	        	$existing = $_POST["useInstead"]; 
+	            $type = $_POST["type"]; 
+	            $argAtHand = intval($_SESSION['currentArg']);
+	            $profileID = intval($_SESSION['profile']);
+	            $query = "CALL useInstead(\"".$type."\",".$argAtHand.",".$existing.",".$profileID.");";
+
+				/*Execute queries */
+				if(mysqli_query($db, $query)){
+					header('Location: /index.php?arg='.$_SESSION['currentArg']);
+				}
+				else 
+					echo "Query Failed";
+	            break;
 	        case "becauseUseInstead": 
 	        	$existing = $_POST["becauseUseInstead"]; 
 	            $type = "Because";
