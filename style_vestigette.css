@@ -117,7 +117,7 @@ TODO: Let's not forget to genericize these buttons to apply to more than just #b
 	padding-right: 0.5rem;
 }
 .opinion button {
-	border-width: 0.1rem;
+	border-width: 0.2rem;
 	cursor: pointer; /* Pointer/hand icon */
 	height: 1.5rem;
 	padding-left: 0.3rem;
