@@ -48,6 +48,26 @@ unset($onClick);
 		echo "0 results";
 	}
 }
+function generateAltLines($alts) {
+	if (sizeof($alts) > 0) {
+		echo "<ul>\n";
+		foreach ($alts as $line) {
+			echo "			<li class=\"lineItem\">
+				<p class=\"assocArg\">${line[0]}</p>
+				<div class=\"opinion\">
+				<form method=\"POST\" class=\"buttons\">
+					<input type=\"hidden\" name=\"useInstead\" value=\"${line[0]}\" /> 
+					<button type=\"submit\" class=\"button instead\" name=\"buttonClicked\" value=\"promotePutForth\">Endorse</button>
+				</form>
+			</div>
+			</li>";
+		}
+		echo "</ul>\n";
+		unset($line);
+	} else {
+		echo "0 results";
+	}
+}
 ?>
 <!DOCTYPE html>
 <html>
@@ -196,24 +216,18 @@ if (isset($therefore)) {
 						<button id="close" class="button">X</button> 
 					</div>
 					<div class="panel expanded">
-						<ul>
-							<li class="lineItem" data-arg-id="">
-								<p class="assocArg">assoc Arg 1</p>
-								<div class="opinion">
-								<form method="POST" class="buttons" action="index.php?arg=X">
-									<button type="submit" class="button eh" name="buttonClicked" value="eh">eh...</button>
-									<button type="submit" class="button preferred" name="buttonClicked" value="preferred">Preferred</button>
-								</form>
-							</li>
-							<li class="lineItem" data-arg-id="">
-								<p class="assocArg">assoc Arg 2</p>
-								<div class="opinion">
-								<form method="POST" class="buttons" action="index.php?arg=X">
-									<button type="submit" class="button eh" name="buttonClicked" value="eh">eh...</button>
-									<button type="submit" class="button preferred" name="buttonClicked" value="preferred">Preferred</button>
-								</form>
-							</li>
-						</ul>
+						
+<?php
+	if (isset($altPhrasings)) {
+		generateAltLines($altPhrasings);
+	}
+?>
+						<div class="assert">
+							<form class="form-inline" method="POST">
+								<input type="text" placeholder="Better said..." name="newPutForth">
+								<button type="submit" class="button addNew" name="buttonClicked" value="newPutForth">Put Forth</button>
+							</form>
+						</div>
 					</div>
 				</div>
 			</div>
