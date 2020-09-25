@@ -195,10 +195,28 @@ if (isset($therefore)) {
 					<div class="buttons">
 						<button id="close" class="button">X</button> 
 					</div>
-					<textarea>Testing</textarea>
+					<div class="panel expanded">
+						<ul>
+							<li class="lineItem" data-arg-id="">
+								<p class="assocArg">assoc Arg 1</p>
+								<div class="opinion">
+								<form method="POST" class="buttons" action="index.php?arg=X">
+									<button type="submit" class="button eh" name="buttonClicked" value="eh">eh...</button>
+									<button type="submit" class="button preferred" name="buttonClicked" value="preferred">Preferred</button>
+								</form>
+							</li>
+							<li class="lineItem" data-arg-id="">
+								<p class="assocArg">assoc Arg 2</p>
+								<div class="opinion">
+								<form method="POST" class="buttons" action="index.php?arg=X">
+									<button type="submit" class="button eh" name="buttonClicked" value="eh">eh...</button>
+									<button type="submit" class="button preferred" name="buttonClicked" value="preferred">Preferred</button>
+								</form>
+							</li>
+						</ul>
+					</div>
 				</div>
 			</div>
-
 
 
 	</body>
