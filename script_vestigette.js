@@ -240,29 +240,37 @@ function init() {
 		});
 	}
 	// buttons for editing and viewing phrasing or explication with overlays
-	let overlay = document.querySelector("#overlay");
+	let overlayP = document.querySelector("#overlayP");
+	let overlayE = document.querySelector("#overlayE");
 	let putforth = document.querySelector("#phrasing");
+	let links = document.querySelector("#explication");
 
-	// edit putforth button -- open overlay
-	let editPutForth = document.querySelectorAll(".altPhraseBtn");
-	limit = editPutForth.length;
-	for (i = 0; i < limit; i++) {
-		editPutForth[i].addEventListener("click", function(evt) {
-			overlay.classList.toggle("hidden");
-			putforth.classList.toggle("hidden");
-		});
-	}
+	// putforth button -- open overlay
+	let openPutForth = document.querySelector(".altPhraseBtn");
+	openPutForth.addEventListener("click", function(evt) {
+		overlayP.classList.toggle("hidden");
+		putforth.classList.toggle("hidden");
+	});
+	// explication button -- open overlay
+	let openExplication = document.querySelector(".altExplicationBtn");
+	openExplication.addEventListener("click", function(evt) {
+		overlayE.classList.toggle("hidden");
+		links.classList.toggle("hidden");
+	});
 	
-	// close button -- remove overlay
-	let closers = document.querySelectorAll("#close");
-	limit = closers.length;
-	for (i = 0; i < limit; i++) {
-		closers[i].addEventListener("click", function(evt) {
-			overlay.classList.toggle("hidden");
-			putforth.classList.toggle("hidden");
-		});
-	}
-	// endorse button -- submit form
+	// close put forths button -- remove overlay
+	let closeP = document.querySelector("#closeP");
+	closeP.addEventListener("click", function(evt) {
+		overlayP.classList.toggle("hidden");
+		putforth.classList.toggle("hidden");
+	});
+	// close explication button -- remove overlay
+	let closeE = document.querySelector("#closeE");
+	closeE.addEventListener("click", function(evt) {
+		overlayE.classList.toggle("hidden");	
+		links.classList.toggle("hidden");
+	});
+	// endorse button -- submit form 
 	// endorse click handler needs to EXIT edit mode -- but since it's submitting, the page will reload anyway
 	// let endorses = document.querySelectorAll(".endorse");
 	// TODO Still would like a history button. resets back historical weights by user, just uses 

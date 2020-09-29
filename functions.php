@@ -216,42 +216,7 @@
 				}
 				else 
 					echo "Query Failed";
-				
             	break;
-
-	        //Promote existing mot juste
-	        case "promoteMotJuste": 
-	        	$preferredPutForth = $_POST["phraseQuibble"];
-	        	$preferredMotJuste = $_POST["promoteMotJuste"];
-	            $argAtHand = intval($_SESSION['currentArg']);
-	            $profileID = intval($_SESSION['profile']);
-	            $query = "CALL promoteMotJuste(".$argAtHand.",".$preferredPutForth.",".$preferredMotJuste.",".$profileID.");";
-
-				//Execute queries
-				if(mysqli_query($db, $query)){
-					header('Location: /index.php?arg='.$_SESSION['currentArg']);
-				}
-				else 
-					echo "Query Failed";
-				
-	            break;
-	        //Submit new mot juste  
-	        case "newMotJuste": 
-	        	$preferredPutForth = $_POST["phraseQuibble"];
-	        	$phrased = $_POST["newMotJuste"]; 
-	            $argAtHand = intval($_SESSION['currentArg']);
-	            $profileID = intval($_SESSION['profile']);
-	            $query = "CALL newMotJuste(".$argAtHand.",".$preferredPutForth.",".$profileID.",\"".$phrased."\");";
-
-				//Execute queries 
-				if(mysqli_query($db, $query)){
-					header('Location: /index.php?arg='.$_SESSION['currentArg']);
-				}
-				else 
-					echo "Query Failed";
-				
-
-	            break;
 
 	            //Promote explication TODO Sucks because just pushing the full link string when should have a int key
 	        case "promoteExplication": 
@@ -268,8 +233,20 @@
 				}
 				else 
 					echo "Query Failed";
-				
-	            
 	            break;
+			case "newExplication":
+				$phrased = $_POST["newExplication"]; 
+				$argAtHand = intval($_SESSION['currentArg']);
+				$profileID = intval($_SESSION['profile']);
+				$query = "CALL newExplication(".$argAtHand.",".$profileID.",\"".$phrased."\");";
+
+				/*Execute queries */
+				if(mysqli_query($db, $query)){
+					header('Location: /index.php?arg='.$_SESSION['currentArg']);
+				}
+				else 
+					echo "Query Failed";
+				break;
+
 	    }
 ?>

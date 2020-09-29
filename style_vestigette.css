@@ -82,7 +82,9 @@ TODO: Let's not forget to genericize these buttons to apply to more than just #b
 
 */
 
-#because button {
+#because button,
+#rebuttal button,
+#therefore button {
 	border-radius: 0;
 	padding-left: 1em;
 	padding-right: 1em;
@@ -100,13 +102,47 @@ TODO: Let's not forget to genericize these buttons to apply to more than just #b
 }
 #because .panel button:hover {
 	background-color: var(--cddbWhite);
-	color: var(--cddbBlue);
+	color: var(--cddbRed);
 }
-#because button.reset {
+#rebuttal button:hover {
+	background-color: var(--cddbWhite);
+	color: var(--cddbRed);
+}
+#rebuttal .panel button {
+	background-color: var(--cddbRed);
+	border-color: var(--cddbRed);
+	border-radius: 0;
+	padding-left: 1em;
+	padding-right: 1em;
+}
+#rebuttal .panel button:hover {
+	background-color: var(--cddbWhite);
+	color: var(--cddbRed);
+}
+#therefore button:hover {
+	background-color: var(--cddbWhite);
+	color: var(--cddbGreen);
+}
+#therefore .panel button {
+	background-color: var(--cddbGreen);
+	border-color: var(--cddbGreen);
+	border-radius: 0;
+	padding-left: 1em;
+	padding-right: 1em;
+}
+#therefore .panel button:hover {
+	background-color: var(--cddbWhite);
+	color: var(--cddbGreen);
+}
+#because button.reset,
+#rebuttal button.reset,
+#therefore button.reset {
 	position: relative;
 	width: 2rem;
 }
-#because button.reset span {
+#because button.reset span,
+#rebuttal button.reset span,
+#therefore button.reset span {
 	font-size: 250%;
 	left: 0.1rem;
 	position: absolute;
@@ -126,36 +162,30 @@ TODO: Let's not forget to genericize these buttons to apply to more than just #b
 .opinion button:not(:last-child) {
 	border-right: none; /* Prevent double borders */
 }
-button.instead, 
-button.eh, 
-button.preferred {
-	border-color: var(--cddbBlack);
-	border-radius: 11px;
-}
 button.instead {
+	border-color: var(--cddbBlack);
 	background-color: var(--cddbBlack);
-}
-button.eh, 
-button.preferred {
-	background-color: var(--cddbGrey);
+	border-radius: 11px;
 }
 button.instead:hover {
 	background-color: var(--cddbLiteGrey);
 	color: var(--cddbBlack);
 }
-button.eh:hover, 
-button.preferred:hover {
+button.addNew {
 	background-color: var(--cddbBlack);
-	color: var(--cddbWhite);
+	border-color: var(--cddbBlack);
+	border-radius: 11px;
 }
-button.accept, 
-button.eh {
+button.addNew:hover {
+	background-color: var(--cddbLiteGrey);
+	color: var(--cddbBlack);
+}
+button.accept {
 	border-right-width: 0.1rem;
 	border-top-right-radius: 0;
 	border-bottom-right-radius: 0;
 }
-button.reject, 
-button.preferred {
+button.reject {
 	border-left-width: 0.1rem;
 	border-top-left-radius: 0;
 	border-bottom-left-radius: 0;
@@ -177,7 +207,7 @@ button.hidden {
 }
 
 /* overlay section */
-#overlay {
+#overlayP, #overlayE {
 	background-color: rgba(0,0,0,0.65);
 	height: 100%;
 	position: fixed;
@@ -185,10 +215,17 @@ button.hidden {
 	width: 100%;
 }
 
-#overlay .buttons {
+#overlayP .buttons {
 	align-self: center;
 }
-#overlay button {
+#overlayP button {
+	padding-left: 0.6rem;
+	padding-right: 0.6rem;
+}
+#overlayE .buttons {
+	align-self: center;
+}
+#overlayE button {
 	padding-left: 0.6rem;
 	padding-right: 0.6rem;
 }
@@ -251,7 +288,8 @@ button.hidden {
 	display: flex;
 	justify-content: space-between;
 }
-#phrasing.container {
+#phrasing.container,
+#explication.container {
 	align-items: flex-start;
 	background-color:var(--cddbGrey);
 	border-color: var(--cddbGrey);
@@ -298,14 +336,10 @@ button.hidden {
 	transition: max-height 0.3s ease-out, margin-bottom 0.1s ease-out 0.1s;
 	width: 100%;
 }
-#phrasing p {
+#phrasing p,
+#explication p {
 	background-color: white;
 	color: var(--cddbBlack);
-/*
-	margin-top: 0.5rem;
-	min-height: 60vh;
-	overflow: hidden;
-*/
 	padding: 0.5rem;
 	width: 100%;
 }
@@ -318,7 +352,8 @@ button.hidden {
 #therefore .panel {
 	border-color: var(--cddbGreen);
 }
-#phrasing .panel, 
+#phrasing .panel,
+#explication .panel, 
 #checkpoint .panel {
 	border-color: var(--cddbGrey);
 }
@@ -338,12 +373,14 @@ button.hidden {
 .panel li:last-child {
 	border-bottom: none;
 }
-#phrasing .panel li, 
+#phrasing .panel li,
+#explication .panel li, 
 #checkpoint .panel li {
 	justify-content: space-between;
 	padding: 0.5rem;
 }
-#phrasing .panel li .assocArg, 
+#phrasing .panel li .assocArg,
+#explication .panel li .assocArg, 
 #checkpoint .panel li .assocArg {
 	width: 75%;
 }
@@ -351,7 +388,8 @@ button.hidden {
 	margin-bottom: 0.5rem;
 	max-height: 338px;
 }
-#phrasing .panel.expanded {
+#phrasing .panel.expanded, 
+#explication .panel.expanded {
 	margin-bottom: 0;
 }
 .opinion + .panel.expanded {

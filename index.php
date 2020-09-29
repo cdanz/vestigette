@@ -48,7 +48,7 @@ unset($onClick);
 		echo "0 results";
 	}
 }
-function generateAltLines($alts) {
+function generatePhraseLines($alts) {
 	if (sizeof($alts) > 0) {
 		echo "<ul>\n";
 		foreach ($alts as $line) {
@@ -58,6 +58,26 @@ function generateAltLines($alts) {
 				<form method=\"POST\" class=\"buttons\">
 					<input type=\"hidden\" name=\"useInstead\" value=\"${line[0]}\" /> 
 					<button type=\"submit\" class=\"button instead\" name=\"buttonClicked\" value=\"promotePutForth\">Endorse</button>
+				</form>
+			</div>
+			</li>";
+		}
+		echo "</ul>\n";
+		unset($line);
+	} else {
+		echo "0 results";
+	}
+}
+function generateLinkLines($alts) {
+	if (sizeof($alts) > 0) {
+		echo "<ul>\n";
+		foreach ($alts as $line) {
+			echo "			<li class=\"lineItem\">
+				<p class=\"assocArg\">${line[0]}</p>
+				<div class=\"opinion\">
+				<form method=\"POST\" class=\"buttons\">
+					<input type=\"hidden\" name=\"useInstead\" value=\"${line[0]}\" /> 
+					<button type=\"submit\" class=\"button instead\" name=\"buttonClicked\" value=\"promoteExplication\">Endorse</button>
 				</form>
 			</div>
 			</li>";
@@ -180,52 +200,114 @@ echo "\n</form>";
 
 		<div id="rebuttal" class="accordion container">
 			<h2>Rebuttal</h2>
+<?php
+if ((isset($opinion)) && ($opinion < 0)) { 
+?>
+	<div class="buttons">
+		<button class="button reset hidden" name="buttonClicked" value="weighRebuttal" data-container-id="rebuttal"><span>&#x27F2;</span></button>
+		<form method="POST"> 
+			<button type="submit" class="button endorse hidden" name="buttonClicked" value="weighRebuttal" data-container-id="rebuttal">Endorse</button>
+<!-- This hidden field has its value updated with an array as a string serving as the "weigh in" input -->
+			<input type="hidden" name="rebuttalWeighInWith" id="rebuttalWeighInWith" value="" />
+		</form>
+		<button class="button weighIn" data-container-id="rebuttal">Weigh In</button>
+	</div>
+<?php
+} 
+?>
 			<div class="panel" data-container-id="rebuttal">
 <?php
 if (isset($rebuttal)) {
 	generateTypeLines("rebuttal", $rebuttal);
 }
 ?>
+				<div class="assert hidden">
+					<form class="form-inline" method="POST" action="checkpoint.php">
+						<label for="assertion">Add Unique:</label>
+						<input type="text" placeholder="An assertion not yet listed here" name="assertion">
+						<input type="hidden" name="type" value="Rebuttal" />
+						<button type="submit" class="button addNew" name="buttonClicked" value="addAssertion" data-container-id="rebuttal">Submit</button>
+					</form>
+				</div>
 			</div>
 		</div> 
 
 		<div id="therefore" class="accordion container">
 			<h2>Therefore</h2>
+<?php
+if ((isset($opinion)) && ($opinion > 0)) { 
+?>
+	<div class="buttons">
+		<button class="button reset hidden" name="buttonClicked" value="weighTherefore" data-container-id="therefore"><span>&#x27F2;</span></button>
+		<form method="POST"> 
+			<button type="submit" class="button endorse hidden" name="buttonClicked" value="weighTherefore" data-container-id="therefore">Endorse</button>
+<!-- This hidden field has its value updated with an array as a string serving as the "weigh in" input -->
+			<input type="hidden" name="thereforeWeighInWith" id="thereforeWeighInWith" value="" />
+		</form>
+		<button class="button weighIn" data-container-id="therefore">Weigh In</button>
+	</div>
+<?php
+} 
+?>
 			<div class="panel" data-container-id="therefore">
 <?php
 if (isset($therefore)) {
 	generateTypeLines("therefore", $therefore);
 }
 ?>
-			</div>
-		</div>
-
-		<div id="filter" class="accordion container">
-			<h2>Filter</h2>
-			<div class="panel" data-container-id="filter">
-				<p>Coming "Soon"<br/><br/></p>
+				<div class="assert hidden">
+					<form class="form-inline" method="POST" action="checkpoint.php">
+						<label for="assertion">Add Unique:</label>
+						<input type="text" placeholder="An assertion not yet listed here" name="assertion">
+						<input type="hidden" name="type" value="Therefore" />
+						<button type="submit" class="button addNew" name="buttonClicked" value="addAssertion" data-container-id="therefore">Submit</button>
+					</form>
+				</div>
 			</div>
 		</div>
 
 
 		<!-- TODO I clearly can't figure out how to properly adjust the height of this overlay window -->
-			<div id="overlay" class="hidden">
+			<div id="overlayP" class="hidden">
 				<div id="phrasing" class="container hidden">
-					<h2>Title</h2>
+					<h2>Put Another Way</h2>
 					<div class="buttons">
-						<button id="close" class="button">X</button> 
+						<button id="closeP" class="button">X</button> 
 					</div>
 					<div class="panel expanded">
 						
 <?php
 	if (isset($altPhrasings)) {
-		generateAltLines($altPhrasings);
+		generatePhraseLines($altPhrasings);
 	}
 ?>
 						<div class="assert">
 							<form class="form-inline" method="POST">
 								<input type="text" placeholder="Better said..." name="newPutForth">
 								<button type="submit" class="button addNew" name="buttonClicked" value="newPutForth">Put Forth</button>
+							</form>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div id="overlayE" class="hidden">
+				<div id="explication" class="container hidden">
+					<h2>Explication Links</h2>
+					<div class="buttons">
+						<button id="closeE" class="button">X</button> 
+					</div>
+					<div class="panel expanded">
+						
+<?php
+	if (isset($altPhrasings)) {
+		generateLinkLines($altPhrasings);
+	}
+?>
+						<div class="assert">
+							<form class="form-inline" method="POST">
+								<input type="text" placeholder="Link a study, article, chart, meme, anything that expands upon or illuminates the argument" name="newExplication">
+								<button type="submit" class="button addNew" name="buttonClicked" value="newExplication">Introduce</button>
 							</form>
 						</div>
 					</div>
