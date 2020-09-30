@@ -49,6 +49,7 @@ unset($onClick);
 	}
 }
 function generatePhraseLines($alts) {
+	global $opinion;
 	if (sizeof($alts) > 0) {
 		echo "<ul>\n";
 		foreach ($alts as $line) {
@@ -56,9 +57,13 @@ function generatePhraseLines($alts) {
 				<p class=\"assocArg\">${line[0]}</p>
 				<div class=\"opinion\">
 				<form method=\"POST\" class=\"buttons\">
-					<input type=\"hidden\" name=\"useInstead\" value=\"${line[0]}\" /> 
-					<button type=\"submit\" class=\"button instead\" name=\"buttonClicked\" value=\"promotePutForth\">Endorse</button>
-				</form>
+					<input type=\"hidden\" name=\"useInstead\" value=\"${line[0]}\" />"; 
+					
+				if ((isset($opinion)) && ($opinion > 0)) { 	
+					echo "<button type=\"submit\" class=\"button instead\" name=\"buttonClicked\" value=\"promotePutForth\">Endorse</button>";
+				}
+
+			echo	"</form>
 			</div>
 			</li>";
 		}
@@ -68,17 +73,21 @@ function generatePhraseLines($alts) {
 		echo "0 results";
 	}
 }
-function generateLinkLines($alts) {
-	if (sizeof($alts) > 0) {
+function generateLinkLines($links) {
+	global $opinion;
+	if (sizeof($links) > 0) {
 		echo "<ul>\n";
-		foreach ($alts as $line) {
+		foreach ($links as $line) {
 			echo "			<li class=\"lineItem\">
-				<p class=\"assocArg\">${line[0]}</p>
+				<p class=\"assocArg\"><a href=\"${line[1]}\">${line[1]}</a></p>
 				<div class=\"opinion\">
 				<form method=\"POST\" class=\"buttons\">
-					<input type=\"hidden\" name=\"useInstead\" value=\"${line[0]}\" /> 
-					<button type=\"submit\" class=\"button instead\" name=\"buttonClicked\" value=\"promoteExplication\">Endorse</button>
-				</form>
+					<input type=\"hidden\" name=\"useInstead\" value=\"${line[0]}\" />"; 
+
+					if ((isset($opinion)) && ($opinion > 0)) { 
+					echo "<button type=\"submit\" class=\"button instead\" name=\"buttonClicked\" value=\"promoteExplication\">Endorse</button>";
+				}
+				echo "</form>
 			</div>
 			</li>";
 		}
@@ -171,8 +180,8 @@ if (isset($_SESSION['profile'])) {
 		$reject = 'Open';
 	}
 	echo "
-		<button type=\"submit\" class=\"button accept accept$accept\" name=\"buttonAccept\" value=\"accept\">Accept" . (($accept == 'Set') ? "ed" : "") . "</button>
-		<button type=\"submit\" class=\"button reject reject$reject\" name=\"buttonReject\" value=\"reject\">Reject" . (($reject == 'Set') ? "ed" : "") . "</button>";
+		<button type=\"submit\" class=\"button accept accept$accept\" name=\"buttonClicked\" value=\"accept\">Accept" . (($accept == 'Set') ? "ed" : "") . "</button>
+		<button type=\"submit\" class=\"button reject reject$reject\" name=\"buttonClicked\" value=\"reject\">Reject" . (($reject == 'Set') ? "ed" : "") . "</button>";
 } else {
 	echo "<form method=\"GET\" class=\"buttons\" action=\"login.php?arg=" . $_SESSION['currentArg'] . "\">
 	<button type=\"submit\" class=\"button accept acceptOpen\" name=\"buttonClicked\">Accept</button>
@@ -281,12 +290,18 @@ if (isset($therefore)) {
 		generatePhraseLines($altPhrasings);
 	}
 ?>
+<?php
+if ((isset($opinion)) && ($opinion > 0)) { 
+?>
 						<div class="assert">
 							<form class="form-inline" method="POST">
 								<input type="text" placeholder="Better said..." name="newPutForth">
-								<button type="submit" class="button addNew" name="buttonClicked" value="newPutForth">Put Forth</button>
+								<button type="submit" class="button addNew" name="buttonClicked" value="newPutForth">Introduce</button>
 							</form>
 						</div>
+<?php
+} 
+?>
 					</div>
 				</div>
 			</div>
@@ -300,9 +315,12 @@ if (isset($therefore)) {
 					<div class="panel expanded">
 						
 <?php
-	if (isset($altPhrasings)) {
-		generateLinkLines($altPhrasings);
+	if (isset($links)) {
+		generateLinkLines($links);
 	}
+?>
+<?php
+if ((isset($opinion)) && ($opinion > 0)) { 
 ?>
 						<div class="assert">
 							<form class="form-inline" method="POST">
@@ -310,6 +328,9 @@ if (isset($therefore)) {
 								<button type="submit" class="button addNew" name="buttonClicked" value="newExplication">Introduce</button>
 							</form>
 						</div>
+<?php
+} 
+?>
 					</div>
 				</div>
 			</div>

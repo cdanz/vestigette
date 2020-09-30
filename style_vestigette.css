@@ -471,6 +471,14 @@ button.hidden {
 }
 #argument .panel p {
 	align-self: center;
+	border: 0px var(--cddbLiteGrey) solid;
+	font-size: 1rem;
+	margin: 0.3rem;
+	padding: 0.3rem;
+	width: 100%;
+}
+#argument .panel p:last-child {
+	align-self: center;
 	border: 2px var(--cddbLiteGrey) solid;
 	font-size: 1rem;
 	margin: 0.3rem;
