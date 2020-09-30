@@ -275,6 +275,13 @@ if (isset($therefore)) {
 			</div>
 		</div>
 
+		<div id="filter" class="accordion container">
+			<h2>Filter</h2>
+			<div class="panel" data-container-id="filter">
+				<p>Coming "Soon"<br/><br/></p>
+			</div>
+		</div>
+
 
 		<!-- TODO I clearly can't figure out how to properly adjust the height of this overlay window -->
 			<div id="overlayP" class="hidden">
