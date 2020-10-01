@@ -1,8 +1,9 @@
 "use strict";
 
 let mode = null;
+const editMode = ['because', 'therefore'];
+let activeEditMode;
 let panel = null;
-let editMode = null;
 let pctRE = /pct\d+\_\d/;
 let genericTotalClicks = 0;
 let genericClickArr = [];
@@ -212,22 +213,47 @@ function init() {
 	limit = weighIns.length;
 	for (i = 0; i < limit; i++) {
 		weighIns[i].addEventListener("click", function(evt) {
+			let which;
 			// 1) set mode to edit, 2) toggle hidden of other buttons, 3) set all "type" circles to neutral
-			if (mode != 'EDIT') {
+			if (mode != 'EDIT') { // cold edit, use what was clicked
 				mode = 'EDIT';
-				document.querySelector(`#${this.dataset.containerId}`).classList.toggle('edit');
+				activeEditMode = this.dataset.containerId;
+				which = this;
+				document.getElementById(`${activeEditMode}`).classList.toggle('edit');
+			} else { // warm edit, use the other click option -- this should only happen between the two editModes
+				if (this.dataset.containerId == activeEditMode) {
+					// do nothing
+					return;
+				} else { // use the other option, which should only exist for because/therefore
+					let oldEditMode = activeEditMode;
+					activeEditMode = editMode[(editMode.indexOf(oldEditMode) + 1) % 2]; // 0=> 1, 1=> 0
+					which = document.querySelector(`#${activeEditMode} .weighIn`);
+					// untoggle the last one
+					let previous = document.querySelector(`#${oldEditMode} .weighIn`);
+					previous.classList.toggle("hidden");
+					resetEl = document.querySelector(`#${oldEditMode} .reset`);
+					resetEl.classList.toggle("hidden");
+					endorseEl = document.querySelector(`#${oldEditMode} .endorse`);
+					endorseEl.classList.toggle("hidden");
+					assertEl = document.querySelector(`#${oldEditMode} .assert`);
+					assertEl.classList.toggle("hidden");
+					// clear genericClickArr
+					genericClickArr.length = 0;
+					genericTotalClicks = 0;
+					// now you can toggle the new one, continue
+				}
 			}
 			/* hide this, unhide rest and endorse */
-			this.classList.toggle("hidden");
-			resetEl = document.querySelector(`#${this.dataset.containerId} .reset`);
+			which.classList.toggle("hidden");
+			resetEl = document.querySelector(`#${activeEditMode} .reset`);
 			resetEl.classList.toggle("hidden");
-			endorseEl = document.querySelector(`#${this.dataset.containerId} .endorse`);
+			endorseEl = document.querySelector(`#${activeEditMode} .endorse`);
 			endorseEl.classList.toggle("hidden");
-			assertEl = document.querySelector(`#${this.dataset.containerId} .assert`);
+			assertEl = document.querySelector(`#${activeEditMode} .assert`);
 			assertEl.classList.toggle("hidden");
-			neutralizeSection(this.dataset.containerId);
+			neutralizeSection(activeEditMode);
 			// if there is data for this, set the wrappers to reflect the user's values
-			loadUserWeights(this.dataset.containerId);
+			loadUserWeights(activeEditMode);
 		});
 	}
 	// reset button -- just go neutral
@@ -333,7 +359,7 @@ function loadUserWeights(id) {
 	}
 	console.log(`loadUserWeights: genericClickArr: ${genericClickArr}`);
 	console.log(`loadUserWeights: genericTotalClicks: ${genericTotalClicks}`);
-	updateWeighInValue(id)
+	updateWeighInValue(id);
 }
 
 

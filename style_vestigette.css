@@ -89,6 +89,14 @@ TODO: Let's not forget to genericize these buttons to apply to more than just #b
 	padding-left: 1em;
 	padding-right: 1em;
 }
+#because .panel button, 
+#rebuttal .panel button, 
+#therefore .panel button {
+	border-radius: 0;
+	padding-left: 1em;
+	padding-right: 1em;
+}
+
 #because button:hover {
 	background-color: var(--cddbWhite);
 	color: var(--cddbBlue);
@@ -96,9 +104,6 @@ TODO: Let's not forget to genericize these buttons to apply to more than just #b
 #because .panel button {
 	background-color: var(--cddbBlue);
 	border-color: var(--cddbBlue);
-	border-radius: 0;
-	padding-left: 1em;
-	padding-right: 1em;
 }
 #because .panel button:hover {
 	background-color: var(--cddbWhite);
@@ -111,9 +116,6 @@ TODO: Let's not forget to genericize these buttons to apply to more than just #b
 #rebuttal .panel button {
 	background-color: var(--cddbRed);
 	border-color: var(--cddbRed);
-	border-radius: 0;
-	padding-left: 1em;
-	padding-right: 1em;
 }
 #rebuttal .panel button:hover {
 	background-color: var(--cddbWhite);
@@ -126,9 +128,6 @@ TODO: Let's not forget to genericize these buttons to apply to more than just #b
 #therefore .panel button {
 	background-color: var(--cddbGreen);
 	border-color: var(--cddbGreen);
-	border-radius: 0;
-	padding-left: 1em;
-	padding-right: 1em;
 }
 #therefore .panel button:hover {
 	background-color: var(--cddbWhite);
@@ -295,7 +294,9 @@ button.hidden {
 	align-items: center;
 	padding-bottom: 1px; /* hahaha */
 }
-#because form {
+#because form, 
+#rebuttal form, 
+#therefore form {
 	margin-left: 1rem;
 }
 .opinion form {
