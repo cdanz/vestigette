@@ -215,33 +215,14 @@ button.hidden {
 	width: 100%;
 }
 
-#overlayP .buttons {
-	align-self: center;
-}
-#overlayP button {
-	padding-left: 0.6rem;
-	padding-right: 0.6rem;
-}
+#overlayP .buttons, 
 #overlayE .buttons {
 	align-self: center;
 }
+#overlayP button, 
 #overlayE button {
 	padding-left: 0.6rem;
 	padding-right: 0.6rem;
-}
-
-#explication {
-  margin: 0;
-  background: var(--cddbWhite);
-  flex-flow: column;
-  height: 100%;
-  top: 0;
-  bottom: 0;
-  right: 0;
-  left: 0;
-  z-index: 3;
-  border-color: var(--cddbGrey);
-  border: 8px solid var(--cddbGrey);
 }
 
 /* sections & containers */
@@ -383,6 +364,7 @@ button.hidden {
 #explication .panel li .assocArg, 
 #checkpoint .panel li .assocArg {
 	width: 75%;
+	word-break: break-all;
 }
 .panel.expanded {
 	margin-bottom: 0.5rem;
@@ -400,13 +382,13 @@ button.hidden {
 }
 .panel .assert {
 	align-items: center;
-	width: 100%;
 	border-top: 2px var(--cddbLiteGrey) solid;
 	color: var(--cddbBlack);
 	display: flex;
 	flex-flow: row nowrap;
 	justify-content: flex-start;
 	min-height: 4rem;
+	width: 100%;
 }
 .assert input[type=text] {
 	width: 100%;

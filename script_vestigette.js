@@ -240,10 +240,10 @@ function init() {
 		});
 	}
 	// buttons for editing and viewing phrasing or explication with overlays
-	let overlayP = document.querySelector("#overlayP");
-	let overlayE = document.querySelector("#overlayE");
-	let putforth = document.querySelector("#phrasing");
-	let links = document.querySelector("#explication");
+	let overlayP = document.getElementById("overlayP");
+	let overlayE = document.getElementById("overlayE");
+	let putforth = document.getElementById("phrasing");
+	let links = document.getElementById("explication");
 
 	// putforth button -- open overlay
 	let openPutForth = document.querySelector(".altPhraseBtn");
@@ -259,15 +259,15 @@ function init() {
 	});
 	
 	// close put forths button -- remove overlay
-	let closeP = document.querySelector("#closeP");
+	let closeP = document.getElementById("closeP");
 	closeP.addEventListener("click", function(evt) {
 		overlayP.classList.toggle("hidden");
 		putforth.classList.toggle("hidden");
 	});
 	// close explication button -- remove overlay
-	let closeE = document.querySelector("#closeE");
+	let closeE = document.getElementById("closeE");
 	closeE.addEventListener("click", function(evt) {
-		overlayE.classList.toggle("hidden");	
+		overlayE.classList.toggle("hidden");
 		links.classList.toggle("hidden");
 	});
 	// endorse button -- submit form 
