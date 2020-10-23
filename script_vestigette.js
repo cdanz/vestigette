@@ -296,6 +296,29 @@ function init() {
 		overlayE.classList.toggle("hidden");
 		links.classList.toggle("hidden");
 	});
+
+	//Filter button
+	let toggle1 = document.getElementById("filter1");
+	let toggleLabelA = document.getElementById("filter1A");
+	let toggleLabelB = document.getElementById("filter1B");
+	if (!filter1) { // cold edit, use what was clicked
+		toggleLabelA.style.color = "var(--cddbGrey)";
+	}
+	else {
+		toggle1.focus();
+		toggleLabelB.style.color = "var(--cddbGrey)";
+	}
+	toggle1.addEventListener("click", function(evt) {
+		if(document.activeElement === toggle1) {
+			toggle1.focus();
+			toggleLabelA.style.color = "var(--cddbGrey)";
+		}
+		else {
+			toggle1.focus();
+			toggleLabelB.style.color = "var(--cddbGrey)";
+		}
+	});
+
 	// endorse button -- submit form 
 	// endorse click handler needs to EXIT edit mode -- but since it's submitting, the page will reload anyway
 	// let endorses = document.querySelectorAll(".endorse");
