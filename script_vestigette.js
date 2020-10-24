@@ -301,20 +301,14 @@ function init() {
 	let toggle1 = document.getElementById("filter1");
 	let toggleLabelA = document.getElementById("filter1A");
 	let toggleLabelB = document.getElementById("filter1B");
-	if (!filter1) { // cold edit, use what was clicked
-		toggleLabelA.style.color = "var(--cddbGrey)";
-	}
-	else {
-		toggle1.focus();
-		toggleLabelB.style.color = "var(--cddbGrey)";
-	}
+	toggleLabelB.style.color = "var(--cddbGrey)";
 	toggle1.addEventListener("click", function(evt) {
-		if(document.activeElement === toggle1) {
-			toggle1.focus();
+		if(document.getElementById("check1").checked) {
 			toggleLabelA.style.color = "var(--cddbGrey)";
+			toggleLabelB.style.color = "var(--cddbBlue)";
 		}
 		else {
-			toggle1.focus();
+			toggleLabelA.style.color = "var(--cddbBlack)";
 			toggleLabelB.style.color = "var(--cddbGrey)";
 		}
 	});

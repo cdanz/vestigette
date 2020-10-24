@@ -6,7 +6,6 @@ require_once("${_SERVER['DOCUMENT_ROOT']}/query_current_argument.php");
 $baseURL = "/index.php";
 $arg = isset($_SESSION['currentArg']) ? $_SESSION['currentArg'] : null;
 $profile = isset($_SESSION['profile']) ? $_SESSION['profile'] : null;
-$filter1 = isset($_SESSION['filter1']) ? $_SESSION['filter1'] : FALSE;
 // made obsolete $opinion = isset($_SESSION['opinion']) ? $_SESSION['opinion'] : null;
 $assocWeights = isset($_SESSION['assocWeights']) ? $_SESSION['assocWeights'] : null; //not used
 
@@ -113,7 +112,6 @@ function generateLinkLines($links) {
 		<script language="javascript">
 			let arg = <?php echo isset($arg) ? $arg : 'undefined'; ?>,
 				profile = <?php echo isset($profile) ? $profile : 'undefined'; ?>,
-				filter1 = <?php echo isset($filter1) ? $filter1 : 'undefined'; ?>,
 				opinion = <?php echo isset($opinion) ? $opinion : 'undefined'; ?>,
 				assoc = <?php echo isset($assocWeights) ? "JSON.parse(" + $assocWeights + ")" : 'undefined'; ?>, //not used
 				because = <?php echo json_encode($because); ?>,
@@ -283,7 +281,7 @@ if (isset($therefore)) {
 				<div class="filter">
 					<div class="filterLabel" id="filter1A">All Users</div>
 					<label class="switch" id="filter1">	
-						<input type="checkbox">
+						<input type="checkbox" id="check1">
 						<span class="toggle round"></span>
 					</label>
 					<div class="filterLabel" id="filter1B">Current User</div>
