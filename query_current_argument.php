@@ -164,6 +164,7 @@ if (mysqli_multi_query($db, $sql)) {
 			$altPhrasings[$iterator] = array();
 			$altPhrasings[$iterator][0] = $row[0];
 			$altPhrasings[$iterator][1] = $row[1];
+			$altPhrasings[$iterator][2] = $row[2];
 			$iterator++;
 		}
 	}

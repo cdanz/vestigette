@@ -379,6 +379,40 @@ function loadUserWeights(id) {
 	updateWeighInValue(id);
 }
 
+/*
+Use with filter. Display the current user's selections. 
+*/
+function displayUserEndorsements(id) {
+	if (DEBUG) console.log(`displayUserEndorsements: id: ${id}`);
+	//if (mode != 'edit') {
+		// load values for editing (initial setting is editing from 0)
+	let args = document.querySelectorAll(`#${id} .lineItem`);
+	let limit = args.length;
+	let i;
+	for (i = 0; i < limit; i++) {
+		if (DEBUG) console.log(`displayUserEndorsements: for loop (${i.toString()} < ${limit.toString()})`);
+		let weight = parseFloat(args[i].dataset.userWeight);
+		if (DEBUG) console.log(`displayUserEndorsements: weight: ${weight} as ${typeof weight}`);
+		// get pct being used, store it
+		let pct = getExistingPct(args[i]);
+		//UPDATE: already stored as data attribute   args[i].setAttribute('data-aggregate-weight', pct);
+		if (weight !== 0) {
+			let newpct = getPctClass(weight);
+			if (DEBUG) console.log(`displayUserEndorsements: newpct: ${newpct}`);
+			args[i].classList.remove("half1", "half2", pct);
+			if (weight <= 50) {
+				args[i].classList.add("half1");
+			}
+			else {
+				args[i].classList.add("half2");
+			}
+			if (DEBUG) console.log(`displayUserEndorsements: adding ${newpct}...`)
+			args[i].classList.add(newpct);
+			setInlinePct(args[i], weight);
+			//args[i].classList.replace("neutral", type);
+		}
+	}
+}
 
 /*
 Docs TBD

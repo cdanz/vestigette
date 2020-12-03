@@ -54,10 +54,10 @@ function generatePhraseLines($alts) {
 		echo "<ul>\n";
 		foreach ($alts as $line) {
 			echo "			<li class=\"lineItem\">
-				<p class=\"assocArg\">${line[0]}</p>
+				<p class=\"assocArg\">${line[1]} <span style=\"color: var(--cddbGrey);font-size: 0.75rem;\">(Votes: ${line[0]})</span></p>
 				<div class=\"opinion\">
 				<form method=\"POST\" class=\"buttons\">
-					<input type=\"hidden\" name=\"useInstead\" value=\"${line[0]}\" />"; 
+					<input type=\"hidden\" name=\"useInstead\" value=\"${line[1]}\" />"; 
 					
 				if ((isset($opinion)) && ($opinion > 0)) { 	
 					echo "<button type=\"submit\" class=\"button instead\" name=\"buttonClicked\" value=\"promotePutForth\">Endorse</button>";
