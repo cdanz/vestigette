@@ -36,7 +36,7 @@ function generateTypeLines($results) {
 }
 
 $sql = "CALL getAssociated($argID);";
-$sql .= "SELECT argumentID, 0, currentPhrasing, lastModified FROM PHRASING ORDER BY lastModified DESC;";
+$sql .= "CALL getAllTheRest();";
 $sql .= "CALL getAggrEndorse()";
 
 if (mysqli_multi_query($db, $sql)) {
@@ -119,7 +119,6 @@ if ($type == 'Because' || $type == 'Therefore') {
 			$endIndex++;
 		}
 	}
-
 }
 $startIndex = 0;
 while ($startIndex < count($pending)) {
@@ -137,7 +136,7 @@ while ($startIndex < count($pending)) {
 					//if found see if its existing weight is less than current
 					if ($results[$j][1] < $weightN){
 						$results[$j][1] = $weightN;
-						$results[$j][2] = $bigList[$i][4]; //might be impossible to be null
+						$results[$j][2] = $bigList[$i][4]; //might be impossible to be null - opportunity to populate
 					}
 				}
 			}
@@ -148,7 +147,7 @@ while ($startIndex < count($pending)) {
 			}
 			//check for existing arg in the pending that hasn't already been processed 
 			$found = false;
-			for ($j = $startIndex; $j < count($pending); $j++) {
+			for ($j = 0; $j < count($pending); $j++) { //TODO Previously j= $startIndex and not sure why I thought that was goo. set to zero fixes infinite loop.
 				if ($bigList[$i][2] == $pending[$j][0]) {
 					$found = true;
 					//if found see if its existing weight is less than current
@@ -186,7 +185,6 @@ for ($i = 0; $i < count($results); $i++) {
 
 //merge 
 $results = array_merge($results, $leftovers);
-
 ?>
 
 <!DOCTYPE html>

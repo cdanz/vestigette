@@ -111,9 +111,11 @@ if (mysqli_multi_query($db, $sql)) {
 			$row = mysqli_fetch_row($result);
 			if ($row[0]) {
 				$opinion = 1;
+				$userPhrasingID = $row[1];
+				$userPhrasing = $row[2];
 			} else {
 				$opinion = -1;
-			}
+			}	
 		}
 		mysqli_free_result($result);
 		mysqli_next_result($db);

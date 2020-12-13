@@ -170,6 +170,17 @@ button.instead:hover {
 	background-color: var(--cddbLiteGrey);
 	color: var(--cddbBlack);
 }
+button.adjust {
+	border-color: var(--cddbBlack);
+	background-color: var(--cddbGrey);
+	color: var(--cddbBlack);
+	border-radius: 11px;
+}
+button.adjust:hover {
+	border-color: var(--cddbGrey);
+	background-color: var(--cddbLiteGrey);
+	color: var(--cddbGrey);
+}
 button.addNew {
 	background-color: var(--cddbBlack);
 	border-color: var(--cddbBlack);
@@ -223,7 +234,9 @@ button.hidden {
 	padding-left: 0.6rem;
 	padding-right: 0.6rem;
 }
+.rewrite {
 
+}
 /* sections & containers */
 #mastHead {
 	align-items: flex-end;

@@ -50,21 +50,37 @@ unset($onClick);
 }
 function generatePhraseLines($alts) {
 	global $opinion;
+	global $userPhrasingID;
+	global $userPhrasing;
 	if (sizeof($alts) > 0) {
 		echo "<ul>\n";
 		foreach ($alts as $line) {
-			echo "			<li class=\"lineItem\">
-				<p class=\"assocArg\">${line[1]} <span style=\"color: var(--cddbGrey);font-size: 0.75rem;\">(Votes: ${line[0]})</span></p>
-				<div class=\"opinion\">
-				<form method=\"POST\" class=\"buttons\">
-					<input type=\"hidden\" name=\"useInstead\" value=\"${line[1]}\" />"; 
-					
 				if ((isset($opinion)) && ($opinion > 0)) { 	
-					echo "<button type=\"submit\" class=\"button instead\" name=\"buttonClicked\" value=\"promotePutForth\">Endorse</button>";
+					if(isset($userPhrasingID) && ($userPhrasingID == $line[2]) && $line[0] == 1) {
+						echo "			<li class=\"lineItem\">
+						<p class=\"assocArg rewrite\">${line[1]} <span style=\"color: var(--cddbGrey);font-size: 0.75rem;\">(Votes: ${line[0]})</span></p>
+						<div class=\"opinion\">
+							<button type=\"submit\" class=\"button adjust rewrite\" id=\"rewriteBtn\" name=\"buttonClicked\" value=\"promotePutForth\">Edit Your Entry</button>
+						<form method=\"POST\" class=\"rewrite form-inline hidden\">
+							<input type=\"text\" placeholder=\"${line[1]}\" name=\"replacement\">
+							<input type=\"hidden\" name=\"userPhraseID\" value=\"${line[2]}\" />
+							<button type=\"submit\" class=\"button adjust\" name=\"buttonClicked\" value=\"replacePutForth\">Update</button>
+						</form>";
+					}
+					else if(isset($userPhrasingID) && ($userPhrasingID == $line[2])) {
+						echo "			<li class=\"lineItem\">
+							<p class=\"assocArg\">${line[1]} <span style=\"color: var(--cddbGrey);font-size: 0.75rem;\">(Votes: ${line[0]})</span></p>
+							<div class=\"opinion\">"; 
+					}
+					else echo "			<li class=\"lineItem\">
+						<p class=\"assocArg\">${line[1]} <span style=\"color: var(--cddbGrey);font-size: 0.75rem;\">(Votes: ${line[0]})</span></p>
+						<div class=\"opinion\"><form method=\"POST\" class=\"buttons\">
+						<input type=\"hidden\" name=\"useInstead\" value=\"${line[2]}\" />
+							<button type=\"submit\" class=\"button instead\" name=\"buttonClicked\" value=\"promotePutForth\">Endorse</button>
+						</form>";
 				}
 
-			echo	"</form>
-			</div>
+			echo	"</div>
 			</li>";
 		}
 		echo "</ul>\n";

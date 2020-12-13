@@ -218,6 +218,22 @@
 					echo "Query Failed";
             	break;
 
+    			//Replace user's existing preferred putforth if they are its only endorser
+            case "replacePutForth":
+            	$phrased = $_POST["replacement"];
+            	$phraseID = $_POST["userPhraseID"]; 
+	            $argAtHand = intval($_SESSION['currentArg']);
+	            $profileID = intval($_SESSION['profile']);
+	            $query = "CALL replacePutForth(".$argAtHand.",".$phraseID.",\"".$phrased."\");";
+
+				/*Execute queries */
+				if(mysqli_query($db, $query)){
+					header('Location: /index.php?arg='.$_SESSION['currentArg']);
+				}
+				else 
+					echo "Query Failed";
+            	break;
+
 	            //Promote explication TODO Sucks because just pushing the full link string when should have a int key
 	        case "promoteExplication": 
 	        	$explicationLink = $_POST["promoteExplication"]; 
