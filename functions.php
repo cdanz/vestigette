@@ -224,7 +224,7 @@
             	$phraseID = $_POST["userPhraseID"]; 
 	            $argAtHand = intval($_SESSION['currentArg']);
 	            $profileID = intval($_SESSION['profile']);
-	            $query = "CALL replacePutForth(".$argAtHand.",".$phraseID.",\"".$phrased."\");";
+	            $query = "CALL replacePutForth(".$argAtHand.",".$profileID.",".$phraseID.",\"".$phrased."\");";
 
 				/*Execute queries */
 				if(mysqli_query($db, $query)){
