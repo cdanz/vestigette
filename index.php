@@ -65,23 +65,24 @@ function generatePhraseLines($alts) {
 							<input type=\"text\" placeholder=\"${line[1]}\" name=\"replacement\">
 							<input type=\"hidden\" name=\"userPhraseID\" value=\"${line[2]}\" />
 							<button type=\"submit\" class=\"button adjust\" name=\"buttonClicked\" value=\"replacePutForth\">Update</button>
-						</form>";
+						</form></div>";
 					}
 					else if(isset($userPhrasingID) && ($userPhrasingID == $line[2])) {
 						echo "			<li class=\"lineItem\">
 							<p class=\"assocArg\">${line[1]} <span style=\"color: var(--cddbGrey);font-size: 0.75rem;\">(Votes: ${line[0]})</span></p>
-							<div class=\"opinion\">"; 
+							<div class=\"opinion\"></div>"; 
 					}
 					else echo "			<li class=\"lineItem\">
 						<p class=\"assocArg\">${line[1]} <span style=\"color: var(--cddbGrey);font-size: 0.75rem;\">(Votes: ${line[0]})</span></p>
 						<div class=\"opinion\"><form method=\"POST\" class=\"buttons\">
-						<input type=\"hidden\" name=\"useInstead\" value=\"${line[2]}\" />
+						<input type=\"hidden\" name=\"promotePutForth\" value=\"${line[2]}\" />
 							<button type=\"submit\" class=\"button instead\" name=\"buttonClicked\" value=\"promotePutForth\">Endorse</button>
-						</form>";
+						</form></div>";
 				}
+				else echo "			<li class=\"lineItem\">
+						<p class=\"assocArg\">${line[1]} <span style=\"color: var(--cddbGrey);font-size: 0.75rem;\">(Votes: ${line[0]})</span></p>";
 
-			echo	"</div>
-			</li>";
+			echo	"</li>";
 		}
 		echo "</ul>\n";
 		unset($line);

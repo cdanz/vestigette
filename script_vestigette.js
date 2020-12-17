@@ -281,13 +281,14 @@ function init() {
 	// edit entry when you are the only endorser
 	let rewriteEl = document.querySelectorAll(".rewrite");
 	let rewriteBtn = document.getElementById("rewriteBtn");
-	limit = rewriteEl.length;
-	rewriteBtn.addEventListener("click", function(evt) {
-		for (i = 0; i < limit; i++) {
-			rewriteEl[i].classList.toggle("hidden");
-		}
-	});
-
+	if(rewriteBtn){
+    	limit = rewriteEl.length;
+		rewriteBtn.addEventListener("click", function(evt) {
+			for (i = 0; i < limit; i++) {
+				rewriteEl[i].classList.toggle("hidden");
+			}
+		});
+    }
 
 		// close put forths button -- remove overlay
 	let closeP = document.getElementById("closeP");
