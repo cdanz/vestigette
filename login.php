@@ -11,7 +11,7 @@
 		$stmt->execute();
 		$result = $stmt->get_result()->fetch_all(MYSQLI_NUM);
 
-		if ($result[1][0] == NULL && isset($result[0][0])) {
+		if (!isset($result[1][0]) && isset($result[0][0])) {
 			$_SESSION['profile'] = $result[0][0];
 			$_SESSION['email']=$email;
 			if(!isset($_SESSION['currentArg'])){
