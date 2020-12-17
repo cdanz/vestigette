@@ -62,7 +62,7 @@ function generatePhraseLines($alts) {
 						<div class=\"opinion\">
 							<button type=\"submit\" class=\"button adjust rewrite\" id=\"rewriteBtn\" name=\"buttonClicked\" value=\"promotePutForth\">Edit Your Entry</button>
 						<form method=\"POST\" class=\"rewrite form-inline hidden\">
-							<input type=\"text\" placeholder=\"${line[1]}\" name=\"replacement\">
+							<input type=\"text\" value=\"${line[1]}\" name=\"replacement\">
 							<input type=\"hidden\" name=\"userPhraseID\" value=\"${line[2]}\" />
 							<button type=\"submit\" class=\"button adjust\" name=\"buttonClicked\" value=\"replacePutForth\">Update</button>
 						</form></div>";
