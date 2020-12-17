@@ -168,6 +168,7 @@ while ($startIndex < count($pending)) {
 	$startIndex++;
 }
 //Sort results by weight
+$weight = array(); //declare it here because there are not always results to define it
 foreach ($results as $key => $row) {
     $weight[$key]  = $row[1];
 }
