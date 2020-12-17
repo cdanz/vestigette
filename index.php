@@ -39,7 +39,7 @@ unset($onClick);
 					<div class=\"pointBtn arc1\"></div>
 					<div class=\"pointBtn arc2\"></div>
 				</div>
-				<p class=\"assocArg\"><span class=\"inLinePct\">" . strval(number_format($line[1], 2, '.', '')) . "% - </span><a href=\"${baseURL}?arg=${line[0]}\">${line[2]}</a></p>
+				<p class=\"assocArg\"><span class=\"inLinePct\">" . strval(number_format($line[1], 2, '.', '')) . "% - </span><a href=\"${baseURL}?arg=${line[0]}\">".htmlspecialchars($line[2])."</a></p>
 			</li>";
 		}
 		echo "</ul>\n";
@@ -58,29 +58,29 @@ function generatePhraseLines($alts) {
 				if ((isset($opinion)) && ($opinion > 0)) { 	
 					if(isset($userPhrasingID) && ($userPhrasingID == $line[2]) && $line[0] == 1) {
 						echo "			<li class=\"lineItem\">
-						<p class=\"assocArg rewrite\">${line[1]} <span style=\"color: var(--cddbGrey);font-size: 0.75rem;\">(Votes: ${line[0]})</span></p>
+						<p class=\"assocArg rewrite\">".htmlspecialchars($line[1])." <span style=\"color: var(--cddbGrey);font-size: 0.75rem;\">(Votes: ${line[0]})</span></p>
 						<div class=\"opinion\">
 							<button type=\"submit\" class=\"button adjust rewrite\" id=\"rewriteBtn\" name=\"buttonClicked\" value=\"promotePutForth\">Edit Your Entry</button>
 						<form method=\"POST\" class=\"rewrite form-inline hidden\">
-							<input type=\"text\" value=\"${line[1]}\" name=\"replacement\">
+							<input type=\"text\" value=\"".htmlspecialchars($line[1])."\" name=\"replacement\">
 							<input type=\"hidden\" name=\"userPhraseID\" value=\"${line[2]}\" />
 							<button type=\"submit\" class=\"button adjust\" name=\"buttonClicked\" value=\"replacePutForth\">Update</button>
 						</form></div>";
 					}
 					else if(isset($userPhrasingID) && ($userPhrasingID == $line[2])) {
 						echo "			<li class=\"lineItem\">
-							<p class=\"assocArg\">${line[1]} <span style=\"color: var(--cddbGrey);font-size: 0.75rem;\">(Votes: ${line[0]})</span></p>
+							<p class=\"assocArg\">".htmlspecialchars($line[1])." <span style=\"color: var(--cddbGrey);font-size: 0.75rem;\">(Votes: ${line[0]})</span></p>
 							<div class=\"opinion\"></div>"; 
 					}
 					else echo "			<li class=\"lineItem\">
-						<p class=\"assocArg\">${line[1]} <span style=\"color: var(--cddbGrey);font-size: 0.75rem;\">(Votes: ${line[0]})</span></p>
+						<p class=\"assocArg\">".htmlspecialchars($line[1])." <span style=\"color: var(--cddbGrey);font-size: 0.75rem;\">(Votes: ${line[0]})</span></p>
 						<div class=\"opinion\"><form method=\"POST\" class=\"buttons\">
 						<input type=\"hidden\" name=\"promotePutForth\" value=\"${line[2]}\" />
 							<button type=\"submit\" class=\"button instead\" name=\"buttonClicked\" value=\"promotePutForth\">Endorse</button>
 						</form></div>";
 				}
 				else echo "			<li class=\"lineItem\">
-						<p class=\"assocArg\">${line[1]} <span style=\"color: var(--cddbGrey);font-size: 0.75rem;\">(Votes: ${line[0]})</span></p>";
+						<p class=\"assocArg\">".htmlspecialchars($line[1])." <span style=\"color: var(--cddbGrey);font-size: 0.75rem;\">(Votes: ${line[0]})</span></p>";
 
 			echo	"</li>";
 		}
@@ -214,7 +214,7 @@ echo "\n</form>";
 						<span class="statSmall">.<?php echo explode('.', $rate)[1]; ?>%</span>
 						<span class="statDetail">of <?php echo $assertions . (($assertions == 1) ? " user accept\n" : " users accept\n"); ?></span>
 					</div>
-					<p><?php echo $phrasing; ?></p>
+					<p><?php echo htmlspecialchars($phrasing); ?></p>
 					<button class="altPhraseBtn" name="buttonClicked" value="altPhrasing">&#x270e;</button>
 				</div>
 				<div class="explicationBox">

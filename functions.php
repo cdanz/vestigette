@@ -109,7 +109,7 @@
 					\%     A “%” character. See note following the table.
 					\_     A “_” character. See note following the table.
 			*/
-	        	$assertion = $_POST["assertion"];
+	        	$assertion = mysqli_real_escape_string($db,trim($_POST["assertion"]));
 	            $type = $_POST["type"];
 	            $argAtHand = intval($_SESSION['currentArg']);
 	            $profileID = intval($_SESSION['profile']);
@@ -205,7 +205,7 @@
             	break;
 	            //Submit a new way of putting forth
             case "newPutForth":
-            	$phrased = $_POST["newPutForth"]; 
+            	$phrased = mysqli_real_escape_string($db,trim($_POST["newPutForth"]));
 	            $argAtHand = intval($_SESSION['currentArg']);
 	            $profileID = intval($_SESSION['profile']);
 	            $query = "CALL newPutForth(".$argAtHand.",".$profileID.",\"".$phrased."\");";
@@ -220,7 +220,7 @@
 
     			//Replace user's existing preferred putforth if they are its only endorser
             case "replacePutForth":
-            	$phrased = $_POST["replacement"];
+            	$phrased = mysqli_real_escape_string($db,trim($_POST["replacement"]));
             	$phraseID = $_POST["userPhraseID"]; 
 	            $argAtHand = intval($_SESSION['currentArg']);
 	            $profileID = intval($_SESSION['profile']);
@@ -251,7 +251,7 @@
 					echo "Query Failed";
 	            break;
 			case "newExplication":
-				$phrased = $_POST["newExplication"]; 
+				$phrased = trim($_POST["newExplication"]);
 				$argAtHand = intval($_SESSION['currentArg']);
 				$profileID = intval($_SESSION['profile']);
 				$query = "CALL newExplication(".$argAtHand.",".$profileID.",\"".$phrased."\");";

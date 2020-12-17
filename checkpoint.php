@@ -18,7 +18,7 @@ function generateTypeLines($results) {
 		echo "<ul>\n";
 		foreach ($results as $line) {
 			echo "			<li class=\"lineItem\" data-arg-id=\"${line[0]}\">
-				<p class=\"assocArg\">${line[2]}</p>
+				<p class=\"assocArg\">".htmlspecialchars($line[2])."</p>
 				<div class=\"opinion\">
 				<form method=\"POST\" class=\"buttons\" action=\"index.php?arg=".$argID."\">
 					<input type=\"hidden\" name=\"useInstead\" value=\"${line[0]}\" /> 
@@ -208,7 +208,7 @@ $results = array_merge($results, $leftovers);
 	</head>
 	<body>
 		<div id="checkpoint" class="accordion container">
-			<h2><?php echo $assertion; ?></h2>
+			<h2><?php echo htmlspecialchars($assertion); ?></h2>
 			<div class="opinion">
 				<form method="POST" class="buttons" action=<?php echo "\"/index.php?arg=".$argID."\"";?>>
 					<input type="hidden" name="assertion" value=<?php echo "\"".$assertion."\"";?>>
