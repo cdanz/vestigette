@@ -3,6 +3,11 @@ session_start();
 $_SESSION['currentArg'] = intval($_GET["arg"]); 
 include("${_SERVER['DOCUMENT_ROOT']}/includes/dbconnect.php");
 require_once("${_SERVER['DOCUMENT_ROOT']}/query_current_argument.php");
+//To aid in seeding with fake user endorsements - display profile for those users
+if (isset($_SESSION['profile']) && ($_SESSION['profile'] < 26)) {
+	echo "Seed User: ".$_SESSION['profile'];
+}
+//End seeding
 $baseURL = "/index.php";
 $arg = isset($_SESSION['currentArg']) ? $_SESSION['currentArg'] : null;
 $profile = isset($_SESSION['profile']) ? $_SESSION['profile'] : null;

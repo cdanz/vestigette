@@ -1,9 +1,12 @@
 <?php 
 session_start();
+include("${_SERVER['DOCUMENT_ROOT']}/includes/dbconnect.php");
 $_SESSION['currentArg'] = intval($_GET["arg"]); 
 $baseURL = "/index.php";
 $arg = isset($_SESSION['currentArg']) ? $_SESSION['currentArg'] : null;
 $profile = isset($_SESSION['profile']) ? $_SESSION['profile'] : null;
+$sql = "CALL getHeterodox($profile)";
+mysqli_multi_query($db, $sql);
 ?>
 <!DOCTYPE html>
 <html>
@@ -37,33 +40,63 @@ $profile = isset($_SESSION['profile']) ? $_SESSION['profile'] : null;
 		</div>
 
 		<div id="because" class="accordion container">
-			<h2>This isn't a profile you're expecting</h2>
+			<h2>Vestigette Profiles</h2>
 
 			<div class="panel" data-container-id="because">
 				<br>
-				<p>Vestigette is anonymous. There are not profile pictures or details about your life here. The only thing Vestigette cares about is that you actually exist and if you exist you deserve a voice. A voice that is exactly as loud as everyone else’s.
+				<p>Vestigette is anonymous. There are not profile pictures, person details, nor people to follow. The only thing Vestigette cares about is that you actually exist and if you exist you deserve a voice. But that voice is only ever as loud as everyone else’s on Vestigette.
 				<br>
-				Basic information such as geographic location and age and maybe a few other things that haven’t been firmly decided should be available to filter upon but a name does not matter here.</p>
+				<br>
+				The Vestigette profile is mostly about refining your contribution to the collective whole. Basic information such as geographic location and age (and maybe a few other things that haven’t been firmly decided) should be available to filter upon but your name does not matter here.
+				<br>
+				<br>
+				Only one feature is available currently: "Most Heterodox" the arguments where you go most against the grain of every other user on here. New features will focus on enabling you to better clarify or revisit postions you have taken.
+				<br>
+				<br>
+				You may be just one anonymous voice but it matters and it should be as clear and nuanced as desired.</p>
 				<br>
 			</div>
 		</div>
 
 		<div id="rebuttal" class="accordion container">
-			<h2>So why is there a page dedicated to a non-profile profile?</h2>
+			<h2>Most Heterodox</h2>
 			<div class="panel" data-container-id="because">
-				<br>
-				<p style="white-space:normal;">Your profile - this page - will be used for advanced features that haven't been released. Features enabling you to better clarify or revisit postions you have taken.
-				<br>
-				You may be just one anonymous voice but it matters and it should be as clear and nuanced as desired.</p>
-				<br>
+				<?php
+				$result = mysqli_store_result($db);
+					if (mysqli_num_rows($result) > 0) {
+						$lineColorIterator = 0;
+						echo "<ul>\n";
+						while($row = mysqli_fetch_row($result)) {
+							if ($lineColorIterator % 2  == 0) { 
+							echo "<li class=\"lineItem\">";
+							}
+							else{
+							echo "<li class=\"lineItem\" style=\"background-color: var(--cddbLiteGrey);\">";
+							}
+							$lineColorIterator++;
+							$aOrR = ($row[1]==1) ? "Accept" : "Reject";
+							$doOrDont = ($row[1]==1) ? "don't" : "do";
+							echo "<p class=\"assocArg\">You ".$aOrR.": <a href=".$baseURL."?arg=".$row[0].">".htmlspecialchars($row[6])."</a> ".($row[4]*100)."% ".$doOrDont."</p>
+							</li>";
+						}
+						echo "</ul>\n";
+						unset($row);
+						while (mysqli_more_results($db)) {
+							mysqli_next_result($db);
+						}
+					}
+					else {
+						echo "No results - You're either basic AFor haven't made your opinion known on enough arguments";
+					}
+				?>
 			</div>
 		</div> 
 
 		<div id="therefore" class="accordion container">
-			<h2>Is there any reason to be here?</h2>
+			<h2>Profile Actions</h2>
 			<div class="panel" data-container-id="because">
 				<br>
-				<p>Not now, this is just a placeholder.</p>
+				<p>None of these have been built yet. But thanks for visiting.</p>
 				<br>
 			</div>
 		</div>

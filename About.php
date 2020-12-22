@@ -69,6 +69,7 @@ $profile = isset($_SESSION['profile']) ? $_SESSION['profile'] : null;
 				<br>
 				<p style="white-space:normal;">Vestigette is an abstraction of common argument mapping techniques. Each argument is an assertion, phrased as its proponents prefer best. Arguments are linked together in 3 different ways: those that (1) precede - <span style="color: var(--cddbBlue); font-weight:bold;">Because</span>, (2) follow - <span style="color: var(--cddbGreen); font-weight:bold;">Therefore</span>, or (3) refute - <span style="color: var(--cddbRed); font-weight:bold;">Rebuttal</span>.
 				<br>
+				<br>
 				Users aim to develop and track their own personal line of reasoning around any given topic within the Vestigette framework. To ensure their reasoning is optimally compelling while consistent with principles and beliefs previously tracked involves continuous reconsideration and fine-tuning.
 				<br>
 				<br>
@@ -90,6 +91,7 @@ $profile = isset($_SESSION['profile']) ? $_SESSION['profile'] : null;
 				<br>
 				Users interact by first choosing to "Accept" or "Reject" an argument. Accepting an argument gives a user the right to endorse which arguments should be linked as its <span style="color: var(--cddbBlue); font-weight:bold;">Because</span> or <span style="color: var(--cddbGreen); font-weight:bold;">Therefore</span> types. Users that accept an argument also have the right to improve the argument by choosing a Phrasing (&#x270e;) that better puts the argument forth or to promote a preferred Explication (&#x2318;) - a url link to any kind of content: news article, academic paper, explainer video, meme - that may better expand upon or exemplify the point the argument makes. Rejecting the argument, on the other hand, gives those users who are its opponents the right to prioritize arguments linked to it in order to refute it as its <span style="color: var(--cddbRed); font-weight:bold;">Rebuttal</span> types.
 				<br>
+				<br>
 				The 3 types of links from the primary argument at hand to others are applied with a weight. Each user can give their full weight to a single argument of any type they have rights to, or distribute weight proportionally among many. The circular chart to the left of each argument becomes a button upon choosing to weigh in. Apply weight to arguments of your choosing by clicking the circle button to its left. Each click gives an argument more weight relative to the others. Once satisfied with the weighting, submit your endorsement and add to the collective whole.</p>
 				<br>
 			</div>
@@ -101,7 +103,7 @@ $profile = isset($_SESSION['profile']) ? $_SESSION['profile'] : null;
 				<br>
 				<p>Vestigette is in its inital development stage and self-funded. Software development guidance, legal assistance, financial support or general user feedback are all accepted graciously.</p>
 				<br>
-				<p>To request to become a beta user, email your request to <a href="mailto:craigdanz@gmail.com">craigdanz@gmail.com</a></p>
+				<p>To request to become a beta user, email your request to <a href="mailto:craig@vestigette.org">craig@vestigette.org</a></p>
 				<br>
 			</div>
 		</div>
