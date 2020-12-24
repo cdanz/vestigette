@@ -5,8 +5,10 @@ $_SESSION['currentArg'] = intval($_GET["arg"]);
 $baseURL = "/index.php";
 $arg = isset($_SESSION['currentArg']) ? $_SESSION['currentArg'] : null;
 $profile = isset($_SESSION['profile']) ? $_SESSION['profile'] : null;
-$sql = "CALL getHeterodox($profile)";
-mysqli_multi_query($db, $sql);
+if (isset($profile)) {
+	$sql = "CALL getHeterodox($profile)";
+	mysqli_multi_query($db, $sql);
+}
 ?>
 <!DOCTYPE html>
 <html>
@@ -32,10 +34,10 @@ mysqli_multi_query($db, $sql);
 	<body>
 
 		<div id="mastHead" class="container">
-			<h1>Vestigette</h1>
-			<div><a href="index.php?arg=<?php echo $_SESSION['currentArg'];?>">Return to Previous</a></div>
+			<h1><a href="index.php?arg=<?php echo $_SESSION['currentArg'];?>">Vestigette</a></h1>
 			<div><a href="About.php?arg=<?php echo $_SESSION['currentArg'];?>">About</a></div>
 			<div><a href="Explore.php?arg=<?php echo $_SESSION['currentArg'];?>">Explore</a></div>
+			<div style="border-bottom: .2rem solid var(--cddbWhite);">Profile</div>
 			<div><a href="<?php echo ($profile) ? 'logout' : 'login'; ?>.php?arg=<?php echo $_SESSION['currentArg'];?>"><?php echo ($profile) ? 'Logout' : 'Login'; ?></a></div> 
 		</div>
 
@@ -62,32 +64,34 @@ mysqli_multi_query($db, $sql);
 			<h2>Most Heterodox</h2>
 			<div class="panel" data-container-id="because">
 				<?php
-				$result = mysqli_store_result($db);
-					if (mysqli_num_rows($result) > 0) {
-						$lineColorIterator = 0;
-						echo "<ul>\n";
-						while($row = mysqli_fetch_row($result)) {
-							if ($lineColorIterator % 2  == 0) { 
-							echo "<li class=\"lineItem\">";
+					if (isset($profile)) {
+						$result = mysqli_store_result($db);
+						if (mysqli_num_rows($result) > 0) {
+							$lineColorIterator = 0;
+							echo "<ul>\n";
+							while($row = mysqli_fetch_row($result)) {
+								if ($lineColorIterator % 2  == 0) { 
+								echo "<li class=\"lineItem\">";
+								}
+								else{
+								echo "<li class=\"lineItem\" style=\"background-color: var(--cddbLiteGrey);\">";
+								}
+								$lineColorIterator++;
+								$aOrR = ($row[1]==1) ? "Accept" : "Reject";
+								$doOrDont = ($row[1]==1) ? "don't" : "do";
+								echo "<p class=\"assocArg\">You ".$aOrR.": <a href=".$baseURL."?arg=".$row[0].">".htmlspecialchars($row[6])."</a> ".($row[4]*100)."% ".$doOrDont."</p>
+								</li>";
 							}
-							else{
-							echo "<li class=\"lineItem\" style=\"background-color: var(--cddbLiteGrey);\">";
+							echo "</ul>\n";
+							unset($row);
+							while (mysqli_more_results($db)) {
+								mysqli_next_result($db);
 							}
-							$lineColorIterator++;
-							$aOrR = ($row[1]==1) ? "Accept" : "Reject";
-							$doOrDont = ($row[1]==1) ? "don't" : "do";
-							echo "<p class=\"assocArg\">You ".$aOrR.": <a href=".$baseURL."?arg=".$row[0].">".htmlspecialchars($row[6])."</a> ".($row[4]*100)."% ".$doOrDont."</p>
-							</li>";
-						}
-						echo "</ul>\n";
-						unset($row);
-						while (mysqli_more_results($db)) {
-							mysqli_next_result($db);
 						}
 					}
 					else {
-						echo "No results - You're either basic AFor haven't made your opinion known on enough arguments";
-					}
+							echo "No results - Log in to see results. If you ARE logged in... well go be controversial already! For the sake of seeding the database.";
+						}
 				?>
 			</div>
 		</div> 

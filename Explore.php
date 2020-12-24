@@ -38,9 +38,9 @@ mysqli_multi_query($db, $sql);
 	<body>
 
 		<div id="mastHead" class="container">
-			<h1>Vestigette</h1>
-			<div><a href="index.php?arg=<?php echo $_SESSION['currentArg'];?>">Return to Previous</a></div>
+			<h1><a href="index.php?arg=<?php echo $_SESSION['currentArg'];?>">Vestigette</a></h1>
 			<div><a href="About.php?arg=<?php echo $_SESSION['currentArg'];?>">About</a></div>
+			<div style="border-bottom: .2rem solid var(--cddbWhite);">Explore</div>
 			<div><a href="Profile.php?arg=<?php echo $_SESSION['currentArg'];?>">Profile</a></div>
 			<div><a href="<?php echo ($profile) ? 'logout' : 'login'; ?>.php?arg=<?php echo $_SESSION['currentArg'];?>"><?php echo ($profile) ? 'Logout' : 'Login'; ?></a></div> 
 		</div>

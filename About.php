@@ -29,8 +29,8 @@ $profile = isset($_SESSION['profile']) ? $_SESSION['profile'] : null;
 	<body>
 
 		<div id="mastHead" class="container">
-			<h1>Vestigette</h1>
-			<div><a href="index.php?arg=<?php echo $_SESSION['currentArg'];?>">Return to Previous</a></div>
+			<h1><a href="index.php?arg=<?php echo $_SESSION['currentArg'];?>">Vestigette</a></h1>
+			<div style="border-bottom: .2rem solid var(--cddbWhite);">About</div>
 			<div><a href="Explore.php?arg=<?php echo $_SESSION['currentArg'];?>">Explore</a></div>
 			<div><a href="Profile.php?arg=<?php echo $_SESSION['currentArg'];?>">Profile</a></div>
 			<div><a href="<?php echo ($profile) ? 'logout' : 'login'; ?>.php?arg=<?php echo $_SESSION['currentArg'];?>"><?php echo ($profile) ? 'Logout' : 'Login'; ?></a></div> 
@@ -73,23 +73,16 @@ $profile = isset($_SESSION['profile']) ? $_SESSION['profile'] : null;
 				Users aim to develop and track their own personal line of reasoning around any given topic within the Vestigette framework. To ensure their reasoning is optimally compelling while consistent with principles and beliefs previously tracked involves continuous reconsideration and fine-tuning.
 				<br>
 				<br>
-				Accept or Reject<br>
-				&emsp;Options if you Accept:<br>
-				&emsp;&emsp;1. Weigh in, distributing proportional significance to arguments connected as <span style="color: var(--cddbBlue); font-weight:bold;">Because</span> arguments<br>
-				&emsp;&emsp;&emsp;1a - Connect an argument not yet associated<br>
-				&emsp;&emsp;2. Weigh in, distributing proportional significance to arguments connected as <span style="color: var(--cddbGreen); font-weight:bold;">Therefore</span> arguments<br>
-				&emsp;&emsp;&emsp;2a - Connect an argument not yet associated<br>
-				&emsp;&emsp;3. Vote on the best phrasing of the argument<br>
-				&emsp;&emsp;&emsp;3a - Endorse a pre-existing phrasing<br>
-				&emsp;&emsp;&emsp;3b - Add your own preferred phrasing to endorse<br>
-				&emsp;&emsp;4. Weigh in on the best explication (link to content)<br>
-				&emsp;&emsp;&emsp;4a - Endorse a pre-existing submission<br>
-				&emsp;&emsp;&emsp;4b - Add your own preferred and endorse<br>
-				&emsp;Option if you Reject:<br>
+				Start with <span style="color: var(--cddbGreen); font-weight:bold;">Accept</span> or <span style="color: var(--cddbRed); font-weight:bold;">Reject</span><br>
+				&emsp;If you <span style="color: var(--cddbGreen); font-weight:bold;">Accept</span>:<br>
+				&emsp;&emsp;1. Weigh in, distributing proportional significance to arguments connected as either <span style="color: var(--cddbBlue); font-weight:bold;">Because</span> or <span style="color: var(--cddbGreen); font-weight:bold;">Therefore</span> arguments<br>
+				&emsp;&emsp;2. Vote on the best <span style="color: var(--cddbBlack); font-weight:bold;">Phrasing</span> of the argument<br>
+				&emsp;&emsp;3. Vote on the best <span style="color: var(--cddbBlack); font-weight:bold;">Explication</span> (link to content)<br>
+				&emsp;If you <span style="color: var(--cddbRed); font-weight:bold;">Reject</span>:<br>
 				&emsp;&emsp;1. Weigh in, distributing proportional significance to arguments connected as <span style="color: var(--cddbRed); font-weight:bold;">Rebuttal</span> arguments<br>
 				<br>
 				<br>
-				Users interact by first choosing to "Accept" or "Reject" an argument. Accepting an argument gives a user the right to endorse which arguments should be linked as its <span style="color: var(--cddbBlue); font-weight:bold;">Because</span> or <span style="color: var(--cddbGreen); font-weight:bold;">Therefore</span> types. Users that accept an argument also have the right to improve the argument by choosing a Phrasing (&#x270e;) that better puts the argument forth or to promote a preferred Explication (&#x2318;) - a url link to any kind of content: news article, academic paper, explainer video, meme - that may better expand upon or exemplify the point the argument makes. Rejecting the argument, on the other hand, gives those users who are its opponents the right to prioritize arguments linked to it in order to refute it as its <span style="color: var(--cddbRed); font-weight:bold;">Rebuttal</span> types.
+				Users interact by first choosing to "Accept" or "Reject" an argument. Accepting an argument gives a user the right to endorse which arguments should be linked as its <span style="color: var(--cddbBlue); font-weight:bold;">Because</span> or <span style="color: var(--cddbGreen); font-weight:bold;">Therefore</span> types. Users that accept an argument also have the right to improve the argument by choosing a <span style="color: var(--cddbBlack); font-weight:bold;">Phrasing (&#x270e;)</span> that better puts the argument forth or to promote a preferred <span style="color: var(--cddbBlack); font-weight:bold;">Explication (&#x2318;)</span> - a url link to any kind of content: news article, academic paper, explainer video, meme - that may better expand upon or exemplify the point the argument makes. Rejecting the argument, on the other hand, gives those users who are its opponents the right to prioritize arguments linked to it in order to refute it as its <span style="color: var(--cddbRed); font-weight:bold;">Rebuttal</span> types.
 				<br>
 				<br>
 				The 3 types of links from the primary argument at hand to others are applied with a weight. Each user can give their full weight to a single argument of any type they have rights to, or distribute weight proportionally among many. The circular chart to the left of each argument becomes a button upon choosing to weigh in. Apply weight to arguments of your choosing by clicking the circle button to its left. Each click gives an argument more weight relative to the others. Once satisfied with the weighting, submit your endorsement and add to the collective whole.</p>

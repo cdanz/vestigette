@@ -364,6 +364,7 @@ button.hidden {
 	flex-flow: row nowrap;
 	justify-content: flex-start;
 	min-height: 4rem;
+	wrap: nowrap;
 }
 .panel li:last-child {
 	border-bottom: none;
