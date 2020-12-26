@@ -1,4 +1,5 @@
 <?php
+	if(isset($_SESSION['profile'])){
 		switch ($_POST["buttonClicked"]) {
 	        case "accept":
 	            $opinion=1;
@@ -265,4 +266,5 @@
 				break;
 
 	    }
+	}
 ?>

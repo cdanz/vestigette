@@ -1,5 +1,8 @@
 <?php
 session_start();
+if(!isset($_SESSION['profile'])){
+	header('Location: /index.php?arg='.$_SESSION['currentArg']);
+}
 include("${_SERVER['DOCUMENT_ROOT']}/includes/dbconnect.php");
 $baseURL = "/index.php";
 $assertion = $_POST["assertion"];
