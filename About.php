@@ -47,14 +47,13 @@ $profile = isset($_SESSION['profile']) ? $_SESSION['profile'] : null;
 				<br>
 				<p><strong>Why?</strong></p>
 				<br>
-				<p>There is a science fiction trope where a great technological power is discovered, but rather than telling the world the protagonist wisely decides to hide it away or even destroy it. It would be too great a risk to leave society to its own devices with it because society cannot be trusted to act responsibly. "Humanity is just not ready" - the lesson. But will humanity EVER be ready?</p>
-				<br>
-				<p>Are we not the same, fundamentally flawed, creatures we have always been? Yes our technology advances but us?</p>
-				<br>
-				<p>This question should not depress us. We are not so bad. There is a great deal of good to be found in us. There is a great deal of wisdom. There is a great deal of sense. But there is an impression that too often what is right is not what rises to the top. The question Vestigette aims to answer is: How do we more readily identify good sense to outline the common wisdom?</p>
-				<br>
-				<p>Our most prominent systems of communicating today are based on what most piques interest. That is not a good system. What would be? Vestigette is an attempt at collective decision making. My attempt to determine precisely: what is what.</p>
-				</p>
+				<p>There’s an old sci-fi trope where this great technology is discovered. But the hero decides it must be destroyed. It’s clear humanity is not mature enough to be trusted with such power.
+				<br><br>
+				The thing is, who is to say humanity can ever mature further? And who is to say we have not already unleashed technology we will not make good decisions with? 
+				<br><br>
+				A reason for hope is we are not so bad. There is a great deal of good to be found in us. There is a great deal of wisdom. There is a great deal of sense. But there also is an impression that too often what is right is not what is rising to the top. The question Vestigette aims to answer then is: how do we access the best of humanity to guide us?
+				<br><br>
+				Through the singleminded pursuit of fair representation.</p>
 				<br>
 				<p><strong>What does "Vestigette" mean?</strong></p>
 				<br>
