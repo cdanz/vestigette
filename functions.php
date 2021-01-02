@@ -204,7 +204,7 @@
 					echo "Query Failed";
 				
             	break;
-	            //Submit a new way of putting forth
+	            //Submit a new way of putting forth - TODO Likely no different than promote. remove until data schema changes
             case "newPutForth":
             	$phrased = mysqli_real_escape_string($db,trim($_POST["newPutForth"]));
 	            $argAtHand = intval($_SESSION['currentArg']);
@@ -251,7 +251,7 @@
 				else 
 					echo "Query Failed";
 	            break;
-			case "newExplication":
+			case "newExplication": //may not need at all until we make the data model for explications more sophisticated.
 				$phrased = trim($_POST["newExplication"]);
 				$argAtHand = intval($_SESSION['currentArg']);
 				$profileID = intval($_SESSION['profile']);

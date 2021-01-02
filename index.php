@@ -104,10 +104,10 @@ function generateLinkLines($links) {
 				<p class=\"assocArg\"><a href=\"${line[1]}\">${line[1]}</a></p>
 				<div class=\"opinion\">
 				<form method=\"POST\" class=\"buttons\">
-					<input type=\"hidden\" name=\"useInstead\" value=\"${line[0]}\" />"; 
+					<input type=\"hidden\" name=\"promoteExplication\" value=\"${line[1]}\" />"; 
 
 					if ((isset($opinion)) && ($opinion > 0)) { 
-					echo "<button type=\"submit\" class=\"button instead\" name=\"buttonClicked\" value=\"promoteExplication\">Endorse</button>";
+					echo "<button type=\"submit\" class=\"button instead\" name=\"buttonClicked\" value=\"promoteExplication\">Endorse</button>";	
 				}
 				echo "</form>
 			</div>
@@ -361,8 +361,8 @@ if ((isset($opinion)) && ($opinion > 0)) {
 ?>
 						<div class="assert">
 							<form class="form-inline" method="POST">
-								<input type="text" placeholder="Link a study, article, chart, meme, anything that expands upon or illuminates the argument" name="newExplication">
-								<button type="submit" class="button addNew" name="buttonClicked" value="newExplication">Introduce</button>
+								<input type="text" placeholder="Link a study, article, chart, meme, anything that expands upon or illuminates the argument" name="promoteExplication">
+								<button type="submit" class="button addNew" name="buttonClicked" value="promoteExplication">Introduce</button>
 							</form>
 						</div>
 <?php

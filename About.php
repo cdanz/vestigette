@@ -47,13 +47,13 @@ $profile = isset($_SESSION['profile']) ? $_SESSION['profile'] : null;
 				<br>
 				<p><strong>Why?</strong></p>
 				<br>
-				<p>There’s an old sci-fi trope where this great technology is discovered. But the hero decides it must be destroyed. It’s clear humanity is not mature enough to be trusted with such power.
+				<p>Consider the sci-fi trope where this great technology is discovered but, instead of sharing it with the world, the hero decides it must be destroyed. Humanity is sadly not mature enough to be trusted with such power.
 				<br><br>
-				The thing is, who is to say humanity can ever mature further? And who is to say we have not already unleashed technology we will not make good decisions with? 
+				The thing is, who is to say humanity can ever mature any further than we already have? And who is to say we have not already unleashed technology we will not make good decisions with? How do we make the most of the hand we have been dealt?
 				<br><br>
 				A reason for hope is we are not so bad. There is a great deal of good to be found in us. There is a great deal of wisdom. There is a great deal of sense. But there also is an impression that too often what is right is not what is rising to the top. The question Vestigette aims to answer then is: how do we access the best of humanity to guide us?
 				<br><br>
-				Through the singleminded pursuit of fair representation.</p>
+				Westigette aims to do this through the singleminded pursuit of fair representation.</p>
 				<br>
 				<p><strong>What does "Vestigette" mean?</strong></p>
 				<br>
@@ -69,22 +69,25 @@ $profile = isset($_SESSION['profile']) ? $_SESSION['profile'] : null;
 				<p style="white-space:normal;">Vestigette is an abstraction of common argument mapping techniques. Each argument is an assertion, phrased as its proponents prefer best. Arguments are linked together in 3 different ways: those that (1) precede - <span style="color: var(--cddbBlue); font-weight:bold;">Because</span>, (2) follow - <span style="color: var(--cddbGreen); font-weight:bold;">Therefore</span>, or (3) refute - <span style="color: var(--cddbRed); font-weight:bold;">Rebuttal</span>.
 				<br>
 				<br>
-				Users aim to develop and track their own personal line of reasoning around any given topic within the Vestigette framework. To ensure their reasoning is optimally compelling while consistent with principles and beliefs previously tracked involves continuous reconsideration and fine-tuning.
+				<span style="color: var(--cddbBlue); text-decoration: underline;"><a href="https://youtu.be/gSlucDTMsmA">30 second Tutorial</a></span>
+				<br>
+				<br>
+				Users develop and track their own personal line of reasoning for a given topic within the Vestigette framework. Maintaining a line of reasoning that is optimally compelling while consistent with principles and beliefs previously tracked involves continuous reconsideration and fine-tuning. This collective effort produces the common wisdom mapped by Vestigette.
+				<br>
+				<br>
+				Users interact with an argument by first choosing to "Accept" or "Reject" it. Accepting an argument gives a user the right to endorse which other arguments should be linked as its <span style="color: var(--cddbBlue); font-weight:bold;">Because</span> or <span style="color: var(--cddbGreen); font-weight:bold;">Therefore</span> types. Users that accept an argument also have the right to improve the argument by choosing a <span style="color: var(--cddbBlack); font-weight:bold;">Phrasing (&#x270e;)</span> that better puts the argument forth or to promote a preferred <span style="color: var(--cddbBlack); font-weight:bold;">Explication (&#x2318;)</span> - a url link to any kind of content: news article, academic paper, explainer video, meme - that better exemplify, expands upon or gives evidence toward the point of the the argument. Rejecting the argument, on the other hand, gives those users who are its opponents the right to prioritize arguments linked to it in order to refute it as its <span style="color: var(--cddbRed); font-weight:bold;">Rebuttal</span> types.
 				<br>
 				<br>
 				Start with <span style="color: var(--cddbGreen); font-weight:bold;">Accept</span> or <span style="color: var(--cddbRed); font-weight:bold;">Reject</span><br>
-				&emsp;If you <span style="color: var(--cddbGreen); font-weight:bold;">Accept</span>:<br>
-				&emsp;&emsp;1. Weigh in, distributing proportional significance to arguments connected as either <span style="color: var(--cddbBlue); font-weight:bold;">Because</span> or <span style="color: var(--cddbGreen); font-weight:bold;">Therefore</span> arguments<br>
-				&emsp;&emsp;2. Vote on the best <span style="color: var(--cddbBlack); font-weight:bold;">Phrasing</span> of the argument<br>
-				&emsp;&emsp;3. Vote on the best <span style="color: var(--cddbBlack); font-weight:bold;">Explication</span> (link to content)<br>
-				&emsp;If you <span style="color: var(--cddbRed); font-weight:bold;">Reject</span>:<br>
-				&emsp;&emsp;1. Weigh in, distributing proportional significance to arguments connected as <span style="color: var(--cddbRed); font-weight:bold;">Rebuttal</span> arguments<br>
+				&emsp;&#x2022;  If you <span style="color: var(--cddbGreen); font-weight:bold;">Accept</span>:<br>
+				&emsp;&emsp;&#x2022;  1. Weigh in, distributing proportional significance to arguments connected as either <span style="color: var(--cddbBlue); font-weight:bold;">Because</span> or <span style="color: var(--cddbGreen); font-weight:bold;">Therefore</span> arguments<br>
+				&emsp;&emsp;&#x2022;  2. Vote on the best <span style="color: var(--cddbBlack); font-weight:bold;">Phrasing</span> of the argument<br>
+				&emsp;&emsp;&#x2022;  3. Vote on the best <span style="color: var(--cddbBlack); font-weight:bold;">Explication</span> (link to content)<br>
+				&emsp;&#x2022;  If you <span style="color: var(--cddbRed); font-weight:bold;">Reject</span>:<br>
+				&emsp;&emsp;&#x2022;  1. Weigh in, distributing proportional significance to arguments connected as <span style="color: var(--cddbRed); font-weight:bold;">Rebuttal</span> arguments<br>
 				<br>
 				<br>
-				Users interact by first choosing to "Accept" or "Reject" an argument. Accepting an argument gives a user the right to endorse which arguments should be linked as its <span style="color: var(--cddbBlue); font-weight:bold;">Because</span> or <span style="color: var(--cddbGreen); font-weight:bold;">Therefore</span> types. Users that accept an argument also have the right to improve the argument by choosing a <span style="color: var(--cddbBlack); font-weight:bold;">Phrasing (&#x270e;)</span> that better puts the argument forth or to promote a preferred <span style="color: var(--cddbBlack); font-weight:bold;">Explication (&#x2318;)</span> - a url link to any kind of content: news article, academic paper, explainer video, meme - that may better expand upon or exemplify the point the argument makes. Rejecting the argument, on the other hand, gives those users who are its opponents the right to prioritize arguments linked to it in order to refute it as its <span style="color: var(--cddbRed); font-weight:bold;">Rebuttal</span> types.
-				<br>
-				<br>
-				The 3 types of links from the primary argument at hand to others are applied with a weight. Each user can give their full weight to a single argument of any type they have rights to, or distribute weight proportionally among many. The circular chart to the left of each argument becomes a button upon choosing to weigh in. Apply weight to arguments of your choosing by clicking the circle button to its left. Each click gives an argument more weight relative to the others. Once satisfied with the weighting, submit your endorsement and add to the collective whole.</p>
+				The 3 types of links from the primary argument at hand to others are applied with a <span style="font-weight:bold;">weight</span>. Each user can give their full <span style="font-weight:bold;">weight</span> to a single argument of any type they have rights to, or distribute <span style="font-weight:bold;">weight</span> proportionally among many. The circular chart to the left of each argument becomes a button upon choosing to <span style="font-weight:bold;">weigh in</span>. Apply <span style="font-weight:bold;">weight</span> to arguments of your choosing by clicking the circle button to its left. Each click gives an argument more <span style="font-weight:bold;">weight</span> relative to the others. Once satisfied, submit your endorsement and add to the collective whole.</p>
 				<br>
 			</div>
 		</div> 
