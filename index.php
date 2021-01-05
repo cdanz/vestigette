@@ -1,6 +1,10 @@
 <?php 
 session_start();
-$_SESSION['currentArg'] = intval($_GET["arg"]); 
+$_SESSION['currentArg'] = intval($_GET["arg"]);
+//Send to help arg (75) if no other arg selected
+if ($_SESSION['currentArg'] == 0){
+	$_SESSION['currentArg'] = 75; 
+}
 include("${_SERVER['DOCUMENT_ROOT']}/includes/dbconnect.php");
 require_once("${_SERVER['DOCUMENT_ROOT']}/query_current_argument.php");
 //To aid in seeding with fake user endorsements - display profile for those users
@@ -50,7 +54,12 @@ unset($onClick);
 		echo "</ul>\n";
 		unset($line);
 	} else {
-		echo "0 results";
+		if ($type == "rebuttal") {
+			echo "No Results - Reject the argument to be the first to endorse";
+		}
+		else {
+			echo "No Results - Accept the argument to be the first to endorse";
+		}
 	}
 }
 function generatePhraseLines($alts) {
@@ -173,6 +182,9 @@ if ((isset($opinion)) && ($opinion > 0)) {
 if (isset($because)) {
 	generateTypeLines("because", $because);
 }
+else {
+	echo "No Results - Accept the argument to be the first to endorse";
+}
 ?>
 				<div class="assert hidden">
 					<form class="form-inline" method="POST" action="checkpoint.php">
@@ -251,6 +263,9 @@ if ((isset($opinion)) && ($opinion < 0)) {
 if (isset($rebuttal)) {
 	generateTypeLines("rebuttal", $rebuttal);
 }
+else {
+	echo "No Results - Reject the argument to be the first to endorse";
+}
 ?>
 				<div class="assert hidden">
 					<form class="form-inline" method="POST" action="checkpoint.php">
@@ -284,6 +299,9 @@ if ((isset($opinion)) && ($opinion > 0)) {
 <?php
 if (isset($therefore)) {
 	generateTypeLines("therefore", $therefore);
+}
+else {
+	echo "No Results - Accept the argument to be the first to endorse";
 }
 ?>
 				<div class="assert hidden">
