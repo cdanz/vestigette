@@ -31,6 +31,9 @@
 			}
 			$logoutURL = "/logout.php?arg=".$_SESSION['currentArg']; 
 		}	
+	if (!isset($_SESSION['currentArg'])) {
+		$_SESSION['currentArg'] = null; 
+	}
 ?>
 <!DOCTYPE html>
 <html>
