@@ -158,9 +158,11 @@ TODO: Let's not forget to genericize these buttons to apply to more than just #b
 	padding-left: 0.3rem;
 	padding-right: 0.3rem;
 }
+/*
 .opinion button:not(:last-child) {
-	border-right: none; /* Prevent double borders */
+	border-right: none; /-* Prevent double borders *-/
 }
+*/
 button.instead {
 	border-color: var(--cddbBlack);
 	background-color: var(--cddbBlack);

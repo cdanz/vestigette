@@ -1,5 +1,8 @@
 <?php
 session_start();
+if($_POST['csrfKey'] != $_SESSION['csrfKey']) {
+	die("Unauthorized source!");
+}
 if(!isset($_SESSION['profile'])){
 	header('Location: /index.php?arg='.$_SESSION['currentArg']);
 }
@@ -9,7 +12,7 @@ $assertion = $_POST["assertion"];
 $argID = $_SESSION['currentArg'];
 $type = $_POST["type"];
 
-function IsNullOrEmptyString($str){
+function IsNullOrEmptyString($str) {
 	return (!isset($str) || trim($str) === '');
 }
 

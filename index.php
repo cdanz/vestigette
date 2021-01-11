@@ -1,5 +1,8 @@
 <?php 
 session_start();
+$csrfToken = md5(uniqid(mt_rand(),true));
+$_SESSION['csrfToken'] = $csrfToken;
+
 $_SESSION['currentArg'] = intval($_GET["arg"]);
 //Send to help arg (75) if no other arg selected
 if ($_SESSION['currentArg'] == 0){
@@ -24,6 +27,11 @@ if (isset($_POST["buttonClicked"])) {
 }
 mysqli_close($db);
 	
+
+function addCSRFtoken() {
+	global $csrfToken;
+	echo "\n<input type=\"hidden\" name=\"csrfKey\" value=\"" . $csrfToken . "\" />";
+}
 
 function generateTypeLines($type, $typeArray) {
 	global $baseURL;
@@ -78,7 +86,7 @@ function generatePhraseLines($alts) {
 						<form method=\"POST\" class=\"rewrite form-inline hidden\" accept-charset=\"utf-8\">
 							<input type=\"text\" value=\"".htmlspecialchars($line[1])."\" name=\"replacement\">
 							<input type=\"hidden\" name=\"userPhraseID\" value=\"${line[2]}\" />
-							<button type=\"submit\" class=\"button adjust\" name=\"buttonClicked\" value=\"replacePutForth\">Update</button>
+							<button type=\"submit\" class=\"button adjust\" name=\"buttonClicked\" value=\"replacePutForth\">Update</button>" . addCSRFtoken() . "
 						</form></div>";
 					}
 					else if(isset($userPhrasingID) && ($userPhrasingID == $line[2])) {
@@ -90,7 +98,7 @@ function generatePhraseLines($alts) {
 						<p class=\"assocArg\">".htmlspecialchars($line[1])." <span style=\"color: var(--cddbGrey);font-size: 0.75rem;\">(Votes: ${line[0]})</span></p>
 						<div class=\"opinion\"><form method=\"POST\" class=\"buttons\" accept-charset=\"utf-8\">
 						<input type=\"hidden\" name=\"promotePutForth\" value=\"${line[2]}\" />
-							<button type=\"submit\" class=\"button instead\" name=\"buttonClicked\" value=\"promotePutForth\">Endorse</button>
+							<button type=\"submit\" class=\"button instead\" name=\"buttonClicked\" value=\"promotePutForth\">Endorse</button>" . addCSRFtoken() . "
 						</form></div>";
 				}
 				else echo "			<li class=\"lineItem\">
@@ -118,6 +126,7 @@ function generateLinkLines($links) {
 					if ((isset($opinion)) && ($opinion > 0)) { 
 					echo "<button type=\"submit\" class=\"button instead\" name=\"buttonClicked\" value=\"promoteExplication\">Endorse</button>";	
 				}
+				addCSRFtoken();
 				echo "</form>
 			</div>
 			</li>";
@@ -171,6 +180,7 @@ if ((isset($opinion)) && ($opinion > 0)) {
 			<button type="submit" class="button endorse hidden" name="buttonClicked" value="weighBecause" data-container-id="because">Endorse</button>
 <!-- This hidden field has its value updated with an array as a string serving as the "weigh in" input -->
 			<input type="hidden" name="becauseWeighInWith" id="becauseWeighInWith" value="" />
+			<?php addCSRFtoken() ?>
 		</form>
 		<button class="button weighIn" data-container-id="because">Weigh In</button>
 	</div>
@@ -192,6 +202,7 @@ else {
 						<input type="text" placeholder="An assertion not yet listed here" name="assertion">
 						<input type="hidden" name="type" value="Because" />
 						<button type="submit" class="button addNew" name="buttonClicked" value="addAssertion" data-container-id="because">Submit</button>
+						<?php addCSRFtoken() ?>
 					</form>
 				</div>
 			</div>
@@ -221,6 +232,7 @@ if (isset($_SESSION['profile'])) {
 	<button type=\"submit\" class=\"button accept acceptOpen\" name=\"buttonClicked\">Accept</button>
 	<button type=\"submit\" class=\"button reject rejectOpen\" name=\"buttonClicked\">Reject</button>";
 }
+addCSRFtoken();
 echo "\n</form>";
 ?>
 			</div>
@@ -252,6 +264,7 @@ if ((isset($opinion)) && ($opinion < 0)) {
 			<button type="submit" class="button endorse hidden" name="buttonClicked" value="weighRebuttal" data-container-id="rebuttal">Endorse</button>
 <!-- This hidden field has its value updated with an array as a string serving as the "weigh in" input -->
 			<input type="hidden" name="rebuttalWeighInWith" id="rebuttalWeighInWith" value="" />
+			<?php addCSRFtoken() ?>
 		</form>
 		<button class="button weighIn" data-container-id="rebuttal">Weigh In</button>
 	</div>
@@ -273,6 +286,7 @@ else {
 						<input type="text" placeholder="An assertion not yet listed here" name="assertion">
 						<input type="hidden" name="type" value="Rebuttal" />
 						<button type="submit" class="button addNew" name="buttonClicked" value="addAssertion" data-container-id="rebuttal">Submit</button>
+						<?php addCSRFtoken() ?>
 					</form>
 				</div>
 			</div>
@@ -289,6 +303,7 @@ if ((isset($opinion)) && ($opinion > 0)) {
 			<button type="submit" class="button endorse hidden" name="buttonClicked" value="weighTherefore" data-container-id="therefore">Endorse</button>
 <!-- This hidden field has its value updated with an array as a string serving as the "weigh in" input -->
 			<input type="hidden" name="thereforeWeighInWith" id="thereforeWeighInWith" value="" />
+			<?php addCSRFtoken() ?>
 		</form>
 		<button class="button weighIn" data-container-id="therefore">Weigh In</button>
 	</div>
@@ -310,6 +325,7 @@ else {
 						<input type="text" placeholder="An assertion not yet listed here" name="assertion">
 						<input type="hidden" name="type" value="Therefore" />
 						<button type="submit" class="button addNew" name="buttonClicked" value="addAssertion" data-container-id="therefore">Submit</button>
+						<?php addCSRFtoken() ?>
 					</form>
 				</div>
 			</div>
@@ -352,6 +368,7 @@ if ((isset($opinion)) && ($opinion > 0)) {
 							<form class="form-inline" method="POST" accept-charset="utf-8">
 								<input type="text" placeholder="Better said..." name="newPutForth">
 								<button type="submit" class="button addNew" name="buttonClicked" value="newPutForth">Introduce</button>
+								<?php addCSRFtoken() ?>
 							</form>
 						</div>
 <?php
@@ -381,6 +398,7 @@ if ((isset($opinion)) && ($opinion > 0)) {
 							<form class="form-inline" method="POST" accept-charset="utf-8">
 								<input type="text" placeholder="Link a study, article, chart, meme, anything that expands upon or illuminates the argument" name="promoteExplication">
 								<button type="submit" class="button addNew" name="buttonClicked" value="promoteExplication">Introduce</button>
+								<?php addCSRFtoken() ?>
 							</form>
 						</div>
 <?php
