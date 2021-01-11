@@ -75,7 +75,7 @@ function generatePhraseLines($alts) {
 						<p class=\"assocArg rewrite\">".htmlspecialchars($line[1])." <span style=\"color: var(--cddbGrey);font-size: 0.75rem;\">(Votes: ${line[0]})</span></p>
 						<div class=\"opinion\">
 							<button type=\"submit\" class=\"button adjust rewrite\" id=\"rewriteBtn\" name=\"buttonClicked\" value=\"promotePutForth\">Edit Your Entry</button>
-						<form method=\"POST\" class=\"rewrite form-inline hidden\">
+						<form method=\"POST\" class=\"rewrite form-inline hidden\" accept-charset=\"utf-8\">
 							<input type=\"text\" value=\"".htmlspecialchars($line[1])."\" name=\"replacement\">
 							<input type=\"hidden\" name=\"userPhraseID\" value=\"${line[2]}\" />
 							<button type=\"submit\" class=\"button adjust\" name=\"buttonClicked\" value=\"replacePutForth\">Update</button>
@@ -88,7 +88,7 @@ function generatePhraseLines($alts) {
 					}
 					else echo "			<li class=\"lineItem\">
 						<p class=\"assocArg\">".htmlspecialchars($line[1])." <span style=\"color: var(--cddbGrey);font-size: 0.75rem;\">(Votes: ${line[0]})</span></p>
-						<div class=\"opinion\"><form method=\"POST\" class=\"buttons\">
+						<div class=\"opinion\"><form method=\"POST\" class=\"buttons\" accept-charset=\"utf-8\">
 						<input type=\"hidden\" name=\"promotePutForth\" value=\"${line[2]}\" />
 							<button type=\"submit\" class=\"button instead\" name=\"buttonClicked\" value=\"promotePutForth\">Endorse</button>
 						</form></div>";
@@ -112,7 +112,7 @@ function generateLinkLines($links) {
 			echo "			<li class=\"lineItem\">
 				<p class=\"assocArg\"><a href=\"${line[1]}\">${line[1]}</a></p>
 				<div class=\"opinion\">
-				<form method=\"POST\" class=\"buttons\">
+				<form method=\"POST\" class=\"buttons\" accept-charset=\"utf-8\">
 					<input type=\"hidden\" name=\"promoteExplication\" value=\"${line[1]}\" />"; 
 
 					if ((isset($opinion)) && ($opinion > 0)) { 
@@ -167,7 +167,7 @@ if ((isset($opinion)) && ($opinion > 0)) {
 ?>
 	<div class="buttons">
 		<button class="button reset hidden" name="buttonClicked" value="weighBecause" data-container-id="because"><span>&#x27F2;</span></button>
-		<form method="POST"> 
+		<form method="POST" accept-charset="utf-8">
 			<button type="submit" class="button endorse hidden" name="buttonClicked" value="weighBecause" data-container-id="because">Endorse</button>
 <!-- This hidden field has its value updated with an array as a string serving as the "weigh in" input -->
 			<input type="hidden" name="becauseWeighInWith" id="becauseWeighInWith" value="" />
@@ -187,7 +187,7 @@ else {
 }
 ?>
 				<div class="assert hidden">
-					<form class="form-inline" method="POST" action="checkpoint.php">
+					<form class="form-inline" method="POST" action="checkpoint.php" accept-charset="utf-8">
 						<label for="assertion">Add Unique:</label>
 						<input type="text" placeholder="An assertion not yet listed here" name="assertion">
 						<input type="hidden" name="type" value="Because" />
@@ -205,7 +205,7 @@ else {
 $accept = 'Open';
 $reject = 'Set';
 if (isset($_SESSION['profile'])) {
-	echo "<form method=\"POST\" class=\"buttons\" >";
+	echo "<form method=\"POST\" class=\"buttons\" accept-charset=\"utf-8\">";
 	if ($opinion == 0) { 
 		$reject = 'Open';
 	}
@@ -217,7 +217,7 @@ if (isset($_SESSION['profile'])) {
 		<button type=\"submit\" class=\"button accept accept$accept\" name=\"buttonClicked\" value=\"accept\">Accept" . (($accept == 'Set') ? "ed" : "") . "</button>
 		<button type=\"submit\" class=\"button reject reject$reject\" name=\"buttonClicked\" value=\"reject\">Reject" . (($reject == 'Set') ? "ed" : "") . "</button>";
 } else {
-	echo "<form method=\"GET\" class=\"buttons\" action=\"login.php?arg=" . $_SESSION['currentArg'] . "\">
+	echo "<form method=\"GET\" class=\"buttons\" action=\"login.php?arg=" . $_SESSION['currentArg'] . "\" accept-charset=\"utf-8\">
 	<button type=\"submit\" class=\"button accept acceptOpen\" name=\"buttonClicked\">Accept</button>
 	<button type=\"submit\" class=\"button reject rejectOpen\" name=\"buttonClicked\">Reject</button>";
 }
@@ -248,7 +248,7 @@ if ((isset($opinion)) && ($opinion < 0)) {
 ?>
 	<div class="buttons">
 		<button class="button reset hidden" name="buttonClicked" value="weighRebuttal" data-container-id="rebuttal"><span>&#x27F2;</span></button>
-		<form method="POST"> 
+		<form method="POST" accept-charset="utf-8">
 			<button type="submit" class="button endorse hidden" name="buttonClicked" value="weighRebuttal" data-container-id="rebuttal">Endorse</button>
 <!-- This hidden field has its value updated with an array as a string serving as the "weigh in" input -->
 			<input type="hidden" name="rebuttalWeighInWith" id="rebuttalWeighInWith" value="" />
@@ -268,7 +268,7 @@ else {
 }
 ?>
 				<div class="assert hidden">
-					<form class="form-inline" method="POST" action="checkpoint.php">
+					<form class="form-inline" method="POST" action="checkpoint.php" accept-charset="utf-8">
 						<label for="assertion">Add Unique:</label>
 						<input type="text" placeholder="An assertion not yet listed here" name="assertion">
 						<input type="hidden" name="type" value="Rebuttal" />
@@ -285,7 +285,7 @@ if ((isset($opinion)) && ($opinion > 0)) {
 ?>
 	<div class="buttons">
 		<button class="button reset hidden" name="buttonClicked" value="weighTherefore" data-container-id="therefore"><span>&#x27F2;</span></button>
-		<form method="POST"> 
+		<form method="POST" accept-charset="utf-8">
 			<button type="submit" class="button endorse hidden" name="buttonClicked" value="weighTherefore" data-container-id="therefore">Endorse</button>
 <!-- This hidden field has its value updated with an array as a string serving as the "weigh in" input -->
 			<input type="hidden" name="thereforeWeighInWith" id="thereforeWeighInWith" value="" />
@@ -305,7 +305,7 @@ else {
 }
 ?>
 				<div class="assert hidden">
-					<form class="form-inline" method="POST" action="checkpoint.php">
+					<form class="form-inline" method="POST" action="checkpoint.php" accept-charset="utf-8">
 						<label for="assertion">Add Unique:</label>
 						<input type="text" placeholder="An assertion not yet listed here" name="assertion">
 						<input type="hidden" name="type" value="Therefore" />
@@ -349,7 +349,7 @@ else {
 if ((isset($opinion)) && ($opinion > 0)) { 
 ?>
 						<div class="assert">
-							<form class="form-inline" method="POST">
+							<form class="form-inline" method="POST" accept-charset="utf-8">
 								<input type="text" placeholder="Better said..." name="newPutForth">
 								<button type="submit" class="button addNew" name="buttonClicked" value="newPutForth">Introduce</button>
 							</form>
@@ -378,7 +378,7 @@ if ((isset($opinion)) && ($opinion > 0)) {
 if ((isset($opinion)) && ($opinion > 0)) { 
 ?>
 						<div class="assert">
-							<form class="form-inline" method="POST">
+							<form class="form-inline" method="POST" accept-charset="utf-8">
 								<input type="text" placeholder="Link a study, article, chart, meme, anything that expands upon or illuminates the argument" name="promoteExplication">
 								<button type="submit" class="button addNew" name="buttonClicked" value="promoteExplication">Introduce</button>
 							</form>
