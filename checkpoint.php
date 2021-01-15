@@ -1,6 +1,6 @@
 <?php
 session_start();
-if($_POST['csrfKey'] != $_SESSION['csrfKey']) {
+if($_POST['csrfToken'] != $_SESSION['csrfToken']) {
 	die("Unauthorized source!");
 }
 if(!isset($_SESSION['profile'])){

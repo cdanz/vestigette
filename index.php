@@ -30,7 +30,7 @@ mysqli_close($db);
 
 function addCSRFtoken() {
 	global $csrfToken;
-	echo "\n<input type=\"hidden\" name=\"csrfKey\" value=\"" . $csrfToken . "\" />";
+	echo "\n<input type=\"hidden\" name=\"csrfToken\" value=\"" . $csrfToken . "\" />";
 }
 
 function generateTypeLines($type, $typeArray) {
