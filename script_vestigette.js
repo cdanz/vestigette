@@ -11,6 +11,17 @@ let DEBUG = true;
 
 
 /*
+Better simple nav
+*/
+function openNav() {
+	document.querySelector("#mastHead div").classList.add("shownav");
+}
+function closeNav() {
+	document.querySelector("#mastHead div").classList.remove("shownav");
+}
+
+
+/*
 Capitalize a given str.
 */
 function capitalize(str) {
@@ -160,12 +171,16 @@ function init() {
 	let limit;
 	let subLimit;
 	limit = acc.length;
-	for (i = 0; i < limit; i++) {
-		acc[i].addEventListener("click", function() {
-			panel.classList.toggle("expanded");
-			panel = this.querySelector(".panel");
-			panel.classList.toggle("expanded");
-		});
+	// only set accordion listeners if we're less than "tablet" width
+	let mql = window.matchMedia('(max-width: 800px)');
+	if (mql.matches) {
+		for (i = 0; i < limit; i++) {
+			acc[i].addEventListener("click", function() {
+				panel.classList.toggle("expanded");
+				panel = this.querySelector(".panel");
+				panel.classList.toggle("expanded");
+			});
+		}
 	}
 	//Grow main phrasing if character count is low
 	let phrasing = document.querySelector("#argument .panel p");

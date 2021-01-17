@@ -163,10 +163,15 @@ function generateLinkLines($links) {
 
 		<div id="mastHead" class="container">
 			<h1><a href="index.php?arg=<?php echo $_SESSION['currentArg'];?>">Vestigette</a></h1>
-			<div><a href="About.php?arg=<?php echo $_SESSION['currentArg'];?>">About</a></div>
-			<div><a href="Explore.php?arg=<?php echo $_SESSION['currentArg'];?>">Explore</a></div>
-			<div><a href="Profile.php?arg=<?php echo $_SESSION['currentArg'];?>">Profile</a></div>
-			<div><a href="<?php echo ($profile) ? 'logout' : 'login'; ?>.php?arg=<?php echo $_SESSION['currentArg'];?>"><?php echo ($profile) ? 'Logout' : 'Login'; ?></a></div> 
+			<div>
+				<a href="About.php?arg=<?php echo $_SESSION['currentArg'];?>">About</a>
+				<a href="Explore.php?arg=<?php echo $_SESSION['currentArg'];?>">Explore</a>
+				<a href="Profile.php?arg=<?php echo $_SESSION['currentArg'];?>">Profile</a>
+				<a href="<?php echo ($profile) ? 'logout' : 'login'; ?>.php?arg=<?php echo $_SESSION['currentArg'];?>"><?php echo ($profile) ? 'Logout' : 'Login'; ?></a>
+				<a href="#" class="closenav" onclick="closeNav()">&times;</a>
+			</div> 
+			
+			<a href="#" class="opennav" onclick="openNav()">&equiv;</a>
 		</div>
 
 		<div id="because" class="accordion container">

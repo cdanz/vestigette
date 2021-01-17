@@ -41,13 +41,73 @@ a:active {
 }
 h1 {
 	color: var(--cddbWhite);
-	font-size: 2.5rem;
+	font-size: 2rem;
 	font-weight: normal;
 	text-shadow: 0.2em 0.2em 0.2em var(--cddbRed);
 }
 h2 {
 	font-weight: bold;
 	font-size: 2rem;
+}
+
+
+#mastHead div {
+	align-items: center;
+	background-color: #000;
+	border: none;
+	border-radius: 0;
+	border-bottom: 2px solid #561211;
+	top: -55px;
+	margin: 0;
+	overflow-y: hidden; /* Disable horizontal scroll */
+	xpadding-top: 3.5vw; /* Place content 60px from the top */
+	position: fixed; /* Stay in place */
+
+	transition: top 0.5s;
+	height: 55px; /* 0 width - change this with JavaScript */
+	width: 100%;
+	z-index: 1; /* Stay on top */
+}
+#mastHead div {
+	xmargin-top: 0.5rem;
+}
+#mastHead div a {
+	margin-left: 20px;
+}
+#mastHead div a:first-child {
+	xmargin-left: 0;
+}
+#mastHead div.shownav {
+	xmargin-top: 0;
+	top: 0px;
+}
+#mastHead div.shownav a:first-child {
+	xmargin-left: 20px;
+}
+
+/* wide view====
+a.closenav,
+a.opennav {
+	display: none;
+}
+*/
+a.closenav, 
+a.opennav {
+	color: #fff;
+	display: initial;
+	font-size: 24px;
+	padding-left: 6px;
+	padding-right: 6px;
+	position: absolute;
+	text-decoration: none;
+}
+a.closenav {
+	right: 10px;
+	top: 10px;
+}
+a.opennav {
+	top: 13px;
+	right: 10px;
 }
 
 /* buttons */
@@ -241,11 +301,12 @@ button.hidden {
 }
 /* sections & containers */
 #mastHead {
-	align-items: flex-end;
+	align-items: center;
 	border: none;
 	display: flex;
+	flex-flow: column nowrap;
 	font-size: 0.8em;
-	justify-content: space-around;
+	justify-content: space-between;
 	outline: none;
 	padding: 0.5rem;
 	text-align: left;
@@ -3714,4 +3775,134 @@ input:checked + .toggle:before {
 }
 .pct100_0 .pointBtn.arc2 {
 	transform: rotate(-450.00grad);
+}
+
+
+@media only screen and (min-width: 800px) {
+	/* put nav under logo */
+	a.closenav,
+	a.opennav {
+		display: none;
+	}
+
+	#mastHead div {
+		align-items: center;
+		background-color: transparent;
+		border: none;
+		height: auto;
+		margin-top: 0.7rem;
+		position: initial;
+		width: auto;
+	}
+	#mastHead div a:first-child {
+		margin-left: 0;
+	}
+}
+
+
+@media only screen and (min-width: 1200px) {
+	/* use 3 row layout */
+	html {
+		overflow: hidden;
+	}
+	body {
+		display: flex;
+		flex-flow: row wrap;
+		overflow: hidden;
+	}
+	h1 {
+		font-size: 3rem;
+		margin-top: 3rem;
+	}
+	h2 {
+		font-size: 1.5rem;
+		height: initial;
+	}
+	#mastHead {
+		font-size: 1.1rem;
+	}
+	#mastHead div a {
+		margin-left: 4rem;
+	}
+	.accordion {
+		padding-bottom: 5rem;
+	}
+	.container {
+		overflow: hidden;
+	}
+	#because, 
+	#argument, 
+	#therefore {
+		width: 66%;
+	}
+	#mastHead, 
+	#rebuttal, 
+	#filter {
+		width: 33%;
+	}
+	#because, 
+	#mastHead {
+		height: 25vh;
+		max-height: 25vh;
+	}
+	#argument, 
+	#rebuttal {
+		height: 50vh;
+		max-height: 50vh;
+	}
+	#therefore, 
+	#fitler {
+		height: 25vh;
+		max-height: 25vh;
+	}
+
+	#because {
+		order: 1;
+	}
+	#mastHead {
+		order: 2;
+	}
+	#argument {
+		order: 3;
+	}
+	#rebuttal {
+		order: 4;
+	}
+	#therefore {
+		order: 5;
+	}
+	#filter {
+		order: 6;
+	}
+	.container .panel {
+		height: 18vh;
+		max-height: 18vh;
+	}
+	#rebuttal .panel {
+		height: 43vh;
+		max-height: 43vh;
+	}
+	#argument .panel {
+		flex-flow: column nowrap;
+		justify-content: flex-start;
+		height: 42.75vh;
+		max-height: 42.75vh;
+	}
+	#argument .panel .rate_phrase {
+		margin-bottom: 1.5rem;
+	}
+	.panel li {
+		min-height: 3rem;
+	}
+	.panel p {
+		font-size: 0.9rem;
+	}
+	.pointBtn {
+		height: 3rem;
+		xtop: 4px;
+		width: 3rem;
+	}
+	.wrapper {
+		height: 3rem;
+	}
 }
