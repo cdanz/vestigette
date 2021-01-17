@@ -60,7 +60,6 @@ h2 {
 	top: -55px;
 	margin: 0;
 	overflow-y: hidden; /* Disable horizontal scroll */
-	xpadding-top: 3.5vw; /* Place content 60px from the top */
 	position: fixed; /* Stay in place */
 
 	transition: top 0.5s;
@@ -68,29 +67,12 @@ h2 {
 	width: 100%;
 	z-index: 1; /* Stay on top */
 }
-#mastHead div {
-	xmargin-top: 0.5rem;
-}
 #mastHead div a {
 	margin-left: 20px;
 }
-#mastHead div a:first-child {
-	xmargin-left: 0;
-}
 #mastHead div.shownav {
-	xmargin-top: 0;
 	top: 0px;
 }
-#mastHead div.shownav a:first-child {
-	xmargin-left: 20px;
-}
-
-/* wide view====
-a.closenav,
-a.opennav {
-	display: none;
-}
-*/
 a.closenav, 
 a.opennav {
 	color: #fff;

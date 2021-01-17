@@ -66,8 +66,8 @@
 				<a href="Profile.php?arg=<?php echo $_SESSION['currentArg'];?>">Profile</a>
 				<a style="border-bottom: .2rem solid var(--cddbWhite);">Login</a>
 				<a href="#" class="closenav" onclick="closeNav()">&times;</a>
-				<a href="#" class="opennav" onclick="openNav()">&equiv;</a>
 			</div>
+			<a href="#" class="opennav" onclick="openNav()">&equiv;</a>
 		</div>
 
 		<div id="because" class="accordion container">
