@@ -173,7 +173,7 @@ function init() {
 	limit = acc.length;
 	// only set accordion listeners if we're less than "tablet" width
 	let mql = window.matchMedia('(max-width: 800px)');
-	if (mql.matches) {
+	if (mql.matches && panel) { //if panel is null it should evaluate to false and skip this
 		for (i = 0; i < limit; i++) {
 			acc[i].addEventListener("click", function() {
 				panel.classList.toggle("expanded");
@@ -184,9 +184,9 @@ function init() {
 	}
 	//Grow main phrasing if character count is low
 	let phrasing = document.querySelector("#argument .panel p");
-	if (phrasing.innerText.length < 20) {
+	if (phrasing && phrasing.innerText.length < 20) { //if phrasing is null it should evaluate to false and skip this
 		phrasing.style.fontSize = "2rem";
-	} else if (phrasing.innerText.length < 75) {
+	} else if (phrasing && phrasing.innerText.length < 75) { //same as previous. avoid nulls at checkpoint
 		phrasing.style.fontSize = "1.5rem";
 	}
 
@@ -288,10 +288,13 @@ function init() {
 
 	// putforth button -- open overlay
 	let openPutForth = document.querySelector(".altPhraseBtn");
-	openPutForth.addEventListener("click", function(evt) {
-		overlayP.classList.toggle("hidden");
-		putforth.classList.toggle("hidden");
-	});
+	if(openPutForth){
+		openPutForth.addEventListener("click", function(evt) {
+			overlayP.classList.toggle("hidden");
+			putforth.classList.toggle("hidden");
+		});
+	}
+
 
 	// edit entry when you are the only endorser
 	let rewriteEl = document.querySelectorAll(".rewrite");
@@ -307,42 +310,79 @@ function init() {
 
 		// close put forths button -- remove overlay
 	let closeP = document.getElementById("closeP");
-	closeP.addEventListener("click", function(evt) {
-		overlayP.classList.toggle("hidden");
-		putforth.classList.toggle("hidden");
-	});
+	if (closeP) {
+		closeP.addEventListener("click", function(evt) {
+			overlayP.classList.toggle("hidden");
+			putforth.classList.toggle("hidden");
+		});
+	}
+
 
 
 
 	// explication button -- open overlay
 	let openExplication = document.querySelector(".altExplicationBtn");
-	openExplication.addEventListener("click", function(evt) {
-		overlayE.classList.toggle("hidden");
-		links.classList.toggle("hidden");
-	});
+	if(openExplication) {
+		openExplication.addEventListener("click", function(evt) {
+			overlayE.classList.toggle("hidden");
+			links.classList.toggle("hidden");
+		});
+	}
+
 	
 	// close explication button -- remove overlay
 	let closeE = document.getElementById("closeE");
-	closeE.addEventListener("click", function(evt) {
-		overlayE.classList.toggle("hidden");
-		links.classList.toggle("hidden");
-	});
+	if (closeE) {
+		closeE.addEventListener("click", function(evt) {
+			overlayE.classList.toggle("hidden");
+			links.classList.toggle("hidden");
+		});
+	}
+
 
 	//Filter button
 	let toggle1 = document.getElementById("filter1");
 	let toggleLabelA = document.getElementById("filter1A");
 	let toggleLabelB = document.getElementById("filter1B");
-	toggleLabelB.style.color = "var(--cddbGrey)";
-	toggle1.addEventListener("click", function(evt) {
-		if(document.getElementById("check1").checked) {
-			toggleLabelA.style.color = "var(--cddbGrey)";
-			toggleLabelB.style.color = "var(--cddbBlue)";
-		}
-		else {
-			toggleLabelA.style.color = "var(--cddbBlack)";
-			toggleLabelB.style.color = "var(--cddbGrey)";
-		}
-	});
+	if(toggleLabelB) {
+		toggleLabelB.style.color = "var(--cddbGrey)";
+	}
+	if (toggle1) {
+		toggle1.addEventListener("click", function(evt) {
+			if(document.getElementById("check1").checked) {
+				toggleLabelA.style.color = "var(--cddbGrey)";
+				toggleLabelB.style.color = "var(--cddbBlue)";
+			}
+			else {
+				toggleLabelA.style.color = "var(--cddbBlack)";
+				toggleLabelB.style.color = "var(--cddbGrey)";
+			}
+		});
+	}
+
+
+	//Checkbox on Checkpoint page to reciprocate
+	let checkbox = document.querySelector("input[type=checkbox]"); 
+	let stickWithThis = document.querySelector(".stick");
+	let useInstead = document.querySelectorAll(".instead"); 
+	limit = useInstead.length;
+	if(checkbox) {
+		checkbox.addEventListener("change", function(evt) {
+			if(evt.target.checked) {
+				stickWithThis.value = "addAssertionAndReciprocate";
+				for (i = 0; i < limit; i++) {
+					useInstead[i].value = "useInsteadAndReciprocate";
+				}
+			}
+			else {
+				stickWithThis.value = "addAssertion";
+				for (i = 0; i < limit; i++) {
+					useInstead[i].value = "useInstead";											
+				}
+			}
+		});
+	}
+
 
 	// endorse button -- submit form 
 	// endorse click handler needs to EXIT edit mode -- but since it's submitting, the page will reload anyway

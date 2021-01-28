@@ -96,20 +96,6 @@
 				
 	            break;
 	        case "addAssertion":
-	        /*TODO can't handle special characters. They fail and show up with blank phrasing.	
-	        	MySQL recognizes the following escape sequences.
-					\0     An ASCII NUL (0x00) character.
-					\'     A single quote (“'”) character.
-					\"     A double quote (“"”) character.
-					\b     A backspace character.
-					\n     A newline (linefeed) character.
-					\r     A carriage return character.
-					\t     A tab character.
-					\Z     ASCII 26 (Control-Z). See note following the table.
-					\\     A backslash (“\”) character.
-					\%     A “%” character. See note following the table.
-					\_     A “_” character. See note following the table.
-			*/
 	        	$assertion = mysqli_real_escape_string($db,trim($_POST["assertion"]));
 	            $type = $_POST["type"];
 	            $argAtHand = intval($_SESSION['currentArg']);
@@ -124,6 +110,21 @@
 					echo "Query Failed";
 				
 	            break;
+			case "addAssertionAndReciprocate":
+				$assertion = mysqli_real_escape_string($db,trim($_POST["assertion"]));
+				$type = $_POST["type"];
+				$argAtHand = intval($_SESSION['currentArg']);
+				$profileID = intval($_SESSION['profile']);
+				$query = "CALL foldAndReciprocate(\"".$assertion."\",\"".$type."\",".$argAtHand.",".$profileID.");";
+
+				/*Execute queries */
+				if(mysqli_query($db, $query)){
+					header('Location: /index.php?arg='.$_SESSION['currentArg']);
+				}
+				else 
+					echo "Query Failed";
+
+				break;
 	            //TODO THIS IS NOT NEARLY DONE - YOU HAVE AN UNTESTED SQL STORED PROCEDURE
 	            //Make the button pass the arg ID
 	        case "useInstead": 
@@ -140,6 +141,20 @@
 				else 
 					echo "Query Failed";
 	            break;
+			case "useInsteadAndReciprocate": 
+				$existing = $_POST["useInstead"]; 
+				$type = $_POST["type"]; 
+				$argAtHand = intval($_SESSION['currentArg']);
+				$profileID = intval($_SESSION['profile']);
+				$query = "CALL useInsteadAndReciprocate(\"".$type."\",".$argAtHand.",".$existing.",".$profileID.");";
+
+				/*Execute queries */
+				if(mysqli_query($db, $query)){
+					header('Location: /index.php?arg='.$_SESSION['currentArg']);
+				}
+				else 
+					echo "Query Failed";
+				break;
 	        case "becauseUseInstead": 
 	        	$existing = $_POST["becauseUseInstead"]; 
 	            $type = "Because";

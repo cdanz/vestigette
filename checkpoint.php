@@ -223,10 +223,22 @@ $results = array_merge($results, $leftovers);
 				<form method="POST" class="buttons" action=<?php echo "\"/index.php?arg=".$argID."\"";?>>
 					<input type="hidden" name="assertion" value="<?php echo htmlspecialchars($assertion);?>">
 					<input type="hidden" name="type" value=<?php echo "\"".$type."\"";?> />
-					<button type="submit" name="buttonClicked" value="addAssertion" data-container-id="because">STICK WITH THIS</button>
+					<button type="submit" class="stick" name="buttonClicked" value="addAssertion" data-container-id="because">STICK WITH THIS</button>
 				</form>
 			</div>
 			<div class="panel expanded">
+<?php
+if (($type == 'Because') || ($type == 'Therefore')) { 
+?>
+				<div>
+					<form>
+						<input type="checkbox" name="reciprocate" value="reciprocate">
+  						<label for="reciprocate"> Reciprocate by linking new addition back to current argument</label><br>
+					</form>
+				</div>
+<?php
+} 
+?>
 <?php
 if (isset($results)) {
 	generateTypeLines($results);
