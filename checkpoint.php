@@ -23,16 +23,20 @@ function generateTypeLines($results) {
 	if (sizeof($results) > 0) {
 		echo "<ul>\n";
 		foreach ($results as $line) {
-			echo "			<li class=\"lineItem\" data-arg-id=\"${line[0]}\">
-				<p class=\"assocArg\">".htmlspecialchars($line[2])."</p>
-				<div class=\"opinion\">
-				<form method=\"POST\" class=\"buttons\" action=\"index.php?arg=".$argID."\">
-					<input type=\"hidden\" name=\"useInstead\" value=\"${line[0]}\" /> 
-					<input type=\"hidden\" name=\"type\" value=\"".$type."\" />
-					<button type=\"submit\" class=\"button instead\" name=\"buttonClicked\" value=\"useInstead\">Use Instead</button>
-				</form>
-			</div>
-			</li>";
+			//Exclude the current arg lest argument would be circular
+			if ($line[0] != $argID) {
+				echo "			<li class=\"lineItem\" data-arg-id=\"${line[0]}\">
+					<p class=\"assocArg\">".htmlspecialchars($line[2])."</p>
+					<div class=\"opinion\">
+					<form method=\"POST\" class=\"buttons\" action=\"index.php?arg=".$argID."\">
+						<input type=\"hidden\" name=\"useInstead\" value=\"${line[0]}\" /> 
+						<input type=\"hidden\" name=\"type\" value=\"".$type."\" />
+						<button type=\"submit\" class=\"button instead\" name=\"buttonClicked\" value=\"useInstead\">Use Instead</button>
+					</form>
+				</div>
+				</li>";
+			}
+
 		}
 		echo "</ul>\n";
 		unset($line);
