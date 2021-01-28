@@ -217,7 +217,7 @@ $results = array_merge($results, $leftovers);
 			<h2><?php echo htmlspecialchars($assertion); ?></h2>
 			<div class="opinion">
 				<form method="POST" class="buttons" action=<?php echo "\"/index.php?arg=".$argID."\"";?>>
-					<input type="hidden" name="assertion" value=<?php echo "\"".$assertion."\"";?>>
+					<input type="hidden" name="assertion" value="<?php echo htmlspecialchars($assertion);?>">
 					<input type="hidden" name="type" value=<?php echo "\"".$type."\"";?> />
 					<button type="submit" name="buttonClicked" value="addAssertion" data-container-id="because">STICK WITH THIS</button>
 				</form>
