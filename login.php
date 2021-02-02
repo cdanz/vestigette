@@ -1,6 +1,7 @@
 <?php 
 	session_start();
 	include("${_SERVER['DOCUMENT_ROOT']}/includes/dbconnect.php");
+
 	if(isset($_POST) && !empty($_POST)){
 		$email = mysqli_real_escape_string($db, $_POST['email']);
 		$password = hash('sha256',$_POST['password'],false);
@@ -15,6 +16,17 @@
 			$_SESSION['email']=$email;
 			if(!isset($_SESSION['currentArg'])){
 				$_SESSION['currentArg'] = intval($_GET["arg"]); 
+			}
+			//set remember me cookie
+			if (isset($_POST['keepLoggedIn'])) {
+				$cookie_name = "rememberMe";
+				$cookie_value = md5(uniqid(mt_rand(),true));
+				$expiration = time() + (86400 * 30); //30 days in the future
+				$expirationSQL = date("Y-m-d h:i:s", strtotime("+30 days"));
+				setcookie($cookie_name, $cookie_value, $expiration, "/");
+				$stmt = $db->prepare("INSERT INTO REMEMBER_ME (token, profileID, email, createdDate, expiration) VALUES (?, ?, ?, CURRENT_TIMESTAMP, ?)");	
+				$stmt->bind_param("siss", $cookie_value, $_SESSION['profile'], $_SESSION['email'], $expirationSQL);
+				$stmt->execute();
 			}
 			header('Location: /index.php?arg='.$_SESSION['currentArg']);
 		}
@@ -91,8 +103,8 @@
 					<input type="password" placeholder="Password" name="password">
 					<button type="submit" name="buttonClicked">Login</button>
 					<div class="form-group">
-						<input type="checkbox" name="stayCookie" value="keepLoggedIn" checked>
-  						<label for="stayCookie"> Keep me logged in 30 days</label>
+						<input type="checkbox" name="keepLoggedIn" checked>
+  						<label for="keepLoggedIn"> Keep me logged in 30 days</label>
   					</div>
 				</form>
 			</div>

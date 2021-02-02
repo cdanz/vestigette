@@ -9,6 +9,18 @@ if ($_SESSION['currentArg'] == 0){
 	$_SESSION['currentArg'] = 75; 
 }
 include("${_SERVER['DOCUMENT_ROOT']}/includes/dbconnect.php");
+//Keep me logged in cookie - get value before querying current argument
+if(isset($_COOKIE['rememberMe']) && !isset($_SESSION['profile'])) {
+	$stmt = $db->prepare("SELECT profileID, email FROM REMEMBER_ME WHERE token = ? ");	
+	$stmt->bind_param("s", $_COOKIE['rememberMe']);
+	$stmt->execute();
+	$result = $stmt->get_result()->fetch_all(MYSQLI_NUM);
+	if (!isset($result[1][0]) && isset($result[0][0])) {
+		$_SESSION['profile'] = $result[0][0];
+		$_SESSION['email'] = $result[0][1];
+	}
+}
+//End cookie
 require_once("${_SERVER['DOCUMENT_ROOT']}/query_current_argument.php");
 //To aid in seeding with fake user endorsements - display profile for those users
 if (isset($_SESSION['profile']) && ($_SESSION['profile'] < 26)) {
