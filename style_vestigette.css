@@ -278,8 +278,9 @@ button.hidden {
 	padding-left: 0.6rem;
 	padding-right: 0.6rem;
 }
-.rewrite {
-
+.rewrite input[type=text] {
+	min-width: 500px;
+	padding-left: 0.4rem;
 }
 /* sections & containers */
 #mastHead {

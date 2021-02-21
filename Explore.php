@@ -105,28 +105,52 @@ mysqli_multi_query($db, $sql);
 			<div class="panel" data-container-id="because">
 				<ul>
 					<li class='lineItem'>
+						<p class="assocArg"><a href="http://www.vestigette.org/?arg=422">Free Speech</a></p>
+					</li>
+					<li class='lineItem' style="background-color: var(--cddbLiteGrey)">
 						<p class="assocArg"><a href="http://www.vestigette.org/?arg=123">Global Warming</a></p>
 					</li>
+					<li class='lineItem'>
+						<p class="assocArg"><a href="http://www.vestigette.org/?arg=110">Class Struggle</a></p>
+					</li>
 					<li class='lineItem' style="background-color: var(--cddbLiteGrey)">
-						<p class="assocArg"><a href="http://www.vestigette.org/?arg=80">Class Struggle</a></p>
+						<p class="assocArg"><a href="http://www.vestigette.org/?arg=238">Racism</a></p>
 					</li>
 					<li class='lineItem'>
-						<p class="assocArg"><a href="http://www.vestigette.org/?arg=49">Black Lives Matter</a></p>
+						<p class="assocArg"><a href="http://www.vestigette.org/?arg=403">Role of Government</a></p>
 					</li>
 					<li class='lineItem' style="background-color: var(--cddbLiteGrey)">
-						<p class="assocArg"><a href="http://www.vestigette.org/?arg=48">Abortion</a></p>
+						<p class="assocArg"><a href="http://www.vestigette.org/?arg=376">Media</a></p>
 					</li>
 					<li class='lineItem'>
-						<p class="assocArg"><a href="http://www.vestigette.org/?arg=80">Election 2020</a></p>
+						<p class="assocArg"><a href="http://www.vestigette.org/?arg=128">Abortion</a></p>
 					</li>
 					<li class='lineItem' style="background-color: var(--cddbLiteGrey)">
-						<p class="assocArg"><a href="http://www.vestigette.org/?arg=51">Existence of God</a></p>
+						<p class="assocArg"><a href="http://www.vestigette.org/?arg=423">Misogyny</a></p>
 					</li>
 					<li class='lineItem'>
-						<p class="assocArg"><a href="http://www.vestigette.org/?arg=52">Gun Control</a></p>
+						<p class="assocArg"><a href="http://www.vestigette.org/?arg=80">Donald Trump</a></p>
 					</li>
 					<li class='lineItem' style="background-color: var(--cddbLiteGrey)">
-						<p class="assocArg"><a href="http://www.vestigette.org/?arg=53">LGBTQ Acceptance</a></p>
+						<p class="assocArg"><a href="http://www.vestigette.org/?arg=90">The GOP</a></p>
+					</li>
+					<li class='lineItem'>
+						<p class="assocArg"><a href="http://www.vestigette.org/?arg=104">The Democratic Party</a></p>
+					</li>
+					<li class='lineItem' style="background-color: var(--cddbLiteGrey)">
+						<p class="assocArg"><a href="http://www.vestigette.org/?arg=413">COVID-19 School Reopening</a></p>
+					</li>
+					<li class='lineItem'>
+						<p class="assocArg"><a href="http://www.vestigette.org/?arg=424">Vaccines</a></p>
+					</li>
+					<li class='lineItem' style="background-color: var(--cddbLiteGrey)">
+						<p class="assocArg"><a href="http://www.vestigette.org/?arg=161">Existence of God</a></p>
+					</li>
+					<li class='lineItem'>
+						<p class="assocArg"><a href="http://www.vestigette.org/?arg=328">Gun Control</a></p>
+					</li>
+					<li class='lineItem' style="background-color: var(--cddbLiteGrey)">
+						<p class="assocArg"><a href="http://www.vestigette.org/?arg=278">LGBTQ Acceptance</a></p>
 					</li>
 		        </ul>
 			</div>

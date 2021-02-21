@@ -92,7 +92,7 @@ function generatePhraseLines($alts) {
 				if ((isset($opinion)) && ($opinion > 0)) { 	
 					if(isset($userPhrasingID) && ($userPhrasingID == $line[2]) && $line[0] == 1) {
 						echo "			<li class=\"lineItem\">
-						<p class=\"assocArg rewrite\">".htmlspecialchars($line[1])." <span style=\"color: var(--cddbGrey);font-size: 0.75rem;\">(Votes: ${line[0]})</span></p>
+						<p class=\"assocArg rewrite\">".htmlspecialchars($line[1])." <span style=\"color: var(--cddbGrey);font-size: 0.75rem;\">(your preference)</span></p>
 						<div class=\"opinion\">
 							<button type=\"submit\" class=\"button adjust rewrite\" id=\"rewriteBtn\" name=\"buttonClicked\" value=\"promotePutForth\">Edit Your Entry</button>
 						<form method=\"POST\" class=\"rewrite form-inline hidden\" accept-charset=\"utf-8\">

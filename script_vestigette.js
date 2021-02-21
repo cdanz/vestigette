@@ -300,10 +300,11 @@ function init() {
 	let rewriteEl = document.querySelectorAll(".rewrite");
 	let rewriteBtn = document.getElementById("rewriteBtn");
 	if(rewriteBtn){
-    	limit = rewriteEl.length;
 		rewriteBtn.addEventListener("click", function(evt) {
+			limit = rewriteEl.length;
 			for (i = 0; i < limit; i++) {
 				rewriteEl[i].classList.toggle("hidden");
+				console.log(rewriteEl[i]);
 			}
 		});
     }
