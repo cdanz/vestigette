@@ -170,6 +170,14 @@ function generateLinkLines($links) {
 				therefore = <?php echo json_encode($therefore); ?>,
 				rebuttal = <?php echo json_encode($rebuttal); ?>;
 		</script>
+		<!-- Global site tag (gtag.js) - Google Analytics -->
+		<script async src="https://www.googletagmanager.com/gtag/js?id=G-38LM87XMGN"></script>
+		<script>
+			window.dataLayer = window.dataLayer || [];
+			function gtag(){dataLayer.push(arguments);}
+			gtag('js', new Date());
+			gtag('config', 'G-38LM87XMGN');
+		</script>
 	</head>
 	<body>
 

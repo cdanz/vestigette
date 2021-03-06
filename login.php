@@ -76,7 +76,7 @@
 				<a href="About.php?arg=<?php echo $_SESSION['currentArg'];?>">About</a>
 				<a href="Explore.php?arg=<?php echo $_SESSION['currentArg'];?>">Explore</a>
 				<a href="Profile.php?arg=<?php echo $_SESSION['currentArg'];?>">Profile</a>
-				<a style="border-bottom: .2rem solid var(--cddbWhite);">Login</a>
+				<a href="login.php?arg=<?php echo $_SESSION['currentArg'];?>"><span style="text-decoration: underline;">Login</span></a>
 				<a href="#" class="closenav" onclick="closeNav()">&times;</a>
 			</div>
 			<a href="#" class="opennav" onclick="openNav()">&equiv;</a>

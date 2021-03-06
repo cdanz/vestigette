@@ -30,12 +30,16 @@ $profile = isset($_SESSION['profile']) ? $_SESSION['profile'] : null;
 
 		<div id="mastHead" class="container">
 			<h1><a href="index.php?arg=<?php echo $_SESSION['currentArg'];?>">Vestigette</a></h1>
-			<div style="border-bottom: .2rem solid var(--cddbWhite);">About</div>
-			<div><a href="Explore.php?arg=<?php echo $_SESSION['currentArg'];?>">Explore</a></div>
-			<div><a href="Profile.php?arg=<?php echo $_SESSION['currentArg'];?>">Profile</a></div>
-			<div><a href="<?php echo ($profile) ? 'logout' : 'login'; ?>.php?arg=<?php echo $_SESSION['currentArg'];?>"><?php echo ($profile) ? 'Logout' : 'Login'; ?></a></div> 
+			<div>
+				<a href="About.php?arg=<?php echo $_SESSION['currentArg'];?>"><span style="text-decoration: underline;">About</span></a>
+				<a href="Explore.php?arg=<?php echo $_SESSION['currentArg'];?>">Explore</a>
+				<a href="Profile.php?arg=<?php echo $_SESSION['currentArg'];?>">Profile</a>
+				<a href="<?php echo ($profile) ? 'logout' : 'login'; ?>.php?arg=<?php echo $_SESSION['currentArg'];?>"><?php echo ($profile) ? 'Logout' : 'Login'; ?></a>
+				<a href="#" class="closenav" onclick="closeNav()">&times;</a>
+			</div> 
+			
+			<a href="#" class="opennav" onclick="openNav()">&equiv;</a>
 		</div>
-
 		<div id="because" class="accordion container">
 			<h2>About</h2>
 
@@ -105,7 +109,8 @@ $profile = isset($_SESSION['profile']) ? $_SESSION['profile'] : null;
 		<div id="argument" class="accordion container">
 			<div class="panel expanded" data-container-id="argument">
 				<br>
-				<p>Vestigette was created by Craig Danz of Seattle, WA, U.S.A. Copyright 2015</p>
+				<p>Vestigette was created by Craig Danz of Seattle, WA, U.S.A. Copyright <?php echo date("Y"); ?></p>
+				<a href="https://twitter.com/vestigette?ref_src=twsrc%5Etfw" class="twitter-follow-button" data-show-count="false">Follow @vestigette</a><script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
 				<br>
 			</div>
 		</div>
