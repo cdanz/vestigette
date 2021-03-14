@@ -2,7 +2,6 @@
 session_start();
 $csrfToken = md5(uniqid(mt_rand(),true));
 $_SESSION['csrfToken'] = $csrfToken;
-
 $_SESSION['currentArg'] = intval($_GET["arg"]);
 //Send to help arg (75) if no other arg selected
 if ($_SESSION['currentArg'] == 0){
@@ -22,6 +21,26 @@ if(isset($_COOKIE['rememberMe']) && !isset($_SESSION['profile'])) {
 }
 //End cookie
 require_once("${_SERVER['DOCUMENT_ROOT']}/query_current_argument.php");
+//To do history - add to array of past arguments visited
+if (isset($_SESSION['history']) && is_array($_SESSION['history'])) {
+	$arr = array($_SESSION['currentArg'],$opinion,$phrasing);
+	array_push($_SESSION['history'],$arr);
+	$limit = sizeof($_SESSION['history']);
+	$arr = $_SESSION['history'];
+	for ($i = 0; $i < ($limit - 1); $i++) {
+		if(isset($arr[$i]) && ($arr[$i][0] == $_SESSION['currentArg'])) {
+            array_splice($_SESSION['history'], $i, 1);
+			break;			
+		}
+	}
+	$_SESSION['history'] = array_slice($_SESSION['history'], -9, 9); //no more than 
+}
+else {
+	$_SESSION['history'] = array();
+	$_SESSION['history'][0] = array(75,0,"This is my first visit to Vestigette"); //Start off with welcome arg
+	$arr = array($_SESSION['currentArg'],$opinion,$phrasing);
+	array_push($_SESSION['history'],$arr);
+}
 //To aid in seeding with fake user endorsements - display profile for those users
 if (isset($_SESSION['profile']) && ($_SESSION['profile'] < 26)) {
 	echo "Seed User: ".$_SESSION['profile'];
@@ -142,6 +161,35 @@ function generateLinkLines($links) {
 				echo "</form>
 			</div>
 			</li>";
+		}
+		echo "</ul>\n";
+		unset($line);
+	} else {
+		echo "0 results";
+	}
+}
+function generateFindLines($results) {
+	global $baseURL;
+	global $arg;
+	if (sizeof($results) > 0) {
+		$results = array_reverse($results); //more recent listed first
+		echo "<ul>\n";
+		foreach ($results as $line) {
+			//Exclude the current arg lest argument would be circular
+			if ($line[0] != $arg) {
+				if ($line[1] > 0) {
+					$color = "style=\"color: var(--cddbGreen);\"";
+				}
+				else if ($line[1] < 0) {
+					$color = "style=\"color: var(--cddbRed);\"";
+				}
+				else {
+					$color = "style=\"color: var(--cddbblack);\"";
+				}
+				echo "			<li class=\"lineItem\" ${color} data-arg-id=\"${line[0]}\">
+					<a href=\"${baseURL}?arg=${line[0]}\">".htmlspecialchars($line[2])."</a>
+				</li>";
+			}
 		}
 		echo "</ul>\n";
 		unset($line);
@@ -337,12 +385,12 @@ if ((isset($opinion)) && ($opinion > 0)) {
 ?>
 			<div class="panel" data-container-id="therefore">
 <?php
-if (isset($therefore)) {
-	generateTypeLines("therefore", $therefore);
-}
-else {
-	echo "No Results - Accept the argument to be the first to endorse";
-}
+	if (isset($therefore)) {
+		generateTypeLines("therefore", $therefore);
+	}
+	else {
+		echo "No Results - Accept the argument to be the first to endorse";
+	}
 ?>
 				<div class="assert hidden">
 					<form class="form-inline" method="POST" action="checkpoint.php" accept-charset="utf-8">
@@ -356,7 +404,36 @@ else {
 			</div>
 		</div>
 
-		<div id="filter" class="accordion container">
+		<div id="find" class="accordion container">
+			<h2>Find</h2>
+			<div class="panel" data-container-id="filter">
+				<div class="find">
+					<ul><li class="strong">Last Visited</li><ul>
+<?php
+if (isset($_SESSION['history']) && is_array($_SESSION['history'])) {
+	generateFindLines($_SESSION['history']);
+}
+?>
+					<ul><li class="strong">Recent Assertions</li><ul>
+<?php
+if (isset($recent) && is_array($recent)) {
+	generateFindLines($recent);
+}
+?>
+					<ul><li class="strong">Go to ID</li><ul>
+					<ul><li class="lineItem">
+						<form class="form-inline" id="form" method="get">
+							<input type="text" id="jumpToID" name="arg" placeholder="Argument ID" onchange="document.getElementById('form').action = <?php echo "${baseURL}?arg="; ?> + this.value;">
+							<button type="submit" class="button instead" value="jumpTo">Go</button>
+						</form>
+					</li><ul>
+				</div>
+
+			</div>
+		</div>
+
+		<!-- You not ready for this -->
+		<div id="filter" class="accordion container hidden">
 			<h2>Filter</h2>
 			<div class="panel" data-container-id="filter">
 				<div class="filter">

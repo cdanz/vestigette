@@ -327,6 +327,11 @@ button.hidden {
 	display: flex;
 	justify-content: space-between;
 }
+#find.container {
+	color: var(--cddbBlack);
+	background-color:var(--cddbWhite);
+	border-color: var(--cddbBlack);
+}
 #phrasing.container,
 #explication.container {
 	align-items: flex-start;
@@ -414,6 +419,28 @@ button.hidden {
 }
 .panel li:last-child {
 	border-bottom: none;
+}
+.find ul {
+	list-style: none;
+	width: 100%;
+}
+.find li {
+	align-items: center;
+	border-bottom: 2px var(--cddbLiteGrey) solid;
+	color: var(--cddbBlack);
+	display: flex;
+	flex-flow: row nowrap;
+	justify-content: flex-start;
+	min-height: 2rem;
+	wrap: nowrap;
+}
+.find li:last-child {
+	border-bottom: none;
+}
+.find .strong {
+	background-color: var(--cddbBlack);
+	color: var(--cddbWhite);
+	font-weight: bold;
 }
 #phrasing .panel li,
 #explication .panel li, 
@@ -3820,6 +3847,7 @@ input:checked + .toggle:before {
 	}
 	#mastHead, 
 	#rebuttal, 
+	#find,
 	#filter {
 		width: 33%;
 	}
@@ -3854,9 +3882,13 @@ input:checked + .toggle:before {
 	#therefore {
 		order: 5;
 	}
-	#filter {
+	#find {
 		order: 6;
 	}
+	#filter {
+		order: 7;
+	}
+
 	.container .panel {
 		height: 18vh;
 		max-height: 18vh;

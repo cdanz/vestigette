@@ -9,7 +9,8 @@ if (isset($_SESSION['profile'])) {
 	$sql .= "CALL getOpinion($argID,$proID);";
 	$sql .= "CALL getUserAssociated($argID,$proID);";
 }
-$sql .= "CALL getAltPhrasing($argID)";
+$sql .= "CALL getAltPhrasing($argID);";
+$sql .= "CALL getSomeOfTheRest(8)";
 
 
 if (mysqli_multi_query($db, $sql)) {
@@ -167,6 +168,22 @@ if (mysqli_multi_query($db, $sql)) {
 			$altPhrasings[$iterator][0] = $row[0];
 			$altPhrasings[$iterator][1] = $row[1];
 			$altPhrasings[$iterator][2] = $row[2];
+			$iterator++;
+		}
+		mysqli_free_result($result);
+		mysqli_next_result($db);
+		mysqli_next_result($db);
+		mysqli_next_result($db);
+	}
+	$result = mysqli_store_result($db);
+	if (mysqli_num_rows($result) > 0) {
+		$iterator = 0;
+		$recent = array();
+		while($row = mysqli_fetch_row($result)) {
+			$recent[$iterator] = array();
+			$recent[$iterator][0] = $row[0];
+			$recent[$iterator][1] = 0;
+			$recent[$iterator][2] = $row[2];
 			$iterator++;
 		}
 	}
