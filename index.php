@@ -410,7 +410,7 @@ if ((isset($opinion)) && ($opinion > 0)) {
 					<ul><li class="strong">Last Visited</li><ul>
 <?php
 if (isset($_SESSION['history']) && is_array($_SESSION['history'])) {
-	$arr = array_reverse($results); //more recent listed first
+	$arr = array_reverse($_SESSION['history']); //more recent listed first
 	generateFindLines($arr);
 }
 ?>
