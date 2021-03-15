@@ -172,7 +172,6 @@ function generateFindLines($results) {
 	global $baseURL;
 	global $arg;
 	if (sizeof($results) > 0) {
-		$results = array_reverse($results); //more recent listed first
 		echo "<ul>\n";
 		foreach ($results as $line) {
 			//Exclude the current arg lest argument would be circular
@@ -411,7 +410,8 @@ if ((isset($opinion)) && ($opinion > 0)) {
 					<ul><li class="strong">Last Visited</li><ul>
 <?php
 if (isset($_SESSION['history']) && is_array($_SESSION['history'])) {
-	generateFindLines($_SESSION['history']);
+	$arr = array_reverse($results); //more recent listed first
+	generateFindLines($arr);
 }
 ?>
 					<ul><li class="strong">Recent Assertions</li><ul>
