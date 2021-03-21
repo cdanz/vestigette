@@ -8,7 +8,7 @@ let pctRE = /pct\d+\_\d/;
 let genericTotalClicks = 0;
 let genericClickArr = [];
 let DEBUG = true;
-
+const matchMediaValue = '(max-width: 1200px)';
 
 /*
 Better simple nav
@@ -164,32 +164,8 @@ function updateWeighInValue(type) {
 Set up accordion and assign click handlers.
 */
 function init() {
-	panel = document.querySelector("#argument .panel");
-	let acc = document.getElementsByClassName("accordion");
-	let i;
-	let j;
-	let limit;
-	let subLimit;
-	limit = acc.length;
-	// only set accordion listeners if we're less than "tablet" width
-	let mql = window.matchMedia('(max-width: 800px)');
-	if (mql.matches && panel) { //if panel is null it should evaluate to false and skip this
-		for (i = 0; i < limit; i++) {
-			acc[i].addEventListener("click", function() {
-				panel.classList.toggle("expanded");
-				panel = this.querySelector(".panel");
-				panel.classList.toggle("expanded");
-			});
-		}
-	}
-	//Grow main phrasing if character count is low
-	let phrasing = document.querySelector("#argument .panel p");
-	if (phrasing && phrasing.innerText.length < 20) { //if phrasing is null it should evaluate to false and skip this
-		phrasing.style.fontSize = "2rem";
-	} else if (phrasing && phrasing.innerText.length < 75) { //same as previous. avoid nulls at checkpoint
-		phrasing.style.fontSize = "1.5rem";
-	}
-
+	let i, limit;
+	resize('init');
 	// Assign click handlers for .container elements
 	function inCircle(evt, el) {
 		let rect = el.getBoundingClientRect();
@@ -576,9 +552,60 @@ function bump(type, argID) {
 	updateWeighInValue(type);
 }
 
+
+/*
+This is the named function used for accordion expansion
+*/
+function accordionExpand() {
+	panel.classList.toggle("expanded");
+	panel = this.querySelector(".panel");
+	panel.classList.toggle("expanded");
+}
+
+
+/*
+We want to resize things and not rely on the initial load size
+*/
+function resize(why) {
+	panel = document.querySelector("#argument .panel");
+	let acc = document.getElementsByClassName("accordion");
+	let i, limit;
+	limit = acc.length;
+	// only set accordion listeners if we're less than "tablet" width
+	let mql = window.matchMedia(matchMediaValue);
+	if (mql.matches && panel) { //if panel is null it should evaluate to false and skip this
+		for (i = 0; i < limit; i++) {
+			acc[i].addEventListener("click", accordionExpand);
+			acc[i].classList.add('listening');
+		}
+		console.log('added listeners');
+	} else { // ensure they're not set
+		for (i = 0; i < limit; i++) {
+			acc[i].removeEventListener("click", accordionExpand);
+			acc[i].classList.remove('listening');
+		}
+		console.log('removed listeners');
+	}
+	//Grow main phrasing if character count is low
+	let phrasing = document.querySelector("#argument .panel p");
+	if (phrasing && phrasing.innerText.length < 20) { //if phrasing is null it should evaluate to false and skip this
+		phrasing.style.fontSize = "2rem";
+	} else if (phrasing && phrasing.innerText.length < 75) { //same as previous. avoid nulls at checkpoint
+		phrasing.style.fontSize = "1.5rem";
+	}
+}
+
+
 /*
 Initialize after DOM content is loaded.
 */
 document.addEventListener('DOMContentLoaded', function() {
 	init();
+});
+
+window.addEventListener("resize", function() {
+	resize('resize');
+});
+window.addEventListener("orientationchange", function() {
+	resize('orientationchange');
 });
