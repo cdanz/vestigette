@@ -297,7 +297,6 @@ button.hidden {
 }
 .accordion {
 	border: none;
-	cursor: pointer;
 	display: flex;
 	flex-flow: row wrap;
 	justify-content: space-between;
@@ -306,6 +305,9 @@ button.hidden {
 	text-align: left;
 	transition: 0.4s;
 	width: 100%;
+}
+.accordion.listening {
+	cursor: pointer;
 }
 .container {
 	background-color:var(--cddbBlack);
@@ -441,6 +443,7 @@ button.hidden {
 	background-color: var(--cddbBlack);
 	color: var(--cddbWhite);
 	font-weight: bold;
+	padding-left: 1rem;
 }
 #phrasing .panel li,
 #explication .panel li, 
