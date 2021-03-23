@@ -22,18 +22,20 @@ if(isset($_COOKIE['rememberMe']) && !isset($_SESSION['profile'])) {
 //End cookie
 require_once("${_SERVER['DOCUMENT_ROOT']}/query_current_argument.php");
 //To do history - add to array of past arguments visited
-if (isset($_SESSION['history']) && is_array($_SESSION['history'])) {
-	$arr = array($_SESSION['currentArg'],$opinion,$phrasing);
-	array_push($_SESSION['history'],$arr);
+if (isset($_SESSION['history'])) {
 	$limit = sizeof($_SESSION['history']);
-	$arr = $_SESSION['history'];
-	for ($i = 0; $i < ($limit - 1); $i++) {
-		if(isset($arr[$i]) && ($arr[$i][0] == $_SESSION['currentArg'])) {
-            array_splice($_SESSION['history'], $i, 1);
-			break;			
+	for ($i = 0; $i < $limit; $i++) { //remove previous instances of current arg
+		if($_SESSION['history'][$i][0] == $_SESSION['currentArg']) {
+			array_splice($_SESSION['history'], $i, 1);
+			break;
 		}
 	}
-	$_SESSION['history'] = array_slice($_SESSION['history'], -9, 9); //no more than 
+	$arr = array($_SESSION['currentArg'],$opinion,$phrasing);
+	array_push($_SESSION['history'],$arr);
+	if(sizeof($_SESSION['history']) >= 10) {
+		$_SESSION['history'] = array_slice($_SESSION['history'], -9); //no more than 
+	}
+	
 }
 else {
 	$_SESSION['history'] = array();
@@ -45,7 +47,7 @@ else {
 if (isset($_SESSION['profile']) && ($_SESSION['profile'] < 26)) {
 	echo "Seed User: ".$_SESSION['profile'];
 }
-//End seeding
+//End of seeding ids
 $baseURL = "/index.php";
 $arg = isset($_SESSION['currentArg']) ? $_SESSION['currentArg'] : null;
 $profile = isset($_SESSION['profile']) ? $_SESSION['profile'] : null;
@@ -409,14 +411,15 @@ if ((isset($opinion)) && ($opinion > 0)) {
 				<div class="find">
 					<ul><li class="strong">Last Visited</li><ul>
 <?php
-if (isset($_SESSION['history']) && is_array($_SESSION['history'])) {
+if (isset($_SESSION['history'])) {
+
 	$arr = array_reverse($_SESSION['history']); //more recent listed first
 	generateFindLines($arr);
 }
 ?>
 					<ul><li class="strong">Recent Assertions</li><ul>
 <?php
-if (isset($recent) && is_array($recent)) {
+if (isset($recent)) {
 	generateFindLines($recent);
 }
 ?>
