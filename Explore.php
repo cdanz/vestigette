@@ -76,7 +76,7 @@ mysqli_multi_query($db, $sql);
 						<p class="assocArg"><a href="http://www.vestigette.org/?arg=376">Media</a></p>
 					</li>
 					<li class='lineItem' style="background-color: var(--cddbLiteGrey)">
-						<p class="assocArg"><a href="http://www.vestigette.org/?arg=422">Immigration/Migration</a></p>
+						<p class="assocArg"><a href="http://www.vestigette.org/?arg=954">Immigration/Migration</a></p>
 					</li>
 					<li class='lineItem'>
 						<p class="assocArg"><a href="http://www.vestigette.org/?arg=128">Abortion</a></p>
