@@ -468,6 +468,17 @@ button.hidden {
 .opinion + .panel.expanded {
 	max-height: 100%;
 }
+.panel.standalone {
+	margin-bottom: 0.5rem;
+	max-height: 100%;
+}
+#phrasing .panel.standalone, 
+#explication .panel.standalone {
+	margin-bottom: 0;
+}
+.opinion + .panel.standalone {
+	max-height: 100%;
+}
 .panel .inLinePct {
 	font-weight: bold;
 }

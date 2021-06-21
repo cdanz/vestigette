@@ -1,6 +1,52 @@
 "use strict";
 
 let mode = null;
+/*Test for new expanded Add More experience - weigh in buttons should be active upon page load*/ 
+if(window.location.pathname == '/add_more.php') {
+		console.log('add more if condition fired');
+        let which;
+			// 1) set mode to edit, 2) toggle hidden of other buttons, 3) set all "type" circles to neutral
+			if (mode != 'EDIT') { // cold edit, use what was clicked
+				mode = 'EDIT';
+				activeEditMode = this.dataset.containerId;
+				which = this;
+				document.getElementById(`${activeEditMode}`).classList.toggle('edit');
+			} else { // warm edit, use the other click option -- this should only happen between the two editModes
+				if (this.dataset.containerId == activeEditMode) {
+					// do nothing
+					return;
+				} else { // use the other option, which should only exist for because/therefore
+					let oldEditMode = activeEditMode;
+					activeEditMode = editMode[(editMode.indexOf(oldEditMode) + 1) % 2]; // 0=> 1, 1=> 0
+					which = document.querySelector(`#${activeEditMode} .weighIn`);
+					// untoggle the last one
+					let previous = document.querySelector(`#${oldEditMode} .weighIn`);
+					previous.classList.toggle("hidden");
+					resetEl = document.querySelector(`#${oldEditMode} .reset`);
+					resetEl.classList.toggle("hidden");
+					endorseEl = document.querySelector(`#${oldEditMode} .endorse`);
+					endorseEl.classList.toggle("hidden");
+					assertEl = document.querySelector(`#${oldEditMode} .assert`);
+					assertEl.classList.toggle("hidden");
+					// clear genericClickArr
+					genericClickArr.length = 0;
+					genericTotalClicks = 0;
+					// now you can toggle the new one, continue
+				}
+			}
+			/* hide this, unhide rest and endorse */
+			which.classList.toggle("hidden");
+			resetEl = document.querySelector(`#${activeEditMode} .reset`);
+			resetEl.classList.toggle("hidden");
+			endorseEl = document.querySelector(`#${activeEditMode} .endorse`);
+			endorseEl.classList.toggle("hidden");
+			assertEl = document.querySelector(`#${activeEditMode} .assert`);
+			assertEl.classList.toggle("hidden");
+			neutralizeSection(activeEditMode);
+			// if there is data for this, set the wrappers to reflect the user's values
+			loadUserWeights(activeEditMode);
+    }
+
 const editMode = ['because', 'therefore'];
 let activeEditMode;
 let panel = null;
@@ -578,13 +624,13 @@ function resize(why) {
 			acc[i].addEventListener("click", accordionExpand);
 			acc[i].classList.add('listening');
 		}
-		console.log('added listeners');
+		console.log('added accordian listeners');
 	} else { // ensure they're not set
 		for (i = 0; i < limit; i++) {
 			acc[i].removeEventListener("click", accordionExpand);
 			acc[i].classList.remove('listening');
 		}
-		console.log('removed listeners');
+		console.log('removed accordian listeners');
 	}
 	//Grow main phrasing if character count is low
 	let phrasing = document.querySelector("#argument .panel p");
