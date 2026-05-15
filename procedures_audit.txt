@@ -1,0 +1,291 @@
+*************************** 1. row ***************************
+           Procedure: getAltPhrasing
+            sql_mode: ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION
+    Create Procedure: CREATE DEFINER=`root`@`localhost` PROCEDURE `getAltPhrasing`(argID INT UNSIGNED)
+BEGIN
+    SELECT count(E.profileID) as score, P.phrasing, E.phrasingID
+    FROM PHRASE_ENDORSE E 
+    JOIN PHRASING_NEW P ON E.phrasingID = P.putForthID
+    WHERE E.argumentID = argID AND E.active = TRUE
+    GROUP BY E.argumentID, E.phrasingID, P.phrasing
+    ORDER BY score DESC;
+END
+character_set_client: utf8mb4
+collation_connection: utf8mb4_unicode_ci
+  Database Collation: utf8_general_ci
+*************************** 1. row ***************************
+           Procedure: getDetail
+            sql_mode: ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION
+    Create Procedure: CREATE DEFINER=`root`@`localhost` PROCEDURE `getDetail`(argID INT UNSIGNED)
+BEGIN
+    SELECT X.argumentID, X.phrased, 
+        (SELECT COUNT(acceptance) FROM OPINION WHERE argumentID = argID AND acceptance = TRUE) AS AcceptCount,
+        (SELECT COUNT(acceptance) FROM OPINION WHERE argumentID = argID) AS AssertCount, 
+        ((SELECT COUNT(acceptance) FROM OPINION WHERE argumentID = argID AND acceptance = TRUE) /
+            (SELECT COUNT(acceptance) FROM OPINION WHERE argumentID = argID)) AS percentAccept
+    FROM (
+        SELECT
+            A.argumentID, 
+            IFNULL(B.putForthID, 0) as phraseID, 
+            IFNULL(B.phrasing, "Nothing to see here") as phrased
+        FROM ARGUMENT A 
+        LEFT JOIN PHRASING_NEW B ON A.argumentID = B.argumentID AND
+            B.putForthID = COALESCE(
+                -- 1: select winning phrasing by score, where score > 1
+                (SELECT C1.phrasingID FROM (
+                    SELECT A1.phrasingID, count(A1.profileID) as score
+                    FROM PHRASE_ENDORSE A1 
+                    JOIN PHRASING_NEW B1 ON A1.phrasingID = B1.putForthID
+                    WHERE A1.active = TRUE and A1.argumentID = argID
+                    GROUP BY A1.phrasingID
+                    HAVING score > 1
+                    ORDER BY score DESC
+                ) C1 LIMIT 1),
+                -- 2: select winning phrasing by earliest, where score > 1
+                (SELECT C2.phrasingID FROM (
+                    SELECT A2.phrasingID, count(A2.profileID) as score, min(A2.firstVisit) as earliest
+                    FROM PHRASE_ENDORSE A2 
+                    JOIN PHRASING_NEW B2 ON A2.phrasingID = B2.putForthID
+                    WHERE A2.active = TRUE and A2.argumentID = argID
+                    GROUP BY A2.phrasingID
+                    HAVING score > 1
+                    ORDER BY score DESC, earliest ASC
+                ) C2 LIMIT 1),
+                -- 3: only one result
+                (SELECT C3.phrasingID FROM (
+                    SELECT A3.phrasingID, count(A3.profileID) as score, min(A3.firstVisit) as earliest
+                    FROM PHRASE_ENDORSE A3 
+                    JOIN PHRASING_NEW B3 ON A3.phrasingID = B3.putForthID
+                    WHERE A3.active = TRUE and A3.argumentID = argID
+                    GROUP BY A3.phrasingID
+                    HAVING score = 1
+                    ORDER BY earliest ASC
+                ) C3 LIMIT 1),
+                -- 4: zero endorsements
+                (SELECT C4.putForthID FROM PHRASING_NEW C4 
+                 WHERE C4.argumentID = argID
+                 ORDER BY C4.createdDate ASC LIMIT 1)
+            )
+        WHERE A.argumentID = argID
+        ORDER BY A.argumentID ASC
+    ) X
+    WHERE argumentID = argID;
+END
+character_set_client: utf8mb4
+collation_connection: utf8mb4_unicode_ci
+  Database Collation: utf8_general_ci
+*************************** 1. row ***************************
+           Procedure: getOpinion
+            sql_mode: NO_AUTO_VALUE_ON_ZERO
+    Create Procedure: CREATE DEFINER=`root`@`localhost` PROCEDURE `getOpinion`(argID INT Unsigned, proID INT Unsigned)
+BEGIN
+	SELECT O.acceptance AS acceptance, X.phrasingID, X.phrasing FROM OPINION O 
+	LEFT JOIN (SELECT E. argumentID, E.phrasingID, P.phrasing FROM PHRASE_ENDORSE E JOIN PHRASING P 
+		ON P.phrasingID = E.phrasingID 
+		WHERE E.argumentID = argID AND E.profileID = proID AND active = TRUE) X ON X.argumentID = O.argumentID 
+        WHERE O.argumentID = argID AND O.profileID = proID;
+END
+character_set_client: utf8mb4
+collation_connection: utf8mb4_unicode_ci
+  Database Collation: utf8_general_ci
+*************************** 1. row ***************************
+           Procedure: newPutForth
+            sql_mode: NO_AUTO_VALUE_ON_ZERO
+    Create Procedure: CREATE DEFINER=`root`@`localhost` PROCEDURE `newPutForth`(argID INT Unsigned, proID INT Unsigned, words VARCHAR(300))
+BEGIN
+	DECLARE freshPhraseID INT Unsigned;
+	/*Give argument phrasing*/
+    INSERT INTO PHRASING (argumentID, phrasing, createdDate, coinedBy) 
+    VALUES (argID, words, CURRENT_TIMESTAMP, proID);
+    SET freshPhraseID = (SELECT LAST_INSERT_ID());
+	IF (EXISTS(SELECT * FROM PHRASE_ENDORSE WHERE argumentID = argID AND profileID = proID)) THEN
+		UPDATE PHRASE_ENDORSE SET phrasingID = freshPhraseID, lastVisit = CURRENT_TIMESTAMP 
+			WHERE argumentID = argID AND profileID = proID;
+	ELSE 
+		INSERT INTO PHRASE_ENDORSE (argumentID, phrasingID, profileID, firstVisit, lastVisit, active) 
+			VALUES (argID,freshPhraseID,proID,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,TRUE);
+	END IF;
+END
+character_set_client: utf8mb4
+collation_connection: utf8mb4_unicode_ci
+  Database Collation: utf8_general_ci
+*************************** 1. row ***************************
+           Procedure: promotePhrasing
+            sql_mode: ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION
+    Create Procedure: CREATE DEFINER=`craigdanz`@`%` PROCEDURE `promotePhrasing`(argID INT Unsigned, proID INT Unsigned, words VARCHAR(300))
+BEGIN
+	IF (EXISTS(SELECT * FROM PHRASING WHERE argumentID = argID AND profileID = proID)) THEN
+		UPDATE PHRASING SET phrasing = words WHERE argumentID = argID AND profileID = proID;
+	ELSE 
+		INSERT INTO PHRASING VALUES (argID,proID,words,proID,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,TRUE);
+	END IF;
+
+END
+character_set_client: utf8
+collation_connection: utf8_general_ci
+  Database Collation: utf8_general_ci
+*************************** 1. row ***************************
+           Procedure: promoteMotJuste
+            sql_mode: ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION
+    Create Procedure: CREATE DEFINER=`craigdanz`@`%` PROCEDURE `promoteMotJuste`(argID INT Unsigned, putID INT Unsigned, proID INT Unsigned, words VARCHAR(300))
+BEGIN
+	DECLARE nextMotJusteID int(10) unsigned;
+    
+    SET nextMotJusteID = (SELECT quibbleID 
+		FROM MOT_JUSTE 
+		WHERE argumentID = argID AND putForthID = putID
+		ORDER BY quibbleID DESC
+		LIMIT 1) + 1;
+        
+	IF (EXISTS(SELECT * FROM QUIBBLES_N_BITS WHERE argumentID = argID AND profileID = proID)) THEN
+		UPDATE QUIBBLES_N_BITS SET putForthID = putID, quibbleID = nextMotJusteID, lastModified = CURRENT_TIMESTAMP 
+        WHERE argumentID = argID AND profileID = proID;
+	ELSE 
+		INSERT INTO QUIBBLES_N_BITS VALUES (argID,proID,putID,nextMotJusteID,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,TRUE);
+	END IF;
+    
+    INSERT INTO MOT_JUSTE VALUES (argID,putID,nextMotJusteID,proID, CURRENT_TIMESTAMP, words);
+    
+    CALL updateCurrentPhrasing(argID);
+
+END
+character_set_client: utf8
+collation_connection: utf8_general_ci
+  Database Collation: utf8_general_ci
+*************************** 1. row ***************************
+           Procedure: replacePutForth
+            sql_mode: NO_AUTO_VALUE_ON_ZERO
+    Create Procedure: CREATE DEFINER=`root`@`localhost` PROCEDURE `replacePutForth`(argID INT Unsigned, proID INT Unsigned, phrID INT Unsigned, words VARCHAR(300))
+BEGIN
+	UPDATE PHRASING SET phrasing = words, coinedBy = proID, createdDate = CURRENT_TIMESTAMP 
+			WHERE argumentID = argID AND phrasingID = phrID;
+
+END
+character_set_client: utf8mb4
+collation_connection: utf8mb4_unicode_ci
+  Database Collation: utf8_general_ci
+*************************** 1. row ***************************
+           Procedure: cosignMotJuste
+            sql_mode: ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION
+    Create Procedure: CREATE DEFINER=`craigdanz`@`%` PROCEDURE `cosignMotJuste`(argID INT Unsigned, putID INT Unsigned, motID INT Unsigned, proID INT Unsigned)
+BEGIN
+	IF (EXISTS(SELECT * FROM QUIBBLES_N_BITS WHERE argumentID = argID AND profileID = proID)) THEN
+		UPDATE QUIBBLES_N_BITS SET putForthID = putID, quibbleID = motID, lastModified = CURRENT_TIMESTAMP 
+        WHERE argumentID = argID AND profileID = proID;
+	ELSE 
+		INSERT INTO QUIBBLES_N_BITS VALUES (argID,proID,putID,motID,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,TRUE);
+	END IF;
+    
+    CALL updateCurrentPhrasing(argID);
+
+END
+character_set_client: utf8
+collation_connection: utf8_general_ci
+  Database Collation: utf8_general_ci
+*************************** 1. row ***************************
+           Procedure: cosignPutForth
+            sql_mode: ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION
+    Create Procedure: CREATE DEFINER=`craigdanz`@`%` PROCEDURE `cosignPutForth`(argID INT Unsigned, putID INT Unsigned, proID INT Unsigned)
+BEGIN
+	IF (EXISTS(SELECT * FROM QUIBBLES_N_BITS WHERE argumentID = argID AND profileID = proID)) THEN
+		UPDATE QUIBBLES_N_BITS SET putForthID = putID, quibbleID = NULL, lastModified = CURRENT_TIMESTAMP WHERE argumentID = argID AND profileID = proID;
+	ELSE 
+		INSERT INTO QUIBBLES_N_BITS VALUES (argID,proID,putID,NULL,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,TRUE);
+	END IF;
+    
+    CALL updateCurrentPhrasing(argID);
+
+END
+character_set_client: utf8
+collation_connection: utf8_general_ci
+  Database Collation: utf8_general_ci
+*************************** 1. row ***************************
+           Procedure: updateCurrentPhrasing
+            sql_mode: ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION
+    Create Procedure: CREATE DEFINER=`craigdanz`@`%` PROCEDURE `updateCurrentPhrasing`(argID INT Unsigned)
+BEGIN
+    DECLARE quibbleWinner int(10) unsigned;
+    DECLARE putForthWinner int(10) unsigned;
+    DECLARE motJusteUpdate VARCHAR(300);
+    
+    SET putForthWinner = (SELECT S.putForthID 
+		FROM (SELECT putForthID, COUNT(putForthID) AS putForthVotes
+			FROM QUIBBLES_N_BITS 
+			WHERE argumentID = argID AND active = TRUE
+			GROUP BY putForthID
+			ORDER BY putForthVotes DESC) S
+		LIMIT 1);
+    SET quibbleWinner = (SELECT S.quibbleID 
+		FROM (SELECT putForthID, quibbleID, COUNT(putForthID) AS putForthVotes, COUNT(quibbleID) AS quibbleVotes
+			FROM QUIBBLES_N_BITS 
+			WHERE argumentID = argID AND active = TRUE
+			GROUP BY putForthID, quibbleID
+			ORDER BY putForthVotes DESC, quibbleVotes DESC) S
+		LIMIT 1);
+    
+    SET motJusteUpdate = (SELECT motJuste 
+		FROM MOT_JUSTE 
+		WHERE argumentID = argID AND putForthID = putForthWinner AND quibbleID = quibbleWinner);
+	
+    UPDATE PUT_FORTH 
+		SET currentPhrasing = motJusteUpdate 
+		WHERE argumentID = argID AND putForthID = putForthWinner;
+	
+    UPDATE PHRASING
+		SET currentPhrasing = motJusteUpdate 
+		WHERE argumentID = argID;
+    
+END
+character_set_client: utf8
+collation_connection: utf8_general_ci
+  Database Collation: utf8_general_ci
+*************************** 1. row ***************************
+           Procedure: assertOpinion
+            sql_mode: NO_AUTO_VALUE_ON_ZERO
+    Create Procedure: CREATE DEFINER=`root`@`localhost` PROCEDURE `assertOpinion`(op INT, argID INT Unsigned, proID INT Unsigned)
+BEGIN
+	IF NOT EXISTS(SELECT * FROM OPINION WHERE argumentID = argID AND profileID = proID) THEN
+			IF op = 1 THEN
+				INSERT INTO OPINION VALUES (argID, proID, TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+			ELSE
+				INSERT INTO OPINION VALUES (argID, proID, FALSE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+			END IF;
+    ELSEIF (EXISTS(SELECT * FROM OPINION WHERE argumentID = argID AND profileID = proID AND acceptance = FALSE) AND op = 1) THEN
+		UPDATE OPINION 
+			SET acceptance = TRUE, lastVisit = CURRENT_TIMESTAMP 
+				WHERE argumentID = argID AND profileID = proID;
+        UPDATE ENDORSEMENT 
+			SET active = TRUE, lastVisit = CURRENT_TIMESTAMP 
+				WHERE targArgID = argID AND profileID = proID AND (endorseType = 'Because' OR endorseType = 'Therefore');
+        UPDATE ENDORSEMENT 
+			SET active = FALSE, lastVisit = CURRENT_TIMESTAMP
+				WHERE targArgID = argID AND profileID = proID AND endorseType = 'Rebuttal';
+		IF (EXISTS(SELECT * FROM PHRASE_ENDORSE WHERE argumentID = argID AND profileID = proID)) THEN
+			UPDATE PHRASE_ENDORSE SET active = TRUE WHERE argumentID = argID AND profileID = proID;
+		END IF;
+        IF (EXISTS(SELECT * FROM EXPLICATION WHERE argumentID = argID AND profileID = proID)) THEN
+			UPDATE EXPLICATION SET active = TRUE WHERE argumentID = argID AND profileID = proID;
+		END IF;
+	ELSEIF (EXISTS(SELECT * FROM OPINION WHERE argumentID = argID AND profileID = proID AND acceptance = TRUE) AND op = -1) THEN
+		UPDATE OPINION 
+			SET acceptance = FALSE, lastVisit = CURRENT_TIMESTAMP 
+				WHERE argumentID = argID AND profileID = proID;
+        UPDATE ENDORSEMENT 
+			SET active = FALSE, lastVisit = CURRENT_TIMESTAMP 
+				WHERE targArgID = argID AND profileID = proID AND (endorseType = 'Because' OR endorseType = 'Therefore');
+        UPDATE ENDORSEMENT 
+			SET active = TRUE 
+				WHERE targArgID = argID AND profileID = proID AND endorseType = 'Rebuttal';
+		IF (EXISTS(SELECT * FROM PHRASE_ENDORSE WHERE argumentID = argID AND profileID = proID)) THEN
+			UPDATE PHRASE_ENDORSE SET active = FALSE WHERE argumentID = argID AND profileID = proID;
+		END IF;
+        IF (EXISTS(SELECT * FROM EXPLICATION WHERE argumentID = argID AND profileID = proID)) THEN
+			UPDATE EXPLICATION SET active = FALSE WHERE argumentID = argID AND profileID = proID;
+		END IF;
+        CALL rebalanceRecentRejections(argID, proID);
+	END IF;
+
+END
+character_set_client: utf8mb4
+collation_connection: utf8mb4_unicode_ci
+  Database Collation: utf8_general_ci
