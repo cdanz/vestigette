@@ -6,18 +6,19 @@ if($_POST['csrfToken'] != $_SESSION['csrfToken']) {
 }
 */
 $_SESSION['currentArg'] = 77;
+$baseURL = "/index.php";
+$argID = $_SESSION['currentArg'];
+//$type = strtolower($_POST["type"]);
+$type = 'because'; //TESTING
 if(!isset($_SESSION['profile'])){
 	header('Location: /index.php?arg='.$_SESSION['currentArg']);
 }
 include("${_SERVER['DOCUMENT_ROOT']}/includes/dbconnect.php");
 require_once("${_SERVER['DOCUMENT_ROOT']}/query_current_argument.php");
-$baseURL = "/index.php";
-$argID = $_SESSION['currentArg'];
-//$type = strtolower($_POST["type"]);
-$type = 'because'; //TESTING
+require_once("${_SERVER['DOCUMENT_ROOT']}/graph_search.php");
 
 function IsNullOrEmptyString($str) {
-	return (!isset($str) || trim($str) === '');
+	return (!isset($str) || trim($str) === '');	
 }
 
 /* Checkpoint style had no use for buttons 
@@ -54,39 +55,43 @@ function generateTypeLines($results) {
 function generateTypeLines($type, $typeArray) {
 	global $baseURL;
 	global $opinion;
-	if (sizeof($typeArray) > 0) {
-		echo "<ul>\n";
-		foreach ($typeArray as $line) {
-			if (isset($_SESSION['profile']) AND ($opinion != 0)) {
-				if ((($type == "rebuttal") AND ($opinion < 0)) OR (($type != "rebuttal") AND ($opinion > 0))) {
-					$onClick = "onclick=\"firstClick" . ucfirst($type) . "(" . $line[0] . ")\"";
-				}
+	global $alreadyEndorsed;
+	global $results;
+	$fullArray = array_merge($typeArray, $results); 
+	echo "<ul>\n";
+	foreach ($fullArray as $line) {
+		/*What does this do, Craig? Why? Maybe comment on your code, jerk.*/
+		if (isset($_SESSION['profile']) AND ($opinion != 0)) {
+			if ((($type == "rebuttal") AND ($opinion < 0)) OR (($type != "rebuttal") AND ($opinion > 0))) {
+				$onClick = "onclick=\"firstClick" . ucfirst($type) . "(" . $line[0] . ")\"";
 			}
-unset($onClick);
-			if ($line[1] <= 50) {
-				$half = "half1";
+		}
+		unset($onClick);
+		if ($alreadyEndorsed) {
+			if (isset($line[3]) && is_numeric($line[3])) {
+				$lineWeight = $line[3];
 			} else {
-				$half = "half2";
+				$lineWeight = 0;
 			}
-			$pct = strval(number_format($line[1], 1, '_', ''));
-			echo "			<li class=\"lineItem ${half} pct${pct}\" data-arg-id=\"${line[0]}\" data-aggregate-weight=\"" . strval(number_format($line[1], 2, '.', '')) . "\" data-user-weight=\"" . ((isset($line[3])) ? strval(number_format($line[3], 2, '.', '')) : "0.00") . "\">
-				<div class=\"wrapper\"" . ((isset($onClick)) ? $onClick : "") . ">
-					<div class=\"pointBtn arc1\"></div>
-					<div class=\"pointBtn arc2\"></div>
-				</div>
-				<p class=\"assocArg\"><span class=\"inLinePct\">" . strval(number_format($line[1], 2, '.', '')) . "% - </span><a href=\"${baseURL}?arg=${line[0]}\">".htmlspecialchars($line[2])."</a></p>
-			</li>";
+		} else {
+			$lineWeight = $line[1];
 		}
-		echo "</ul>\n";
-		unset($line);
-	} else {
-		if ($type == "rebuttal") {
-			echo "No Results - Reject the argument to be the first to endorse";
+		if ($lineWeight <= 50) {
+			$half = "half1";
+		} else {
+			$half = "half2";
 		}
-		else {
-			echo "No Results - Accept the argument to be the first to endorse";
-		}
+		$pct = strval(number_format($lineWeight, 1, '_', ''));
+		echo "			<li class=\"lineItem ${half} pct${pct}\" data-arg-id=\"${line[0]}\" data-aggregate-weight=\"" . strval(number_format($lineWeight, 2, '.', '')) . "\">
+			<div class=\"wrapper\"" . ((isset($onClick)) ? $onClick : "") . ">
+				<div class=\"pointBtn arc1\"></div>
+				<div class=\"pointBtn arc2\"></div>
+			</div>
+			<p class=\"assocArg\"><span class=\"inLinePct\">" . strval(number_format($lineWeight, 2, '.', '')) . "% - </span><a href=\"${baseURL}?arg=${line[0]}\">".htmlspecialchars($line[2])."</a></p>
+		</li>";
 	}
+	echo "</ul>\n";
+	unset($line);
 }
 
 ?>

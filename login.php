@@ -3,39 +3,38 @@
 	include("${_SERVER['DOCUMENT_ROOT']}/includes/dbconnect.php");
 
 	if(isset($_POST) && !empty($_POST)){
-		$email = mysqli_real_escape_string($db, $_POST['email']);
-		$password = hash('sha256',$_POST['password'],false);
-
-		$stmt = $db->prepare("SELECT profileID FROM USER_PROFILE WHERE email = ? AND securityCode = ? ");	
-		$stmt->bind_param("ss", $email, $password);
-		$stmt->execute();
-		$result = $stmt->get_result()->fetch_all(MYSQLI_NUM);
-
-		if (!isset($result[1][0]) && isset($result[0][0])) {
-			$_SESSION['profile'] = $result[0][0];
-			$_SESSION['email']=$email;
-			if(!isset($_SESSION['currentArg'])){
-				$_SESSION['currentArg'] = intval($_GET["arg"]); 
-			}
-			//set remember me cookie
-			if (isset($_POST['keepLoggedIn'])) {
-				$cookie_name = "rememberMe";
-				$cookie_value = md5(uniqid(mt_rand(),true));
-				$expiration = time() + (86400 * 30); //30 days in the future
-				$expirationSQL = date("Y-m-d h:i:s", strtotime("+30 days"));
-				setcookie($cookie_name, $cookie_value, $expiration, "/");
-				$stmt = $db->prepare("INSERT INTO REMEMBER_ME (token, profileID, email, createdDate, expiration) VALUES (?, ?, ?, CURRENT_TIMESTAMP, ?)");	
-				$stmt->bind_param("siss", $cookie_value, $_SESSION['profile'], $_SESSION['email'], $expirationSQL);
-				$stmt->execute();
-			}
-			header('Location: /index.php?arg='.$_SESSION['currentArg']);
-		}
-		else {
-			$fmsg = "Invalid Email/Password";
-		}
-		
-			$stmt->close();
-	}
+    echo "<pre>POST received</pre>";
+    
+    $email = mysqli_real_escape_string($db, $_POST['email']);
+    $password = hash('sha256',$_POST['password'],false);
+    
+    echo "<pre>Email: " . $email . "</pre>";
+    echo "<pre>Password Hash: " . $password . "</pre>";
+    
+    $stmt = $db->prepare("SELECT profileID FROM USER_PROFILE WHERE email = ? AND securityCode = ? ");	
+    $stmt->bind_param("ss", $email, $password);
+    $stmt->execute();
+    $result = $stmt->get_result()->fetch_all(MYSQLI_NUM);
+    
+    echo "<pre>Query Result: ";
+    print_r($result);
+    echo "</pre>";
+    echo "<pre>Result count: " . count($result) . "</pre>";
+    
+    if (count($result) > 0 && isset($result[0][0])) {
+        $_SESSION['profile'] = $result[0][0];
+        $_SESSION['email']=$email;
+        if(!isset($_SESSION['currentArg'])){
+            $_SESSION['currentArg'] = intval($_GET["arg"]); 
+        }
+        header('Location: /index.php?arg='.$_SESSION['currentArg']);
+    }
+    else {
+        $fmsg = "Invalid Email/Password";
+    }
+    
+    $stmt->close();
+}
 	if(isset($_SESSION['profile'])){
 			$smsg = "Already logged in as ".$_SESSION['email'].":&nbsp;";
 			if(!isset($_SESSION['currentArg'])){
@@ -57,7 +56,7 @@
 		<meta name="robots" content="follow" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<link rel="stylesheet" href="style_vestigette.css" />
-		<script language="javascript" src="script_vestigette.js"></script>
+		<!--<script language="javascript" src="script_vestigette.js"></script>
 		<script language="javascript">
 			let arg = <?php echo isset($arg) ? $arg : 'undefined'; ?>,
 				profile = <?php echo isset($profile) ? $profile : 'undefined'; ?>,
@@ -66,7 +65,7 @@
 				because = <?php echo json_encode($because); ?>,
 				therefore = <?php echo json_encode($therefore); ?>,
 				rebuttal = <?php echo json_encode($rebuttal); ?>;
-		</script>
+		</script>-->
 	</head>
 	<body>
 

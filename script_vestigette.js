@@ -1,7 +1,8 @@
 "use strict";
 
 let mode = null;
-/*Test for new expanded Add More experience - weigh in buttons should be active upon page load*/ 
+/*TEMPORARILY DISABLED
+Test for new expanded Add More experience - weigh in buttons should be active upon page load 
 if(window.location.pathname == '/add_more.php') {
 		console.log('add more if condition fired');
         let which;
@@ -34,7 +35,7 @@ if(window.location.pathname == '/add_more.php') {
 					// now you can toggle the new one, continue
 				}
 			}
-			/* hide this, unhide rest and endorse */
+			 hide this, unhide rest and endorse 
 			which.classList.toggle("hidden");
 			resetEl = document.querySelector(`#${activeEditMode} .reset`);
 			resetEl.classList.toggle("hidden");
@@ -46,6 +47,7 @@ if(window.location.pathname == '/add_more.php') {
 			// if there is data for this, set the wrappers to reflect the user's values
 			loadUserWeights(activeEditMode);
     }
+*/
 
 const editMode = ['because', 'therefore'];
 let activeEditMode;

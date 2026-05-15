@@ -1,0 +1,17 @@
+# Sensitive configuration
+includes/config.local.php
+
+# Database dumps
+*.sql
+dumps/
+
+# System files
+.DS_Store
+
+# Editor files
+*.swp
+*.swo
+*~
+
+# Logs
+*.log

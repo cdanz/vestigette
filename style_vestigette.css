@@ -41,9 +41,9 @@ a:active {
 }
 h1 {
 	color: var(--cddbWhite);
-	font-size: 2rem;
+	font-size: 3rem;
 	font-weight: normal;
-	text-shadow: 0.2em 0.2em 0.2em var(--cddbRed);
+	text-shadow: 0.4em 0em 0.05em var(--cddbRed), 0em -0.4em 0.05em var(--cddbBlue), 0em 0.4em 0.05em var(--cddbGreen);
 }
 h2 {
 	font-weight: bold;

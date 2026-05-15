@@ -1,7 +1,12 @@
 <?php
 //  $webroot = str_replace($_SERVER['SCRIPT_NAME'], '', realpath($_SERVER['SCRIPT_FILENAME']));
   $webroot = $_SERVER['DOCUMENT_ROOT'];
-  $config = parse_ini_file("${webroot}/../private/config.ini"); 
+  if (file_exists('includes/config.local.php')) {
+    $config = require 'includes/config.local.php';
+  } else {
+    $config = parse_ini_file("${webroot}/../private/config.ini"); 
+  }
+  
 
   $key = "${webroot}/../ssl/client-key.pem";
   $cert = "${webroot}/../ssl/client-cert.pem";
@@ -23,4 +28,7 @@
       throw new Exception("Can't connect to the database! \n" . $ex);
   }
   mysqli_set_charset($db, "utf8mb4");
+
+  //Be skeptical of this. Claude added on 09.05.2026
+  $mysqli = $db; // Create $mysqli alias for compatibility with existing queries
 ?>

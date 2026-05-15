@@ -210,15 +210,15 @@ function generateFindLines($results) {
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<link rel="stylesheet" href="style_vestigette.css" />
 		<script language="javascript" src="script_vestigette.js"></script>
-		<script language="javascript">
+		<!--<script language="javascript">
 			let arg = <?php echo isset($arg) ? $arg : 'undefined'; ?>,
 				profile = <?php echo isset($profile) ? $profile : 'undefined'; ?>,
 				opinion = <?php echo isset($opinion) ? $opinion : 'undefined'; ?>,
-				assoc = <?php echo isset($assocWeights) ? "JSON.parse(" + $assocWeights + ")" : 'undefined'; ?>, //not used
+				assoc = <?php echo isset($assocWeights) ? "JSON.parse(" + $assocWeights + ")" : 'undefined'; ?>
 				because = <?php echo json_encode($because); ?>,
 				therefore = <?php echo json_encode($therefore); ?>,
 				rebuttal = <?php echo json_encode($rebuttal); ?>;
-		</script>
+		</script>-->
 		<!-- Global site tag (gtag.js) - Google Analytics -->
 		<script async src="https://www.googletagmanager.com/gtag/js?id=G-38LM87XMGN"></script>
 		<script>
@@ -231,7 +231,7 @@ function generateFindLines($results) {
 	<body>
 
 		<div id="mastHead" class="container">
-			<h1><a href="index.php?arg=<?php echo $_SESSION['currentArg'];?>">Vestigette</a></h1>
+			<h1><a href="index.php?arg=<?php echo $_SESSION['currentArg'];?>">AGITATE</a></h1>
 			<div>
 				<a href="About.php?arg=<?php echo $_SESSION['currentArg'];?>">About</a>
 				<a href="Explore.php?arg=<?php echo $_SESSION['currentArg'];?>">Explore</a>

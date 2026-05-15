@@ -1,0 +1,11 @@
+<?php
+// config.local.php - Local development only
+return [
+    'environment' => 'DEVELOPMENT',
+    'dblocation' => 'LOCAL',
+    'servername' => 'localhost',
+    'username' => 'root',
+    'pass' => 'root',
+    'dbname' => 'vestigette'
+];
+?>
