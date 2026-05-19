@@ -161,9 +161,10 @@ if (mysqli_multi_query($db, $sql)) {
     $altPhrasings = array();
     while ($row = mysqli_fetch_row($result)) {
       $altPhrasings[$iterator] = array();
-      $altPhrasings[$iterator][0] = $row[0];
-      $altPhrasings[$iterator][1] = $row[1];
-      $altPhrasings[$iterator][2] = $row[2];
+      $altPhrasings[$iterator][0] = $row[0];  // totalWeight
+      $altPhrasings[$iterator][1] = $row[1];  // endorsementCount
+      $altPhrasings[$iterator][2] = $row[2];  // phrasing text
+      $altPhrasings[$iterator][3] = $row[3];  // phrasingID
       $iterator++;
     }
   }

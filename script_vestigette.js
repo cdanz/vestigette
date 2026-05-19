@@ -55,6 +55,8 @@ let panel = null;
 let pctRE = /pct\d+\_\d/;
 let genericTotalClicks = 0;
 let genericClickArr = [];
+let phrasingTotalClicks = 0;
+let phrasingClickArr = [];
 let DEBUG = true;
 const matchMediaValue = '(max-width: 1200px)';
 
@@ -600,6 +602,66 @@ function bump(type, argID) {
 	updateWeighInValue(type);
 }
 
+function bumpPhrasing(phrasingID) {
+  var found = false;
+  var iterator = 0;
+  var foundIndex;
+  
+  phrasingTotalClicks++;
+  while (found == false && iterator < phrasingClickArr.length) {
+    if(phrasingClickArr[iterator][0] == phrasingID){
+      found = true;
+      phrasingClickArr[iterator][1]++;
+      foundIndex = iterator;
+    }
+    iterator++;
+  }
+  
+  if (found == false) {
+    foundIndex = phrasingClickArr.length;
+    phrasingClickArr.push([phrasingID, 1]);
+  }
+  
+  for (var i = 0, l = phrasingClickArr.length; i < l; i++) {
+    diameter = diameterShift + (((phrasingClickArr[i][1])/phrasingTotalClicks) * diameterFactor);
+    if (diameter > maxFontNum) diFontSize = maxFontNum;
+    else diFontSize = diameter;
+    
+    rateAsString = ((phrasingClickArr[i][1]/phrasingTotalClicks)*100).toFixed(1); 
+    if (((phrasingClickArr[i][1]/phrasingTotalClicks)*100) < 10) {
+      leftOfDec = rateAsString.substring(0,1); 
+      decOnRight = rateAsString.substring(1,3);
+    }
+    else if(((phrasingClickArr[i][1]/phrasingTotalClicks)*100) < 100) {
+      leftOfDec = rateAsString.substring(0,2);
+      decOnRight = rateAsString.substring(2,4);
+    }
+    else {
+      leftOfDec = rateAsString.substring(0,3);
+      decOnRight = rateAsString.substring(3,5);
+    }
+    decOnRight += "%";
+
+    // Update UI elements - need to match your phrasing HTML structure
+    var wrapper = document.querySelector('[data-phrasing-id="' + phrasingClickArr[i][0] + '"] .wrapper');
+    if (wrapper) {
+      wrapper.style.width = diameter + "rem"; 
+      wrapper.style.height = diameter + "rem";
+      
+      // Update percentage display
+      var pctDisplay = document.querySelector('[data-phrasing-id="' + phrasingClickArr[i][0] + '"] .inLinePct');
+      if (pctDisplay) {
+        pctDisplay.innerHTML = leftOfDec + '<span style="font-size:.6em">' + decOnRight + '</span> - ';
+      }
+    }
+  }
+  
+  updatePhrasingWeighInValue();
+}
+
+function updatePhrasingWeighInValue() {
+  document.getElementById("phrasingWeighInWith").value = JSON.stringify(phrasingClickArr);
+}
 
 /*
 This is the named function used for accordion expansion

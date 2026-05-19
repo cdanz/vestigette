@@ -103,47 +103,53 @@ unset($onClick);
 		}
 	}
 }
-function generatePhraseLines($alts) {
-	global $opinion;
-	global $userPhrasingID;
-	global $userPhrasing;
-	if (sizeof($alts) > 0) {
-		echo "<ul>\n";
-		foreach ($alts as $line) {
-				if ((isset($opinion)) && ($opinion > 0)) { 	
-					if(isset($userPhrasingID) && ($userPhrasingID == $line[2]) && $line[0] == 1) {
-						echo "			<li class=\"lineItem\">
-						<p class=\"assocArg rewrite\">".htmlspecialchars($line[1])." <span style=\"color: var(--cddbGrey);font-size: 0.75rem;\">(your preference)</span></p>
-						<div class=\"opinion\">
-							<button type=\"submit\" class=\"button adjust rewrite\" id=\"rewriteBtn\" name=\"buttonClicked\" value=\"promotePutForth\">Edit Your Entry</button>
-						<form method=\"POST\" class=\"rewrite form-inline hidden\" accept-charset=\"utf-8\">
-							<input type=\"text\" value=\"".htmlspecialchars($line[1])."\" name=\"replacement\">
-							<input type=\"hidden\" name=\"userPhraseID\" value=\"${line[2]}\" />
-							<button type=\"submit\" class=\"button adjust\" name=\"buttonClicked\" value=\"replacePutForth\">Update</button>" . addCSRFtoken() . "
-						</form></div>";
-					}
-					else if(isset($userPhrasingID) && ($userPhrasingID == $line[2])) {
-						echo "			<li class=\"lineItem\">
-							<p class=\"assocArg\">".htmlspecialchars($line[1])." <span style=\"color: var(--cddbGrey);font-size: 0.75rem;\">(Votes: ${line[0]})</span></p>
-							<div class=\"opinion\"></div>"; 
-					}
-					else echo "			<li class=\"lineItem\">
-						<p class=\"assocArg\">".htmlspecialchars($line[1])." <span style=\"color: var(--cddbGrey);font-size: 0.75rem;\">(Votes: ${line[0]})</span></p>
-						<div class=\"opinion\"><form method=\"POST\" class=\"buttons\" accept-charset=\"utf-8\">
-						<input type=\"hidden\" name=\"promotePutForth\" value=\"${line[2]}\" />
-							<button type=\"submit\" class=\"button instead\" name=\"buttonClicked\" value=\"promotePutForth\">Endorse</button>" . addCSRFtoken() . "
-						</form></div>";
-				}
-				else echo "			<li class=\"lineItem\">
-						<p class=\"assocArg\">".htmlspecialchars($line[1])." <span style=\"color: var(--cddbGrey);font-size: 0.75rem;\">(Votes: ${line[0]})</span></p>";
-
-			echo	"</li>";
-		}
-		echo "</ul>\n";
-		unset($line);
-	} else {
-		echo "0 results";
-	}
+function generatePhrasingLines($alts) {
+    global $opinion;
+    global $userPhrasingID;
+    global $baseURL;
+    
+    if (sizeof($alts) > 0) {
+        echo "<ul>\n";
+        foreach ($alts as $line) {
+            // $line[0] = totalWeight (aggregate)
+            // $line[1] = endorsementCount
+            // $line[2] = phrasing text
+            // $line[3] = phrasingID
+            
+            if (isset($_SESSION['profile']) && ($opinion > 0)) {
+                $onClick = "onclick=\"bumpPhrasing(" . $line[3] . ")\"";
+            }
+            
+            // Calculate percentage for display
+            $totalWeight = isset($line[0]) ? floatval($line[0]) : 0;
+            $maxWeight = 100; // For now, assume max is 100, could calculate from all phrasings
+            $percentage = $maxWeight > 0 ? ($totalWeight / $maxWeight) * 100 : 0;
+            
+            if ($percentage <= 50) {
+                $half = "half1";
+            } else {
+                $half = "half2";
+            }
+            
+            $pct = strval(number_format($percentage, 1, '_', ''));
+            $userWeight = 0; // TODO: Get user's specific weight for this phrasing
+            
+            $isUserChoice = (isset($userPhrasingID) && ($userPhrasingID == $line[3]));
+            $userLabel = $isUserChoice ? " <span style=\"color: var(--cddbGrey);font-size: 0.75rem;\">(your preference)</span>" : "";
+            
+            echo "            <li class=\"lineItem ${half} pct${pct}\" data-phrasing-id=\"${line[3]}\" data-aggregate-weight=\"" . strval(number_format($percentage, 2, '.', '')) . "\" data-user-weight=\"" . strval(number_format($userWeight, 2, '.', '')) . "\">
+                <div class=\"wrapper\"" . ((isset($onClick)) ? " " . $onClick : "") . ">
+                    <div class=\"pointBtn arc1\"></div>
+                    <div class=\"pointBtn arc2\"></div>
+                </div>
+                <p class=\"assocArg\"><span class=\"inLinePct\">" . strval(number_format($percentage, 2, '.', '')) . "% - </span>" . htmlspecialchars($line[2]) . $userLabel . "</p>
+            </li>";
+        }
+        echo "</ul>\n";
+        unset($line);
+    } else {
+        echo "No alternative phrasings yet - be the first to introduce one!";
+    }
 }
 function generateLinkLines($links) {
 	global $opinion;
@@ -202,7 +208,7 @@ function generateFindLines($results) {
 <!DOCTYPE html>
 <html>
 	<head>
-		<title>Vestigette</title>
+		<title>Agitate</title>
 		<meta charset="utf-8"/>
 		<meta name="keywords" content="argument, dialectic, reasoning, anti-troll, discussion, debate, assertion network, dialogue, public forum, town square, consensus building, diliberation chamber, diliberative body, dynamic polling, self-guided polling, opposition research, best reason why, best reason not"/>
 		<meta name="copyright" content="Copyright 2015 Craig Danz Seattle, WA USA" />
@@ -451,37 +457,50 @@ if (isset($recent)) {
 			</div>
 		</div>
 
-
-		<!-- TODO I clearly can't figure out how to properly adjust the height of this overlay window -->
-			<div id="overlayP" class="hidden">
-				<div id="phrasing" class="container hidden">
-					<h2>Put Another Way</h2>
-					<div class="buttons">
-						<button id="closeP" class="button">X</button> 
-					</div>
-					<div class="panel expanded">
-						
+<!-- Phrasing Modal -->
+<div id="overlayP" class="hidden">
+    <div id="phrasing" class="container hidden">
+        <h2>Put Another Way</h2>
+        <div class="buttons">
+            <button id="closeP" class="button">X</button> 
+        </div>
 <?php
-	if (isset($altPhrasings)) {
-		generatePhraseLines($altPhrasings);
-	}
+if ((isset($opinion)) && ($opinion > 0)) { 
+?>
+        <div class="buttons">
+            <button class="button reset hidden" name="buttonClicked" value="weighPhrasing" data-container-id="phrasing">&#x27F2;</button>
+            <form method="POST" accept-charset="utf-8">
+                <button type="submit" class="button endorse hidden" name="buttonClicked" value="weighPhrasing" data-container-id="phrasing">Endorse</button>
+                <input type="hidden" name="phrasingWeighInWith" id="phrasingWeighInWith" value="" />
+                <?php addCSRFtoken() ?>
+            </form>
+            <button class="button weighIn" data-container-id="phrasing">Weigh In</button>
+        </div>
+<?php
+} 
+?>
+        <div class="panel expanded" data-container-id="phrasing">
+<?php
+    if (isset($altPhrasings)) {
+        generatePhrasingLines($altPhrasings);
+    }
 ?>
 <?php
 if ((isset($opinion)) && ($opinion > 0)) { 
 ?>
-						<div class="assert">
-							<form class="form-inline" method="POST" accept-charset="utf-8">
-								<input type="text" placeholder="Better said..." name="newPutForth">
-								<button type="submit" class="button addNew" name="buttonClicked" value="newPutForth">Introduce</button>
-								<?php addCSRFtoken() ?>
-							</form>
-						</div>
+            <div class="assert hidden">
+                <form class="form-inline" method="POST" accept-charset="utf-8">
+                    <input type="text" placeholder="Better said..." name="newPutForth">
+                    <button type="submit" class="button addNew" name="buttonClicked" value="newPutForth">Introduce</button>
+                    <?php addCSRFtoken() ?>
+                </form>
+            </div>
 <?php
 } 
 ?>
-					</div>
-				</div>
-			</div>
+        </div>
+    </div>
+</div>
 
 			<div id="overlayE" class="hidden">
 				<div id="explication" class="container hidden">
