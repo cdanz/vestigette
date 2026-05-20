@@ -4,6 +4,7 @@ includes/config.local.php
 # Database dumps (allow procedure definition scripts)
 *.sql
 !*_procedures.sql
+!*_seed.sql
 dumps/
 
 # System files
