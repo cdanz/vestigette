@@ -220,6 +220,24 @@
 				
             	break;
 	            //Submit a new way of putting forth - TODO Likely no different than promote. remove until data schema changes
+            case "weighPhrasing":
+            	$arrayOfWeighIns = explode(",",$_POST["phrasingWeighInWith"]);
+	            $argAtHand = intval($_SESSION['currentArg']);
+	            $profileID = intval($_SESSION['profile']);
+	            $query = "CALL prepareForNewPhrasingEndorse(".$argAtHand.",".$profileID.");";
+				for ($i = 0; $i < (count($arrayOfWeighIns)-2); $i+=2) {
+					$phrasingIDVal = intval($arrayOfWeighIns[$i]);
+					$weightVal = floatval($arrayOfWeighIns[$i+1]);
+					$query .= "INSERT INTO PHRASE_ENDORSE (argumentID, profileID, phrasingID, weight, active) VALUES(".$argAtHand.",".$profileID.",".$phrasingIDVal.",".$weightVal.",TRUE);";
+				}
+				$query .= "CALL updatePhrasingCache(".$argAtHand.");";
+				if(mysqli_multi_query($db, $query)){
+					header('Location: /index.php?arg='.$_SESSION['currentArg']);
+				}
+				else
+					echo "Query Failed";
+            	break;
+
             case "newPutForth":
             	$phrased = mysqli_real_escape_string($db,trim($_POST["newPutForth"]));
 	            $argAtHand = intval($_SESSION['currentArg']);
@@ -230,7 +248,7 @@
 				if(mysqli_query($db, $query)){
 					header('Location: /index.php?arg='.$_SESSION['currentArg']);
 				}
-				else 
+				else
 					echo "Query Failed";
             	break;
 
@@ -250,8 +268,25 @@
 					echo "Query Failed";
             	break;
 
+	        case "weighExplication":
+	        	$arrayOfWeighIns = explode(",", $_POST["explicWeighInWith"]);
+	        	$argAtHand = intval($_SESSION['currentArg']);
+	        	$profileID = intval($_SESSION['profile']);
+	        	$query = "CALL prepareForNewExplicationEndorse(" . $argAtHand . "," . $profileID . ");";
+	        	for ($i = 0; $i < (count($arrayOfWeighIns) - 2); $i += 2) {
+	        		$explicationIDVal = intval($arrayOfWeighIns[$i]);
+	        		$weightVal = floatval($arrayOfWeighIns[$i + 1]);
+	        		$query .= "INSERT INTO EXPLICATION_ENDORSE (explicationID, argumentID, profileID, weight, active) VALUES(" . $explicationIDVal . "," . $argAtHand . "," . $profileID . "," . $weightVal . ",TRUE);";
+	        	}
+	        	if (mysqli_multi_query($db, $query)) {
+	        		header('Location: /index.php?arg=' . $_SESSION['currentArg']);
+	        	} else {
+	        		echo "Query Failed";
+	        	}
+	        	break;
+
 	            //Promote explication TODO Sucks because just pushing the full link string when should have a int key
-	        case "promoteExplication": 
+	        case "promoteExplication":
 	        	$explicationLink = $_POST["promoteExplication"]; 
 	            
 	            $argAtHand = intval($_SESSION['currentArg']);

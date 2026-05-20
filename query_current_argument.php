@@ -81,23 +81,18 @@ if (mysqli_multi_query($db, $sql)) {
     $links = array();
     while ($row = mysqli_fetch_row($result)) {
       $links[$iterator] = array();
-      $links[$iterator][0] = $row[0];
-      $links[$iterator][1] = $row[1];
-      $links[$iterator][2] = $row[2];
-      $links[$iterator][3] = $row[3];
-      $links[$iterator][4] = $row[4]; 
-      $links[$iterator][5] = $row[5]; 
+      $links[$iterator][0] = $row[0];  // totalWeight
+      $links[$iterator][1] = $row[1];  // endorsementCount
+      $links[$iterator][2] = $row[2];  // explicationID
+      $links[$iterator][3] = $row[3];  // hyperlink
+      $links[$iterator][4] = $row[4];  // publisher
+      $links[$iterator][5] = $row[5];  // authorFName
+      $links[$iterator][6] = $row[6];  // authorLName
+      $links[$iterator][7] = $row[7];  // title
       $iterator++;
     }
   } else {
     $links = array();
-    $links[0] = array();
-    $links[0][0] = NULL;
-    $links[0][1] = NULL;
-    $links[0][2] = NULL;
-    $links[0][3] = NULL;
-    $links[0][4] = NULL;
-    $links[0][5] = NULL;
   }
   if ($result) mysqli_free_result($result);
   mysqli_next_result($db);

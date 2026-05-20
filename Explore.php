@@ -55,58 +55,58 @@ mysqli_multi_query($db, $sql);
 			<div class="panel" data-container-id="because">
 				<ul>
 					<li class='lineItem'>
-						<p class="assocArg"><a href="http://www.vestigette.org/?arg=77">Vestigette</a></p>
+						<p class="assocArg"><a href="/index.php?arg=77">Vestigette</a></p>
 					</li>
 					<li class='lineItem' style="background-color: var(--cddbLiteGrey)">
-						<p class="assocArg"><a href="http://www.vestigette.org/?arg=422">Free Speech</a></p>
+						<p class="assocArg"><a href="/index.php?arg=422">Free Speech</a></p>
 					</li>
 					<li class='lineItem'>
-						<p class="assocArg"><a href="http://www.vestigette.org/?arg=123">Global Warming</a></p>
+						<p class="assocArg"><a href="/index.php?arg=123">Global Warming</a></p>
 					</li>
 					<li class='lineItem' style="background-color: var(--cddbLiteGrey)">
-						<p class="assocArg"><a href="http://www.vestigette.org/?arg=110">Poverty and Wealth</a></p>
+						<p class="assocArg"><a href="/index.php?arg=110">Poverty and Wealth</a></p>
 					</li>
 					<li class='lineItem'>
-						<p class="assocArg"><a href="http://www.vestigette.org/?arg=238">Racism</a></p>
+						<p class="assocArg"><a href="/index.php?arg=238">Racism</a></p>
 					</li>
 					<li class='lineItem' style="background-color: var(--cddbLiteGrey)">
-						<p class="assocArg"><a href="http://www.vestigette.org/?arg=403">The Role of Government</a></p>
+						<p class="assocArg"><a href="/index.php?arg=403">The Role of Government</a></p>
 					</li>
 					<li class='lineItem'>
-						<p class="assocArg"><a href="http://www.vestigette.org/?arg=376">Media</a></p>
+						<p class="assocArg"><a href="/index.php?arg=376">Media</a></p>
 					</li>
 					<li class='lineItem' style="background-color: var(--cddbLiteGrey)">
-						<p class="assocArg"><a href="http://www.vestigette.org/?arg=954">Immigration/Migration</a></p>
+						<p class="assocArg"><a href="/index.php?arg=954">Immigration/Migration</a></p>
 					</li>
 					<li class='lineItem'>
-						<p class="assocArg"><a href="http://www.vestigette.org/?arg=128">Abortion</a></p>
+						<p class="assocArg"><a href="/index.php?arg=128">Abortion</a></p>
 					</li>
 					<li class='lineItem' style="background-color: var(--cddbLiteGrey)">
-						<p class="assocArg"><a href="http://www.vestigette.org/?arg=423">Misogyny</a></p>
+						<p class="assocArg"><a href="/index.php?arg=423">Misogyny</a></p>
 					</li>
 					<li class='lineItem'>
-						<p class="assocArg"><a href="http://www.vestigette.org/?arg=80">Donald Trump</a></p>
+						<p class="assocArg"><a href="/index.php?arg=80">Donald Trump</a></p>
 					</li>
 					<li class='lineItem' style="background-color: var(--cddbLiteGrey)">
-						<p class="assocArg"><a href="http://www.vestigette.org/?arg=90">The GOP</a></p>
+						<p class="assocArg"><a href="/index.php?arg=90">The GOP</a></p>
 					</li>
 					<li class='lineItem'>
-						<p class="assocArg"><a href="http://www.vestigette.org/?arg=574">The Democratic Party</a></p>
+						<p class="assocArg"><a href="/index.php?arg=574">The Democratic Party</a></p>
 					</li>
 					<li class='lineItem' style="background-color: var(--cddbLiteGrey)">
-						<p class="assocArg"><a href="http://www.vestigette.org/?arg=413">COVID-19</a></p>
+						<p class="assocArg"><a href="/index.php?arg=413">COVID-19</a></p>
 					</li>
 					<li class='lineItem'>
-						<p class="assocArg"><a href="http://www.vestigette.org/?arg=424">Vaccines</a></p>
+						<p class="assocArg"><a href="/index.php?arg=424">Vaccines</a></p>
 					</li>
 					<li class='lineItem' style="background-color: var(--cddbLiteGrey)">
-						<p class="assocArg"><a href="http://www.vestigette.org/?arg=428	">Religion</a></p>
+						<p class="assocArg"><a href="/index.php?arg=428">Religion</a></p>
 					</li>
 					<li class='lineItem'>
-						<p class="assocArg"><a href="http://www.vestigette.org/?arg=328">Gun Control</a></p>
+						<p class="assocArg"><a href="/index.php?arg=328">Gun Control</a></p>
 					</li>
 					<li class='lineItem' style="background-color: var(--cddbLiteGrey)">
-						<p class="assocArg"><a href="http://www.vestigette.org/?arg=278">LGBTQ Issues</a></p>
+						<p class="assocArg"><a href="/index.php?arg=278">LGBTQ Issues</a></p>
 					</li>
 		        </ul>
 			</div>

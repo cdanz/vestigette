@@ -216,35 +216,35 @@ $results = array_merge($results, $leftovers);
 				assoc = <?php echo isset($assocWeights) ? "JSON.parse(" + $assocWeights + ")" : 'undefined'; ?>;
 		</script>
 	</head>
-	<body>
-		<div id="checkpoint" class="accordion container">
-			<h2><?php echo htmlspecialchars($assertion); ?></h2>
-			<div class="opinion">
-				<form method="POST" class="buttons" action=<?php echo "\"/index.php?arg=".$argID."\"";?>>
-					<input type="hidden" name="assertion" value="<?php echo htmlspecialchars($assertion);?>">
-					<input type="hidden" name="type" value=<?php echo "\"".$type."\"";?> />
-					<button type="submit" class="stick" name="buttonClicked" value="addAssertion" data-container-id="because">STICK WITH THIS</button>
-				</form>
-			</div>
-			<div class="panel expanded">
-<?php
-if (($type == 'Because') || ($type == 'Therefore')) { 
-?>
-				<div>
-					<form>
-						<input type="checkbox" name="reciprocate" value="reciprocate">
-  						<label for="reciprocate"> Reciprocate by linking new addition back to current argument</label><br>
+	<body class="checkpoint-page">
+		<div id="checkpoint" class="container">
+			<div class="checkpoint-header">
+				<h2><?php echo htmlspecialchars($assertion); ?></h2>
+				<div class="opinion">
+					<form method="POST" class="buttons" action=<?php echo "\"/index.php?arg=".$argID."\"";?>>
+						<input type="hidden" name="assertion" value="<?php echo htmlspecialchars($assertion);?>">
+						<input type="hidden" name="type" value=<?php echo "\"".$type."\"";?> />
+						<button type="submit" class="stick" name="buttonClicked" value="addAssertion" data-container-id="because">STICK WITH THIS</button>
 					</form>
 				</div>
-<?php
-} 
-?>
+			</div>
+			<div class="panel expanded">
 <?php
 if (isset($results)) {
 	generateTypeLines($results);
 }
 ?>
 			</div>
+<?php
+if (($type == 'Because') || ($type == 'Therefore')) {
+?>
+			<div class="checkpoint-footer">
+				<input type="checkbox" name="reciprocate" value="reciprocate" id="reciprocate">
+				<label for="reciprocate">Reciprocate by linking new addition back to current argument</label>
+			</div>
+<?php
+}
+?>
 		</div>
 	</body>
 </html>

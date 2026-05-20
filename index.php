@@ -116,29 +116,25 @@ function generatePhrasingLines($alts) {
             // $line[2] = phrasing text
             // $line[3] = phrasingID
             
-            if (isset($_SESSION['profile']) && ($opinion > 0)) {
-                $onClick = "onclick=\"bumpPhrasing(" . $line[3] . ")\"";
-            }
-            
-            // Calculate percentage for display
+                    // Calculate percentage for display
             $totalWeight = isset($line[0]) ? floatval($line[0]) : 0;
-            $maxWeight = 100; // For now, assume max is 100, could calculate from all phrasings
+            $maxWeight = 100;
             $percentage = $maxWeight > 0 ? ($totalWeight / $maxWeight) * 100 : 0;
-            
+
             if ($percentage <= 50) {
                 $half = "half1";
             } else {
                 $half = "half2";
             }
-            
+
             $pct = strval(number_format($percentage, 1, '_', ''));
-            $userWeight = 0; // TODO: Get user's specific weight for this phrasing
-            
+            $userWeight = 0;
+
             $isUserChoice = (isset($userPhrasingID) && ($userPhrasingID == $line[3]));
             $userLabel = $isUserChoice ? " <span style=\"color: var(--cddbGrey);font-size: 0.75rem;\">(your preference)</span>" : "";
-            
+
             echo "            <li class=\"lineItem ${half} pct${pct}\" data-phrasing-id=\"${line[3]}\" data-aggregate-weight=\"" . strval(number_format($percentage, 2, '.', '')) . "\" data-user-weight=\"" . strval(number_format($userWeight, 2, '.', '')) . "\">
-                <div class=\"wrapper\"" . ((isset($onClick)) ? " " . $onClick : "") . ">
+                <div class=\"wrapper\">
                     <div class=\"pointBtn arc1\"></div>
                     <div class=\"pointBtn arc2\"></div>
                 </div>
@@ -156,24 +152,29 @@ function generateLinkLines($links) {
 	if (sizeof($links) > 0) {
 		echo "<ul>\n";
 		foreach ($links as $line) {
-			echo "			<li class=\"lineItem\">
-				<p class=\"assocArg\"><a href=\"${line[1]}\">${line[1]}</a></p>
-				<div class=\"opinion\">
-				<form method=\"POST\" class=\"buttons\" accept-charset=\"utf-8\">
-					<input type=\"hidden\" name=\"promoteExplication\" value=\"${line[1]}\" />"; 
+			// $line[0] = totalWeight, [1] = endorsementCount, [2] = explicationID
+			// [3] = hyperlink, [4] = publisher, [5] = authorFName, [6] = authorLName, [7] = title
+			if ($line[3] === NULL) continue;
+			$totalWeight = isset($line[0]) ? floatval($line[0]) : 0;
+			$maxWeight = 100;
+			$percentage = $maxWeight > 0 ? ($totalWeight / $maxWeight) * 100 : 0;
+			$half = $percentage <= 50 ? "half1" : "half2";
+			$pct = strval(number_format($percentage, 1, '_', ''));
+			$userWeight = 0;
+			$label = ($line[7] !== NULL && $line[7] !== '') ? htmlspecialchars($line[7]) : htmlspecialchars($line[3]);
 
-					if ((isset($opinion)) && ($opinion > 0)) { 
-					echo "<button type=\"submit\" class=\"button instead\" name=\"buttonClicked\" value=\"promoteExplication\">Endorse</button>";	
-				}
-				addCSRFtoken();
-				echo "</form>
-			</div>
+			echo "			<li class=\"lineItem ${half} pct${pct}\" data-explication-id=\"${line[2]}\" data-aggregate-weight=\"" . strval(number_format($percentage, 2, '.', '')) . "\" data-user-weight=\"" . strval(number_format($userWeight, 2, '.', '')) . "\">
+				<div class=\"wrapper\">
+					<div class=\"pointBtn arc1\"></div>
+					<div class=\"pointBtn arc2\"></div>
+				</div>
+				<p class=\"assocArg\"><span class=\"inLinePct\">" . strval(number_format($percentage, 2, '.', '')) . "% - </span><a href=\"${line[3]}\" target=\"_blank\">${label}</a></p>
 			</li>";
 		}
 		echo "</ul>\n";
 		unset($line);
 	} else {
-		echo "0 results";
+		echo "No explication links yet - be the first to introduce one!";
 	}
 }
 function generateFindLines($results) {
@@ -214,8 +215,8 @@ function generateFindLines($results) {
 		<meta name="copyright" content="Copyright 2015 Craig Danz Seattle, WA USA" />
 		<meta name="robots" content="follow" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<link rel="stylesheet" href="style_vestigette.css" />
-		<script language="javascript" src="script_vestigette.js"></script>
+		<link rel="stylesheet" href="style_vestigette.css?v=<?php echo filemtime($_SERVER['DOCUMENT_ROOT'].'/style_vestigette.css'); ?>" />
+		<script language="javascript" src="script_vestigette.js?v=<?php echo filemtime($_SERVER['DOCUMENT_ROOT'].'/script_vestigette.js'); ?>"></script>
 		<!--<script language="javascript">
 			let arg = <?php echo isset($arg) ? $arg : 'undefined'; ?>,
 				profile = <?php echo isset($profile) ? $profile : 'undefined'; ?>,
@@ -327,7 +328,7 @@ echo "\n</form>";
 					<button class="altPhraseBtn" name="buttonClicked" value="altPhrasing">&#x270e;</button>
 				</div>
 				<div class="explicationBox">
-					<a href="<?php echo $links[0][1]; ?>" target="_blank"><?php echo $links[0][1]; ?></a>
+					<a href="<?php echo isset($links[0][3]) ? $links[0][3] : ''; ?>" target="_blank"><?php echo isset($links[0][3]) ? $links[0][3] : ''; ?></a>
 					<button class="altExplicationBtn" name="buttonClicked" value="altExplication">&#x2318;</button>
 				</div>
 			</div>
@@ -506,19 +507,34 @@ if ((isset($opinion)) && ($opinion > 0)) {
 				<div id="explication" class="container hidden">
 					<h2>Explication Links</h2>
 					<div class="buttons">
-						<button id="closeE" class="button">X</button> 
+						<button id="closeE" class="button">X</button>
 					</div>
-					<div class="panel expanded">
-						
 <?php
-	if (isset($links)) {
+if ((isset($opinion)) && ($opinion > 0)) {
+?>
+				<div class="buttons">
+					<button class="button reset hidden" name="buttonClicked" value="weighExplication" data-container-id="explication">&#x27F2;</button>
+					<form method="POST" accept-charset="utf-8">
+						<button type="submit" class="button endorse hidden" name="buttonClicked" value="weighExplication" data-container-id="explication">Endorse</button>
+						<input type="hidden" name="explicWeighInWith" id="explicWeighInWith" value="" />
+						<?php addCSRFtoken() ?>
+					</form>
+					<button class="button weighIn" data-container-id="explication">Weigh In</button>
+				</div>
+<?php
+}
+?>
+					<div class="panel expanded" data-container-id="explication">
+
+<?php
+	if (isset($links) && sizeof($links) > 0) {
 		generateLinkLines($links);
 	}
 ?>
 <?php
-if ((isset($opinion)) && ($opinion > 0)) { 
+if ((isset($opinion)) && ($opinion > 0)) {
 ?>
-						<div class="assert">
+						<div class="assert hidden">
 							<form class="form-inline" method="POST" accept-charset="utf-8">
 								<input type="text" placeholder="Link a study, article, chart, meme, anything that expands upon or illuminates the argument" name="promoteExplication">
 								<button type="submit" class="button addNew" name="buttonClicked" value="promoteExplication">Introduce</button>
@@ -526,7 +542,7 @@ if ((isset($opinion)) && ($opinion > 0)) {
 							</form>
 						</div>
 <?php
-} 
+}
 ?>
 					</div>
 				</div>

@@ -1,8 +1,9 @@
 # Sensitive configuration
 includes/config.local.php
 
-# Database dumps
+# Database dumps (allow procedure definition scripts)
 *.sql
+!*_procedures.sql
 dumps/
 
 # System files

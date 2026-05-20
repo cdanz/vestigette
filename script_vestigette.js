@@ -57,6 +57,8 @@ let genericTotalClicks = 0;
 let genericClickArr = [];
 let phrasingTotalClicks = 0;
 let phrasingClickArr = [];
+let explicTotalClicks = 0;
+let explicClickArr = [];
 let DEBUG = true;
 const matchMediaValue = '(max-width: 1200px)';
 
@@ -191,10 +193,19 @@ function neutralizeSection(id) {
 		x[i].classList.replace(getExistingPct(x[i]), 'pct0_0');
 		setInlinePct(x[i], 0);
 	}
-	/*empty array tracking clicks and reset counter of total clicks*/
-	genericClickArr.length = 0;
-	genericTotalClicks = 0;
-	updateWeighInValue(id);
+	if (id === 'phrasing') {
+		phrasingClickArr.length = 0;
+		phrasingTotalClicks = 0;
+		updatePhrasingWeighInValue();
+	} else if (id === 'explication') {
+		explicClickArr.length = 0;
+		explicTotalClicks = 0;
+		updateExplicationWeighInValue();
+	} else {
+		genericClickArr.length = 0;
+		genericTotalClicks = 0;
+		updateWeighInValue(id);
+	}
 }
 
 /*
@@ -235,11 +246,18 @@ function init() {
 			let type = this.dataset.containerId;
 			if (type != undefined) {
 				if (evt.target.classList.contains('pointBtn')) { // don't allow the click on just any click on that panel
-					// TODO: technically, this should be a circle and not a square... something to tweak later.
 					fireClick(type);
 					if (mode == 'EDIT' && inCircle(evt, evt.target)) {
-						if (DEBUG) console.log(`in circle ${evt.target.parentNode.nextElementSibling.children[0].innerHTML}`);
-						bump(type, evt.target.parentNode.parentNode.dataset.argId);
+						if (type === 'phrasing') {
+							if (DEBUG) console.log(`in circle phrasing ${evt.target.parentNode.parentNode.dataset.phrasingId}`);
+							bumpPhrasing(evt.target.parentNode.parentNode.dataset.phrasingId);
+						} else if (type === 'explication') {
+							if (DEBUG) console.log(`in circle explication ${evt.target.parentNode.parentNode.dataset.explicationId}`);
+							bumpExplication(evt.target.parentNode.parentNode.dataset.explicationId);
+						} else {
+							if (DEBUG) console.log(`in circle ${evt.target.parentNode.nextElementSibling.children[0].innerHTML}`);
+							bump(type, evt.target.parentNode.parentNode.dataset.argId);
+						}
 					}
 				}
 			}
@@ -453,6 +471,14 @@ function loadUserWeights(id) {
 			//args[i].classList.replace("neutral", type);
 		}
 	}
+	if (id === 'phrasing') {
+		updatePhrasingWeighInValue();
+		return;
+	}
+	if (id === 'explication') {
+		updateExplicationWeighInValue();
+		return;
+	}
 	//get click values to load up generic click array
 	let arr;
 	switch(id) {
@@ -465,6 +491,8 @@ function loadUserWeights(id) {
 		case 'rebuttal':
 			arr = pctToClicks(rebuttal, 3);
 			break;
+		default:
+			arr = [];
 	}
 	console.log(`loadUserWeights: arr: ${arr}`);
 	limit = arr.length;
@@ -603,73 +631,118 @@ function bump(type, argID) {
 }
 
 function bumpPhrasing(phrasingID) {
-  var found = false;
-  var iterator = 0;
-  var foundIndex;
-  
-  phrasingTotalClicks++;
-  while (found == false && iterator < phrasingClickArr.length) {
-    if(phrasingClickArr[iterator][0] == phrasingID){
-      found = true;
-      phrasingClickArr[iterator][1]++;
-      foundIndex = iterator;
-    }
-    iterator++;
-  }
-  
-  if (found == false) {
-    foundIndex = phrasingClickArr.length;
-    phrasingClickArr.push([phrasingID, 1]);
-  }
-  
-  for (var i = 0, l = phrasingClickArr.length; i < l; i++) {
-    diameter = diameterShift + (((phrasingClickArr[i][1])/phrasingTotalClicks) * diameterFactor);
-    if (diameter > maxFontNum) diFontSize = maxFontNum;
-    else diFontSize = diameter;
-    
-    rateAsString = ((phrasingClickArr[i][1]/phrasingTotalClicks)*100).toFixed(1); 
-    if (((phrasingClickArr[i][1]/phrasingTotalClicks)*100) < 10) {
-      leftOfDec = rateAsString.substring(0,1); 
-      decOnRight = rateAsString.substring(1,3);
-    }
-    else if(((phrasingClickArr[i][1]/phrasingTotalClicks)*100) < 100) {
-      leftOfDec = rateAsString.substring(0,2);
-      decOnRight = rateAsString.substring(2,4);
-    }
-    else {
-      leftOfDec = rateAsString.substring(0,3);
-      decOnRight = rateAsString.substring(3,5);
-    }
-    decOnRight += "%";
+	phrasingTotalClicks++;
+	let ndx = phrasingClickArr.findIndex((tuple) => tuple[0] == phrasingID);
+	if (ndx >= 0) {
+		phrasingClickArr[ndx][1] += 1;
+	} else {
+		phrasingClickArr.push([phrasingID, 1]);
+	}
 
-    // Update UI elements - need to match your phrasing HTML structure
-    var wrapper = document.querySelector('[data-phrasing-id="' + phrasingClickArr[i][0] + '"] .wrapper');
-    if (wrapper) {
-      wrapper.style.width = diameter + "rem"; 
-      wrapper.style.height = diameter + "rem";
-      
-      // Update percentage display
-      var pctDisplay = document.querySelector('[data-phrasing-id="' + phrasingClickArr[i][0] + '"] .inLinePct');
-      if (pctDisplay) {
-        pctDisplay.innerHTML = leftOfDec + '<span style="font-size:.6em">' + decOnRight + '</span> - ';
-      }
-    }
-  }
-  
-  updatePhrasingWeighInValue();
+	let args = document.querySelectorAll('#phrasing .lineItem');
+	let limit = args.length;
+	for (let i = 0; i < limit; i++) {
+		let value = 0;
+		for (let j = 0; j < phrasingClickArr.length; j++) {
+			if (phrasingClickArr[j][0] == args[i].dataset.phrasingId) {
+				value = phrasingClickArr[j][1];
+				break;
+			}
+		}
+		if (value > 0) {
+			let rate = (value / phrasingTotalClicks) * 100;
+			let pct = getExistingPct(args[i]);
+			let newpct = getPctClass(rate);
+			args[i].classList.remove("half1", "half2", pct);
+			if (rate <= 50) {
+				args[i].classList.add("half1");
+			} else {
+				args[i].classList.add("half2");
+			}
+			if (DEBUG) console.log(`bumpPhrasing: adding ${newpct}...`);
+			args[i].classList.add(newpct);
+			setInlinePct(args[i], rate);
+		}
+	}
+	console.log(phrasingClickArr);
+	updatePhrasingWeighInValue();
 }
 
 function updatePhrasingWeighInValue() {
-  document.getElementById("phrasingWeighInWith").value = JSON.stringify(phrasingClickArr);
+	var arrayAsString = "";
+	for (var i = 0; i < phrasingClickArr.length; i++) {
+		arrayAsString = arrayAsString + phrasingClickArr[i][0] + ",";
+		arrayAsString = arrayAsString + ((phrasingClickArr[i][1] / phrasingTotalClicks) * 100).toFixed(5) + ",";
+	}
+	document.getElementById("phrasingWeighInWith").value = arrayAsString;
+}
+
+function bumpExplication(explicationID) {
+	explicTotalClicks++;
+	let ndx = explicClickArr.findIndex((tuple) => tuple[0] == explicationID);
+	if (ndx >= 0) {
+		explicClickArr[ndx][1] += 1;
+	} else {
+		explicClickArr.push([explicationID, 1]);
+	}
+
+	let args = document.querySelectorAll('#explication .lineItem');
+	let limit = args.length;
+	for (let i = 0; i < limit; i++) {
+		let value = 0;
+		for (let j = 0; j < explicClickArr.length; j++) {
+			if (explicClickArr[j][0] == args[i].dataset.explicationId) {
+				value = explicClickArr[j][1];
+				break;
+			}
+		}
+		if (value > 0) {
+			let rate = (value / explicTotalClicks) * 100;
+			let pct = getExistingPct(args[i]);
+			let newpct = getPctClass(rate);
+			args[i].classList.remove("half1", "half2", pct);
+			if (rate <= 50) {
+				args[i].classList.add("half1");
+			} else {
+				args[i].classList.add("half2");
+			}
+			if (DEBUG) console.log(`bumpExplication: adding ${newpct}...`);
+			args[i].classList.add(newpct);
+			setInlinePct(args[i], rate);
+		}
+	}
+	console.log(explicClickArr);
+	updateExplicationWeighInValue();
+}
+
+function updateExplicationWeighInValue() {
+	var arrayAsString = "";
+	for (var i = 0; i < explicClickArr.length; i++) {
+		arrayAsString = arrayAsString + explicClickArr[i][0] + ",";
+		arrayAsString = arrayAsString + ((explicClickArr[i][1] / explicTotalClicks) * 100).toFixed(5) + ",";
+	}
+	document.getElementById("explicWeighInWith").value = arrayAsString;
 }
 
 /*
 This is the named function used for accordion expansion
 */
-function accordionExpand() {
-	panel.classList.toggle("expanded");
-	panel = this.querySelector(".panel");
-	panel.classList.toggle("expanded");
+function accordionExpand(evt) {
+	// Ignore clicks that originated inside the panel or on interactive elements
+	if (evt.target.closest('.panel, button, a, input, select, textarea, form')) return;
+
+	let targetPanel = this.querySelector('.panel');
+	let isOpen = targetPanel.classList.contains('expanded');
+
+	// Close all accordion panels
+	document.querySelectorAll('.accordion .panel').forEach(function(p) {
+		p.classList.remove('expanded');
+	});
+
+	// If this one wasn't already open, open it now
+	if (!isOpen) {
+		targetPanel.classList.add('expanded');
+	}
 }
 
 
@@ -677,24 +750,16 @@ function accordionExpand() {
 We want to resize things and not rely on the initial load size
 */
 function resize(why) {
-	panel = document.querySelector("#argument .panel");
 	let acc = document.getElementsByClassName("accordion");
 	let i, limit;
 	limit = acc.length;
-	// only set accordion listeners if we're less than "tablet" width
-	let mql = window.matchMedia(matchMediaValue);
-	if (mql.matches && panel) { //if panel is null it should evaluate to false and skip this
-		for (i = 0; i < limit; i++) {
+	// Add accordion listeners to each section container — always, no matchMedia gate.
+	// Clicks inside .panel or interactive elements are filtered in accordionExpand.
+	for (i = 0; i < limit; i++) {
+		if (!acc[i].classList.contains('listening')) {
 			acc[i].addEventListener("click", accordionExpand);
 			acc[i].classList.add('listening');
 		}
-		console.log('added accordian listeners');
-	} else { // ensure they're not set
-		for (i = 0; i < limit; i++) {
-			acc[i].removeEventListener("click", accordionExpand);
-			acc[i].classList.remove('listening');
-		}
-		console.log('removed accordian listeners');
 	}
 	//Grow main phrasing if character count is low
 	let phrasing = document.querySelector("#argument .panel p");
@@ -713,9 +778,6 @@ document.addEventListener('DOMContentLoaded', function() {
 	init();
 });
 
-window.addEventListener("resize", function() {
-	resize('resize');
-});
 window.addEventListener("orientationchange", function() {
 	resize('orientationchange');
 });

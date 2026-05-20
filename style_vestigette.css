@@ -461,12 +461,54 @@ button.hidden {
 	margin-bottom: 0.5rem;
 	max-height: 338px;
 }
-#phrasing .panel.expanded, 
+#phrasing .panel.expanded,
 #explication .panel.expanded {
 	margin-bottom: 0;
 }
 .opinion + .panel.expanded {
 	max-height: 100%;
+}
+/* checkpoint-page: fill the full viewport height */
+body.checkpoint-page {
+	box-sizing: border-box;
+	display: flex;
+	flex-direction: column;
+	height: 100vh;
+	overflow: hidden;
+}
+#checkpoint.container {
+	box-sizing: border-box;
+	display: flex;
+	flex-direction: column;
+	padding: 0.5rem;
+	width: 100%;
+}
+.checkpoint-header {
+	align-items: center;
+	display: flex;
+	flex-flow: row nowrap;
+	justify-content: space-between;
+	width: 100%;
+}
+body.checkpoint-page #checkpoint {
+	flex: 1;
+	min-height: 0;
+}
+body.checkpoint-page #checkpoint .panel.expanded {
+	flex: 1;
+	margin-bottom: 0;
+	max-height: none;
+	min-height: 0;
+	overflow-y: auto;
+}
+.checkpoint-footer {
+	align-items: center;
+	color: var(--cddbWhite);
+	display: flex;
+	flex-flow: row nowrap;
+	gap: 0.5rem;
+	padding: 0.75rem 0.5rem;
+	width: 100%;
 }
 .panel.standalone {
 	margin-bottom: 0.5rem;
@@ -505,9 +547,11 @@ button.hidden {
 #therefore .inLinePct {
 	color: var(--cddbGreen);
 }
-#because .pct0_0 .inLinePct, 
-#rebuttal .pct0_0 .inLinePct, 
-#therefore .pct0_0 .inLinePct {
+#because .pct0_0 .inLinePct,
+#rebuttal .pct0_0 .inLinePct,
+#therefore .pct0_0 .inLinePct,
+#phrasing .pct0_0 .inLinePct,
+#explication .pct0_0 .inLinePct {
 	color: var(--cddbGrey);
 }
 #argument .panel {
@@ -765,6 +809,12 @@ input:checked + .toggle:before {
 #because .pointBtn.arc1 {
 	border-color: var(--because) var(--percentage_bg) var(--percentage_bg) var(--because);
 }
+#phrasing .pointBtn.arc1 {
+	border-color: var(--cddbBlack) var(--percentage_bg) var(--percentage_bg) var(--cddbBlack);
+}
+#explication .pointBtn.arc1 {
+	border-color: var(--cddbBlack) var(--percentage_bg) var(--percentage_bg) var(--cddbBlack);
+}
 .lineItem.pct0_0 .pointBtn.arc1 {
 	border-color: transparent;
 	background-color: var(--cddbGrey);
@@ -790,6 +840,12 @@ input:checked + .toggle:before {
 }
 #because .half2 .pointBtn.arc2 {
 	border-color: transparent var(--because) var(--because) transparent;
+}
+#phrasing .half2 .pointBtn.arc2 {
+	border-color: transparent var(--cddbBlack) var(--cddbBlack) transparent;
+}
+#explication .half2 .pointBtn.arc2 {
+	border-color: transparent var(--cddbBlack) var(--cddbBlack) transparent;
 }
 /*
 .lineItem.pct0_0 .pointBtn.arc2 {
