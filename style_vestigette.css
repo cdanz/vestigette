@@ -699,8 +699,8 @@ body.checkpoint-page #checkpoint .panel.expanded {
 }
 /* Link preview card (OG meta) */
 .explicationBox a.link-preview {
-	display: grid;
-	grid-template-columns: 140px 1fr;
+	display: grid !important;
+	grid-template-columns: 140px 1fr !important;
 	border: 1px solid var(--cddbLiteGrey);
 	border-radius: 4px;
 	overflow: hidden;
@@ -721,11 +721,11 @@ body.checkpoint-page #checkpoint .panel.expanded {
 	padding: 0.5rem 0.65rem;
 	overflow: hidden;
 }
-/* Reset panel-level p/span rules that bleed into the card */
+/* Reset panel-level rules that bleed into the card */
 .link-preview-text .link-preview-title,
 .link-preview-text .link-preview-desc,
 .link-preview-text .link-preview-domain {
-	display: block;
+	display: block !important;
 	width: auto;
 	align-self: auto;
 	margin: 0 0 0.25rem 0;
@@ -738,17 +738,13 @@ body.checkpoint-page #checkpoint .panel.expanded {
 	font-size: 0.9rem;
 	line-height: 1.35;
 	overflow: hidden;
-	display: -webkit-box;
-	-webkit-line-clamp: 4;
-	-webkit-box-orient: vertical;
+	max-height: 5.4em;
 }
 .link-preview-desc {
 	font-size: 0.8rem;
 	color: var(--cddbGrey);
 	overflow: hidden;
-	display: -webkit-box;
-	-webkit-line-clamp: 3;
-	-webkit-box-orient: vertical;
+	max-height: 3.6em;
 }
 .link-preview-domain {
 	font-size: 0.72rem;
