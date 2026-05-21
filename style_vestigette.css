@@ -718,15 +718,15 @@ body.checkpoint-page #checkpoint .panel.expanded {
 	align-self: stretch;
 }
 .link-preview-text {
-	display: flex;
-	flex-direction: column;
+	display: block;
 	padding: 0.5rem 0.65rem;
-	gap: 0.25rem;
 	flex: 1;
 	min-width: 0;
+	overflow: hidden;
 }
 .link-preview-text p {
-	margin: 0;
+	margin: 0 0 0.25rem 0;
+	width: 100%;
 }
 .link-preview-title {
 	font-weight: bold;
@@ -748,8 +748,8 @@ body.checkpoint-page #checkpoint .panel.expanded {
 .link-preview-domain {
 	font-size: 0.72rem;
 	color: var(--cddbLiteGrey);
-	margin-top: auto;
-	padding-top: 0.25rem;
+	margin-top: 0.35rem;
+	margin-bottom: 0;
 	text-transform: lowercase;
 }
 /* filter switches */
