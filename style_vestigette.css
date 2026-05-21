@@ -439,11 +439,24 @@ button.hidden {
 .find li:last-child {
 	border-bottom: none;
 }
-.find .strong {
+.find-toggle {
 	background-color: var(--cddbBlack);
 	color: var(--cddbWhite);
+	cursor: pointer;
 	font-weight: bold;
-	padding-left: 1rem;
+	padding: 0.4rem 1rem;
+	user-select: none;
+	width: 100%;
+}
+.find-toggle::after {
+	content: ' ▾';
+	float: right;
+}
+.find-toggle.collapsed::after {
+	content: ' ▸';
+}
+.find-content.collapsed {
+	display: none;
 }
 #phrasing .panel li,
 #explication .panel li, 

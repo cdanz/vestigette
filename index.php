@@ -442,27 +442,38 @@ if ((isset($opinion)) && ($opinion > 0)) {
 			<h2>Find</h2>
 			<div class="panel" data-container-id="filter">
 				<div class="find">
-					<ul><li class="strong">Last Visited</li><ul>
+					<div class="find-section">
+						<div class="find-toggle">Last Visited</div>
+						<div class="find-content">
 <?php
 if (isset($_SESSION['history'])) {
-
-	$arr = array_reverse($_SESSION['history']); //more recent listed first
+	$arr = array_reverse($_SESSION['history']);
 	generateFindLines($arr);
 }
 ?>
-					<ul><li class="strong">Recent Assertions</li><ul>
+						</div>
+					</div>
+					<div class="find-section">
+						<div class="find-toggle">Recent Assertions</div>
+						<div class="find-content">
 <?php
 if (isset($recent)) {
 	generateFindLines($recent);
 }
 ?>
-					<ul><li class="strong">Go to ID</li><ul>
-					<ul><li class="lineItem">
-						<form class="form-inline" id="form" method="get">
-							<input type="text" id="jumpToID" name="arg" placeholder="Argument ID" onchange="document.getElementById('form').action = <?php echo "${baseURL}?arg="; ?> + this.value;">
-							<button type="submit" class="button instead" value="jumpTo">Go</button>
-						</form>
-					</li><ul>
+						</div>
+					</div>
+					<div class="find-section">
+						<div class="find-toggle">Go to ID</div>
+						<div class="find-content">
+							<ul><li class="lineItem">
+								<form class="form-inline" id="form" method="get">
+									<input type="text" id="jumpToID" name="arg" placeholder="Argument ID" onchange="document.getElementById('form').action = '<?php echo $baseURL; ?>?arg=' + this.value;">
+									<button type="submit" class="button instead" value="jumpTo">Go</button>
+								</form>
+							</li></ul>
+						</div>
+					</div>
 				</div>
 
 			</div>

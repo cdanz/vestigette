@@ -385,6 +385,17 @@ function init() {
 	}
 
 
+	// Find sub-section toggles
+	document.querySelectorAll('.find-toggle').forEach(function(toggle) {
+		toggle.addEventListener('click', function() {
+			let content = this.nextElementSibling;
+			if (content) {
+				content.classList.toggle('collapsed');
+				this.classList.toggle('collapsed');
+			}
+		});
+	});
+
 	//Filter button
 	let toggle1 = document.getElementById("filter1");
 	let toggleLabelA = document.getElementById("filter1A");
