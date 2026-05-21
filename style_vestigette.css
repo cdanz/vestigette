@@ -439,9 +439,9 @@ button.hidden {
 .find li:last-child {
 	border-bottom: none;
 }
-.find,
-.find-section,
-.find-content {
+.container .find,
+.container .find-section,
+.container .find-content {
 	flex-flow: column nowrap;
 	width: 100%;
 }
