@@ -89,6 +89,9 @@ if (mysqli_multi_query($db, $sql)) {
       $links[$iterator][5] = $row[5];  // authorFName
       $links[$iterator][6] = $row[6];  // authorLName
       $links[$iterator][7] = $row[7];  // title
+      $links[$iterator][8] = $row[8];  // og_title
+      $links[$iterator][9] = $row[9];  // og_image
+      $links[$iterator][10] = $row[10]; // og_description
       $iterator++;
     }
   } else {
