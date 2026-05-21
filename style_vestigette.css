@@ -721,27 +721,34 @@ body.checkpoint-page #checkpoint .panel.expanded {
 	padding: 0.5rem 0.65rem;
 	overflow: hidden;
 }
-.link-preview-text p {
+/* Reset panel-level p/span rules that bleed into the card */
+.link-preview-text .link-preview-title,
+.link-preview-text .link-preview-desc,
+.link-preview-text .link-preview-domain {
 	display: block;
+	width: auto;
+	align-self: auto;
 	margin: 0 0 0.25rem 0;
-	width: 100%;
+	border: none;
+	padding: 0;
+	font-size: inherit;
 }
 .link-preview-title {
 	font-weight: bold;
 	font-size: 0.9rem;
 	line-height: 1.35;
+	overflow: hidden;
 	display: -webkit-box;
 	-webkit-line-clamp: 4;
 	-webkit-box-orient: vertical;
-	overflow: hidden;
 }
 .link-preview-desc {
 	font-size: 0.8rem;
 	color: var(--cddbGrey);
+	overflow: hidden;
 	display: -webkit-box;
 	-webkit-line-clamp: 3;
 	-webkit-box-orient: vertical;
-	overflow: hidden;
 }
 .link-preview-domain {
 	font-size: 0.72rem;
