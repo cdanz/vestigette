@@ -8,7 +8,7 @@ $profile = isset($_SESSION['profile']) ? $_SESSION['profile'] : null;
 <!DOCTYPE html>
 <html>
 	<head>
-		<title>Vestigette - About</title>
+		<title>Agitate - About</title>
 		<meta charset="utf-8"/>
 		<meta name="keywords" content="argument, dialectic, reasoning, anti-troll, discussion, debate, assertion network, dialogue, public forum, town square, consensus building, diliberation chamber, diliberative body, dynamic polling, self-guided polling, opposition research, best reason why, best reason not"/>
 		<meta name="copyright" content="Copyright 2015 Craig Danz Seattle, WA USA" />
@@ -29,7 +29,7 @@ $profile = isset($_SESSION['profile']) ? $_SESSION['profile'] : null;
 	<body>
 
 		<div id="mastHead" class="container">
-			<h1><a href="index.php?arg=<?php echo $_SESSION['currentArg'];?>">Vestigette</a></h1>
+			<h1><a href="index.php?arg=<?php echo $_SESSION['currentArg'];?>">Agitate</a></h1>
 			<div>
 				<a href="About.php?arg=<?php echo $_SESSION['currentArg'];?>"><span style="text-decoration: underline;">About</span></a>
 				<a href="Explore.php?arg=<?php echo $_SESSION['currentArg'];?>">Explore</a>
@@ -45,9 +45,9 @@ $profile = isset($_SESSION['profile']) ? $_SESSION['profile'] : null;
 
 			<div class="panel" data-container-id="because">
 				<br>
-				<p>Vestigette is the world's first consensus building platform. Discussion as a single, collective, ongoing project.</p>
+				<p>Agitate is the world's first consensus building platform. Discussion as a single, collective, ongoing project.</p>
 				<br>
-				<p>Vestigette produces a model of our discourse. A map to study, use, and improve. Passively participated in, resistant to trolls, and anonymous - bizarro social media.</p>
+				<p>Agitate produces a model of our discourse. A map to study, use, and improve. Passively participated in, resistant to trolls, and anonymous - bizarro social media.</p>
 				<br>
 				<p><strong>Why?</strong></p>
 				<br>
@@ -55,13 +55,13 @@ $profile = isset($_SESSION['profile']) ? $_SESSION['profile'] : null;
 				<br><br>
 				The thing is - who is to say humanity will ever truly mature any further? And who is to say we can be trusted with the technologies humanity has already unleashed? How do we best play the hand we've been dealt?
 				<br><br>
-				A reason for hope is we are not all bad. There is a great deal of good to be found amongst us. There is a great deal of wisdom. There is a great deal of sense. But there also is an impression that too often what is right is not what's brought to the fore. The question Vestigette aims to answer then is: how do we access the best of humanity for guidance?
+				A reason for hope is we are not all bad. There is a great deal of good to be found amongst us. There is a great deal of wisdom. There is a great deal of sense. But there also is an impression that too often what is right is not what's brought to the fore. The question Agitate aims to answer then is: how do we access the best of humanity for guidance?
 				<br><br>
-				Through a dogged pursuit of fair representation, it is the mission of Vestigette to conduct the most extensive exercise in open inquiry in history.</p>
+				Through a dogged pursuit of fair representation, it is the mission of Agitate to conduct the most extensive exercise in open inquiry in history.</p>
 				<br>
-				<p><strong>What does "Vestigette" mean?</strong></p>
+				<p><strong>What does "Agitate" mean?</strong></p>
 				<br>
-				<p>Vestigette is a made-up word. From the Latin "vestigium" - to track, trace, or mark. The most common descendant "Vestige" is notable because it is so inextricably of the past. There is not a more intentional, affirmative, present form of the word. Vestigette means to lay down a marker with the intention of aiding those that follow. The suffix, "-gette", invokes suffrage because Vestigette aims to add clarity and context to our dialogue by giving voice to the underrepresented.</p>
+				<p>Agitate is a made-up word. From the Latin "vestigium" - to track, trace, or mark. The most common descendant "Vestige" is notable because it is so inextricably of the past. There is not a more intentional, affirmative, present form of the word. Agitate means to lay down a marker with the intention of aiding those that follow. The suffix, "-gette", invokes suffrage because Agitate aims to add clarity and context to our dialogue by giving voice to the underrepresented.</p>
 				<br>
 			</div>
 		</div>
@@ -70,13 +70,13 @@ $profile = isset($_SESSION['profile']) ? $_SESSION['profile'] : null;
 			<h2>How-To</h2>
 			<div class="panel" data-container-id="because">
 				<br>
-				<p style="white-space:normal;">Vestigette is an abstraction of common argument mapping techniques. Each argument is an assertion - phrased as its proponents prefer best. Arguments are linked together in 3 different ways: those that (1) precede - <span style="color: var(--cddbBlue); font-weight:bold;">Because</span>, (2) follow - <span style="color: var(--cddbGreen); font-weight:bold;">Therefore</span>, or (3) refute - <span style="color: var(--cddbRed); font-weight:bold;">Rebuttal</span>.
+				<p style="white-space:normal;">Agitate is an abstraction of common argument mapping techniques. Each argument is an assertion - phrased as its proponents prefer best. Arguments are linked together in 3 different ways: those that (1) precede - <span style="color: var(--cddbBlue); font-weight:bold;">Because</span>, (2) follow - <span style="color: var(--cddbGreen); font-weight:bold;">Therefore</span>, or (3) refute - <span style="color: var(--cddbRed); font-weight:bold;">Rebuttal</span>.
 				<br>
 				<br>
 				<span style="color: var(--cddbBlue); text-decoration: underline;"><a href="https://youtu.be/gSlucDTMsmA">30 Second Video Tutorial</a></span>
 				<br>
 				<br>
-				Users develop and track their own personal lines of reasoning within the Vestigette framework. Maintaining a line of reasoning that is optimally compelling while consistent with principles and beliefs previously tracked involves continuous reconsideration and fine-tuning. This collective effort produces a map of both the common wisdom and where/how it deviates.
+				Users develop and track their own personal lines of reasoning within the Agitate framework. Maintaining a line of reasoning that is optimally compelling while consistent with principles and beliefs previously tracked involves continuous reconsideration and fine-tuning. This collective effort produces a map of both the common wisdom and where/how it deviates.
 				<br>
 				<br>
 				Users interact with an argument first by choosing to "Accept" or "Reject". Accepting an argument gives a user the right to endorse which other arguments should be linked as its <span style="color: var(--cddbBlue); font-weight:bold;">Because</span> or <span style="color: var(--cddbGreen); font-weight:bold;">Therefore</span> types. Users that accept an argument also improve the argument by deciding a <span style="color: var(--cddbBlack); font-weight:bold;">Phrasing (&#x270e;)</span> that better puts the argument forth and promote a preferred <span style="color: var(--cddbBlack); font-weight:bold;">Explication (&#x2318;)</span> - a link to any kind of content (news article, academic paper, explainer video, meme) that better exemplifies, expands upon or gives evidence toward the point of the the argument. Rejecting the argument gives opponents the right to prioritize arguments linked to refute it as its <span style="color: var(--cddbRed); font-weight:bold;">Rebuttal</span> types.
@@ -100,7 +100,7 @@ $profile = isset($_SESSION['profile']) ? $_SESSION['profile'] : null;
 			<h2>Contribute</h2>
 			<div class="panel" data-container-id="because">
 				<br>
-				<p>Vestigette is in its inital development stage and self-funded. Software development guidance, legal assistance, financial support or general user feedback are all accepted graciously.</p>
+				<p>Agitate is in its inital development stage and self-funded. Software development guidance, legal assistance, financial support or general user feedback are all accepted graciously.</p>
 				<br>
 				<p>To request to become a beta user, email your request to <a href="mailto:craig@vestigette.org">craig@vestigette.org</a></p>
 				<br>
@@ -109,7 +109,7 @@ $profile = isset($_SESSION['profile']) ? $_SESSION['profile'] : null;
 		<div id="argument" class="accordion container">
 			<div class="panel expanded" data-container-id="argument">
 				<br>
-				<p>Vestigette was created by Craig Danz of Seattle, WA, U.S.A. Copyright <?php echo date("Y"); ?></p>
+				<p>Agitate was created by Craig Danz of Seattle, WA, U.S.A. Copyright <?php echo date("Y"); ?></p>
 				<a href="https://twitter.com/vestigette?ref_src=twsrc%5Etfw" class="twitter-follow-button" data-show-count="false">Follow @vestigette</a><script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
 				<br>
 			</div>

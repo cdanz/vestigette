@@ -39,7 +39,7 @@ if (isset($_SESSION['history'])) {
 }
 else {
 	$_SESSION['history'] = array();
-	$_SESSION['history'][0] = array(75,0,"This is my first visit to Vestigette"); //Start off with welcome arg
+	$_SESSION['history'][0] = array(75,0,"This is my first visit to Agitate"); //Start off with welcome arg
 	$arr = array($_SESSION['currentArg'],$opinion,$phrasing);
 	array_push($_SESSION['history'],$arr);
 }

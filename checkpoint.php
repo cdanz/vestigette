@@ -201,7 +201,7 @@ $results = array_merge($results, $leftovers);
 <!DOCTYPE html>
 <html>
 	<head>
-		<title>Vestigette</title>
+		<title>Agitate</title>
 		<meta charset="utf-8"/>
 		<meta name="keywords" content="argument, dialectic, reasoning, anti-troll, discussion, debate, assertion network, dialogue, public forum, town square, consensus building, diliberation chamber, diliberative body, dynamic polling, self-guided polling, opposition research, best reason why, best reason not"/>
 		<meta name="copyright" content="Copyright 2015 Craig Danz Seattle, WA USA" />

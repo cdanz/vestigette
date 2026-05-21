@@ -17,7 +17,7 @@ mysqli_multi_query($db, $sql);
 <!DOCTYPE html>
 <html>
 	<head>
-		<title>Vestigette - Explore</title>
+		<title>Agitate - Explore</title>
 		<meta charset="utf-8"/>
 		<meta name="keywords" content="argument, dialectic, reasoning, anti-troll, discussion, debate, assertion network, dialogue, public forum, town square, consensus building, diliberation chamber, diliberative body, dynamic polling, self-guided polling, opposition research, best reason why, best reason not"/>
 		<meta name="copyright" content="Copyright 2015 Craig Danz Seattle, WA USA" />
@@ -38,7 +38,7 @@ mysqli_multi_query($db, $sql);
 	<body>
 
 		<div id="mastHead" class="container">
-			<h1><a href="index.php?arg=<?php echo $_SESSION['currentArg'];?>">Vestigette</a></h1>
+			<h1><a href="index.php?arg=<?php echo $_SESSION['currentArg'];?>">Agitate</a></h1>
 			<div>
 				<a href="About.php?arg=<?php echo $_SESSION['currentArg'];?>">About</a>
 				<a href="Explore.php?arg=<?php echo $_SESSION['currentArg'];?>"><span style="text-decoration: underline;">Explore</span></a></span>
@@ -55,7 +55,7 @@ mysqli_multi_query($db, $sql);
 			<div class="panel" data-container-id="because">
 				<ul>
 					<li class='lineItem'>
-						<p class="assocArg"><a href="/index.php?arg=77">Vestigette</a></p>
+						<p class="assocArg"><a href="/index.php?arg=77">Agitate</a></p>
 					</li>
 					<li class='lineItem' style="background-color: var(--cddbLiteGrey)">
 						<p class="assocArg"><a href="/index.php?arg=422">Free Speech</a></p>

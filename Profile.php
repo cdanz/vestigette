@@ -13,7 +13,7 @@ if (isset($profile)) {
 <!DOCTYPE html>
 <html>
 	<head>
-		<title>Vestigette - Profile</title>
+		<title>Agitate - Profile</title>
 		<meta charset="utf-8"/>
 		<meta name="keywords" content="argument, dialectic, reasoning, anti-troll, discussion, debate, assertion network, dialogue, public forum, town square, consensus building, diliberation chamber, diliberative body, dynamic polling, self-guided polling, opposition research, best reason why, best reason not"/>
 		<meta name="copyright" content="Copyright 2015 Craig Danz Seattle, WA USA" />
@@ -34,7 +34,7 @@ if (isset($profile)) {
 	<body>
 
 		<div id="mastHead" class="container">
-			<h1><a href="index.php?arg=<?php echo $_SESSION['currentArg'];?>">Vestigette</a></h1>
+			<h1><a href="index.php?arg=<?php echo $_SESSION['currentArg'];?>">Agitate</a></h1>
 			<div>
 				<a href="About.php?arg=<?php echo $_SESSION['currentArg'];?>">About</a>
 				<a href="Explore.php?arg=<?php echo $_SESSION['currentArg'];?>">Explore</a>
@@ -47,14 +47,14 @@ if (isset($profile)) {
 		</div>
 
 		<div id="because" class="accordion container">
-			<h2>Vestigette Profiles</h2>
+			<h2>Agitate Profiles</h2>
 
 			<div class="panel" data-container-id="because">
 				<br>
-				<p>Vestigette is anonymous. There are not profile pictures, person details, nor people to follow. The only thing Vestigette cares about is that you actually exist and if you exist you deserve a voice. But that voice is only ever as loud as everyone else’s on Vestigette.
+				<p>Agitate is anonymous. There are not profile pictures, person details, nor people to follow. The only thing Agitate cares about is that you actually exist and if you exist you deserve a voice. But that voice is only ever as loud as everyone else’s on Agitate.
 				<br>
 				<br>
-				The Vestigette profile is mostly about refining your contribution to the collective whole. Basic information such as geographic location and age (and maybe a few other things that haven’t been firmly decided) should be available to filter upon but your name does not matter here.
+				The Agitate profile is mostly about refining your contribution to the collective whole. Basic information such as geographic location and age (and maybe a few other things that haven’t been firmly decided) should be available to filter upon but your name does not matter here.
 				<br>
 				<br>
 				Only one feature is available currently: "Most Heterodox" the arguments where you go most against the grain of every other user on here. New features will focus on enabling you to better clarify or revisit postions you have taken.
@@ -112,7 +112,7 @@ if (isset($profile)) {
 		<div id="argument" class="accordion container">
 			<div class="panel expanded" data-container-id="argument">
 				<br>
-				<p>Vestigette was created by Craig Danz of Seattle, WA, U.S.A. Copyright <?php echo date("Y"); ?></p>
+				<p>Agitate was created by Craig Danz of Seattle, WA, U.S.A. Copyright <?php echo date("Y"); ?></p>
 				<a href="https://twitter.com/vestigette?ref_src=twsrc%5Etfw" class="twitter-follow-button" data-show-count="false">Follow @vestigette</a><script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
 				<br>
 			</div>

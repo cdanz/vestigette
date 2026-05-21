@@ -49,7 +49,7 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<title>Vestigette - Login</title>
+		<title>Agitate - Login</title>
 		<meta charset="utf-8"/>
 		<meta name="keywords" content="argument, dialectic, reasoning, anti-troll, discussion, debate, assertion network, dialogue, public forum, town square, consensus building, diliberation chamber, diliberative body, dynamic polling, self-guided polling, opposition research, best reason why, best reason not"/>
 		<meta name="copyright" content="Copyright 2015 Craig Danz Seattle, WA USA" />
@@ -70,7 +70,7 @@
 	<body>
 
 		<div id="mastHead" class="container">
-			<h1><a href="index.php?arg=<?php echo $_SESSION['currentArg'];?>">Vestigette</a></h1>
+			<h1><a href="index.php?arg=<?php echo $_SESSION['currentArg'];?>">Agitate</a></h1>
 			<div>
 				<a href="About.php?arg=<?php echo $_SESSION['currentArg'];?>">About</a>
 				<a href="Explore.php?arg=<?php echo $_SESSION['currentArg'];?>">Explore</a>
@@ -113,13 +113,13 @@
 			<h2>Privacy Policy</h2>
 			<div class="panel" data-container-id="because">
 				<br>
-				<p>TL;DR: Vestigette's privacy goals are lofty but shortcuts will be taken during initial development. 
+				<p>TL;DR: Agitate's privacy goals are lofty but shortcuts will be taken during initial development. 
 				<br>
 				<br>
-				Vestgiette is nonprofit and expects to remain that way. No user data will be sold nor will your user behavior be monitized in any way. It is a core part of the Vestigette ethos that there is no bias built into what the systems serves you and that would be ruined the moment money got involved. 
+				Agitate is nonprofit and expects to remain that way. No user data will be sold nor will your user behavior be monitized in any way. It is a core part of the Agitate ethos that there is no bias built into what the systems serves you and that would be ruined the moment money got involved. 
 				<br>
 				<br>
-				Vestigette also aims to use demographic data differently. Initially just location and age will be used as conditions for filtering results. That list of two may increase but Vestigette is not eager to define groups rather would prefer to use the framework for users to define it for themselves. 
+				Agitate also aims to use demographic data differently. Initially just location and age will be used as conditions for filtering results. That list of two may increase but Agitate is not eager to define groups rather would prefer to use the framework for users to define it for themselves. 
 				<br>
 				</p>
 				<br>
