@@ -287,18 +287,20 @@
 
 	            //Promote explication TODO Sucks because just pushing the full link string when should have a int key
 	        case "promoteExplication":
-	        	$explicationLink = $_POST["promoteExplication"]; 
-	            
+	        	$explicationLink = $_POST["promoteExplication"];
+
 	            $argAtHand = intval($_SESSION['currentArg']);
 	            $profileID = intval($_SESSION['profile']);
 
-	            $query = "CALL promoteExplication(".$argAtHand.",".$profileID.",\"".$explicationLink."\");";
+	            $query = "CALL promoteExplication(".$argAtHand.",".$profileID.",\"".mysqli_real_escape_string($db, $explicationLink)."\");";
 
 				/*Execute queries */
 				if(mysqli_query($db, $query)){
+					$idRow = mysqli_fetch_row(mysqli_query($db, "SELECT explicationID FROM EXPLICATION WHERE argumentID=$argAtHand AND profileID=$profileID LIMIT 1"));
+					if ($idRow) storeOgMeta($db, $explicationLink, $idRow[0]);
 					header('Location: /index.php?arg='.$_SESSION['currentArg']);
 				}
-				else 
+				else
 					echo "Query Failed";
 	            break;
 			case "newExplication": //may not need at all until we make the data model for explications more sophisticated.
@@ -317,4 +319,5 @@
 
 	    }
 	}
+
 ?>

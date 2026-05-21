@@ -58,6 +58,12 @@ $assocWeights = isset($_SESSION['assocWeights']) ? $_SESSION['assocWeights'] : n
 if (isset($_POST["buttonClicked"])) {
 	include("${_SERVER['DOCUMENT_ROOT']}/functions.php");
 }
+// Lazy-fetch OG data for the winning explication before closing the DB connection
+if (isset($links[0][3]) && $links[0][3] !== '' && $links[0][8] === null && $links[0][9] === null) {
+	storeOgMeta($db, $links[0][3], $links[0][2]);
+	$ogRow = mysqli_fetch_row(mysqli_query($db, "SELECT og_title, og_image, og_description FROM EXPLICATION WHERE explicationID=" . intval($links[0][2])));
+	if ($ogRow) { $links[0][8] = $ogRow[0]; $links[0][9] = $ogRow[1]; $links[0][10] = $ogRow[2]; }
+}
 mysqli_close($db);
 	
 
@@ -328,7 +334,27 @@ echo "\n</form>";
 					<button class="altPhraseBtn" name="buttonClicked" value="altPhrasing">&#x270e;</button>
 				</div>
 				<div class="explicationBox">
-					<a href="<?php echo isset($links[0][3]) ? $links[0][3] : ''; ?>" target="_blank"><?php echo isset($links[0][3]) ? $links[0][3] : ''; ?></a>
+<?php
+if (isset($links[0][3]) && $links[0][3] !== '') {
+	$expUrl    = $links[0][3];
+	$expID     = $links[0][2];
+	$ogTitle   = $links[0][8] ?? null;
+	$ogImage   = $links[0][9] ?? null;
+	$ogDesc    = $links[0][10] ?? null;
+	$host = @parse_url($expUrl, PHP_URL_HOST) ?: $expUrl;
+	if ($ogTitle || $ogImage || $ogDesc) {
+?>
+				<a href="<?php echo htmlspecialchars($expUrl); ?>" target="_blank" class="link-preview">
+<?php if ($ogImage) { ?>				<img src="<?php echo htmlspecialchars($ogImage); ?>" class="link-preview-img" alt="" loading="lazy">
+<?php } ?>				<div class="link-preview-text">
+					<span class="link-preview-title"><?php echo htmlspecialchars($ogTitle ?: $host); ?></span>
+<?php if ($ogDesc) { ?>				<span class="link-preview-desc"><?php echo htmlspecialchars($ogDesc); ?></span>
+<?php } ?>				<span class="link-preview-domain"><?php echo htmlspecialchars($host); ?></span>
+				</div>
+				</a>
+<?php } else { ?>
+				<a href="<?php echo htmlspecialchars($expUrl); ?>" target="_blank"><?php echo htmlspecialchars($expUrl); ?></a>
+<?php } } ?>
 					<button class="altExplicationBtn" name="buttonClicked" value="altExplication">&#x2318;</button>
 				</div>
 			</div>

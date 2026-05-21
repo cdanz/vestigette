@@ -89,6 +89,9 @@ if (mysqli_multi_query($db, $sql)) {
       $links[$iterator][5] = $row[5];  // authorFName
       $links[$iterator][6] = $row[6];  // authorLName
       $links[$iterator][7] = $row[7];  // title
+      $links[$iterator][8] = $row[8];  // og_title
+      $links[$iterator][9] = $row[9];  // og_image
+      $links[$iterator][10] = $row[10]; // og_description
       $iterator++;
     }
   } else {
@@ -174,5 +177,110 @@ if (mysqli_multi_query($db, $sql)) {
   }
 } else {
   echo "ERROR - MULTIPLE QUERIES FAILED";
+}
+
+function fetchOgMeta($url) {
+	$meta = ['title' => null, 'image' => null, 'description' => null];
+	if (!filter_var($url, FILTER_VALIDATE_URL)) return $meta;
+
+	// --- Attempt 1: direct fetch ---
+	$ch = curl_init();
+	curl_setopt_array($ch, [
+		CURLOPT_URL            => $url,
+		CURLOPT_RETURNTRANSFER => true,
+		CURLOPT_FOLLOWLOCATION => true,
+		CURLOPT_MAXREDIRS      => 5,
+		CURLOPT_TIMEOUT        => 6,
+		CURLOPT_CONNECTTIMEOUT => 4,
+		CURLOPT_USERAGENT      => 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+		CURLOPT_SSL_VERIFYPEER => false,
+		CURLOPT_HTTPHEADER     => [
+			'Accept: text/html,application/xhtml+xml',
+			'Accept-Language: en-US,en;q=0.9',
+		],
+	]);
+	$html = curl_exec($ch);
+	$httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+	curl_close($ch);
+
+	if ($html && $httpCode === 200) {
+		$patterns = [
+			'title'     => '/<meta[^>]+property=["\']og:title["\'][^>]+content=["\'](.*?)["\']/is',
+			'title_rev' => '/<meta[^>]+content=["\'](.*?)["\'][^>]+property=["\']og:title["\']/is',
+			'image'     => '/<meta[^>]+property=["\']og:image["\'][^>]+content=["\'](.*?)["\']/is',
+			'image_rev' => '/<meta[^>]+content=["\'](.*?)["\'][^>]+property=["\']og:image["\']/is',
+			'desc'      => '/<meta[^>]+property=["\']og:description["\'][^>]+content=["\'](.*?)["\']/is',
+			'desc_rev'  => '/<meta[^>]+content=["\'](.*?)["\'][^>]+property=["\']og:description["\']/is',
+		];
+		if (preg_match($patterns['title'], $html, $m) || preg_match($patterns['title_rev'], $html, $m))
+			$meta['title'] = html_entity_decode(trim($m[1]), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+		if (preg_match($patterns['image'], $html, $m) || preg_match($patterns['image_rev'], $html, $m))
+			$meta['image'] = trim($m[1]);
+		if (preg_match($patterns['desc'], $html, $m) || preg_match($patterns['desc_rev'], $html, $m))
+			$meta['description'] = html_entity_decode(trim($m[1]), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+		// Plain-HTML fallbacks
+		if (!$meta['title'] && preg_match('/<title[^>]*>(.*?)<\/title>/is', $html, $m))
+			$meta['title'] = html_entity_decode(trim($m[1]), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+		if (!$meta['description'] && preg_match('/<meta[^>]+name=["\']description["\'][^>]+content=["\'](.*?)["\']/is', $html, $m))
+			$meta['description'] = html_entity_decode(trim($m[1]), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+	}
+
+	// --- Attempt 2: noembed.com oEmbed aggregator (NYT, YouTube, Vimeo, Twitter, etc.) ---
+	if (!$meta['title'] && !$meta['image']) {
+		$ch = curl_init();
+		curl_setopt_array($ch, [
+			CURLOPT_URL            => 'https://noembed.com/embed?url=' . urlencode($url),
+			CURLOPT_RETURNTRANSFER => true,
+			CURLOPT_TIMEOUT        => 8,
+			CURLOPT_CONNECTTIMEOUT => 4,
+			CURLOPT_SSL_VERIFYPEER => false,
+			CURLOPT_HTTPHEADER     => ['Accept: application/json'],
+		]);
+		$response = curl_exec($ch);
+		curl_close($ch);
+		if ($response) {
+			$data = json_decode($response, true);
+			if ($data && empty($data['error'])) {
+				if (!$meta['title'])       $meta['title']       = $data['title'] ?? null;
+				if (!$meta['description']) $meta['description'] = $data['summary'] ?? null;
+				if (!$meta['image'])       $meta['image']       = $data['thumbnail_url'] ?? null;
+			}
+		}
+	}
+
+	// --- Attempt 3: Microlink API (headless browser fallback for everything else) ---
+	if (!$meta['title'] && !$meta['image']) {
+		$ch = curl_init();
+		curl_setopt_array($ch, [
+			CURLOPT_URL            => 'https://api.microlink.io/?url=' . urlencode($url),
+			CURLOPT_RETURNTRANSFER => true,
+			CURLOPT_TIMEOUT        => 10,
+			CURLOPT_CONNECTTIMEOUT => 5,
+			CURLOPT_SSL_VERIFYPEER => false,
+			CURLOPT_HTTPHEADER     => ['Accept: application/json'],
+		]);
+		$response = curl_exec($ch);
+		curl_close($ch);
+		if ($response) {
+			$data = json_decode($response, true);
+			if ($data && ($data['status'] ?? '') === 'success') {
+				$d = $data['data'] ?? [];
+				if (!$meta['title'])       $meta['title']       = $d['title'] ?? null;
+				if (!$meta['description']) $meta['description'] = $d['description'] ?? null;
+				if (!$meta['image'])       $meta['image']       = $d['image']['url'] ?? ($d['screenshot']['url'] ?? null);
+			}
+		}
+	}
+
+	return $meta;
+}
+
+function storeOgMeta($db, $url, $explicationID) {
+	$og = fetchOgMeta($url);
+	$id = intval($explicationID);
+	$t  = mysqli_real_escape_string($db, mb_substr($og['title'] ?? '', 0, 300));
+	$i  = mysqli_real_escape_string($db, mb_substr($og['image'] ?? '', 0, 500));
+	$d  = mysqli_real_escape_string($db, $og['description'] ?? '');
+	mysqli_query($db, "UPDATE EXPLICATION SET og_title='$t', og_image='$i', og_description='$d', og_fetched_at=NOW() WHERE explicationID=$id");
 }
 ?>

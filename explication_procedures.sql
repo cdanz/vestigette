@@ -26,9 +26,38 @@ CREATE TABLE IF NOT EXISTS EXPLICATION_ENDORSE (
     PRIMARY KEY (endorseID)
 );
 
--- Step 3: Replace getExplication procedure
--- Returns all active explications with weighted endorsement totals,
--- sorted by endorsement count DESC then submission date ASC.
+-- Step 3a: Add OG preview cache columns (idempotent — safe to re-run if column already exists)
+ALTER TABLE EXPLICATION
+  ADD COLUMN IF NOT EXISTS og_title VARCHAR(300) DEFAULT NULL,
+  ADD COLUMN IF NOT EXISTS og_image VARCHAR(500) DEFAULT NULL,
+  ADD COLUMN IF NOT EXISTS og_description TEXT DEFAULT NULL,
+  ADD COLUMN IF NOT EXISTS og_fetched_at TIMESTAMP NULL DEFAULT NULL;
+
+-- Step 3b: Fix promoteExplication and newExplication to use named columns (avoids column-order issues)
+DROP PROCEDURE IF EXISTS promoteExplication;
+DELIMITER //
+CREATE PROCEDURE promoteExplication(argID INT UNSIGNED, proID INT UNSIGNED, link VARCHAR(300))
+BEGIN
+    IF (EXISTS(SELECT * FROM EXPLICATION WHERE argumentID = argID AND profileID = proID)) THEN
+        UPDATE EXPLICATION SET hyperlink = link, lastVisit = CURRENT_TIMESTAMP, og_title = NULL, og_image = NULL, og_description = NULL, og_fetched_at = NULL WHERE argumentID = argID AND profileID = proID;
+    ELSE
+        INSERT INTO EXPLICATION (argumentID, profileID, hyperlink, publisher, authorFName, authorLName, title, metaPub, metaName, metaWildcard, firstVisit, lastVisit, active)
+        VALUES (argID, proID, link, '', '', '', '', '', '', '', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, TRUE);
+    END IF;
+END //
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS newExplication;
+DELIMITER //
+CREATE PROCEDURE newExplication(argID INT UNSIGNED, proID INT UNSIGNED, link VARCHAR(300))
+BEGIN
+    INSERT INTO EXPLICATION (argumentID, profileID, hyperlink, publisher, authorFName, authorLName, title, metaPub, metaName, metaWildcard, firstVisit, lastVisit, active)
+    VALUES (argID, proID, link, '', '', '', '', '', '', '', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, TRUE);
+END //
+DELIMITER ;
+
+-- Step 3c: Replace getExplication procedure — returns OG preview columns in addition to core fields.
+-- Sorted by endorsement count DESC then submission date ASC.
 DROP PROCEDURE IF EXISTS getExplication;
 DELIMITER //
 CREATE PROCEDURE getExplication(IN argID INT)
@@ -41,11 +70,14 @@ BEGIN
         E.publisher,
         E.authorFName,
         E.authorLName,
-        E.title
+        E.title,
+        E.og_title,
+        E.og_image,
+        E.og_description
     FROM EXPLICATION E
     LEFT JOIN EXPLICATION_ENDORSE EE ON E.explicationID = EE.explicationID AND EE.argumentID = argID
     WHERE E.argumentID = argID AND E.active = TRUE
-    GROUP BY E.explicationID, E.hyperlink, E.publisher, E.authorFName, E.authorLName, E.title, E.firstVisit
+    GROUP BY E.explicationID, E.hyperlink, E.publisher, E.authorFName, E.authorLName, E.title, E.firstVisit, E.og_title, E.og_image, E.og_description
     ORDER BY endorsementCount DESC, E.firstVisit ASC;
 END //
 DELIMITER ;
