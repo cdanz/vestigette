@@ -58,6 +58,12 @@ $assocWeights = isset($_SESSION['assocWeights']) ? $_SESSION['assocWeights'] : n
 if (isset($_POST["buttonClicked"])) {
 	include("${_SERVER['DOCUMENT_ROOT']}/functions.php");
 }
+// Lazy-fetch OG data for the winning explication before closing the DB connection
+if (isset($links[0][3]) && $links[0][3] !== '' && $links[0][8] === null && $links[0][9] === null) {
+	storeOgMeta($db, $links[0][3], $links[0][2]);
+	$ogRow = mysqli_fetch_row(mysqli_query($db, "SELECT og_title, og_image, og_description FROM EXPLICATION WHERE explicationID=" . intval($links[0][2])));
+	if ($ogRow) { $links[0][8] = $ogRow[0]; $links[0][9] = $ogRow[1]; $links[0][10] = $ogRow[2]; }
+}
 mysqli_close($db);
 	
 
@@ -335,12 +341,6 @@ if (isset($links[0][3]) && $links[0][3] !== '') {
 	$ogTitle   = $links[0][8] ?? null;
 	$ogImage   = $links[0][9] ?? null;
 	$ogDesc    = $links[0][10] ?? null;
-	// Lazy-fetch OG data for existing links that predate the og_ columns
-	if ($ogTitle === null && $ogImage === null) {
-		storeOgMeta($db, $expUrl, $expID);
-		$ogRow = mysqli_fetch_row(mysqli_query($db, "SELECT og_title, og_image, og_description FROM EXPLICATION WHERE explicationID=" . intval($expID)));
-		if ($ogRow) { $ogTitle = $ogRow[0]; $ogImage = $ogRow[1]; $ogDesc = $ogRow[2]; }
-	}
 	$host = @parse_url($expUrl, PHP_URL_HOST) ?: $expUrl;
 	if ($ogTitle || $ogImage || $ogDesc) {
 ?>
