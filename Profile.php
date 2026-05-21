@@ -34,7 +34,7 @@ if (isset($profile)) {
 	<body>
 
 		<div id="mastHead" class="container">
-			<h1><a href="index.php?arg=<?php echo $_SESSION['currentArg'];?>">Agitate</a></h1>
+			<h1><a href="index.php?arg=<?php echo $_SESSION['currentArg'];?>">AGITATE</a></h1>
 			<div>
 				<a href="About.php?arg=<?php echo $_SESSION['currentArg'];?>">About</a>
 				<a href="Explore.php?arg=<?php echo $_SESSION['currentArg'];?>">Explore</a>

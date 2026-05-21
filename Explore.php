@@ -38,7 +38,7 @@ mysqli_multi_query($db, $sql);
 	<body>
 
 		<div id="mastHead" class="container">
-			<h1><a href="index.php?arg=<?php echo $_SESSION['currentArg'];?>">Agitate</a></h1>
+			<h1><a href="index.php?arg=<?php echo $_SESSION['currentArg'];?>">AGITATE</a></h1>
 			<div>
 				<a href="About.php?arg=<?php echo $_SESSION['currentArg'];?>">About</a>
 				<a href="Explore.php?arg=<?php echo $_SESSION['currentArg'];?>"><span style="text-decoration: underline;">Explore</span></a></span>
