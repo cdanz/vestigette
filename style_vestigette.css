@@ -689,6 +689,9 @@ body.checkpoint-page #checkpoint .panel.expanded {
 	min-height: 4rem;
 	width: 100%;
 }
+.altExplicationBtn {
+	margin-left: auto;
+}
 .explicationBox a {
 	border: 2px var(--cddbLiteGrey) solid;
 	margin: 0.3rem;
