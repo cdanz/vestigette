@@ -347,9 +347,9 @@ if (isset($links[0][3]) && $links[0][3] !== '') {
 				<a href="<?php echo htmlspecialchars($expUrl); ?>" target="_blank" class="link-preview">
 <?php if ($ogImage) { ?>				<img src="<?php echo htmlspecialchars($ogImage); ?>" class="link-preview-img" alt="" loading="lazy">
 <?php } ?>				<div class="link-preview-text">
-					<span class="link-preview-title"><?php echo htmlspecialchars($ogTitle ?: $host); ?></span>
-<?php if ($ogDesc) { ?>				<span class="link-preview-desc"><?php echo htmlspecialchars($ogDesc); ?></span>
-<?php } ?>					<span class="link-preview-domain"><?php echo htmlspecialchars($host); ?></span>
+					<p class="link-preview-title"><?php echo htmlspecialchars($ogTitle ?: $host); ?></p>
+<?php if ($ogDesc) { ?>				<p class="link-preview-desc"><?php echo htmlspecialchars($ogDesc); ?></p>
+<?php } ?>				<p class="link-preview-domain"><?php echo htmlspecialchars($host); ?></p>
 				</div>
 				</a>
 <?php } else { ?>

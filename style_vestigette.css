@@ -725,6 +725,9 @@ body.checkpoint-page #checkpoint .panel.expanded {
 	flex: 1;
 	min-width: 0;
 }
+.link-preview-text p {
+	margin: 0;
+}
 .link-preview-title {
 	font-weight: bold;
 	font-size: 0.9rem;
