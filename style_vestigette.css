@@ -699,8 +699,8 @@ body.checkpoint-page #checkpoint .panel.expanded {
 }
 /* Link preview card (OG meta) */
 .explicationBox a.link-preview {
-	display: grid !important;
-	grid-template-columns: 140px 1fr !important;
+	display: grid;
+	grid-template-columns: 140px 1fr;
 	border: 1px solid var(--cddbLiteGrey);
 	border-radius: 4px;
 	overflow: hidden;
