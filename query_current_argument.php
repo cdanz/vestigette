@@ -12,12 +12,12 @@ if (isset($_SESSION['profile'])) {
 $sql .= "CALL getAltPhrasing($argID)";
 
 if (mysqli_multi_query($db, $sql)) {
+  $assocArgs = array();
+  $because = array();
+  $therefore = array();
+  $rebuttal = array();
   $result = mysqli_store_result($db);
   if ($result && mysqli_num_rows($result) > 0) {
-    $assocArgs = array();
-    $because = array();
-    $therefore = array();
-    $rebuttal = array();
     $iterator = 0;
     $bIterator = 0;
     $tIterator = 0;
