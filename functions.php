@@ -32,14 +32,15 @@
 					$query .= "INSERT INTO ENDORSEMENT VALUES(".$argAtHand.",".$profileID.",\"".$type."\",".$supportArgVal.",".$weightVal.",CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,TRUE);";
 				}
 				$query .= "CALL resolveOldWithNewEndorse(\"".$type."\",".$argAtHand.",".$profileID.");";
-				
+
 				/*Execute queries */
 				if(mysqli_multi_query($db, $query)){
+					while (mysqli_more_results($db)) { mysqli_next_result($db); if ($r = mysqli_store_result($db)) mysqli_free_result($r); }
 					header('Location: /index.php?arg='.$_SESSION['currentArg']);
 				}
-				else 
+				else
 					echo "Query Failed";
-				
+
 	            break;
 	        case "weighTherefore":
 	        	$arrayOfWeighIns = explode(",",$_POST["thereforeWeighInWith"]);
@@ -51,23 +52,18 @@
 				for ($i = 0; $i < (count($arrayOfWeighIns)-2); $i+=2) {
 					$supportArgVal = intval($arrayOfWeighIns[$i]);
 					$weightVal = floatval($arrayOfWeighIns[$i+1]);
-					if($i == 0){
-						$query .= "INSERT INTO ENDORSEMENT VALUES(".$argAtHand.",".$profileID.",\"".$type."\",".$supportArgVal.",".$weightVal.",CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,TRUE);";
-					}
-					else {
-						$query .= "INSERT INTO ENDORSEMENT VALUES(".$argAtHand.",".$profileID.",\"".$type."\",".$supportArgVal.",".$weightVal.",CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,TRUE);";
-					}
+					$query .= "INSERT INTO ENDORSEMENT VALUES(".$argAtHand.",".$profileID.",\"".$type."\",".$supportArgVal.",".$weightVal.",CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,TRUE);";
 				}
 				$query .= "CALL resolveOldWithNewEndorse(\"".$type."\",".$argAtHand.",".$profileID.");";
-				
-				echo $query;
+
 				/*Execute queries */
 				if(mysqli_multi_query($db, $query)){
+					while (mysqli_more_results($db)) { mysqli_next_result($db); if ($r = mysqli_store_result($db)) mysqli_free_result($r); }
 					header('Location: /index.php?arg='.$_SESSION['currentArg']);
 				}
-				else 
+				else
 					echo "Query Failed";
-				
+
 	            break;
 	        case "weighRebuttal":
 	        	$arrayOfWeighIns = explode(",",$_POST["rebuttalWeighInWith"]);
@@ -78,22 +74,18 @@
 				for ($i = 0; $i < (count($arrayOfWeighIns)-2); $i+=2) {
 					$supportArgVal = intval($arrayOfWeighIns[$i]);
 					$weightVal = floatval($arrayOfWeighIns[$i+1]);
-					if($i == 0){
-						$query .= "INSERT INTO ENDORSEMENT VALUES(".$argAtHand.",".$profileID.",\"".$type."\",".$supportArgVal.",".$weightVal.",CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,TRUE);";
-					}
-					else {
-						$query .= "INSERT INTO ENDORSEMENT VALUES(".$argAtHand.",".$profileID.",\"".$type."\",".$supportArgVal.",".$weightVal.",CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,TRUE);";
-					}
+					$query .= "INSERT INTO ENDORSEMENT VALUES(".$argAtHand.",".$profileID.",\"".$type."\",".$supportArgVal.",".$weightVal.",CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,TRUE);";
 				}
 				$query .= "CALL resolveOldWithNewEndorse(\"".$type."\",".$argAtHand.",".$profileID.");";
-				echo $query;
+
 				/*Execute queries */
 				if(mysqli_multi_query($db, $query)){
+					while (mysqli_more_results($db)) { mysqli_next_result($db); if ($r = mysqli_store_result($db)) mysqli_free_result($r); }
 					header('Location: /index.php?arg='.$_SESSION['currentArg']);
 				}
-				else 
+				else
 					echo "Query Failed";
-				
+
 	            break;
 	        case "addAssertion":
 	        	$assertion = mysqli_real_escape_string($db,trim($_POST["assertion"]));
