@@ -23,7 +23,7 @@ mysqli_multi_query($db, $sql);
 		<meta name="copyright" content="Copyright 2015 Craig Danz Seattle, WA USA" />
 		<meta name="robots" content="follow" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<link rel="stylesheet" href="style_vestigette.css" />
+		<link rel="stylesheet" href="style_vestigette.css?v=<?php echo filemtime($_SERVER['DOCUMENT_ROOT'].'/style_vestigette.css'); ?>" />
 		<script language="javascript" src="script_vestigette.js"></script>
 		<script language="javascript">
 			let arg = <?php echo isset($arg) ? $arg : 'undefined'; ?>,
@@ -52,7 +52,7 @@ mysqli_multi_query($db, $sql);
 
 		<div id="because" class="accordion container">
 			<h2>Common Entry Points</h2>
-			<div class="panel" data-container-id="because">
+			<div class="panel expanded" data-container-id="because">
 				<ul>
 					<li class='lineItem'>
 						<p class="assocArg"><a href="/index.php?arg=77">Agitate</a></p>
@@ -126,7 +126,7 @@ mysqli_multi_query($db, $sql);
 		<div id="rebuttal" class="accordion container">
 			<h2>Most Endorsed</h2>
 
-			<div class="panel" data-container-id="because">
+			<div class="panel expanded" data-container-id="because">
 				<?php
 					$result = mysqli_store_result($db);
 					$lineColorIterator = 0;
@@ -153,7 +153,7 @@ mysqli_multi_query($db, $sql);
 		</div>
 		<div id="therefore" class="accordion container">
 			<h2>Recent Assertions</h2>
-			<div class="panel" data-container-id="because">
+			<div class="panel expanded" data-container-id="because">
 				<?php
 					$result = mysqli_store_result($db);
 					$lineColorIterator = 0;

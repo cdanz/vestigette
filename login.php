@@ -55,8 +55,8 @@
 		<meta name="copyright" content="Copyright 2015 Craig Danz Seattle, WA USA" />
 		<meta name="robots" content="follow" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<link rel="stylesheet" href="style_vestigette.css" />
-		<!--<script language="javascript" src="script_vestigette.js"></script>
+		<link rel="stylesheet" href="style_vestigette.css?v=<?php echo filemtime($_SERVER['DOCUMENT_ROOT'].'/style_vestigette.css'); ?>" />
+		<script language="javascript" src="script_vestigette.js"></script>
 		<script language="javascript">
 			let arg = <?php echo isset($arg) ? $arg : 'undefined'; ?>,
 				profile = <?php echo isset($profile) ? $profile : 'undefined'; ?>,
@@ -65,7 +65,7 @@
 				because = <?php echo json_encode($because); ?>,
 				therefore = <?php echo json_encode($therefore); ?>,
 				rebuttal = <?php echo json_encode($rebuttal); ?>;
-		</script>-->
+		</script>
 	</head>
 	<body>
 
@@ -84,7 +84,7 @@
 		<div id="because" class="accordion container">
 			<h2>Request Access</h2>
 
-			<div class="panel" data-container-id="because">
+			<div class="panel expanded" data-container-id="because">
 				<br>
 				<p>To request to become a beta user, email your request to <a href="mailto:craig@vestigette.org">craig@vestigette.org</a></p>
 				<br>
@@ -111,7 +111,7 @@
 
 		<div id="rebuttal" class="accordion container">
 			<h2>Privacy Policy</h2>
-			<div class="panel" data-container-id="because">
+			<div class="panel expanded" data-container-id="because">
 				<br>
 				<p>TL;DR: Agitate's privacy goals are lofty but shortcuts will be taken during initial development. 
 				<br>

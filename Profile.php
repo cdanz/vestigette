@@ -19,7 +19,7 @@ if (isset($profile)) {
 		<meta name="copyright" content="Copyright 2015 Craig Danz Seattle, WA USA" />
 		<meta name="robots" content="follow" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<link rel="stylesheet" href="style_vestigette.css" />
+		<link rel="stylesheet" href="style_vestigette.css?v=<?php echo filemtime($_SERVER['DOCUMENT_ROOT'].'/style_vestigette.css'); ?>" />
 		<script language="javascript" src="script_vestigette.js"></script>
 		<script language="javascript">
 			let arg = <?php echo isset($arg) ? $arg : 'undefined'; ?>,
@@ -49,7 +49,7 @@ if (isset($profile)) {
 		<div id="because" class="accordion container">
 			<h2>Agitate Profiles</h2>
 
-			<div class="panel" data-container-id="because">
+			<div class="panel expanded" data-container-id="because">
 				<br>
 				<p>Agitate is anonymous. There are not profile pictures, person details, nor people to follow. The only thing Agitate cares about is that you actually exist and if you exist you deserve a voice. But that voice is only ever as loud as everyone else’s on Agitate.
 				<br>
@@ -67,7 +67,7 @@ if (isset($profile)) {
 
 		<div id="rebuttal" class="accordion container">
 			<h2>Most Heterodox</h2>
-			<div class="panel" data-container-id="because">
+			<div class="panel expanded" data-container-id="because">
 				<?php
 					if (isset($profile)) {
 						$result = mysqli_store_result($db);
@@ -103,7 +103,7 @@ if (isset($profile)) {
 
 		<div id="therefore" class="accordion container">
 			<h2>Profile Actions</h2>
-			<div class="panel" data-container-id="because">
+			<div class="panel expanded" data-container-id="because">
 				<br>
 				<p>None of these have been built yet. But thanks for visiting.</p>
 				<br>

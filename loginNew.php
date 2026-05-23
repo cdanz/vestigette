@@ -41,7 +41,7 @@
 		<meta name="copyright" content="Copyright 2015 Craig Danz Seattle, WA USA" />
 		<meta name="robots" content="follow" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<link rel="stylesheet" href="style_vestigette.css" />
+		<link rel="stylesheet" href="style_vestigette.css?v=<?php echo filemtime($_SERVER['DOCUMENT_ROOT'].'/style_vestigette.css'); ?>" />
 		<script language="javascript" src="script_vestigette.js"></script>
 		<script language="javascript">
 			let arg = <?php echo isset($arg) ? $arg : 'undefined'; ?>,
