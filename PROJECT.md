@@ -507,9 +507,9 @@ When user switches between accept/reject:
 
 ---
 
-*Document Version: 1.0*  
-*Last Updated: May 14, 2026*  
-*Next Review: [After Phase 1.2 complete]*
+*Document Version: 2.0*  
+*Last Updated: May 23, 2026*  
+*Next Review: [After Phase 3 UI work begins]*
 
 
 ---
@@ -621,3 +621,166 @@ Argument 50 has 5 phrasings but getAltPhrasing returns 0 results because all PHR
 2. Test weighting flow on argument 50
 3. Get user's current weights to pre-populate in UI
 4. Handle case where user hasn't endorsed any phrasings yet
+
+---
+
+## Development Environment & Workflow
+
+### Two-Location Pattern (Critical)
+
+Every code change requires touching **two separate directories**:
+
+| Location | Purpose |
+|---|---|
+| `/Users/Razzmatazz/vestigette-dev/` | Git repository — where edits are made |
+| `/Users/Razzmatazz/localHost/root/` | MAMP web root — what the browser actually serves |
+
+**After editing any file in `vestigette-dev/`, sync it to `localHost/root/` before testing:**
+```bash
+cp /Users/Razzmatazz/vestigette-dev/About.php /Users/Razzmatazz/localHost/root/About.php
+```
+
+Or sync multiple files at once:
+```bash
+cp /Users/Razzmatazz/vestigette-dev/{About,Explore,Profile,login}.php /Users/Razzmatazz/localHost/root/
+```
+
+**Never edit files directly in `localHost/root/`** — changes there won't be tracked by git.
+
+### Git Repository
+
+- **Remote:** GitHub (origin)
+- **Branch:** `main`
+- **Local path:** `/Users/Razzmatazz/vestigette-dev/`
+- The repo is ~29 commits ahead of origin as of May 2026
+
+### MAMP Configuration
+
+- **Web root:** `/Users/Razzmatazz/localHost/root/` (custom, not default htdocs)
+- **Apache port:** 80
+- **MySQL port:** 3306
+- **phpMyAdmin:** `http://localhost/phpMyAdmin`
+- **display_errors:** ON (development mode — errors print inline in HTML output)
+
+---
+
+## Frontend Architecture
+
+### Pages
+
+| File | Purpose | Notes |
+|---|---|---|
+| `index.php` | Main argument viewer | Includes `query_current_argument.php` and `functions.php` |
+| `About.php` | About / How-To | Static content only |
+| `Explore.php` | Browse arguments | Calls `getMostEndorsed()` and `getAllTheRest()` stored procs |
+| `Profile.php` | User profile / Most Heterodox | Calls `getHeterodox($profileID)` |
+| `login.php` | Login form | Was historically broken (script commented out) — now fixed |
+| `logout.php` | Session destroy | Redirects to login |
+
+### CSS — `style_vestigette.css`
+
+All pages link with **cache-busting**:
+```php
+<link rel="stylesheet" href="style_vestigette.css?v=<?php echo filemtime($_SERVER['DOCUMENT_ROOT'].'/style_vestigette.css'); ?>" />
+```
+
+**Desktop layout (`@media (min-width: 1200px)`):**
+
+The page body becomes a flex container with a 3-row / 2-column grid. Layout uses fixed `vh` heights:
+
+| Section ID | Column | Row | Width | Height |
+|---|---|---|---|---|
+| `#mastHead` | Right | 1 | 33% | 25vh |
+| `#because` | Left | 1 | 66% | 25vh |
+| `#rebuttal` | Right | 2 | 33% | 50vh |
+| `#argument` | Left | 2 | 66% | 50vh |
+| `#find` / `#filter` | Right | 3 | 33% | — |
+| `#therefore` | Left | 3 | 66% | 25vh |
+
+On desktop, **all panels are always visible** at their fixed viewport heights — the accordion expand/collapse has no visible effect. This is intentional, not a bug.
+
+**Mobile layout (below 1200px):**
+
+Sections stack vertically. Each `.accordion` section collapses to just its `<h2>` header. Clicking an `<h2>` expands that section's `.panel` (max-height animates from 0 → 338px) and collapses all others. This is handled by `accordionExpand()` in `script_vestigette.js`.
+
+**Panel default state:**
+
+Only the `#argument` panel starts with `class="panel expanded"` on secondary pages (About, Explore, Profile, login). All other panels start collapsed (`class="panel"` only) and expand on click.
+
+### JavaScript — `script_vestigette.js`
+
+Single JS file shared by all pages. Key functions:
+
+- **`init()`** — Called on `DOMContentLoaded`. Attaches all handlers.
+- **`resize(why)`** — Attaches `accordionExpand` click listener to every `.accordion` element. Uses a `listening` class guard to prevent duplicate listeners.
+- **`accordionExpand(evt)`** — Handles accordion clicks. Guards against clicks originating inside `.panel, button, a, input, select, textarea, form` (returns early). Closes all panels, then opens the clicked one (unless it was already open).
+- **`openNav()` / `closeNav()`** — Adds/removes `shownav` class on `#mastHead div`, which slides the mobile nav into view via CSS transition.
+
+### Inline PHP Script Block (All Pages)
+
+Every page has an inline `<script>` block that passes PHP variables to JS:
+
+```javascript
+let arg = <?php echo isset($arg) ? $arg : 'undefined'; ?>,
+    profile = <?php echo isset($profile) ? $profile : 'undefined'; ?>,
+    opinion = <?php echo isset($opinion) ? $opinion : 'undefined'; ?>,
+    assoc = <?php echo isset($assocWeights) ? "JSON.parse(" + $assocWeights + ")" : 'undefined'; ?>,
+    because = <?php echo json_encode(isset($because) ? $because : null); ?>,
+    therefore = <?php echo json_encode(isset($therefore) ? $therefore : null); ?>,
+    rebuttal = <?php echo json_encode(isset($rebuttal) ? $rebuttal : null); ?>;
+```
+
+---
+
+## Critical Gotchas
+
+### 1. `$because` / `$therefore` / `$rebuttal` Only Defined on index.php
+
+These variables are populated by `query_current_argument.php`, which is **only included in `index.php`**. Secondary pages (About, Explore, Profile, login) do not include it.
+
+**If you use `json_encode($because)` without an `isset()` guard on a secondary page**, MAMP's `display_errors = On` will inject a PHP Warning directly into the JavaScript block, producing output like:
+
+```html
+because = <br /><b>Warning</b>:  Undefined variable $because in ...line 65<br />
+null,
+```
+
+This is a JavaScript syntax error that silently kills **all** JS on the page — accordion, nav button, everything stops working. Always use:
+```php
+<?php echo json_encode(isset($because) ? $because : null); ?>
+```
+
+### 2. CSS Changes Don't Apply on Mobile Until Hard Refresh
+
+Mobile browsers aggressively cache CSS. The `?v=filemtime()` cache-buster on the stylesheet link handles this automatically when the file changes. To force a manual cache bypass while testing on device, append a dummy query param to the URL:
+```
+http://localhost/About.php?v=2
+```
+DuckDuckGo browser has a "Fire" button that wipes all cache in one tap.
+
+### 3. Always Sync to localHost After Editing
+
+Git commits in `vestigette-dev/` have **no effect** on what MAMP serves. You must `cp` the file to `localHost/root/` to see changes in the browser.
+
+### 4. Do Not Re-Scope the Desktop CSS Grid
+
+A past mistake scoped the `@media (min-width: 1200px)` desktop grid rules to `body.index-layout`, intending to make the accordion work on secondary pages. This broke the grid layout on all non-index pages. **The grid CSS must remain unscoped** — it applies to all pages by ID (`#because`, `#argument`, etc.), which exist on all pages.
+
+---
+
+## Session Summary — May 23, 2026
+
+### Problems Solved
+
+**1. Secondary pages had broken desktop layout**
+Commit `5b3b197` incorrectly scoped the desktop CSS grid to `body.index-layout`, causing About/Explore/Profile to render sections as a single stacked column instead of the 3-row/2-col grid. Fix: reverted the CSS scoping and removed `class="index-layout"` from `index.php` body tag.
+
+**2. All JavaScript dead on secondary pages (mobile and desktop)**
+The inline `<script>` block on About.php, Explore.php, Profile.php, and login.php referenced `$because`, `$therefore`, `$rebuttal` without `isset()` guards. With MAMP's `display_errors = On`, PHP injected warning HTML into the JS block on every page load, causing a syntax error that prevented `script_vestigette.js` from initializing. Nothing clicked — not accordion headers, not the mobile nav button. Fix: added `isset()` guards to all three variables on all four pages.
+
+**3. login.php had JS entirely commented out**
+Historically, the entire `<script language="javascript" src="script_vestigette.js"></script>` block and the inline variable script on `login.php` were wrapped in `<!-- -->` HTML comment tags, disabling all JavaScript. Fix: removed the comment tags (done in the previous session cycle).
+
+### Commits This Session
+- `ca036aa` — Revert bad CSS scoping; restore panel defaults on secondary pages
+- `b444b46` — Fix JS broken on secondary pages: guard undefined PHP vars in inline script
