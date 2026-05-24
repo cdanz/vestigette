@@ -26,9 +26,9 @@ if (isset($profile)) {
 				profile = <?php echo isset($profile) ? $profile : 'undefined'; ?>,
 				opinion = <?php echo isset($opinion) ? $opinion : 'undefined'; ?>,
 				assoc = <?php echo isset($assocWeights) ? "JSON.parse(" + $assocWeights + ")" : 'undefined'; ?>, //not used
-				because = <?php echo json_encode($because); ?>,
-				therefore = <?php echo json_encode($therefore); ?>,
-				rebuttal = <?php echo json_encode($rebuttal); ?>;
+				because = <?php echo json_encode(isset($because) ? $because : null); ?>,
+				therefore = <?php echo json_encode(isset($therefore) ? $therefore : null); ?>,
+				rebuttal = <?php echo json_encode(isset($rebuttal) ? $rebuttal : null); ?>;
 		</script>
 	</head>
 	<body>
