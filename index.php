@@ -241,7 +241,7 @@ function generateFindLines($results) {
 			gtag('config', 'G-38LM87XMGN');
 		</script>
 	</head>
-	<body class="index-layout">
+	<body>
 
 		<div id="mastHead" class="container">
 			<h1><a href="index.php?arg=<?php echo $_SESSION['currentArg'];?>">AGITATE</a></h1>

@@ -43,7 +43,7 @@ $profile = isset($_SESSION['profile']) ? $_SESSION['profile'] : null;
 		<div id="because" class="accordion container">
 			<h2>About</h2>
 
-			<div class="panel expanded" data-container-id="because">
+			<div class="panel" data-container-id="because">
 				<br>
 				<p>Agitate is the world's first consensus building platform. Discussion as a single, collective, ongoing project.</p>
 				<br>
@@ -68,7 +68,7 @@ $profile = isset($_SESSION['profile']) ? $_SESSION['profile'] : null;
 
 		<div id="rebuttal" class="accordion container">
 			<h2>How-To</h2>
-			<div class="panel expanded" data-container-id="because">
+			<div class="panel" data-container-id="because">
 				<br>
 				<p style="white-space:normal;">Agitate is an abstraction of common argument mapping techniques. Each argument is an assertion - phrased as its proponents prefer best. Arguments are linked together in 3 different ways: those that (1) precede - <span style="color: var(--cddbBlue); font-weight:bold;">Because</span>, (2) follow - <span style="color: var(--cddbGreen); font-weight:bold;">Therefore</span>, or (3) refute - <span style="color: var(--cddbRed); font-weight:bold;">Rebuttal</span>.
 				<br>
@@ -98,7 +98,7 @@ $profile = isset($_SESSION['profile']) ? $_SESSION['profile'] : null;
 
 		<div id="therefore" class="accordion container">
 			<h2>Contribute</h2>
-			<div class="panel expanded" data-container-id="because">
+			<div class="panel" data-container-id="because">
 				<br>
 				<p>Agitate is in its inital development stage and self-funded. Software development guidance, legal assistance, financial support or general user feedback are all accepted graciously.</p>
 				<br>

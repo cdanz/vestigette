@@ -3961,7 +3961,15 @@ input:checked + .toggle:before {
 
 
 @media only screen and (min-width: 1200px) {
-	/* General desktop typography — applies to all pages */
+	/* use 3 row layout */
+	html {
+		overflow: hidden;
+	}
+	body {
+		display: flex;
+		flex-flow: row wrap;
+		overflow: hidden;
+	}
 	h1 {
 		font-size: 3rem;
 		margin-top: 3rem;
@@ -3976,95 +3984,90 @@ input:checked + .toggle:before {
 	#mastHead div a {
 		margin-left: 4rem;
 	}
-
-	/* Index grid layout — only when body has class="index-layout" */
-	body.index-layout {
-		display: flex;
-		flex-flow: row wrap;
-		overflow: hidden;
-	}
-	body.index-layout .accordion {
+	.accordion {
 		padding-bottom: 5rem;
 	}
-	body.index-layout .container {
+	.container {
 		overflow: hidden;
 	}
-	body.index-layout #because,
-	body.index-layout #argument,
-	body.index-layout #therefore {
+	#because, 
+	#argument, 
+	#therefore {
 		width: 66%;
 	}
-	body.index-layout #mastHead,
-	body.index-layout #rebuttal,
-	body.index-layout #find,
-	body.index-layout #filter {
+	#mastHead, 
+	#rebuttal, 
+	#find,
+	#filter {
 		width: 33%;
 	}
-	body.index-layout #because,
-	body.index-layout #mastHead {
+	#because, 
+	#mastHead {
 		height: 25vh;
 		max-height: 25vh;
 	}
-	body.index-layout #argument,
-	body.index-layout #rebuttal {
+	#argument, 
+	#rebuttal {
 		height: 50vh;
 		max-height: 50vh;
 	}
-	body.index-layout #therefore,
-	body.index-layout #fitler {
+	#therefore, 
+	#fitler {
 		height: 25vh;
 		max-height: 25vh;
 	}
-	body.index-layout #because {
+
+	#because {
 		order: 1;
 	}
-	body.index-layout #mastHead {
+	#mastHead {
 		order: 2;
 	}
-	body.index-layout #argument {
+	#argument {
 		order: 3;
 	}
-	body.index-layout #rebuttal {
+	#rebuttal {
 		order: 4;
 	}
-	body.index-layout #therefore {
+	#therefore {
 		order: 5;
 	}
-	body.index-layout #find {
+	#find {
 		order: 6;
 	}
-	body.index-layout #filter {
+	#filter {
 		order: 7;
 	}
-	body.index-layout .container .panel {
+
+	.container .panel {
 		height: 18vh;
 		max-height: 18vh;
 	}
-	body.index-layout #rebuttal .panel {
+	#rebuttal .panel {
 		height: 43vh;
 		max-height: 43vh;
 	}
-	body.index-layout #argument .panel {
+	#argument .panel {
 		flex-flow: column nowrap;
 		justify-content: flex-start;
 		height: 42.75vh;
 		max-height: 42.75vh;
 	}
-	body.index-layout #argument .panel .rate_phrase {
+	#argument .panel .rate_phrase {
 		margin-bottom: 1.5rem;
 	}
-	body.index-layout .panel li {
+	.panel li {
 		min-height: 3rem;
 	}
-	body.index-layout .panel p {
+	.panel p {
 		font-size: 0.9rem;
 	}
-	body.index-layout .pointBtn {
+	.pointBtn {
 		height: 3rem;
 		xtop: 4px;
 		width: 3rem;
 	}
-	body.index-layout .wrapper {
+	.wrapper {
 		height: 3rem;
 	}
 }

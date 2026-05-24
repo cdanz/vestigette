@@ -52,7 +52,7 @@ mysqli_multi_query($db, $sql);
 
 		<div id="because" class="accordion container">
 			<h2>Common Entry Points</h2>
-			<div class="panel expanded" data-container-id="because">
+			<div class="panel" data-container-id="because">
 				<ul>
 					<li class='lineItem'>
 						<p class="assocArg"><a href="/index.php?arg=77">Agitate</a></p>
@@ -126,7 +126,7 @@ mysqli_multi_query($db, $sql);
 		<div id="rebuttal" class="accordion container">
 			<h2>Most Endorsed</h2>
 
-			<div class="panel expanded" data-container-id="because">
+			<div class="panel" data-container-id="because">
 				<?php
 					$result = mysqli_store_result($db);
 					$lineColorIterator = 0;
@@ -153,7 +153,7 @@ mysqli_multi_query($db, $sql);
 		</div>
 		<div id="therefore" class="accordion container">
 			<h2>Recent Assertions</h2>
-			<div class="panel expanded" data-container-id="because">
+			<div class="panel" data-container-id="because">
 				<?php
 					$result = mysqli_store_result($db);
 					$lineColorIterator = 0;

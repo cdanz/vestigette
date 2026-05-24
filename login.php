@@ -84,7 +84,7 @@
 		<div id="because" class="accordion container">
 			<h2>Request Access</h2>
 
-			<div class="panel expanded" data-container-id="because">
+			<div class="panel" data-container-id="because">
 				<br>
 				<p>To request to become a beta user, email your request to <a href="mailto:craig@vestigette.org">craig@vestigette.org</a></p>
 				<br>
@@ -111,7 +111,7 @@
 
 		<div id="rebuttal" class="accordion container">
 			<h2>Privacy Policy</h2>
-			<div class="panel expanded" data-container-id="because">
+			<div class="panel" data-container-id="because">
 				<br>
 				<p>TL;DR: Agitate's privacy goals are lofty but shortcuts will be taken during initial development. 
 				<br>
