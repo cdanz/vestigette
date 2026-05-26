@@ -663,6 +663,25 @@ body.flesh-out-page .inLinePct {
 	white-space: nowrap;
 }
 body.flesh-out-page .pct0_0 .inLinePct { display: none; }
+/* Counteract .container / .container div cascade on flesh_out.php */
+body.flesh-out-page .flesh-list,
+body.flesh-out-page #new-arg-zone,
+body.flesh-out-page #pinned-zone {
+	display: block;
+}
+body.flesh-out-page .flesh-list {
+	color: var(--cddbBlack);
+}
+body.flesh-out-page .flesh-row {
+	align-items: center;
+}
+body.flesh-out-page .flesh-footer {
+	align-items: center;
+}
+body.flesh-out-page .assocArg {
+	flex: 1;
+	min-width: 0;
+}
 .panel.standalone {
 	margin-bottom: 0.5rem;
 	max-height: 100%;

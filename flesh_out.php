@@ -311,6 +311,18 @@ $baseURL      = '/index.php';
 <script>
 // ── flesh_out.php inline JS ───────────────────────────────────────────────────
 
+// inCircle is defined inside init() in script_vestigette.js and is not global.
+// Redefine it here so inline onclick handlers can call it.
+function inCircle(evt, el) {
+    var rect    = el.getBoundingClientRect();
+    var radius  = (rect.right - rect.left) / 2;
+    var centerX = rect.left + radius;
+    var centerY = rect.top  + radius;
+    var d = Math.sqrt(Math.pow(evt.clientX - centerX, 2) +
+                      Math.pow(evt.clientY - centerY, 2));
+    return d < radius;
+}
+
 var fleshPool        = [];   // [{id: 'new-0'|'ex-123', clicks: N}]
 var fleshTotalClicks = 0;
 var fleshNewCounter  = 0;    // index of the next new-arg slot to create
