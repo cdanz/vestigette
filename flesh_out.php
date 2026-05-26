@@ -1,8 +1,13 @@
 <?php
 session_start();
 
-$csrfToken = md5(uniqid(mt_rand(), true));
-$_SESSION['csrfToken'] = $csrfToken;
+// Generate a fresh CSRF token only when serving the form (GET).
+// On POST the token was already stored in the session from the GET load;
+// regenerating it here would overwrite it and make every submission fail.
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    $_SESSION['csrfToken'] = md5(uniqid(mt_rand(), true));
+}
+$csrfToken = $_SESSION['csrfToken'] ?? '';
 
 // Validate type param
 $allowedTypes = ['Because', 'Therefore', 'Rebuttal'];
