@@ -682,6 +682,24 @@ body.flesh-out-page .assocArg {
 	flex: 1;
 	min-width: 0;
 }
+/* Counteract responsive grid breakpoints on flesh_out.php */
+@media only screen and (min-width: 1200px) {
+	body.flesh-out-page {
+		flex-flow: column nowrap;
+	}
+	body.flesh-out-page #mastHead {
+		height: auto;
+		max-height: none;
+		order: 0;
+		width: 100%;
+	}
+	body.flesh-out-page #flesh-out {
+		height: auto;
+		max-height: none;
+		order: 1;
+		width: 100%;
+	}
+}
 .panel.standalone {
 	margin-bottom: 0.5rem;
 	max-height: 100%;
