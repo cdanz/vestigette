@@ -1079,15 +1079,9 @@ input:checked + .toggle:before {
 	border-color: var(--cddbBlack) var(--percentage_bg) var(--percentage_bg) var(--cddbBlack);
 }
 .lineItem.pct0_0 .pointBtn.arc1 {
-	border-color: transparent;
+	border-color: var(--percentage_bg);
 	background-color: var(--cddbGrey);
 }
-/*
-.lineItem.pct0_0 .pointBtn.arc1 {
-	border-color: var(--percentage_bg) var(--percentage_bg) var(--percentage_bg) var(--percentage_bg);
-	background-color: var(--cddbGrey);
-}
-*/
 /* arc 2 */
 .half1 .pointBtn.arc2 {
 	border-color: var(--percentage_bg) transparent transparent var(--percentage_bg);
