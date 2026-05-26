@@ -292,6 +292,11 @@ else {
 						<?php addCSRFtoken() ?>
 					</form>
 				</div>
+<?php if ((isset($opinion)) && ($opinion > 0)): ?>
+				<div class="bulk-add-bar">
+					<a href="/flesh_out.php?arg=<?php echo $arg; ?>&type=Because" class="button bulk-add-btn">+ Add Many</a>
+				</div>
+<?php endif; ?>
 			</div>
 		</div>
 
@@ -396,8 +401,13 @@ else {
 						<?php addCSRFtoken() ?>
 					</form>
 				</div>
+<?php if ((isset($opinion)) && ($opinion < 0)): ?>
+				<div class="bulk-add-bar">
+					<a href="/flesh_out.php?arg=<?php echo $arg; ?>&type=Rebuttal" class="button bulk-add-btn">+ Add Many</a>
+				</div>
+<?php endif; ?>
 			</div>
-		</div> 
+		</div>
 
 		<div id="therefore" class="accordion container">
 			<h2>Therefore</h2>
@@ -435,6 +445,11 @@ if ((isset($opinion)) && ($opinion > 0)) {
 						<?php addCSRFtoken() ?>
 					</form>
 				</div>
+<?php if ((isset($opinion)) && ($opinion > 0)): ?>
+				<div class="bulk-add-bar">
+					<a href="/flesh_out.php?arg=<?php echo $arg; ?>&type=Therefore" class="button bulk-add-btn">+ Add Many</a>
+				</div>
+<?php endif; ?>
 			</div>
 		</div>
 

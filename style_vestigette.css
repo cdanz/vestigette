@@ -530,6 +530,139 @@ body.checkpoint-page #checkpoint .panel.expanded {
 	padding: 0.75rem 0.5rem;
 	width: 100%;
 }
+
+/* ── Bulk-add entry point (index.php panels) ───────────────── */
+.bulk-add-bar {
+	border-top: 2px var(--cddbLiteGrey) solid;
+	display: flex;
+	justify-content: flex-end;
+	padding: 0.4rem 0.5rem;
+}
+.bulk-add-btn {
+	font-size: 0.85rem;
+}
+#because  .bulk-add-btn { color: var(--cddbBlue); }
+#rebuttal .bulk-add-btn { color: var(--cddbRed); }
+#therefore .bulk-add-btn { color: var(--cddbGreen); }
+
+/* ── flesh_out.php ─────────────────────────────────────────── */
+body.flesh-out-page {
+	display: flex;
+	flex-direction: column;
+	height: 100vh;
+}
+body.flesh-out-page #flesh-out {
+	display: flex;
+	flex-direction: column;
+	flex: 1;
+	min-height: 0;
+}
+.flesh-header {
+	align-items: flex-start;
+	display: flex;
+	flex-flow: row nowrap;
+	justify-content: space-between;
+	padding: 0.5rem;
+}
+.flesh-header h2 {
+	font-size: 1.2rem;
+	font-weight: bold;
+}
+.flesh-type-label {
+	color: var(--cddbGrey);
+	font-size: 0.8rem;
+	font-weight: bold;
+	letter-spacing: 0.05em;
+	text-transform: uppercase;
+}
+.flesh-cancel {
+	flex: none;
+	margin-left: 0.5rem;
+}
+.flesh-col-labels {
+	background-color: var(--cddbLiteGrey);
+	color: var(--cddbGrey);
+	display: flex;
+	font-size: 0.7rem;
+	font-weight: bold;
+	letter-spacing: 0.04em;
+	padding: 0.2rem 0.5rem;
+	text-transform: uppercase;
+}
+.flesh-col-weight  { flex: none; width: 5.2rem; }
+.flesh-col-phrasing { flex: 1; }
+.flesh-col-recip   { flex: none; width: 5rem; text-align: center; }
+.flesh-list {
+	background-color: white;
+	flex: 1;
+	min-height: 0;
+	overflow-y: auto;
+}
+.flesh-row {
+	align-items: center;
+	border-bottom: 2px var(--cddbLiteGrey) solid;
+	display: flex;
+	flex-flow: row nowrap;
+	justify-content: flex-start;
+	min-height: 4rem;
+}
+.flesh-row:last-child { border-bottom: none; }
+.flesh-text-col {
+	align-items: center;
+	display: flex;
+	flex: 1;
+	flex-flow: row nowrap;
+	overflow: hidden;
+}
+.new-arg-text {
+	border: none;
+	flex: 1;
+	font-size: 1rem;
+	outline: none;
+	padding-left: 0.2rem;
+}
+.flesh-reciprocate {
+	flex: none;
+	margin-right: 0.6rem;
+}
+#pinned-zone:not(:empty)::before {
+	background-color: var(--cddbLiteGrey);
+	color: var(--cddbGrey);
+	content: 'Weighted';
+	display: block;
+	font-size: 0.7rem;
+	font-weight: bold;
+	letter-spacing: 0.04em;
+	padding: 0.2rem 0.5rem;
+	text-transform: uppercase;
+}
+.flesh-footer {
+	align-items: center;
+	background-color: var(--cddbBlack);
+	display: flex;
+	flex-flow: row nowrap;
+	gap: 0.5rem;
+	padding: 0.5rem;
+}
+.flesh-footer form { display: inline; }
+/* Circle colours keyed to type */
+#flesh-out.flesh-because  { --flesh-color: var(--because); }
+#flesh-out.flesh-therefore { --flesh-color: var(--therefore); }
+#flesh-out.flesh-rebuttal { --flesh-color: var(--rebuttal); }
+body.flesh-out-page .pointBtn.arc1 {
+	border-color: var(--flesh-color) var(--percentage_bg) var(--percentage_bg) var(--flesh-color);
+	background-color: var(--percentage_bg_page);
+}
+body.flesh-out-page .half2 .pointBtn.arc2 {
+	border-color: transparent var(--flesh-color) var(--flesh-color) transparent;
+}
+body.flesh-out-page .inLinePct {
+	color: var(--flesh-color);
+	flex: none;
+	font-weight: bold;
+	white-space: nowrap;
+}
+body.flesh-out-page .pct0_0 .inLinePct { display: none; }
 .panel.standalone {
 	margin-bottom: 0.5rem;
 	max-height: 100%;
