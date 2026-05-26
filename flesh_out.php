@@ -300,10 +300,9 @@ $baseURL      = '/index.php';
             <input type="hidden" name="argID"     value="<?php echo $argIDEsc; ?>"/>
             <input type="hidden" name="pinnedData" id="pinnedData" value=""/>
             <button type="submit" class="button flesh-submit" id="flesh-submit" disabled>
-                Add All
+                Endorse
             </button>
         </form>
-        <a href="/index.php?arg=<?php echo $argIDEsc; ?>" class="button">Cancel</a>
     </div>
 
 </div><!-- #flesh-out -->
