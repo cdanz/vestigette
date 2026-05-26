@@ -683,6 +683,17 @@ body.flesh-out-page .assocArg {
 	flex: 1;
 	min-width: 0;
 }
+body.flesh-out-page .flesh-footer button {
+	background-color: var(--flesh-color);
+	border-color: var(--flesh-color);
+	border-radius: 0;
+	padding-left: 1em;
+	padding-right: 1em;
+}
+body.flesh-out-page .flesh-footer button:hover:not(:disabled) {
+	background-color: var(--cddbWhite);
+	color: var(--flesh-color);
+}
 /* Counteract responsive grid breakpoints on flesh_out.php */
 @media only screen and (min-width: 1200px) {
 	body.flesh-out-page {
