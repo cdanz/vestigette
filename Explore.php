@@ -53,62 +53,49 @@ mysqli_multi_query($db, $sql);
 		<div id="because" class="accordion container">
 			<h2>Common Entry Points</h2>
 			<div class="panel" data-container-id="because">
-				<ul>
-					<li class='lineItem'>
-						<p class="assocArg"><a href="/index.php?arg=77">Agitate</a></p>
-					</li>
-					<li class='lineItem' style="background-color: var(--cddbLiteGrey)">
-						<p class="assocArg"><a href="/index.php?arg=422">Free Speech</a></p>
-					</li>
-					<li class='lineItem'>
-						<p class="assocArg"><a href="/index.php?arg=123">Global Warming</a></p>
-					</li>
-					<li class='lineItem' style="background-color: var(--cddbLiteGrey)">
-						<p class="assocArg"><a href="/index.php?arg=110">Poverty and Wealth</a></p>
-					</li>
-					<li class='lineItem'>
-						<p class="assocArg"><a href="/index.php?arg=238">Racism</a></p>
-					</li>
-					<li class='lineItem' style="background-color: var(--cddbLiteGrey)">
-						<p class="assocArg"><a href="/index.php?arg=403">The Role of Government</a></p>
-					</li>
-					<li class='lineItem'>
-						<p class="assocArg"><a href="/index.php?arg=376">Media</a></p>
-					</li>
-					<li class='lineItem' style="background-color: var(--cddbLiteGrey)">
-						<p class="assocArg"><a href="/index.php?arg=954">Immigration/Migration</a></p>
-					</li>
-					<li class='lineItem'>
-						<p class="assocArg"><a href="/index.php?arg=128">Abortion</a></p>
-					</li>
-					<li class='lineItem' style="background-color: var(--cddbLiteGrey)">
-						<p class="assocArg"><a href="/index.php?arg=423">Misogyny</a></p>
-					</li>
-					<li class='lineItem'>
-						<p class="assocArg"><a href="/index.php?arg=80">Donald Trump</a></p>
-					</li>
-					<li class='lineItem' style="background-color: var(--cddbLiteGrey)">
-						<p class="assocArg"><a href="/index.php?arg=90">The GOP</a></p>
-					</li>
-					<li class='lineItem'>
-						<p class="assocArg"><a href="/index.php?arg=574">The Democratic Party</a></p>
-					</li>
-					<li class='lineItem' style="background-color: var(--cddbLiteGrey)">
-						<p class="assocArg"><a href="/index.php?arg=413">COVID-19</a></p>
-					</li>
-					<li class='lineItem'>
-						<p class="assocArg"><a href="/index.php?arg=424">Vaccines</a></p>
-					</li>
-					<li class='lineItem' style="background-color: var(--cddbLiteGrey)">
-						<p class="assocArg"><a href="/index.php?arg=428">Religion</a></p>
-					</li>
-					<li class='lineItem'>
-						<p class="assocArg"><a href="/index.php?arg=328">Gun Control</a></p>
-					</li>
-					<li class='lineItem' style="background-color: var(--cddbLiteGrey)">
-						<p class="assocArg"><a href="/index.php?arg=278">LGBTQ Issues</a></p>
-					</li>
-		        </ul>
+				<?php
+				$entryPoints = [
+					['Abortion',                  '/index.php?arg=124'],
+					['Black Lives Matter',         '/index.php?arg=546'],
+					['Cancel Culture',             '/index.php?arg=288'],
+					['Capitalism as a System',     '/index.php?arg=136'],
+					['Catholic Church Abuse',      '/index.php?arg=983'],
+					['Christianity &amp; Faith',   '/index.php?arg=1385'],
+					['Climate Change',             '/index.php?arg=123'],
+					['Conspiracy Theories',        '/index.php?arg=1714'],
+					['COVID Mandates',             '/index.php?arg=1396'],
+					['Cryptocurrency',             '/index.php?arg=808'],
+					['Environmental Policy',       '/index.php?arg=757'],
+					['Gender &amp; Trans Rights',  '/index.php?arg=791'],
+					['GMO Crops',                  '/index.php?arg=5'],
+					['Government &amp; Free Markets', '/index.php?arg=400'],
+					['Gun Rights',                 '/index.php?arg=140'],
+					['Housing &amp; Homelessness', '/index.php?arg=682'],
+					['Immigration Policy',         '/index.php?arg=612'],
+					['Informal Debates',           '/index.php?arg=58'],
+					['Israel &amp; Palestine',     '/index.php?arg=1627'],
+					['Labor &amp; Unions',         '/index.php?arg=494'],
+					['Media &amp; Social Media',   '/index.php?arg=367'],
+					['Policing in America',        '/index.php?arg=561'],
+					['Pop Culture',                '/index.php?arg=1016'],
+					['Public Health',              '/index.php?arg=427'],
+					['Race &amp; Racism',          '/index.php?arg=1192'],
+					['Republican Politics &amp; Trump', '/index.php?arg=120'],
+					['Sports &amp; Athletics',     '/index.php?arg=883'],
+					['The Supreme Court',          '/index.php?arg=1443'],
+					['Voting Rights',              '/index.php?arg=182'],
+					['War &amp; Military',         '/index.php?arg=1479'],
+					['Wealth &amp; Taxation',      '/index.php?arg=265'],
+				];
+				echo "<ul>\n";
+				foreach ($entryPoints as $i => $entry) {
+					$bg = ($i % 2 === 1) ? ' style="background-color: var(--cddbLiteGrey)"' : '';
+					echo "\t\t\t\t\t<li class='lineItem'$bg>"
+					   . "<p class=\"assocArg\"><a href=\"{$entry[1]}\">{$entry[0]}</a></p>"
+					   . "</li>\n";
+				}
+				echo "</ul>\n";
+				?>
 			</div>
 		</div>
 		<div id="argument" class="accordion container">
