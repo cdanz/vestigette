@@ -552,6 +552,7 @@ body.flesh-out-page {
 	height: 100vh;
 }
 body.flesh-out-page #flesh-out {
+	background-color: var(--flesh-color);
 	display: flex;
 	flex-direction: column;
 	flex: 1;
