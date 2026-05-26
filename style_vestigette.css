@@ -664,6 +664,7 @@ body.flesh-out-page .inLinePct {
 	white-space: nowrap;
 }
 body.flesh-out-page .pct0_0 .inLinePct { display: none; }
+body.flesh-out-page .pct0_0 .pointBtn.arc2 { border-color: transparent; }
 /* Counteract .container / .container div cascade on flesh_out.php */
 body.flesh-out-page .flesh-list,
 body.flesh-out-page #new-arg-zone,
