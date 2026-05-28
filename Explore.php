@@ -99,27 +99,14 @@ mysqli_multi_query($db, $sql);
 			</div>
 		</div>
 		<div id="argument" class="accordion container">
-			<h2>Go to Argument ID</h2>
+			<h2>Recent Assertions</h2>
 			<div class="panel expanded" data-container-id="argument">
-				<div class="assert">
-					<form class="form-inline" method="POST">
-						<label for="jumpToID">Jump to: </label>
-						<input type="text" id="jumpToID" placeholder="Argument ID" name="jumpTo">
-						<button type="submit" class="button instead" name="buttonClicked" value="jumpTo">Go</button>
-					</form>
-				</div>
-			</div>
-		</div>
-		<div id="rebuttal" class="accordion container">
-			<h2>Most Endorsed</h2>
-
-			<div class="panel" data-container-id="because">
 				<?php
 					$result = mysqli_store_result($db);
 					$lineColorIterator = 0;
 					echo "<ul>\n";
 					while($row = mysqli_fetch_row($result)) {
-						if ($lineColorIterator % 2  == 0) { 
+						if ($lineColorIterator % 2  == 0) {
 						echo "<li class=\"lineItem\">";
 						}
 						else{
@@ -138,15 +125,15 @@ mysqli_multi_query($db, $sql);
 				?>
 			</div>
 		</div>
-		<div id="therefore" class="accordion container">
-			<h2>Recent Assertions</h2>
-			<div class="panel" data-container-id="because">
+		<div id="rebuttal" class="accordion container">
+			<h2>Most Endorsed</h2>
+			<div class="panel" data-container-id="rebuttal">
 				<?php
 					$result = mysqli_store_result($db);
 					$lineColorIterator = 0;
 					echo "<ul>\n";
 					while($row = mysqli_fetch_row($result)) {
-						if ($lineColorIterator % 2  == 0) { 
+						if ($lineColorIterator % 2  == 0) {
 						echo "<li class=\"lineItem\">";
 						}
 						else{
@@ -163,6 +150,18 @@ mysqli_multi_query($db, $sql);
 					}
 				?>
 			</div>
-		</div> 
+		</div>
+		<div id="therefore" class="accordion container">
+			<h2>Go to Argument ID</h2>
+			<div class="panel expanded" data-container-id="therefore">
+				<div class="assert">
+					<form class="form-inline" method="POST">
+						<label for="jumpToID">Jump to: </label>
+						<input type="text" id="jumpToID" placeholder="Argument ID" name="jumpTo">
+						<button type="submit" class="button instead" name="buttonClicked" value="jumpTo">Go</button>
+					</form>
+				</div>
+			</div>
+		</div>
 	</body>
 </html>
