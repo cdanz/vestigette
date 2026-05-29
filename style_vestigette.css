@@ -384,12 +384,13 @@ button.hidden {
 }
 .container .buttons {
 	align-items: center;
+	gap: 0.4rem;
 	padding-bottom: 1px; /* hahaha */
 }
-#because form, 
-#rebuttal form, 
+#because form,
+#rebuttal form,
 #therefore form {
-	margin-left: 1rem;
+	margin-left: 0;
 }
 .opinion form {
 	display: flex;
