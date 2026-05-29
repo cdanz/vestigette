@@ -384,8 +384,12 @@ button.hidden {
 }
 .container .buttons {
 	align-items: center;
-	gap: 0.4rem;
 	padding-bottom: 1px; /* hahaha */
+}
+#because .buttons,
+#rebuttal .buttons,
+#therefore .buttons {
+	gap: 0.4rem;
 }
 #because form,
 #rebuttal form,
