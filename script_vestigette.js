@@ -1,6 +1,5 @@
 "use strict";
 
-let mode = null;
 /*TEMPORARILY DISABLED
 Test for new expanded Add More experience - weigh in buttons should be active upon page load 
 if(window.location.pathname == '/add_more.php') {
@@ -49,12 +48,15 @@ if(window.location.pathname == '/add_more.php') {
     }
 */
 
-const editMode = ['because', 'therefore'];
-let activeEditMode;
 let panel = null;
 let pctRE = /pct\d+\_\d/;
-let genericTotalClicks = 0;
-let genericClickArr = [];
+// Per-section state replaces the old shared genericClickArr/genericTotalClicks.
+// Each section tracks its own clicks independently to prevent cross-contamination.
+const sectionState = {
+	because:   { mode: 'idle', clickArr: [], totalClicks: 0 },
+	therefore: { mode: 'idle', clickArr: [], totalClicks: 0 },
+	rebuttal:  { mode: 'idle', clickArr: [], totalClicks: 0 }
+};
 let phrasingTotalClicks = 0;
 let phrasingClickArr = [];
 let explicTotalClicks = 0;
@@ -171,12 +173,6 @@ function setInlinePct(el, value) {
 }
 
 
-/*
-Actually do actions upon click.
-*/
-function fireClick(type) {
-	if (DEBUG) console.log(`fireClick: click occurred in ${type}; mode is ${mode}`);
-}
 
 
 /*
@@ -202,8 +198,10 @@ function neutralizeSection(id) {
 		explicTotalClicks = 0;
 		updateExplicationWeighInValue();
 	} else {
-		genericClickArr.length = 0;
-		genericTotalClicks = 0;
+		if (sectionState[id]) {
+			sectionState[id].clickArr.length = 0;
+			sectionState[id].totalClicks = 0;
+		}
 		updateWeighInValue(id);
 	}
 }
@@ -212,12 +210,16 @@ function neutralizeSection(id) {
 Update hidden value submitted with endorse button.
 */
 function updateWeighInValue(type) {
-	var arrayAsString = "";
-	for (var i = 0; i < genericClickArr.length; i++) {
-		arrayAsString = arrayAsString + genericClickArr[i][0] + ","; 
-		arrayAsString = arrayAsString + ((genericClickArr[i][1]/genericTotalClicks)*100).toFixed(5) + ",";
+	let state = sectionState[type];
+	if (!state) return;
+	let el = document.getElementById(`${type}WeighInWith`);
+	if (!el) return;
+	let arrayAsString = "";
+	for (let i = 0; i < state.clickArr.length; i++) {
+		arrayAsString += state.clickArr[i][0] + ",";
+		arrayAsString += ((state.clickArr[i][1] / state.totalClicks) * 100).toFixed(5) + ",";
 	}
-	document.getElementById(`${type}WeighInWith`).value = arrayAsString;
+	el.value = arrayAsString;
 }
 
 
@@ -244,84 +246,63 @@ function init() {
 		containers[i].addEventListener("click", function(evt) {
 			if (DEBUG) console.log(`click: ${evt.target.nodeName} with classes ${evt.target.className} (via ${evt.currentTarget.nodeName}, ${evt.currentTarget.className})`);
 			let type = this.dataset.containerId;
-			if (type != undefined) {
-				if (evt.target.classList.contains('pointBtn')) { // don't allow the click on just any click on that panel
-					fireClick(type);
-					if (mode == 'EDIT' && inCircle(evt, evt.target)) {
-						if (type === 'phrasing') {
-							if (DEBUG) console.log(`in circle phrasing ${evt.target.parentNode.parentNode.dataset.phrasingId}`);
-							bumpPhrasing(evt.target.parentNode.parentNode.dataset.phrasingId);
-						} else if (type === 'explication') {
-							if (DEBUG) console.log(`in circle explication ${evt.target.parentNode.parentNode.dataset.explicationId}`);
-							bumpExplication(evt.target.parentNode.parentNode.dataset.explicationId);
-						} else {
-							if (DEBUG) console.log(`in circle ${evt.target.parentNode.nextElementSibling.children[0].innerHTML}`);
-							bump(type, evt.target.parentNode.parentNode.dataset.argId);
-						}
-					}
-				}
+			if (type == undefined) return;
+			if (!evt.target.classList.contains('pointBtn')) return;
+			if (!inCircle(evt, evt.target)) return;
+
+			if (type === 'phrasing') {
+				if (DEBUG) console.log(`in circle phrasing ${evt.target.parentNode.parentNode.dataset.phrasingId}`);
+				bumpPhrasing(evt.target.parentNode.parentNode.dataset.phrasingId);
+				return;
 			}
+			if (type === 'explication') {
+				if (DEBUG) console.log(`in circle explication ${evt.target.parentNode.parentNode.dataset.explicationId}`);
+				bumpExplication(evt.target.parentNode.parentNode.dataset.explicationId);
+				return;
+			}
+
+			// For because/therefore/rebuttal: check if section is unlocked
+			let lockIcon = document.querySelector(`#${type} .section-lock`);
+			if (!lockIcon || !lockIcon.classList.contains('unlocked')) return;
+
+			let state = sectionState[type];
+			if (state.mode === 'idle') {
+				// First click in this section — enter edit mode
+				state.mode = 'editing';
+				document.getElementById(type).classList.add('edit');
+				// Reveal endorse, reset, and myWeights buttons
+				let endorseEl = document.querySelector(`#${type} .endorse`);
+				let resetEl   = document.querySelector(`#${type} .reset`);
+				let myWtsEl   = document.querySelector(`#${type} .myWeights`);
+				let assertEl  = document.querySelector(`#${type} .assert`);
+				if (endorseEl) endorseEl.classList.remove('hidden');
+				if (resetEl)   resetEl.classList.remove('hidden');
+				if (myWtsEl)   myWtsEl.classList.remove('hidden');
+				if (assertEl)  assertEl.classList.remove('hidden');
+				// Reset all circle weights to zero (fresh start from scratch)
+				neutralizeSection(type);
+			}
+
+			if (DEBUG) console.log(`in circle ${evt.target.parentNode.nextElementSibling.children[0].innerHTML}`);
+			bump(type, evt.target.parentNode.parentNode.dataset.argId);
 		});
 	}
-	// Assign click handlers for weighIn buttons
-	let weighIns = document.querySelectorAll(".weighIn");
-	let typeClass = "";
-	let resetEl = null;
-	let endorseEl = null;
-	let assertEl = null;
-	limit = weighIns.length;
-	for (i = 0; i < limit; i++) {
-		weighIns[i].addEventListener("click", function(evt) {
-			let which;
-			// 1) set mode to edit, 2) toggle hidden of other buttons, 3) set all "type" circles to neutral
-			if (mode != 'EDIT') { // cold edit, use what was clicked
-				mode = 'EDIT';
-				activeEditMode = this.dataset.containerId;
-				which = this;
-				document.getElementById(`${activeEditMode}`).classList.toggle('edit');
-			} else { // warm edit, use the other click option -- this should only happen between the two editModes
-				if (this.dataset.containerId == activeEditMode) {
-					// do nothing
-					return;
-				} else { // use the other option, which should only exist for because/therefore
-					let oldEditMode = activeEditMode;
-					activeEditMode = editMode[(editMode.indexOf(oldEditMode) + 1) % 2]; // 0=> 1, 1=> 0
-					which = document.querySelector(`#${activeEditMode} .weighIn`);
-					// untoggle the last one
-					let previous = document.querySelector(`#${oldEditMode} .weighIn`);
-					previous.classList.toggle("hidden");
-					resetEl = document.querySelector(`#${oldEditMode} .reset`);
-					resetEl.classList.toggle("hidden");
-					endorseEl = document.querySelector(`#${oldEditMode} .endorse`);
-					endorseEl.classList.toggle("hidden");
-					assertEl = document.querySelector(`#${oldEditMode} .assert`);
-					assertEl.classList.toggle("hidden");
-					// clear genericClickArr
-					genericClickArr.length = 0;
-					genericTotalClicks = 0;
-					// now you can toggle the new one, continue
-				}
-			}
-			/* hide this, unhide rest and endorse */
-			which.classList.toggle("hidden");
-			resetEl = document.querySelector(`#${activeEditMode} .reset`);
-			resetEl.classList.toggle("hidden");
-			endorseEl = document.querySelector(`#${activeEditMode} .endorse`);
-			endorseEl.classList.toggle("hidden");
-			assertEl = document.querySelector(`#${activeEditMode} .assert`);
-			assertEl.classList.toggle("hidden");
-			neutralizeSection(activeEditMode);
-			// if there is data for this, set the wrappers to reflect the user's values
-			loadUserWeights(activeEditMode);
-		});
-	}
-	// reset button -- just go neutral
+	// reset button — neutralize circles and clear click state
 	let resets = document.querySelectorAll(".reset");
 	limit = resets.length;
 	for (i = 0; i < limit; i++) {
 		resets[i].addEventListener("click", function(evt) {
 			neutralizeSection(this.dataset.containerId);
-
+		});
+	}
+	// myWeights button — load the user's prior saved weights so they can refine from there
+	let myWeightsBtns = document.querySelectorAll(".myWeights");
+	limit = myWeightsBtns.length;
+	for (i = 0; i < limit; i++) {
+		myWeightsBtns[i].addEventListener("click", function(evt) {
+			let id = this.dataset.containerId;
+			neutralizeSection(id);
+			loadUserWeights(id);
 		});
 	}
 	// buttons for editing and viewing phrasing or explication with overlays
@@ -449,70 +430,55 @@ function init() {
 
 
 /*
-Retrieve weights from .wrapper, via attribute data-user-weight.
-Replace pctX_Y value with those weights and store the original in data-aggregate-weight.
+Restore user's previously-saved weights into the section's visual display and
+click-state, so they can start adjusting from their prior endorsement rather
+than from scratch.  Called by the myWeights (avatar) button.
 */
 function loadUserWeights(id) {
 	if (DEBUG) console.log(`loadUserWeights: id: ${id}`);
-	//if (mode != 'edit') {
-		// load values for editing (initial setting is editing from 0)
 	let args = document.querySelectorAll(`#${id} .lineItem`);
 	let limit = args.length;
-	let i;
-	for (i = 0; i < limit; i++) {
-		if (DEBUG) console.log(`loadUserWeights: for loop (${i.toString()} < ${limit.toString()})`);
+	for (let i = 0; i < limit; i++) {
 		let weight = parseFloat(args[i].dataset.userWeight);
-		if (DEBUG) console.log(`loadUserWeights: weight: ${weight} as ${typeof weight}`);
-		// get pct being used, store it
-		let pct = getExistingPct(args[i]);
-		//UPDATE: already stored as data attribute   args[i].setAttribute('data-aggregate-weight', pct);
-		if (weight !== 0) {
+		if (DEBUG) console.log(`loadUserWeights: item ${i} weight=${weight}`);
+		if (weight > 0) {
+			let pct = getExistingPct(args[i]);
 			let newpct = getPctClass(weight);
-			if (DEBUG) console.log(`loadUserWeights: newpct: ${newpct}`);
+			if (DEBUG) console.log(`loadUserWeights: applying ${newpct}`);
 			args[i].classList.remove("half1", "half2", pct);
-			if (weight <= 50) {
-				args[i].classList.add("half1");
-			}
-			else {
-				args[i].classList.add("half2");
-			}
-			if (DEBUG) console.log(`loadUserWeights: adding ${newpct}...`)
+			args[i].classList.add(weight <= 50 ? "half1" : "half2");
 			args[i].classList.add(newpct);
 			setInlinePct(args[i], weight);
-			//args[i].classList.replace("neutral", type);
 		}
 	}
-	if (id === 'phrasing') {
-		updatePhrasingWeighInValue();
-		return;
+
+	if (id === 'phrasing') { updatePhrasingWeighInValue(); return; }
+	if (id === 'explication') { updateExplicationWeighInValue(); return; }
+
+	// Reconstruct the click array from the user's saved weights so subsequent
+	// circle clicks adjust proportionally from the loaded baseline.
+	let rawArr;
+	switch (id) {
+		case 'because':   rawArr = because;   break;
+		case 'therefore': rawArr = therefore; break;
+		case 'rebuttal':  rawArr = rebuttal;  break;
+		default: rawArr = null;
 	}
-	if (id === 'explication') {
-		updateExplicationWeighInValue();
-		return;
+
+	if (rawArr && sectionState[id]) {
+		// Filter to items with a positive user weight; null/0 entries are skipped.
+		let weighted = rawArr.filter(row => row && row[3] != null && parseFloat(row[3]) > 0);
+		if (weighted.length > 0) {
+			let clickArr = pctToClicks(weighted, 3);
+			sectionState[id].clickArr.length = 0;
+			sectionState[id].totalClicks = 0;
+			for (let i = 0; i < clickArr.length; i++) {
+				sectionState[id].clickArr.push([clickArr[i][0], clickArr[i][1]]);
+				sectionState[id].totalClicks += clickArr[i][1];
+			}
+			if (DEBUG) console.log(`loadUserWeights: loaded ${clickArr.length} items into sectionState[${id}]`);
+		}
 	}
-	//get click values to load up generic click array
-	let arr;
-	switch(id) {
-		case 'because':
-			arr = pctToClicks(because, 3);
-			break;
-		case 'therefore':
-			arr = pctToClicks(therefore, 3);
-			break;
-		case 'rebuttal':
-			arr = pctToClicks(rebuttal, 3);
-			break;
-		default:
-			arr = [];
-	}
-	console.log(`loadUserWeights: arr: ${arr}`);
-	limit = arr.length;
-	for (i = 0; i < limit; i++) {
-		genericClickArr.push([(arr[i][0]),(arr[i][1])]);
-		genericTotalClicks = genericTotalClicks + arr[i][1];
-	}
-	console.log(`loadUserWeights: genericClickArr: ${genericClickArr}`);
-	console.log(`loadUserWeights: genericTotalClicks: ${genericTotalClicks}`);
 	updateWeighInValue(id);
 }
 
@@ -552,92 +518,43 @@ function displayUserEndorsements(id) {
 }
 
 /*
-Docs TBD
+Record a click on argID within the given section type and update the display.
+Uses per-section sectionState to prevent cross-section contamination.
 */
 function bump(type, argID) {
-	let found = false;
-	let iterator = 0;
-	let rateAsString;
-	let element;
+	let state = sectionState[type];
+	if (!state) return;
 
-	function getValueFrom2DArray(array, key) {
-		let returnval = 0;
-		for (let i=0; i < array.length; i++) {
-			if (array[i][0] == key) {
-				return array[i][1]; // this can't be zero
+	state.totalClicks++;
+	let ndx = state.clickArr.findIndex((tuple) => tuple[0] == argID);
+	if (ndx >= 0) {
+		state.clickArr[ndx][1] += 1;
+	} else {
+		state.clickArr.push([argID, 1]);
+	}
+
+	let args = document.querySelectorAll(`#${type} .lineItem`);
+	let limit = args.length;
+	for (let i = 0; i < limit; i++) {
+		let value = 0;
+		for (let j = 0; j < state.clickArr.length; j++) {
+			if (state.clickArr[j][0] == args[i].dataset.argId) {
+				value = state.clickArr[j][1];
+				break;
 			}
 		}
-		return returnval; // this is zero
-	}
-
-// increment genericTotalClicks because a click has happened
-	genericTotalClicks++;
-//	if (genericClickArr.some(row => row.includes(argID))) { // this one shows if something exists
-	let ndx = genericClickArr.findIndex((tuple) => tuple[0] == argID); // this returns the index of something that exists or -1 if it doesn't
-	if (ndx >= 0) { // found
-		// go through the type's lineItems and do that stuff below
-		genericClickArr[ndx][1] += 1;
-	} else { // argID not in genericClickArr, so add its initial state
-		genericClickArr.push([argID, 1]);
-	}
-	// now genericClickArr reflects reality, so update display
-	let args = document.querySelectorAll(`#${type} .lineItem`);
-	let i;
-	let limit = args.length;
-	for (i = 0; i < limit; i++) {
-		// for every argID in our panel, if it's in genericClickArr, update its display
-		let value = getValueFrom2DArray(genericClickArr, args[i].dataset.argId);
 		if (value > 0) {
-			// update
-			let rate = (value/genericTotalClicks) * 100;
+			let rate = (value / state.totalClicks) * 100;
 			let pct = getExistingPct(args[i]);
 			let newpct = getPctClass(rate);
 			args[i].classList.remove("half1", "half2", pct);
-			if (rate <= 50) {
-				args[i].classList.add("half1");
-			} else {
-				args[i].classList.add("half2");
-			}
-			if (DEBUG) console.log(`bump: adding ${newpct}...`)
+			args[i].classList.add(rate <= 50 ? "half1" : "half2");
+			if (DEBUG) console.log(`bump: adding ${newpct}...`);
 			args[i].classList.add(newpct);
 			setInlinePct(args[i], rate);
 		}
 	}
-/*
-	while (!found && iterator < genericClickArr.length) {
-		if (genericClickArr[iterator][0] == argID) {
-			found = true;
-			genericClickArr[iterator][1]++;
-		}
-		iterator++;
-	}
-	if (found == false) {
-		genericClickArr.push([argID, 1]);
-	}
-	for (let i = 0, limit = genericClickArr.length; i < limit; i++) {
-		let args = document.querySelectorAll(`#${type} .lineItem`);
-		let sublimit = args.length;
-		let j;
-		for (j = 0; j < sublimit; j++) {
-			if (args[j].dataset.argId == genericClickArr[i][0]) {
-				rateAsString = ((genericClickArr[i][1]/genericTotalClicks)*100).toFixed(2);
-				let pct = getExistingPct(args[j]);
-				let newpct = getPctClass((genericClickArr[i][1]/genericTotalClicks)*100);
-				args[j].classList.remove("half1", "half2", pct);
-				if (((genericClickArr[i][1]/genericTotalClicks)*100) <= 50) {
-					args[j].classList.add("half1");
-				}
-				else {
-					args[j].classList.add("half2");
-				}	
-				if (DEBUG) console.log(`loadUserWeights: adding ${newpct}...`)
-				args[j].classList.add(newpct);
-				setInlinePct(args[j], rateAsString);
-			}
-		}
-	}
-*/
-	console.log(genericClickArr);
+	if (DEBUG) console.log(`bump: sectionState[${type}].clickArr`, state.clickArr);
 	updateWeighInValue(type);
 }
 

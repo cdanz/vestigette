@@ -78,12 +78,6 @@ function generateTypeLines($type, $typeArray) {
 	if (sizeof($typeArray) > 0) {
 		echo "<ul>\n";
 		foreach ($typeArray as $line) {
-			if (isset($_SESSION['profile']) AND ($opinion != 0)) {
-				if ((($type == "rebuttal") AND ($opinion < 0)) OR (($type != "rebuttal") AND ($opinion > 0))) {
-					$onClick = "onclick=\"firstClick" . ucfirst($type) . "(" . $line[0] . ")\"";
-				}
-			}
-unset($onClick);
 			if ($line[1] <= 50) {
 				$half = "half1";
 			} else {
@@ -223,15 +217,14 @@ function generateFindLines($results) {
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<link rel="stylesheet" href="style_vestigette.css?v=<?php echo filemtime($_SERVER['DOCUMENT_ROOT'].'/style_vestigette.css'); ?>" />
 		<script language="javascript" src="script_vestigette.js?v=<?php echo filemtime($_SERVER['DOCUMENT_ROOT'].'/script_vestigette.js'); ?>"></script>
-		<!--<script language="javascript">
-			let arg = <?php echo isset($arg) ? $arg : 'undefined'; ?>,
-				profile = <?php echo isset($profile) ? $profile : 'undefined'; ?>,
-				opinion = <?php echo isset($opinion) ? $opinion : 'undefined'; ?>,
-				assoc = <?php echo isset($assocWeights) ? "JSON.parse(" + $assocWeights + ")" : 'undefined'; ?>
-				because = <?php echo json_encode($because); ?>,
-				therefore = <?php echo json_encode($therefore); ?>,
-				rebuttal = <?php echo json_encode($rebuttal); ?>;
-		</script>-->
+		<script>
+			let arg = <?php echo isset($arg) ? intval($arg) : 'null'; ?>,
+				profile = <?php echo isset($profile) ? intval($profile) : 'null'; ?>,
+				opinion = <?php echo isset($opinion) ? intval($opinion) : 'null'; ?>,
+				because = <?php echo json_encode(isset($because) ? $because : null); ?>,
+				therefore = <?php echo json_encode(isset($therefore) ? $therefore : null); ?>,
+				rebuttal = <?php echo json_encode(isset($rebuttal) ? $rebuttal : null); ?>;
+		</script>
 		<!-- Global site tag (gtag.js) - Google Analytics -->
 		<script async src="https://www.googletagmanager.com/gtag/js?id=G-38LM87XMGN"></script>
 		<script>
@@ -259,21 +252,27 @@ function generateFindLines($results) {
 		<div id="because" class="accordion container">
 			<h2>Because</h2>
 <?php
-if ((isset($opinion)) && ($opinion > 0)) { 
+$canWeightBecause = isset($opinion) && ($opinion > 0);
 ?>
 	<div class="buttons">
-		<button class="button reset hidden" name="buttonClicked" value="weighBecause" data-container-id="because"><span>&#x27F2;</span></button>
+<?php if ($canWeightBecause): ?>
+		<span class="section-lock unlocked" title="Because is unlocked — click a circle to start weighting">&#x1F513;</span>
+		<button class="button myWeights hidden" data-container-id="because" title="Load my previous weights">
+			<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="18" height="18" aria-hidden="true">
+				<circle cx="12" cy="8" r="4"/>
+				<path d="M4 20c0-3.866 3.582-7 8-7s8 3.134 8 7" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round"/>
+			</svg>
+		</button>
+		<button class="button reset hidden" data-container-id="because"><span>&#x27F2;</span></button>
 		<form method="POST" accept-charset="utf-8">
 			<button type="submit" class="button endorse hidden" name="buttonClicked" value="weighBecause" data-container-id="because">Endorse</button>
-<!-- This hidden field has its value updated with an array as a string serving as the "weigh in" input -->
 			<input type="hidden" name="becauseWeighInWith" id="becauseWeighInWith" value="" />
 			<?php addCSRFtoken() ?>
 		</form>
-		<button class="button weighIn" data-container-id="because">Weigh In</button>
+<?php else: ?>
+		<span class="section-lock locked" title="Accept the argument to weight this section">&#x1F512;</span>
+<?php endif; ?>
 	</div>
-<?php
-} 
-?>
 			<div class="panel" data-container-id="because">
 <?php
 if (isset($because)) {
@@ -368,21 +367,27 @@ if (isset($links[0][3]) && $links[0][3] !== '') {
 		<div id="rebuttal" class="accordion container">
 			<h2>Rebuttal</h2>
 <?php
-if ((isset($opinion)) && ($opinion < 0)) { 
+$canWeightRebuttal = isset($opinion) && ($opinion < 0);
 ?>
 	<div class="buttons">
-		<button class="button reset hidden" name="buttonClicked" value="weighRebuttal" data-container-id="rebuttal"><span>&#x27F2;</span></button>
+<?php if ($canWeightRebuttal): ?>
+		<span class="section-lock unlocked" title="Rebuttal is unlocked — click a circle to start weighting">&#x1F513;</span>
+		<button class="button myWeights hidden" data-container-id="rebuttal" title="Load my previous weights">
+			<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="18" height="18" aria-hidden="true">
+				<circle cx="12" cy="8" r="4"/>
+				<path d="M4 20c0-3.866 3.582-7 8-7s8 3.134 8 7" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round"/>
+			</svg>
+		</button>
+		<button class="button reset hidden" data-container-id="rebuttal"><span>&#x27F2;</span></button>
 		<form method="POST" accept-charset="utf-8">
 			<button type="submit" class="button endorse hidden" name="buttonClicked" value="weighRebuttal" data-container-id="rebuttal">Endorse</button>
-<!-- This hidden field has its value updated with an array as a string serving as the "weigh in" input -->
 			<input type="hidden" name="rebuttalWeighInWith" id="rebuttalWeighInWith" value="" />
 			<?php addCSRFtoken() ?>
 		</form>
-		<button class="button weighIn" data-container-id="rebuttal">Weigh In</button>
+<?php else: ?>
+		<span class="section-lock locked" title="Reject the argument to weight this section">&#x1F512;</span>
+<?php endif; ?>
 	</div>
-<?php
-} 
-?>
 			<div class="panel" data-container-id="rebuttal">
 <?php
 if (isset($rebuttal)) {
@@ -412,21 +417,27 @@ else {
 		<div id="therefore" class="accordion container">
 			<h2>Therefore</h2>
 <?php
-if ((isset($opinion)) && ($opinion > 0)) { 
+$canWeightTherefore = isset($opinion) && ($opinion > 0);
 ?>
 	<div class="buttons">
-		<button class="button reset hidden" name="buttonClicked" value="weighTherefore" data-container-id="therefore"><span>&#x27F2;</span></button>
+<?php if ($canWeightTherefore): ?>
+		<span class="section-lock unlocked" title="Therefore is unlocked — click a circle to start weighting">&#x1F513;</span>
+		<button class="button myWeights hidden" data-container-id="therefore" title="Load my previous weights">
+			<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="18" height="18" aria-hidden="true">
+				<circle cx="12" cy="8" r="4"/>
+				<path d="M4 20c0-3.866 3.582-7 8-7s8 3.134 8 7" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round"/>
+			</svg>
+		</button>
+		<button class="button reset hidden" data-container-id="therefore"><span>&#x27F2;</span></button>
 		<form method="POST" accept-charset="utf-8">
 			<button type="submit" class="button endorse hidden" name="buttonClicked" value="weighTherefore" data-container-id="therefore">Endorse</button>
-<!-- This hidden field has its value updated with an array as a string serving as the "weigh in" input -->
 			<input type="hidden" name="thereforeWeighInWith" id="thereforeWeighInWith" value="" />
 			<?php addCSRFtoken() ?>
 		</form>
-		<button class="button weighIn" data-container-id="therefore">Weigh In</button>
+<?php else: ?>
+		<span class="section-lock locked" title="Accept the argument to weight this section">&#x1F512;</span>
+<?php endif; ?>
 	</div>
-<?php
-} 
-?>
 			<div class="panel" data-container-id="therefore">
 <?php
 	if (isset($therefore)) {

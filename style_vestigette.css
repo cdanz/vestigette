@@ -175,6 +175,31 @@ TODO: Let's not forget to genericize these buttons to apply to more than just #b
 	background-color: var(--cddbWhite);
 	color: var(--cddbGreen);
 }
+/* Lock/unlock indicator icon next to section heading */
+.section-lock {
+	font-size: 1.1rem;
+	line-height: 1;
+	margin-right: 0.4rem;
+	flex: none;
+}
+.section-lock.locked {
+	opacity: 0.55;
+}
+/* Avatar (profile) button to restore user's saved weights */
+#because button.myWeights,
+#rebuttal button.myWeights,
+#therefore button.myWeights {
+	align-items: center;
+	display: flex;
+	justify-content: center;
+	padding: 0.15rem 0.3rem;
+	width: 2.2rem;
+}
+#because button.myWeights,
+#rebuttal button.myWeights,
+#therefore button.myWeights {
+	margin-left: 0;
+}
 #because button.reset,
 #rebuttal button.reset,
 #therefore button.reset {
