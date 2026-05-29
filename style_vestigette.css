@@ -388,7 +388,9 @@ button.hidden {
 }
 #because .buttons,
 #rebuttal .buttons,
-#therefore .buttons {
+#therefore .buttons,
+#phrasing .buttons,
+#explication .buttons {
 	gap: 0.4rem;
 }
 #because form,

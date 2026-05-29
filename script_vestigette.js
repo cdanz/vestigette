@@ -53,9 +53,11 @@ let pctRE = /pct\d+\_\d/;
 // Per-section state replaces the old shared genericClickArr/genericTotalClicks.
 // Each section tracks its own clicks independently to prevent cross-contamination.
 const sectionState = {
-	because:   { mode: 'idle', clickArr: [], totalClicks: 0 },
-	therefore: { mode: 'idle', clickArr: [], totalClicks: 0 },
-	rebuttal:  { mode: 'idle', clickArr: [], totalClicks: 0 }
+	because:     { mode: 'idle', clickArr: [], totalClicks: 0 },
+	therefore:   { mode: 'idle', clickArr: [], totalClicks: 0 },
+	rebuttal:    { mode: 'idle', clickArr: [], totalClicks: 0 },
+	phrasing:    { mode: 'idle' },
+	explication: { mode: 'idle' }
 };
 let phrasingTotalClicks = 0;
 let phrasingClickArr = [];
@@ -252,11 +254,29 @@ function init() {
 
 			if (type === 'phrasing') {
 				if (DEBUG) console.log(`in circle phrasing ${evt.target.parentNode.parentNode.dataset.phrasingId}`);
+				if (sectionState.phrasing.mode === 'idle') {
+					sectionState.phrasing.mode = 'editing';
+					document.getElementById('phrasing').classList.add('edit');
+					let endorseEl = document.querySelector('#phrasing .endorse');
+					let resetEl   = document.querySelector('#phrasing .reset');
+					if (endorseEl) endorseEl.classList.remove('hidden');
+					if (resetEl)   resetEl.classList.remove('hidden');
+					neutralizeSection('phrasing');
+				}
 				bumpPhrasing(evt.target.parentNode.parentNode.dataset.phrasingId);
 				return;
 			}
 			if (type === 'explication') {
 				if (DEBUG) console.log(`in circle explication ${evt.target.parentNode.parentNode.dataset.explicationId}`);
+				if (sectionState.explication.mode === 'idle') {
+					sectionState.explication.mode = 'editing';
+					document.getElementById('explication').classList.add('edit');
+					let endorseEl = document.querySelector('#explication .endorse');
+					let resetEl   = document.querySelector('#explication .reset');
+					if (endorseEl) endorseEl.classList.remove('hidden');
+					if (resetEl)   resetEl.classList.remove('hidden');
+					neutralizeSection('explication');
+				}
 				bumpExplication(evt.target.parentNode.parentNode.dataset.explicationId);
 				return;
 			}

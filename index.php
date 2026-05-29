@@ -116,10 +116,8 @@ function generatePhrasingLines($alts) {
             // $line[2] = phrasing text
             // $line[3] = phrasingID
             
-                    // Calculate percentage for display
-            $totalWeight = isset($line[0]) ? floatval($line[0]) : 0;
-            $maxWeight = 100;
-            $percentage = $maxWeight > 0 ? ($totalWeight / $maxWeight) * 100 : 0;
+                    // avgWeight is already a 0-100 value (SUM/endorserCount from SQL)
+            $percentage = isset($line[0]) ? floatval($line[0]) : 0;
 
             if ($percentage <= 50) {
                 $half = "half1";
@@ -155,9 +153,8 @@ function generateLinkLines($links) {
 			// $line[0] = totalWeight, [1] = endorsementCount, [2] = explicationID
 			// [3] = hyperlink, [4] = publisher, [5] = authorFName, [6] = authorLName, [7] = title
 			if ($line[3] === NULL) continue;
-			$totalWeight = isset($line[0]) ? floatval($line[0]) : 0;
-			$maxWeight = 100;
-			$percentage = $maxWeight > 0 ? ($totalWeight / $maxWeight) * 100 : 0;
+			// avgWeight is already a 0-100 value (SUM/endorserCount from SQL)
+			$percentage = isset($line[0]) ? floatval($line[0]) : 0;
 			$half = $percentage <= 50 ? "half1" : "half2";
 			$pct = strval(number_format($percentage, 1, '_', ''));
 			$userWeight = 0;
@@ -562,16 +559,15 @@ if (isset($recent)) {
 if ((isset($opinion)) && ($opinion > 0)) { 
 ?>
         <div class="buttons">
-            <button class="button reset hidden" name="buttonClicked" value="weighPhrasing" data-container-id="phrasing">&#x27F2;</button>
             <form method="POST" accept-charset="utf-8">
                 <button type="submit" class="button endorse hidden" name="buttonClicked" value="weighPhrasing" data-container-id="phrasing">Endorse</button>
                 <input type="hidden" name="phrasingWeighInWith" id="phrasingWeighInWith" value="" />
                 <?php addCSRFtoken() ?>
             </form>
-            <button class="button weighIn" data-container-id="phrasing">Weigh In</button>
+            <button class="button reset hidden" data-container-id="phrasing">&#x27F2;</button>
         </div>
 <?php
-} 
+}
 ?>
         <div class="panel expanded" data-container-id="phrasing">
 <?php
@@ -580,9 +576,9 @@ if ((isset($opinion)) && ($opinion > 0)) {
     }
 ?>
 <?php
-if ((isset($opinion)) && ($opinion > 0)) { 
+if ((isset($opinion)) && ($opinion > 0)) {
 ?>
-            <div class="assert hidden">
+            <div class="assert">
                 <form class="form-inline" method="POST" accept-charset="utf-8">
                     <input type="text" placeholder="Better said..." name="newPutForth">
                     <button type="submit" class="button addNew" name="buttonClicked" value="newPutForth">Introduce</button>
@@ -606,13 +602,12 @@ if ((isset($opinion)) && ($opinion > 0)) {
 if ((isset($opinion)) && ($opinion > 0)) {
 ?>
 				<div class="buttons">
-					<button class="button reset hidden" name="buttonClicked" value="weighExplication" data-container-id="explication">&#x27F2;</button>
 					<form method="POST" accept-charset="utf-8">
 						<button type="submit" class="button endorse hidden" name="buttonClicked" value="weighExplication" data-container-id="explication">Endorse</button>
 						<input type="hidden" name="explicWeighInWith" id="explicWeighInWith" value="" />
 						<?php addCSRFtoken() ?>
 					</form>
-					<button class="button weighIn" data-container-id="explication">Weigh In</button>
+					<button class="button reset hidden" data-container-id="explication">&#x27F2;</button>
 				</div>
 <?php
 }
@@ -627,7 +622,7 @@ if ((isset($opinion)) && ($opinion > 0)) {
 <?php
 if ((isset($opinion)) && ($opinion > 0)) {
 ?>
-						<div class="assert hidden">
+						<div class="assert">
 							<form class="form-inline" method="POST" accept-charset="utf-8">
 								<input type="text" placeholder="Link a study, article, chart, meme, anything that expands upon or illuminates the argument" name="promoteExplication">
 								<button type="submit" class="button addNew" name="buttonClicked" value="promoteExplication">Introduce</button>
