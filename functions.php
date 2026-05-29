@@ -231,9 +231,28 @@
             	break;
 
             case "newPutForth":
-            	$phrased = mysqli_real_escape_string($db,trim($_POST["newPutForth"]));
+            	$phrased = trim($_POST["newPutForth"] ?? '');
+            	// Server-side validation: must be human-readable text, not a URL or HTML
+            	$phrasingError = null;
+            	if (strlen($phrased) < 5) {
+            		$phrasingError = 'Phrasing is too short — write it out as a complete sentence.';
+            	} elseif (strlen($phrased) > 300) {
+            		$phrasingError = 'Phrasing must be 300 characters or less.';
+            	} elseif (preg_match('#^https?://#i', $phrased) || preg_match('#^www\.#i', $phrased)) {
+            		$phrasingError = 'Phrasings should be human-readable text, not a URL. Use the Explication section to add links.';
+            	} elseif (preg_match('/<[a-zA-Z][\s\S]*>/u', $phrased)) {
+            		$phrasingError = 'HTML tags are not allowed in phrasings.';
+            	} elseif (!preg_match('/[a-zA-Z\x{00C0}-\x{024F}]/u', $phrased)) {
+            		$phrasingError = 'Phrasings must contain readable text with letters.';
+            	}
+            	if ($phrasingError) {
+            		$_SESSION['formError'] = $phrasingError;
+            		header('Location: /index.php?arg='.$_SESSION['currentArg']);
+            		exit;
+            	}
 	            $argAtHand = intval($_SESSION['currentArg']);
 	            $profileID = intval($_SESSION['profile']);
+	            $phrased = mysqli_real_escape_string($db, $phrased);
 	            $query = "CALL newPutForth(".$argAtHand.",".$profileID.",\"".$phrased."\");";
 
 				/*Execute queries */
@@ -279,7 +298,13 @@
 
 	            //Promote explication TODO Sucks because just pushing the full link string when should have a int key
 	        case "promoteExplication":
-	        	$explicationLink = $_POST["promoteExplication"];
+	        	$explicationLink = trim($_POST["promoteExplication"] ?? '');
+	        	// Server-side validation: must be a valid http/https URL
+	        	if (!preg_match('#^https?://#i', $explicationLink) || !filter_var($explicationLink, FILTER_VALIDATE_URL)) {
+	        		$_SESSION['formError'] = 'Explications must be a valid URL starting with https:// or http://';
+	        		header('Location: /index.php?arg='.$_SESSION['currentArg']);
+	        		exit;
+	        	}
 
 	            $argAtHand = intval($_SESSION['currentArg']);
 	            $profileID = intval($_SESSION['profile']);

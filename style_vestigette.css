@@ -765,9 +765,26 @@ body.flesh-out-page .flesh-footer button:hover:not(:disabled) {
 	border-top: 2px var(--cddbLiteGrey) solid;
 	color: var(--cddbBlack);
 	display: flex;
-	flex-flow: row nowrap;
+	flex-flow: row wrap;
 	justify-content: flex-start;
 	min-height: 4rem;
+	width: 100%;
+}
+.validation-error {
+	color: var(--cddbRed);
+	font-size: 0.8rem;
+	padding: 0.15rem 0.4rem 0.3rem;
+	width: 100%;
+}
+.validation-error.hidden {
+	display: none;
+}
+.form-error-banner {
+	background-color: var(--cddbRed);
+	color: var(--cddbWhite);
+	font-size: 0.9rem;
+	padding: 0.5rem 1rem;
+	text-align: center;
 	width: 100%;
 }
 .assert input[type=text] {

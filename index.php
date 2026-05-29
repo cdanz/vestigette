@@ -233,6 +233,12 @@ function generateFindLines($results) {
 	</head>
 	<body>
 
+<?php if (!empty($_SESSION['formError'])): ?>
+		<div class="form-error-banner" role="alert">
+			<?php echo htmlspecialchars($_SESSION['formError']); unset($_SESSION['formError']); ?>
+		</div>
+<?php endif; ?>
+
 		<div id="mastHead" class="container">
 			<h1><a href="index.php?arg=<?php echo $_SESSION['currentArg'];?>">AGITATE</a></h1>
 			<div>
@@ -580,10 +586,11 @@ if ((isset($opinion)) && ($opinion > 0)) {
 ?>
             <div class="assert">
                 <form class="form-inline" method="POST" accept-charset="utf-8">
-                    <input type="text" placeholder="Better said..." name="newPutForth">
+                    <input type="text" id="newPutForthInput" placeholder="Better said..." name="newPutForth" maxlength="300">
                     <button type="submit" class="button addNew" name="buttonClicked" value="newPutForth">Introduce</button>
                     <?php addCSRFtoken() ?>
                 </form>
+                <span id="phrasingError" class="validation-error hidden" role="alert"></span>
             </div>
 <?php
 } 
@@ -624,10 +631,11 @@ if ((isset($opinion)) && ($opinion > 0)) {
 ?>
 						<div class="assert">
 							<form class="form-inline" method="POST" accept-charset="utf-8">
-								<input type="text" placeholder="Link a study, article, chart, meme, anything that expands upon or illuminates the argument" name="promoteExplication">
+								<input type="text" id="promoteExplicationInput" placeholder="https://... a study, article, chart, or anything that expands upon the argument" name="promoteExplication">
 								<button type="submit" class="button addNew" name="buttonClicked" value="promoteExplication">Introduce</button>
 								<?php addCSRFtoken() ?>
 							</form>
+							<span id="explicError" class="validation-error hidden" role="alert"></span>
 						</div>
 <?php
 }

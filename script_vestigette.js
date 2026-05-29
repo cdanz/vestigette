@@ -386,7 +386,86 @@ function init() {
 	}
 
 
-	// Find sub-section toggles
+	// ─── Form validation helpers ────────────────────────────────────────────────
+	function showValidationError(el, msg) {
+		el.textContent = msg;
+		el.classList.remove('hidden');
+	}
+	function clearValidationError(el) {
+		el.textContent = '';
+		el.classList.add('hidden');
+	}
+	// True if the string looks like a URL rather than human prose
+	function isLikelyUrl(str) {
+		if (/^https?:\/\//i.test(str)) return true;  // explicit protocol
+		if (/^www\./i.test(str))        return true;  // www. prefix
+		// No spaces + contains a dot + ends or continues like a path → bare domain
+		if (!/\s/.test(str) && /\.[a-z]{2,}(\/|$)/i.test(str)) return true;
+		return false;
+	}
+	function containsHtml(str) {
+		return /<[a-zA-Z][^>]*>/i.test(str);
+	}
+	function hasLetters(str) {
+		return /[a-zA-ZÀ-ɏ]/.test(str);
+	}
+
+	// ─── Phrasing form ───────────────────────────────────────────────────────
+	let phrasingForm  = document.querySelector('#phrasing .assert form');
+	let phrasingInput = document.getElementById('newPutForthInput');
+	let phrasingError = document.getElementById('phrasingError');
+
+	if (phrasingForm && phrasingInput && phrasingError) {
+		phrasingForm.addEventListener('submit', function(evt) {
+			let val = phrasingInput.value.trim();
+			clearValidationError(phrasingError);
+			if (!val || val.length < 5) {
+				evt.preventDefault();
+				showValidationError(phrasingError, 'Too short — write it out as a complete sentence.');
+			} else if (val.length > 300) {
+				evt.preventDefault();
+				showValidationError(phrasingError, 'Phrasing must be 300 characters or less.');
+			} else if (isLikelyUrl(val)) {
+				evt.preventDefault();
+				showValidationError(phrasingError, 'Phrasings should be readable text, not a URL. Add links in the Explication section.');
+			} else if (containsHtml(val)) {
+				evt.preventDefault();
+				showValidationError(phrasingError, 'HTML tags are not allowed in phrasings.');
+			} else if (!hasLetters(val)) {
+				evt.preventDefault();
+				showValidationError(phrasingError, 'Phrasings must contain readable text with letters.');
+			}
+		});
+		phrasingInput.addEventListener('input', function() { clearValidationError(phrasingError); });
+	}
+
+	// ─── Explication form ────────────────────────────────────────────────────
+	let explicForm  = document.querySelector('#explication .assert form');
+	let explicInput = document.getElementById('promoteExplicationInput');
+	let explicError = document.getElementById('explicError');
+
+	if (explicForm && explicInput && explicError) {
+		explicForm.addEventListener('submit', function(evt) {
+			let val = explicInput.value.trim();
+			clearValidationError(explicError);
+			if (!val) {
+				evt.preventDefault();
+				showValidationError(explicError, 'Please enter a URL.');
+			} else if (!/^https?:\/\//i.test(val)) {
+				evt.preventDefault();
+				showValidationError(explicError, 'Must be a full URL starting with https:// or http://');
+			} else {
+				try { new URL(val); }
+				catch(e) {
+					evt.preventDefault();
+					showValidationError(explicError, 'That doesn\'t look like a valid URL.');
+				}
+			}
+		});
+		explicInput.addEventListener('input', function() { clearValidationError(explicError); });
+	}
+
+	// ─── Find sub-section toggles ────────────────────────────────────────────
 	document.querySelectorAll('.find-toggle').forEach(function(toggle) {
 		toggle.addEventListener('click', function() {
 			let content = this.nextElementSibling;
