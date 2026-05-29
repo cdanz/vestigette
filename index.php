@@ -256,7 +256,12 @@ $canWeightBecause = isset($opinion) && ($opinion > 0);
 ?>
 	<div class="buttons">
 <?php if ($canWeightBecause): ?>
-		<span class="section-lock unlocked" title="Because is unlocked — click a circle to start weighting">&#x1F513;</span>
+		<span class="section-lock unlocked" title="Because is unlocked — click a circle to start weighting">
+			<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+				<rect x="3" y="11" width="18" height="12" rx="2.5" fill="white"/>
+				<path d="M7 12V8a5 5 0 0 1 10 0V3" fill="none" stroke="white" stroke-width="3" stroke-linecap="round"/>
+			</svg>
+		</span>
 		<button class="button myWeights hidden" data-container-id="because" title="Load my previous weights">
 			<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="18" height="18" aria-hidden="true">
 				<circle cx="12" cy="8" r="4"/>
@@ -270,7 +275,12 @@ $canWeightBecause = isset($opinion) && ($opinion > 0);
 			<?php addCSRFtoken() ?>
 		</form>
 <?php else: ?>
-		<span class="section-lock locked" title="Accept the argument to weight this section">&#x1F512;</span>
+		<span class="section-lock locked" title="Accept the argument to weight this section">
+			<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+				<rect x="3" y="11" width="18" height="12" rx="2.5" fill="white"/>
+				<path d="M7 12V8a5 5 0 0 1 10 0v4" fill="none" stroke="white" stroke-width="3" stroke-linecap="round"/>
+			</svg>
+		</span>
 <?php endif; ?>
 	</div>
 			<div class="panel" data-container-id="because">
@@ -371,7 +381,12 @@ $canWeightRebuttal = isset($opinion) && ($opinion < 0);
 ?>
 	<div class="buttons">
 <?php if ($canWeightRebuttal): ?>
-		<span class="section-lock unlocked" title="Rebuttal is unlocked — click a circle to start weighting">&#x1F513;</span>
+		<span class="section-lock unlocked" title="Rebuttal is unlocked — click a circle to start weighting">
+			<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+				<rect x="3" y="11" width="18" height="12" rx="2.5" fill="white"/>
+				<path d="M7 12V8a5 5 0 0 1 10 0V3" fill="none" stroke="white" stroke-width="3" stroke-linecap="round"/>
+			</svg>
+		</span>
 		<button class="button myWeights hidden" data-container-id="rebuttal" title="Load my previous weights">
 			<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="18" height="18" aria-hidden="true">
 				<circle cx="12" cy="8" r="4"/>
@@ -385,7 +400,12 @@ $canWeightRebuttal = isset($opinion) && ($opinion < 0);
 			<?php addCSRFtoken() ?>
 		</form>
 <?php else: ?>
-		<span class="section-lock locked" title="Reject the argument to weight this section">&#x1F512;</span>
+		<span class="section-lock locked" title="Reject the argument to weight this section">
+			<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+				<rect x="3" y="11" width="18" height="12" rx="2.5" fill="white"/>
+				<path d="M7 12V8a5 5 0 0 1 10 0v4" fill="none" stroke="white" stroke-width="3" stroke-linecap="round"/>
+			</svg>
+		</span>
 <?php endif; ?>
 	</div>
 			<div class="panel" data-container-id="rebuttal">
@@ -421,7 +441,12 @@ $canWeightTherefore = isset($opinion) && ($opinion > 0);
 ?>
 	<div class="buttons">
 <?php if ($canWeightTherefore): ?>
-		<span class="section-lock unlocked" title="Therefore is unlocked — click a circle to start weighting">&#x1F513;</span>
+		<span class="section-lock unlocked" title="Therefore is unlocked — click a circle to start weighting">
+			<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+				<rect x="3" y="11" width="18" height="12" rx="2.5" fill="white"/>
+				<path d="M7 12V8a5 5 0 0 1 10 0V3" fill="none" stroke="white" stroke-width="3" stroke-linecap="round"/>
+			</svg>
+		</span>
 		<button class="button myWeights hidden" data-container-id="therefore" title="Load my previous weights">
 			<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="18" height="18" aria-hidden="true">
 				<circle cx="12" cy="8" r="4"/>
@@ -435,7 +460,12 @@ $canWeightTherefore = isset($opinion) && ($opinion > 0);
 			<?php addCSRFtoken() ?>
 		</form>
 <?php else: ?>
-		<span class="section-lock locked" title="Accept the argument to weight this section">&#x1F512;</span>
+		<span class="section-lock locked" title="Accept the argument to weight this section">
+			<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+				<rect x="3" y="11" width="18" height="12" rx="2.5" fill="white"/>
+				<path d="M7 12V8a5 5 0 0 1 10 0v4" fill="none" stroke="white" stroke-width="3" stroke-linecap="round"/>
+			</svg>
+		</span>
 <?php endif; ?>
 	</div>
 			<div class="panel" data-container-id="therefore">

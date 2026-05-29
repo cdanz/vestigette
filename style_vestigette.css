@@ -177,13 +177,13 @@ TODO: Let's not forget to genericize these buttons to apply to more than just #b
 }
 /* Lock/unlock indicator icon next to section heading */
 .section-lock {
-	font-size: 1.1rem;
-	line-height: 1;
-	margin-right: 0.4rem;
+	align-items: center;
+	display: flex;
 	flex: none;
+	margin-right: 0.4rem;
 }
 .section-lock.locked {
-	opacity: 0.55;
+	opacity: 0.45;
 }
 /* Avatar (profile) button to restore user's saved weights */
 #because button.myWeights,
