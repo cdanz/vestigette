@@ -587,6 +587,8 @@ body.checkpoint-page #checkpoint .panel.expanded {
 #because  .bulk-add-btn { background-color: var(--cddbBlue);  border-color: var(--cddbBlue); }
 #rebuttal .bulk-add-btn { background-color: var(--cddbRed);   border-color: var(--cddbRed); }
 #therefore .bulk-add-btn { background-color: var(--cddbGreen); border-color: var(--cddbGreen); }
+.bulk-add-btn:link,
+.bulk-add-btn:visited { color: var(--cddbWhite); }
 #because  .bulk-add-btn:hover { background-color: var(--cddbWhite); color: var(--cddbBlue); }
 #rebuttal .bulk-add-btn:hover { background-color: var(--cddbWhite); color: var(--cddbRed); }
 #therefore .bulk-add-btn:hover { background-color: var(--cddbWhite); color: var(--cddbGreen); }
