@@ -567,15 +567,29 @@ body.checkpoint-page #checkpoint .panel.expanded {
 .bulk-add-bar {
 	border-top: 2px var(--cddbLiteGrey) solid;
 	display: flex;
-	justify-content: flex-end;
-	padding: 0.4rem 0.5rem;
+	justify-content: center;
+	padding: 0.6rem 0.5rem;
 }
 .bulk-add-btn {
-	font-size: 0.85rem;
+	align-items: center;
+	border-radius: 0;
+	border-style: solid;
+	border-width: 0.2rem;
+	color: var(--cddbWhite);
+	cursor: pointer;
+	display: inline-flex;
+	font-weight: bold;
+	height: 2rem;
+	padding-left: 1em;
+	padding-right: 1em;
+	text-decoration: none;
 }
-#because  .bulk-add-btn { color: var(--cddbBlue); }
-#rebuttal .bulk-add-btn { color: var(--cddbRed); }
-#therefore .bulk-add-btn { color: var(--cddbGreen); }
+#because  .bulk-add-btn { background-color: var(--cddbBlue);  border-color: var(--cddbBlue); }
+#rebuttal .bulk-add-btn { background-color: var(--cddbRed);   border-color: var(--cddbRed); }
+#therefore .bulk-add-btn { background-color: var(--cddbGreen); border-color: var(--cddbGreen); }
+#because  .bulk-add-btn:hover { background-color: var(--cddbWhite); color: var(--cddbBlue); }
+#rebuttal .bulk-add-btn:hover { background-color: var(--cddbWhite); color: var(--cddbRed); }
+#therefore .bulk-add-btn:hover { background-color: var(--cddbWhite); color: var(--cddbGreen); }
 
 /* ── flesh_out.php ─────────────────────────────────────────── */
 body.flesh-out-page {

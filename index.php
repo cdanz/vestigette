@@ -297,7 +297,7 @@ else {
 ?>
 <?php if ((isset($opinion)) && ($opinion > 0)): ?>
 				<div class="bulk-add-bar">
-					<a href="/flesh_out.php?arg=<?php echo $arg; ?>&type=Because" class="button bulk-add-btn">+ Add Many</a>
+					<a href="/flesh_out.php?arg=<?php echo $arg; ?>&type=Because" class="button bulk-add-btn">+ More to Say</a>
 				</div>
 <?php endif; ?>
 			</div>
@@ -417,7 +417,7 @@ else {
 ?>
 <?php if ((isset($opinion)) && ($opinion < 0)): ?>
 				<div class="bulk-add-bar">
-					<a href="/flesh_out.php?arg=<?php echo $arg; ?>&type=Rebuttal" class="button bulk-add-btn">+ Add Many</a>
+					<a href="/flesh_out.php?arg=<?php echo $arg; ?>&type=Rebuttal" class="button bulk-add-btn">+ More to Say</a>
 				</div>
 <?php endif; ?>
 			</div>
@@ -468,7 +468,7 @@ $canWeightTherefore = isset($opinion) && ($opinion > 0);
 ?>
 <?php if ((isset($opinion)) && ($opinion > 0)): ?>
 				<div class="bulk-add-bar">
-					<a href="/flesh_out.php?arg=<?php echo $arg; ?>&type=Therefore" class="button bulk-add-btn">+ Add Many</a>
+					<a href="/flesh_out.php?arg=<?php echo $arg; ?>&type=Therefore" class="button bulk-add-btn">+ More to Say</a>
 				</div>
 <?php endif; ?>
 			</div>
