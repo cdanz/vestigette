@@ -295,15 +295,6 @@ else {
 	echo "No Results - Accept the argument to be the first to endorse";
 }
 ?>
-				<div class="assert hidden">
-					<form class="form-inline" method="POST" action="checkpoint.php" accept-charset="utf-8">
-						<label for="assertion">Add Unique:</label>
-						<input type="text" placeholder="An assertion not yet listed here" name="assertion">
-						<input type="hidden" name="type" value="Because" />
-						<button type="submit" class="button addNew" name="buttonClicked" value="addAssertion" data-container-id="because">Submit</button>
-						<?php addCSRFtoken() ?>
-					</form>
-				</div>
 <?php if ((isset($opinion)) && ($opinion > 0)): ?>
 				<div class="bulk-add-bar">
 					<a href="/flesh_out.php?arg=<?php echo $arg; ?>&type=Because" class="button bulk-add-btn">+ Add Many</a>
@@ -424,15 +415,6 @@ else {
 	echo "No Results - Reject the argument to be the first to endorse";
 }
 ?>
-				<div class="assert hidden">
-					<form class="form-inline" method="POST" action="checkpoint.php" accept-charset="utf-8">
-						<label for="assertion">Add Unique:</label>
-						<input type="text" placeholder="An assertion not yet listed here" name="assertion">
-						<input type="hidden" name="type" value="Rebuttal" />
-						<button type="submit" class="button addNew" name="buttonClicked" value="addAssertion" data-container-id="rebuttal">Submit</button>
-						<?php addCSRFtoken() ?>
-					</form>
-				</div>
 <?php if ((isset($opinion)) && ($opinion < 0)): ?>
 				<div class="bulk-add-bar">
 					<a href="/flesh_out.php?arg=<?php echo $arg; ?>&type=Rebuttal" class="button bulk-add-btn">+ Add Many</a>
@@ -484,15 +466,6 @@ $canWeightTherefore = isset($opinion) && ($opinion > 0);
 		echo "No Results - Accept the argument to be the first to endorse";
 	}
 ?>
-				<div class="assert hidden">
-					<form class="form-inline" method="POST" action="checkpoint.php" accept-charset="utf-8">
-						<label for="assertion">Add Unique:</label>
-						<input type="text" placeholder="An assertion not yet listed here" name="assertion">
-						<input type="hidden" name="type" value="Therefore" />
-						<button type="submit" class="button addNew" name="buttonClicked" value="addAssertion" data-container-id="therefore">Submit</button>
-						<?php addCSRFtoken() ?>
-					</form>
-				</div>
 <?php if ((isset($opinion)) && ($opinion > 0)): ?>
 				<div class="bulk-add-bar">
 					<a href="/flesh_out.php?arg=<?php echo $arg; ?>&type=Therefore" class="button bulk-add-btn">+ Add Many</a>

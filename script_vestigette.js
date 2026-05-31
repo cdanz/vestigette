@@ -294,11 +294,9 @@ function init() {
 				let endorseEl = document.querySelector(`#${type} .endorse`);
 				let resetEl   = document.querySelector(`#${type} .reset`);
 				let myWtsEl   = document.querySelector(`#${type} .myWeights`);
-				let assertEl  = document.querySelector(`#${type} .assert`);
 				if (endorseEl) endorseEl.classList.remove('hidden');
 				if (resetEl)   resetEl.classList.remove('hidden');
 				if (myWtsEl)   myWtsEl.classList.remove('hidden');
-				if (assertEl)  assertEl.classList.remove('hidden');
 				// Reset all circle weights to zero (fresh start from scratch)
 				neutralizeSection(type);
 			}
