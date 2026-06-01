@@ -4313,5 +4313,6 @@ input:checked + .toggle:before {
 	}
 	.wrapper {
 		height: 3rem;
+		width: 3rem;
 	}
 }
