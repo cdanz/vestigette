@@ -4,5 +4,5 @@
 	$currentArgID = intval($_GET["arg"]);
 	setcookie("rememberMe", "", time() - 3600);
 	session_destroy();
-	header('Location: /index.php?arg='.$currentArgID);
+	header('Location: /?arg='.$currentArgID);
 ?>

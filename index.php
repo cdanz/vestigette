@@ -20,6 +20,24 @@ if(isset($_COOKIE['rememberMe']) && !isset($_SESSION['profile'])) {
 	}
 }
 //End cookie
+// Follow ARGUMENT_REDIRECT chain (up to 5 hops) for merged arguments
+if ($_SESSION['currentArg'] > 0) {
+	$_redirCheck = $_SESSION['currentArg'];
+	for ($_hop = 0; $_hop < 5; $_hop++) {
+		$_redirRow = mysqli_fetch_row(mysqli_query($db,
+			"SELECT newArgumentID FROM ARGUMENT_REDIRECT WHERE oldArgumentID=$_redirCheck"));
+		if ($_redirRow) {
+			$_redirCheck = intval($_redirRow[0]);
+		} else {
+			break;
+		}
+	}
+	if ($_redirCheck !== $_SESSION['currentArg']) {
+		header("Location: /?arg=$_redirCheck");
+		exit;
+	}
+}
+// End redirect check
 require_once("${_SERVER['DOCUMENT_ROOT']}/query_current_argument.php");
 //To do history - add to array of past arguments visited
 if (isset($_SESSION['history'])) {
@@ -48,7 +66,7 @@ if (isset($_SESSION['profile']) && ($_SESSION['profile'] < 26)) {
 	echo "Seed User: ".$_SESSION['profile'];
 }
 //End of seeding ids
-$baseURL = "/index.php";
+$baseURL = "/";
 $arg = isset($_SESSION['currentArg']) ? $_SESSION['currentArg'] : null;
 $profile = isset($_SESSION['profile']) ? $_SESSION['profile'] : null;
 // made obsolete $opinion = isset($_SESSION['opinion']) ? $_SESSION['opinion'] : null;
@@ -64,6 +82,52 @@ if (isset($links[0][3]) && $links[0][3] !== '' && $links[0][8] === null && $link
 	$ogRow = mysqli_fetch_row(mysqli_query($db, "SELECT og_title, og_image, og_description FROM EXPLICATION WHERE explicationID=" . intval($links[0][2])));
 	if ($ogRow) { $links[0][8] = $ogRow[0]; $links[0][9] = $ogRow[1]; $links[0][10] = $ogRow[2]; }
 }
+// --- Admin setup (runs on every GET, results cached in session) ---
+$isAdmin            = false;
+$adminPickerEnabled = false;
+$adminPickerData    = []; // [{profileID, lastName}] ordered: real profile first
+
+if (isset($_SESSION['profile'])) {
+	// Anchor the real (logged-in) profile once per session
+	if (!isset($_SESSION['realProfile'])) {
+		$_SESSION['realProfile'] = $_SESSION['profile'];
+	}
+	$realProfileID = intval($_SESSION['realProfile']);
+
+	// Cache admin flag in session so we don't query every page load
+	if (!isset($_SESSION['isAdmin'])) {
+		$adminChk = mysqli_fetch_row(mysqli_query($db, "SELECT isAdmin FROM USER_PROFILE WHERE profileID=$realProfileID"));
+		$_SESSION['isAdmin'] = ($adminChk && intval($adminChk[0]) === 1);
+	}
+	$isAdmin = (bool)$_SESSION['isAdmin'];
+
+	if ($isAdmin) {
+		$settRow = mysqli_fetch_assoc(mysqli_query($db,
+			"SELECT pickerEnabled, pickerProfiles FROM ADMIN_SETTINGS WHERE profileID=$realProfileID"));
+		$adminPickerEnabled = $settRow ? (bool)$settRow['pickerEnabled'] : false;
+
+		if ($adminPickerEnabled) {
+			$pickerIDs = [$realProfileID];
+			if ($settRow && $settRow['pickerProfiles']) {
+				$extra = array_filter(array_map('intval', explode(',', $settRow['pickerProfiles'])));
+				$pickerIDs = array_unique(array_merge($pickerIDs, $extra));
+			}
+			$idList = implode(',', $pickerIDs);
+			$pickerResult = mysqli_query($db,
+				"SELECT profileID, lastName FROM USER_PROFILE WHERE profileID IN ($idList)");
+			$byID = [];
+			while ($row = mysqli_fetch_assoc($pickerResult)) {
+				$byID[intval($row['profileID'])] = $row['lastName'];
+			}
+			foreach ($pickerIDs as $pid) {
+				if (isset($byID[$pid])) {
+					$adminPickerData[] = ['profileID' => $pid, 'lastName' => $byID[$pid]];
+				}
+			}
+		}
+	}
+}
+// --- End admin setup ---
 mysqli_close($db);
 	
 
@@ -233,6 +297,24 @@ function generateFindLines($results) {
 	</head>
 	<body>
 
+<?php if ($isAdmin && $adminPickerEnabled && !empty($adminPickerData)): ?>
+<div id="adminPickerBar">
+	<span class="admin-bar-label">Admin — Viewing as:</span>
+	<form method="POST" id="adminPickerForm" action="/?arg=<?php echo $_SESSION['currentArg']; ?>">
+		<input type="hidden" name="buttonClicked" value="adminSwitchProfile">
+		<?php foreach ($adminPickerData as $p): ?>
+		<label class="admin-picker-option">
+			<input type="radio" name="pickerProfile" value="<?php echo intval($p['profileID']); ?>"
+				<?php if (intval($_SESSION['profile']) === intval($p['profileID'])) echo 'checked'; ?>
+				onchange="this.form.submit()">
+			<?php echo htmlspecialchars($p['lastName']); ?>
+		</label>
+		<?php endforeach; ?>
+	</form>
+	<a class="admin-bar-tools-link" href="/admin_tools.php?arg=<?php echo $_SESSION['currentArg']; ?>">⚙ Tools</a>
+</div>
+<?php endif; ?>
+
 <?php if (!empty($_SESSION['formError'])): ?>
 		<div class="form-error-banner" role="alert">
 			<?php echo htmlspecialchars($_SESSION['formError']); unset($_SESSION['formError']); ?>
@@ -240,14 +322,17 @@ function generateFindLines($results) {
 <?php endif; ?>
 
 		<div id="mastHead" class="container">
-			<h1><a href="index.php?arg=<?php echo $_SESSION['currentArg'];?>">AGITATE</a></h1>
+			<h1><a href="/?arg=<?php echo $_SESSION['currentArg'];?>">AGITATE</a></h1>
 			<div>
 				<a href="About.php?arg=<?php echo $_SESSION['currentArg'];?>">About</a>
 				<a href="Explore.php?arg=<?php echo $_SESSION['currentArg'];?>">Explore</a>
 				<a href="Profile.php?arg=<?php echo $_SESSION['currentArg'];?>">Profile</a>
+				<?php if ($isAdmin): ?>
+				<a href="/admin_tools.php?arg=<?php echo $_SESSION['currentArg']; ?>">Admin</a>
+				<?php endif; ?>
 				<a href="<?php echo ($profile) ? 'logout' : 'login'; ?>.php?arg=<?php echo $_SESSION['currentArg'];?>"><?php echo ($profile) ? 'Logout' : 'Login'; ?></a>
 				<a href="#" class="closenav" onclick="closeNav()">&times;</a>
-			</div> 
+			</div>
 			
 			<a href="#" class="opennav" onclick="openNav()">&equiv;</a>
 		</div>
@@ -264,7 +349,7 @@ $canWeightBecause = isset($opinion) && ($opinion > 0);
 			<input type="hidden" name="becauseWeighInWith" id="becauseWeighInWith" value="" />
 			<?php addCSRFtoken() ?>
 		</form>
-		<button class="button reset hidden" data-container-id="because"><span>&#x27F2;</span></button>
+		<button class="button reset hidden" data-container-id="because">&#x21BA;</button>
 		<button class="button myWeights hidden" data-container-id="because" title="Load my previous weights">
 			<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="18" height="18" aria-hidden="true">
 				<circle cx="12" cy="8" r="4"/>
@@ -384,7 +469,7 @@ $canWeightRebuttal = isset($opinion) && ($opinion < 0);
 			<input type="hidden" name="rebuttalWeighInWith" id="rebuttalWeighInWith" value="" />
 			<?php addCSRFtoken() ?>
 		</form>
-		<button class="button reset hidden" data-container-id="rebuttal"><span>&#x27F2;</span></button>
+		<button class="button reset hidden" data-container-id="rebuttal">&#x21BA;</button>
 		<button class="button myWeights hidden" data-container-id="rebuttal" title="Load my previous weights">
 			<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="18" height="18" aria-hidden="true">
 				<circle cx="12" cy="8" r="4"/>
@@ -435,7 +520,7 @@ $canWeightTherefore = isset($opinion) && ($opinion > 0);
 			<input type="hidden" name="thereforeWeighInWith" id="thereforeWeighInWith" value="" />
 			<?php addCSRFtoken() ?>
 		</form>
-		<button class="button reset hidden" data-container-id="therefore"><span>&#x27F2;</span></button>
+		<button class="button reset hidden" data-container-id="therefore">&#x21BA;</button>
 		<button class="button myWeights hidden" data-container-id="therefore" title="Load my previous weights">
 			<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="18" height="18" aria-hidden="true">
 				<circle cx="12" cy="8" r="4"/>
@@ -547,7 +632,7 @@ if ((isset($opinion)) && ($opinion > 0)) {
                 <input type="hidden" name="phrasingWeighInWith" id="phrasingWeighInWith" value="" />
                 <?php addCSRFtoken() ?>
             </form>
-            <button class="button reset hidden" data-container-id="phrasing">&#x27F2;</button>
+            <button class="button reset hidden" data-container-id="phrasing">&#x21BA;</button>
         </div>
 <?php
 }
@@ -591,7 +676,7 @@ if ((isset($opinion)) && ($opinion > 0)) {
 						<input type="hidden" name="explicWeighInWith" id="explicWeighInWith" value="" />
 						<?php addCSRFtoken() ?>
 					</form>
-					<button class="button reset hidden" data-container-id="explication">&#x27F2;</button>
+					<button class="button reset hidden" data-container-id="explication">&#x21BA;</button>
 				</div>
 <?php
 }

@@ -16,7 +16,7 @@ $type    = isset($_GET['type']) && in_array($_GET['type'], $allowedTypes)
            ? $_GET['type'] : 'Because';
 
 if ($argID === 0) {
-    header('Location: /index.php');
+    header('Location: /');
     exit;
 }
 
@@ -155,7 +155,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     mysqli_close($db);
-    header('Location: /index.php?arg=' . $postArgID);
+    header('Location: /?arg=' . $postArgID);
     exit;
 }
 // ── End POST handler ──────────────────────────────────────────────────────────
@@ -193,7 +193,7 @@ $typeClass    = 'flesh-' . strtolower($type);
 $showRecipCol = ($type !== 'Rebuttal');
 $typeLabel    = htmlspecialchars($type);
 $argIDEsc     = $argID;
-$baseURL      = '/index.php';
+$baseURL      = '/';
 ?>
 <!DOCTYPE html>
 <html>
@@ -207,7 +207,7 @@ $baseURL      = '/index.php';
 <body class="flesh-out-page">
 
 <div id="mastHead" class="container">
-    <h1><a href="index.php?arg=<?php echo $argIDEsc; ?>">AGITATE</a></h1>
+    <h1><a href="/?arg=<?php echo $argIDEsc; ?>">AGITATE</a></h1>
     <div>
         <a href="About.php?arg=<?php echo $argIDEsc; ?>">About</a>
         <a href="Explore.php?arg=<?php echo $argIDEsc; ?>">Explore</a>
@@ -224,7 +224,7 @@ $baseURL      = '/index.php';
             <p class="flesh-type-label"><?php echo $typeLabel; ?></p>
             <h2><?php echo htmlspecialchars($focalPhrasing); ?></h2>
         </div>
-        <a href="/index.php?arg=<?php echo $argIDEsc; ?>" class="button flesh-cancel">Cancel</a>
+        <a href="/?arg=<?php echo $argIDEsc; ?>" class="button flesh-cancel">Cancel</a>
     </div>
 
 <?php if ($showRecipCol): ?>

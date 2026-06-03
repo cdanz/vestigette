@@ -17,7 +17,7 @@
 			if(!isset($_SESSION['currentArg'])){
 				$_SESSION['currentArg'] = intval($_GET["arg"]); 
 			}
-			header('Location: /index.php?arg='.$_SESSION['currentArg']);
+			header('Location: /?arg='.$_SESSION['currentArg']);
 		}
 		else {
 			$fmsg = "Invalid Email/Password";

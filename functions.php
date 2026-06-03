@@ -8,7 +8,7 @@
 	            $param3 = $_SESSION['profile'];
 				$sql = "CALL assertOpinion($param1,$param2,$param3)";
 				mysqli_query($db, $sql);
-				header('Location: /index.php?arg='.$_SESSION['currentArg']);	
+				header('Location: /?arg='.$_SESSION['currentArg']);	
 	            break;
 	        case "reject":
 	            $opinion=-1;
@@ -17,7 +17,7 @@
 	            $param3 = $_SESSION['profile'];
 				$sql = "CALL assertOpinion($param1,$param2,$param3)";
 				mysqli_query($db, $sql);
-				header('Location: /index.php?arg='.$_SESSION['currentArg']);
+				header('Location: /?arg='.$_SESSION['currentArg']);
 	            break;
 	        case "weighBecause":
 	        	$arrayOfWeighIns = explode(",",$_POST["becauseWeighInWith"]);
@@ -36,7 +36,7 @@
 				/*Execute queries */
 				if(mysqli_multi_query($db, $query)){
 					while (mysqli_more_results($db)) { mysqli_next_result($db); if ($r = mysqli_store_result($db)) mysqli_free_result($r); }
-					header('Location: /index.php?arg='.$_SESSION['currentArg']);
+					header('Location: /?arg='.$_SESSION['currentArg']);
 				}
 				else
 					echo "Query Failed";
@@ -59,7 +59,7 @@
 				/*Execute queries */
 				if(mysqli_multi_query($db, $query)){
 					while (mysqli_more_results($db)) { mysqli_next_result($db); if ($r = mysqli_store_result($db)) mysqli_free_result($r); }
-					header('Location: /index.php?arg='.$_SESSION['currentArg']);
+					header('Location: /?arg='.$_SESSION['currentArg']);
 				}
 				else
 					echo "Query Failed";
@@ -81,7 +81,7 @@
 				/*Execute queries */
 				if(mysqli_multi_query($db, $query)){
 					while (mysqli_more_results($db)) { mysqli_next_result($db); if ($r = mysqli_store_result($db)) mysqli_free_result($r); }
-					header('Location: /index.php?arg='.$_SESSION['currentArg']);
+					header('Location: /?arg='.$_SESSION['currentArg']);
 				}
 				else
 					echo "Query Failed";
@@ -96,7 +96,7 @@
 
 				/*Execute queries */
 				if(mysqli_query($db, $query)){
-					header('Location: /index.php?arg='.$_SESSION['currentArg']);
+					header('Location: /?arg='.$_SESSION['currentArg']);
 				}
 				else 
 					echo "Query Failed";
@@ -111,7 +111,7 @@
 
 				/*Execute queries */
 				if(mysqli_query($db, $query)){
-					header('Location: /index.php?arg='.$_SESSION['currentArg']);
+					header('Location: /?arg='.$_SESSION['currentArg']);
 				}
 				else 
 					echo "Query Failed";
@@ -128,7 +128,7 @@
 
 				/*Execute queries */
 				if(mysqli_query($db, $query)){
-					header('Location: /index.php?arg='.$_SESSION['currentArg']);
+					header('Location: /?arg='.$_SESSION['currentArg']);
 				}
 				else 
 					echo "Query Failed";
@@ -142,7 +142,7 @@
 
 				/*Execute queries */
 				if(mysqli_query($db, $query)){
-					header('Location: /index.php?arg='.$_SESSION['currentArg']);
+					header('Location: /?arg='.$_SESSION['currentArg']);
 				}
 				else 
 					echo "Query Failed";
@@ -156,7 +156,7 @@
 
 				/*Execute queries */
 				if(mysqli_query($db, $query)){
-					header('Location: /index.php?arg='.$_SESSION['currentArg']);
+					header('Location: /?arg='.$_SESSION['currentArg']);
 				}
 				else 
 					echo "Query Failed";
@@ -172,7 +172,7 @@
 
 				/*Execute queries */
 				if(mysqli_query($db, $query)){
-					header('Location: /index.php?arg='.$_SESSION['currentArg']);
+					header('Location: /?arg='.$_SESSION['currentArg']);
 				}
 				else 
 					echo "Query Failed";
@@ -189,7 +189,7 @@
 
 				/*Execute queries */
 				if(mysqli_query($db, $query)){
-					header('Location: /index.php?arg='.$_SESSION['currentArg']);
+					header('Location: /?arg='.$_SESSION['currentArg']);
 				}
 				else 
 					echo "Query Failed";
@@ -205,7 +205,7 @@
 
 				/*Execute queries */
 				if(mysqli_query($db, $query)){
-					header('Location: /index.php?arg='.$_SESSION['currentArg']);
+					header('Location: /?arg='.$_SESSION['currentArg']);
 				}
 				else 
 					echo "Query Failed";
@@ -224,7 +224,7 @@
 				}
 				$query .= "CALL updatePhrasingCache(".$argAtHand.");";
 				if(mysqli_multi_query($db, $query)){
-					header('Location: /index.php?arg='.$_SESSION['currentArg']);
+					header('Location: /?arg='.$_SESSION['currentArg']);
 				}
 				else
 					echo "Query Failed";
@@ -247,7 +247,7 @@
             	}
             	if ($phrasingError) {
             		$_SESSION['formError'] = $phrasingError;
-            		header('Location: /index.php?arg='.$_SESSION['currentArg']);
+            		header('Location: /?arg='.$_SESSION['currentArg']);
             		exit;
             	}
 	            $argAtHand = intval($_SESSION['currentArg']);
@@ -257,7 +257,7 @@
 
 				/*Execute queries */
 				if(mysqli_query($db, $query)){
-					header('Location: /index.php?arg='.$_SESSION['currentArg']);
+					header('Location: /?arg='.$_SESSION['currentArg']);
 				}
 				else
 					echo "Query Failed";
@@ -273,7 +273,7 @@
 
 				/*Execute queries */
 				if(mysqli_query($db, $query)){
-					header('Location: /index.php?arg='.$_SESSION['currentArg']);
+					header('Location: /?arg='.$_SESSION['currentArg']);
 				}
 				else 
 					echo "Query Failed";
@@ -290,7 +290,7 @@
 	        		$query .= "INSERT INTO EXPLICATION_ENDORSE (explicationID, argumentID, profileID, weight, active) VALUES(" . $explicationIDVal . "," . $argAtHand . "," . $profileID . "," . $weightVal . ",TRUE);";
 	        	}
 	        	if (mysqli_multi_query($db, $query)) {
-	        		header('Location: /index.php?arg=' . $_SESSION['currentArg']);
+	        		header('Location: /?arg=' . $_SESSION['currentArg']);
 	        	} else {
 	        		echo "Query Failed";
 	        	}
@@ -302,7 +302,7 @@
 	        	// Server-side validation: must be a valid http/https URL
 	        	if (!preg_match('#^https?://#i', $explicationLink) || !filter_var($explicationLink, FILTER_VALIDATE_URL)) {
 	        		$_SESSION['formError'] = 'Explications must be a valid URL starting with https:// or http://';
-	        		header('Location: /index.php?arg='.$_SESSION['currentArg']);
+	        		header('Location: /?arg='.$_SESSION['currentArg']);
 	        		exit;
 	        	}
 
@@ -315,7 +315,7 @@
 				if(mysqli_query($db, $query)){
 					$idRow = mysqli_fetch_row(mysqli_query($db, "SELECT explicationID FROM EXPLICATION WHERE argumentID=$argAtHand AND profileID=$profileID LIMIT 1"));
 					if ($idRow) storeOgMeta($db, $explicationLink, $idRow[0]);
-					header('Location: /index.php?arg='.$_SESSION['currentArg']);
+					header('Location: /?arg='.$_SESSION['currentArg']);
 				}
 				else
 					echo "Query Failed";
@@ -328,11 +328,29 @@
 
 				/*Execute queries */
 				if(mysqli_query($db, $query)){
-					header('Location: /index.php?arg='.$_SESSION['currentArg']);
+					header('Location: /?arg='.$_SESSION['currentArg']);
 				}
 				else 
 					echo "Query Failed";
 				break;
+
+		case "adminSwitchProfile":
+			if (isset($_SESSION['isAdmin']) && $_SESSION['isAdmin']) {
+				$switchTo      = intval($_POST['pickerProfile'] ?? 0);
+				$realProfileID = intval($_SESSION['realProfile']);
+				// Validate: must be the real profile or one of the designated profiles
+				$settRow = mysqli_fetch_assoc(mysqli_query($db,
+					"SELECT pickerProfiles FROM ADMIN_SETTINGS WHERE profileID=$realProfileID"));
+				$allowed = [$realProfileID];
+				if ($settRow && $settRow['pickerProfiles']) {
+					$allowed = array_merge($allowed, array_map('intval', explode(',', $settRow['pickerProfiles'])));
+				}
+				if (in_array($switchTo, $allowed)) {
+					$_SESSION['profile'] = $switchTo;
+				}
+			}
+			header('Location: /?arg=' . intval($_SESSION['currentArg']));
+			exit;
 
 	    }
 	}

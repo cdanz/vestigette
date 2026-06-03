@@ -202,17 +202,17 @@ TODO: Let's not forget to genericize these buttons to apply to more than just #b
 }
 #because button.reset,
 #rebuttal button.reset,
-#therefore button.reset {
-	position: relative;
+#therefore button.reset,
+#argument button.reset,
+#overlayE button.reset {
+	align-items: center;
+	display: flex;
+	font-size: 1.5rem;
+	font-weight: 300;
+	justify-content: center;
+	line-height: 1;
+	padding: 0;
 	width: 2rem;
-}
-#because button.reset span,
-#rebuttal button.reset span,
-#therefore button.reset span {
-	font-size: 250%;
-	left: 0.1rem;
-	position: absolute;
-	top: -0.42rem;
 }
 #argument button {
 	padding-left: 0.5rem;
@@ -1122,7 +1122,7 @@ input:checked + .toggle:before {
 	position: absolute;
 	top: 0;
 	left: 0;
-	transform: rotate(-50grad);
+	transform: rotate(-50grad) translateZ(0);
 	width: 3.6rem;
 }
 /* arc1 */
@@ -4315,4 +4315,295 @@ input:checked + .toggle:before {
 		height: 3rem;
 		width: 3rem;
 	}
+}
+/* ═══════════════════════════════════════════════════
+   Admin picker bar (shown on index.php for admins)
+   ═══════════════════════════════════════════════════ */
+#adminPickerBar {
+	align-items: center;
+	background: #1c1c2e;
+	box-sizing: border-box;
+	color: #ccc;
+	display: flex;
+	flex-flow: row wrap;
+	font-size: 0.75rem;
+	gap: 0.5rem 1rem;
+	padding: 0.35rem 1rem;
+	width: 100%;
+}
+.admin-bar-label {
+	color: #aaa;
+	font-size: 0.7rem;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+	white-space: nowrap;
+}
+#adminPickerForm {
+	align-items: center;
+	display: flex;
+	flex-flow: row wrap;
+	gap: 0.25rem 0.75rem;
+}
+.admin-picker-option {
+	align-items: center;
+	color: #e0e0e0;
+	cursor: pointer;
+	display: flex;
+	gap: 0.3rem;
+}
+.admin-picker-option input[type="radio"] {
+	accent-color: #7b91ff;
+	cursor: pointer;
+}
+.admin-bar-tools-link {
+	color: #7b91ff;
+	font-size: 0.72rem;
+	margin-left: auto;
+	text-decoration: none;
+	white-space: nowrap;
+}
+.admin-bar-tools-link:hover {
+	text-decoration: underline;
+}
+
+/* ═══════════════════════════════════════════════════
+   Admin tools page  (at- prefix = admin tools)
+   All rules scoped to body.admin-page to avoid
+   any bleed from the consumer site's dark styles.
+   ═══════════════════════════════════════════════════ */
+body.admin-page {
+	background: #f0f0f3;
+	color: #111;
+}
+
+/* Header */
+.at-header {
+	align-items: center;
+	background: #1c1c2e;
+	box-sizing: border-box;
+	color: white;
+	display: flex;
+	flex-flow: row wrap;
+	gap: 0.5rem 1.5rem;
+	padding: 0.75rem 1.5rem;
+	width: 100%;
+}
+.at-header__brand {
+	font-size: 1.1rem;
+	font-weight: 900;
+	letter-spacing: 0.08em;
+}
+.at-header__title {
+	color: #aab;
+	font-size: 0.85rem;
+	letter-spacing: 0.05em;
+	text-transform: uppercase;
+}
+.at-header__nav {
+	display: flex;
+	gap: 1.25rem;
+	margin-left: auto;
+}
+.at-header__nav a {
+	color: #9ab;
+	font-size: 0.85rem;
+	text-decoration: none;
+}
+.at-header__nav a:hover {
+	color: white;
+}
+
+/* Main content area */
+.at-main {
+	box-sizing: border-box;
+	margin: 0 auto;
+	max-width: 740px;
+	padding: 2rem 1rem;
+}
+
+/* Notice banners */
+.at-notice {
+	border-radius: 5px;
+	font-size: 0.875rem;
+	margin-bottom: 1.25rem;
+	padding: 0.65rem 1rem;
+}
+.at-notice--success {
+	background: #e6f4ea;
+	border: 1px solid #b2dfb9;
+	color: #2d6a4f;
+}
+.at-notice--error {
+	background: #fdecea;
+	border: 1px solid #f5c6c6;
+	color: #922;
+}
+
+/* Tool cards */
+.at-card {
+	background: white;
+	border-radius: 8px;
+	box-shadow: 0 1px 4px rgba(0,0,0,0.09);
+	margin-bottom: 1.5rem;
+	padding: 1.5rem;
+}
+.at-card__title {
+	color: #222;
+	font-size: 0.95rem;
+	font-weight: 700;
+	letter-spacing: 0.05em;
+	margin: 0 0 0.35rem;
+	text-transform: uppercase;
+}
+.at-card__desc {
+	color: #666;
+	font-size: 0.85rem;
+	margin: 0 0 1.25rem;
+}
+
+/* Form fields */
+.at-field {
+	margin-bottom: 1rem;
+}
+.at-field--row {
+	align-items: center;
+	display: flex;
+	flex-flow: row wrap;
+	gap: 0.75rem;
+}
+.at-label {
+	color: #333;
+	display: block;
+	font-size: 0.85rem;
+	font-weight: 600;
+	margin-bottom: 0.35rem;
+}
+.at-hint {
+	color: #888;
+	font-size: 0.78rem;
+	margin-bottom: 0.4rem;
+}
+.at-input {
+	background: white;
+	border: 1px solid #ccc;
+	border-radius: 4px;
+	box-sizing: border-box;
+	color: #111;
+	font-size: 0.9rem;
+	padding: 0.45rem 0.65rem;
+	width: 100%;
+}
+.at-input--narrow {
+	width: 120px;
+}
+.at-input:focus {
+	border-color: #7b91ff;
+	outline: none;
+}
+.at-toggle-row {
+	align-items: center;
+	display: flex;
+	gap: 1rem;
+}
+
+/* Buttons */
+.at-btn {
+	border: none;
+	border-radius: 4px;
+	cursor: pointer;
+	font-size: 0.875rem;
+	font-weight: 600;
+	padding: 0.5rem 1.1rem;
+}
+.at-btn--primary {
+	background: #1c1c2e;
+	color: white;
+}
+.at-btn--primary:hover {
+	background: #2e2e50;
+}
+.at-btn--secondary {
+	background: #555;
+	color: white;
+}
+.at-btn--secondary:hover {
+	background: #333;
+}
+.at-btn--danger {
+	background: #a00;
+	color: white;
+}
+.at-btn--danger:not([disabled]):hover {
+	background: #c00;
+}
+.at-btn[disabled] {
+	cursor: not-allowed;
+	opacity: 0.4;
+}
+
+/* Merge inputs row */
+.at-merge-inputs {
+	align-items: flex-end;
+	display: flex;
+	flex-flow: row wrap;
+	gap: 0.75rem 1rem;
+	margin-bottom: 0.5rem;
+}
+.at-merge-inputs .at-field {
+	margin-bottom: 0;
+}
+.at-merge-plus {
+	color: #999;
+	font-size: 1.4rem;
+	padding-bottom: 0.2rem;
+}
+.at-merge-action {
+	padding-bottom: 0.05rem;
+}
+
+/* Merge preview */
+.at-merge-preview {
+	background: #f7f7f9;
+	border: 1px solid #ddd;
+	border-radius: 6px;
+	display: flex;
+	flex-flow: row wrap;
+	gap: 1rem;
+	margin: 1.25rem 0 0.75rem;
+	padding: 1rem;
+}
+.at-merge-col {
+	flex: 1;
+	min-width: 200px;
+}
+.at-merge-col__tag {
+	background: #e8f0fe;
+	border-radius: 3px;
+	color: #3a5bc7;
+	display: inline-block;
+	font-size: 0.72rem;
+	font-weight: 700;
+	letter-spacing: 0.04em;
+	margin-bottom: 0.5rem;
+	padding: 0.15rem 0.45rem;
+	text-transform: uppercase;
+}
+.at-merge-col__tag--absorb {
+	background: #fce8e8;
+	color: #a00;
+}
+.at-merge-col__text {
+	color: #222;
+	font-size: 0.9rem;
+	margin: 0 0 0.5rem;
+}
+.at-merge-col__link {
+	color: #555;
+	font-size: 0.8rem;
+	text-decoration: underline;
+}
+.at-merge-arrow {
+	align-self: center;
+	color: #bbb;
+	font-size: 1.5rem;
 }

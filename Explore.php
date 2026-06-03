@@ -2,12 +2,12 @@
 session_start();
 switch ($_POST["buttonClicked"]) {
 	case "jumpTo":
-		header('Location: /index.php?arg='.$_POST["jumpTo"]);	
+		header('Location: /?arg='.$_POST["jumpTo"]);	
 		break;
 }
 include("${_SERVER['DOCUMENT_ROOT']}/includes/dbconnect.php");
 $_SESSION['currentArg'] = intval($_GET["arg"]); 
-$baseURL = "/index.php";
+$baseURL = "/";
 $arg = isset($_SESSION['currentArg']) ? $_SESSION['currentArg'] : null;
 $profile = isset($_SESSION['profile']) ? $_SESSION['profile'] : null;
 $sql = "CALL getMostEndorsed();";
@@ -38,7 +38,7 @@ mysqli_multi_query($db, $sql);
 	<body>
 
 		<div id="mastHead" class="container">
-			<h1><a href="index.php?arg=<?php echo $_SESSION['currentArg'];?>">AGITATE</a></h1>
+			<h1><a href="/?arg=<?php echo $_SESSION['currentArg'];?>">AGITATE</a></h1>
 			<div>
 				<a href="About.php?arg=<?php echo $_SESSION['currentArg'];?>">About</a>
 				<a href="Explore.php?arg=<?php echo $_SESSION['currentArg'];?>"><span style="text-decoration: underline;">Explore</span></a></span>
@@ -55,37 +55,37 @@ mysqli_multi_query($db, $sql);
 			<div class="panel" data-container-id="because">
 				<?php
 				$entryPoints = [
-					['Abortion',                  '/index.php?arg=124'],
-					['Black Lives Matter',         '/index.php?arg=546'],
-					['Cancel Culture',             '/index.php?arg=288'],
-					['Capitalism as a System',     '/index.php?arg=136'],
-					['Catholic Church Abuse',      '/index.php?arg=983'],
-					['Christianity &amp; Faith',   '/index.php?arg=1385'],
-					['Climate Change',             '/index.php?arg=123'],
-					['Conspiracy Theories',        '/index.php?arg=1714'],
-					['COVID Mandates',             '/index.php?arg=1396'],
-					['Cryptocurrency',             '/index.php?arg=808'],
-					['Environmental Policy',       '/index.php?arg=757'],
-					['Gender &amp; Trans Rights',  '/index.php?arg=791'],
-					['GMO Crops',                  '/index.php?arg=5'],
-					['Government &amp; Free Markets', '/index.php?arg=400'],
-					['Gun Rights',                 '/index.php?arg=140'],
-					['Housing &amp; Homelessness', '/index.php?arg=682'],
-					['Immigration Policy',         '/index.php?arg=612'],
-					['Informal Debates',           '/index.php?arg=58'],
-					['Israel &amp; Palestine',     '/index.php?arg=1627'],
-					['Labor &amp; Unions',         '/index.php?arg=494'],
-					['Media &amp; Social Media',   '/index.php?arg=367'],
-					['Policing in America',        '/index.php?arg=561'],
-					['Pop Culture',                '/index.php?arg=1016'],
-					['Public Health',              '/index.php?arg=427'],
-					['Race &amp; Racism',          '/index.php?arg=1192'],
-					['Republican Politics &amp; Trump', '/index.php?arg=120'],
-					['Sports &amp; Athletics',     '/index.php?arg=883'],
-					['The Supreme Court',          '/index.php?arg=1443'],
-					['Voting Rights',              '/index.php?arg=182'],
-					['War &amp; Military',         '/index.php?arg=1479'],
-					['Wealth &amp; Taxation',      '/index.php?arg=265'],
+					['Abortion',                  '/?arg=124'],
+					['Black Lives Matter',         '/?arg=546'],
+					['Cancel Culture',             '/?arg=288'],
+					['Capitalism as a System',     '/?arg=136'],
+					['Catholic Church Abuse',      '/?arg=983'],
+					['Christianity &amp; Faith',   '/?arg=1385'],
+					['Climate Change',             '/?arg=123'],
+					['Conspiracy Theories',        '/?arg=1714'],
+					['COVID Mandates',             '/?arg=1396'],
+					['Cryptocurrency',             '/?arg=808'],
+					['Environmental Policy',       '/?arg=757'],
+					['Gender &amp; Trans Rights',  '/?arg=791'],
+					['GMO Crops',                  '/?arg=5'],
+					['Government &amp; Free Markets', '/?arg=400'],
+					['Gun Rights',                 '/?arg=140'],
+					['Housing &amp; Homelessness', '/?arg=682'],
+					['Immigration Policy',         '/?arg=612'],
+					['Informal Debates',           '/?arg=58'],
+					['Israel &amp; Palestine',     '/?arg=1627'],
+					['Labor &amp; Unions',         '/?arg=494'],
+					['Media &amp; Social Media',   '/?arg=367'],
+					['Policing in America',        '/?arg=561'],
+					['Pop Culture',                '/?arg=1016'],
+					['Public Health',              '/?arg=427'],
+					['Race &amp; Racism',          '/?arg=1192'],
+					['Republican Politics &amp; Trump', '/?arg=120'],
+					['Sports &amp; Athletics',     '/?arg=883'],
+					['The Supreme Court',          '/?arg=1443'],
+					['Voting Rights',              '/?arg=182'],
+					['War &amp; Military',         '/?arg=1479'],
+					['Wealth &amp; Taxation',      '/?arg=265'],
 				];
 				echo "<ul>\n";
 				foreach ($entryPoints as $i => $entry) {

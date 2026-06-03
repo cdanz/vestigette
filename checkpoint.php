@@ -4,10 +4,10 @@ if($_POST['csrfToken'] != $_SESSION['csrfToken']) {
 	die("Unauthorized source!");
 }
 if(!isset($_SESSION['profile'])){
-	header('Location: /index.php?arg='.$_SESSION['currentArg']);
+	header('Location: /?arg='.$_SESSION['currentArg']);
 }
 include("${_SERVER['DOCUMENT_ROOT']}/includes/dbconnect.php");
-$baseURL = "/index.php";
+$baseURL = "/";
 $assertion = $_POST["assertion"];
 $argID = $_SESSION['currentArg'];
 $type = $_POST["type"];
@@ -28,7 +28,7 @@ function generateTypeLines($results) {
 				echo "			<li class=\"lineItem\" data-arg-id=\"${line[0]}\">
 					<p class=\"assocArg\">".htmlspecialchars($line[2])."</p>
 					<div class=\"opinion\">
-					<form method=\"POST\" class=\"buttons\" action=\"index.php?arg=".$argID."\">
+					<form method=\"POST\" class=\"buttons\" action=\"/?arg=".$argID."\">
 						<input type=\"hidden\" name=\"useInstead\" value=\"${line[0]}\" /> 
 						<input type=\"hidden\" name=\"type\" value=\"".$type."\" />
 						<button type=\"submit\" class=\"button instead\" name=\"buttonClicked\" value=\"useInstead\">Use Instead</button>
@@ -92,7 +92,7 @@ if (mysqli_multi_query($db, $sql)) {
 			<div class="checkpoint-header">
 				<h2><?php echo htmlspecialchars($assertion); ?></h2>
 				<div class="opinion">
-					<form method="POST" class="buttons" action=<?php echo "\"/index.php?arg=".$argID."\"";?>>
+					<form method="POST" class="buttons" action=<?php echo "\"/?arg=".$argID."\"";?>>
 						<input type="hidden" name="assertion" value="<?php echo htmlspecialchars($assertion);?>">
 						<input type="hidden" name="type" value=<?php echo "\"".$type."\"";?> />
 						<button type="submit" class="stick" name="buttonClicked" value="addAssertion" data-container-id="because">STICK WITH THIS</button>
