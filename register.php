@@ -130,7 +130,16 @@ mysqli_close($db);
 	.reg-name-row .field { flex: 1; }
 	.reg-errors { background: rgba(255,80,80,0.15); border: 1px solid rgba(255,80,80,0.5); border-radius: 3px; font-size: 0.875rem; margin-bottom: 1rem; padding: 0.5rem 0.75rem; }
 	.reg-errors p { margin: 0.2rem 0; }
-	.reg-form button[type="submit"] { margin-top: 0.5rem; }
+	#argument .panel .reg-form button[type="submit"] {
+		border-bottom-left-radius: 0;
+		border-bottom-right-radius: 0;
+		border-top-left-radius: 0;
+		border-top-right-radius: 0;
+		font-size: 0.95rem;
+		font-weight: bold;
+		margin-top: 0.5rem;
+		padding: 0.4rem 1.25rem;
+	}
 </style>
 
 <div id="argument" class="accordion container">
