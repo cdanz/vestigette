@@ -205,12 +205,15 @@ function fetchOgMeta($url) {
 
 	if ($html && $httpCode === 200) {
 		$patterns = [
-			'title'     => '/<meta[^>]+property=["\']og:title["\'][^>]+content=["\'](.*?)["\']/is',
-			'title_rev' => '/<meta[^>]+content=["\'](.*?)["\'][^>]+property=["\']og:title["\']/is',
-			'image'     => '/<meta[^>]+property=["\']og:image["\'][^>]+content=["\'](.*?)["\']/is',
-			'image_rev' => '/<meta[^>]+content=["\'](.*?)["\'][^>]+property=["\']og:image["\']/is',
-			'desc'      => '/<meta[^>]+property=["\']og:description["\'][^>]+content=["\'](.*?)["\']/is',
-			'desc_rev'  => '/<meta[^>]+content=["\'](.*?)["\'][^>]+property=["\']og:description["\']/is',
+			// Capture groups exclude '<' and '>' so a lazy match can't span across
+			// tag boundaries (with the /s flag '.' would otherwise swallow '/><meta...'
+			// and pull raw head markup into the value).
+			'title'     => '/<meta[^>]+property=["\']og:title["\'][^>]+content=["\']([^<>]*?)["\']/is',
+			'title_rev' => '/<meta[^>]+content=["\']([^<>]*?)["\'][^>]+property=["\']og:title["\']/is',
+			'image'     => '/<meta[^>]+property=["\']og:image["\'][^>]+content=["\']([^<>]*?)["\']/is',
+			'image_rev' => '/<meta[^>]+content=["\']([^<>]*?)["\'][^>]+property=["\']og:image["\']/is',
+			'desc'      => '/<meta[^>]+property=["\']og:description["\'][^>]+content=["\']([^<>]*?)["\']/is',
+			'desc_rev'  => '/<meta[^>]+content=["\']([^<>]*?)["\'][^>]+property=["\']og:description["\']/is',
 		];
 		if (preg_match($patterns['title'], $html, $m) || preg_match($patterns['title_rev'], $html, $m))
 			$meta['title'] = html_entity_decode(trim($m[1]), ENT_QUOTES | ENT_HTML5, 'UTF-8');
@@ -221,7 +224,7 @@ function fetchOgMeta($url) {
 		// Plain-HTML fallbacks
 		if (!$meta['title'] && preg_match('/<title[^>]*>(.*?)<\/title>/is', $html, $m))
 			$meta['title'] = html_entity_decode(trim($m[1]), ENT_QUOTES | ENT_HTML5, 'UTF-8');
-		if (!$meta['description'] && preg_match('/<meta[^>]+name=["\']description["\'][^>]+content=["\'](.*?)["\']/is', $html, $m))
+		if (!$meta['description'] && preg_match('/<meta[^>]+name=["\']description["\'][^>]+content=["\']([^<>]*?)["\']/is', $html, $m))
 			$meta['description'] = html_entity_decode(trim($m[1]), ENT_QUOTES | ENT_HTML5, 'UTF-8');
 	}
 
@@ -275,12 +278,44 @@ function fetchOgMeta($url) {
 	return $meta;
 }
 
+// Sanitize a scraped OG text value (title/description). The parser regexes can
+// occasionally over-capture across tag boundaries and pull in raw HTML fragments
+// (e.g. `IE=edge" http-equiv="X-UA-Compatible"/><meta ...`). Reject anything that
+// still looks like markup, strip stray tags, collapse whitespace, and cap length.
+function cleanOgText($val, $maxLen) {
+	if ($val === null) return '';
+	$val = (string) $val;
+	// Hard reject values that are clearly botched scrapes of page <head> markup.
+	if (strpos($val, '<') !== false || stripos($val, 'http-equiv') !== false) {
+		return '';
+	}
+	// Defensive: strip any tags that slipped through, collapse whitespace.
+	$val = trim(preg_replace('/\s+/', ' ', strip_tags($val)));
+	return mb_substr($val, 0, $maxLen);
+}
+
+// Validate a scraped OG image value: it must be a clean absolute http(s) URL.
+// Anything containing markup, http-equiv, or that fails URL validation is dropped
+// so we never store (or render) a broken link-preview image.
+function cleanOgImage($val) {
+	if ($val === null) return '';
+	$val = trim((string) $val);
+	if ($val === ''
+		|| strpos($val, '<') !== false
+		|| stripos($val, 'http-equiv') !== false
+		|| !preg_match('#^https?://#i', $val)
+		|| !filter_var($val, FILTER_VALIDATE_URL)) {
+		return '';
+	}
+	return mb_substr($val, 0, 500);
+}
+
 function storeOgMeta($db, $url, $explicationID) {
 	$og = fetchOgMeta($url);
 	$id = intval($explicationID);
-	$t  = mysqli_real_escape_string($db, mb_substr($og['title'] ?? '', 0, 300));
-	$i  = mysqli_real_escape_string($db, mb_substr($og['image'] ?? '', 0, 500));
-	$d  = mysqli_real_escape_string($db, $og['description'] ?? '');
+	$t  = mysqli_real_escape_string($db, cleanOgText($og['title'] ?? '', 300));
+	$i  = mysqli_real_escape_string($db, cleanOgImage($og['image'] ?? ''));
+	$d  = mysqli_real_escape_string($db, cleanOgText($og['description'] ?? '', 1000));
 	mysqli_query($db, "UPDATE EXPLICATION SET og_title='$t', og_image='$i', og_description='$d', og_fetched_at=NOW() WHERE explicationID=$id");
 }
 ?>
