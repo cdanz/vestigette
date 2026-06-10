@@ -33,16 +33,45 @@ ALTER TABLE EXPLICATION
   ADD COLUMN IF NOT EXISTS og_description TEXT DEFAULT NULL,
   ADD COLUMN IF NOT EXISTS og_fetched_at TIMESTAMP NULL DEFAULT NULL;
 
--- Step 3b: Fix promoteExplication and newExplication to use named columns (avoids column-order issues)
+-- Step 3b: promoteExplication — creates EXPLICATION row and auto-creates
+-- EXPLICATION_ENDORSE for the creator (fixes gap where ranking system had no
+-- weight data for newly submitted explications).
+-- UPDATE branch: ensures creator endorsement exists and is active after URL change.
+-- INSERT branch: creates both rows atomically.
 DROP PROCEDURE IF EXISTS promoteExplication;
 DELIMITER //
 CREATE PROCEDURE promoteExplication(argID INT UNSIGNED, proID INT UNSIGNED, link VARCHAR(300))
 BEGIN
+    DECLARE thisExplID INT DEFAULT NULL;
+
     IF (EXISTS(SELECT * FROM EXPLICATION WHERE argumentID = argID AND profileID = proID)) THEN
-        UPDATE EXPLICATION SET hyperlink = link, lastVisit = CURRENT_TIMESTAMP, og_title = NULL, og_image = NULL, og_description = NULL, og_fetched_at = NULL WHERE argumentID = argID AND profileID = proID;
+        UPDATE EXPLICATION
+        SET hyperlink = link, lastVisit = CURRENT_TIMESTAMP,
+            og_title = NULL, og_image = NULL, og_description = NULL, og_fetched_at = NULL
+        WHERE argumentID = argID AND profileID = proID;
+
+        SELECT explicationID INTO thisExplID
+        FROM EXPLICATION WHERE argumentID = argID AND profileID = proID;
+
+        IF NOT EXISTS(SELECT 1 FROM EXPLICATION_ENDORSE
+                      WHERE explicationID = thisExplID AND profileID = proID) THEN
+            INSERT INTO EXPLICATION_ENDORSE (explicationID, argumentID, profileID, weight, active)
+            VALUES (thisExplID, argID, proID, 100, TRUE);
+        ELSE
+            UPDATE EXPLICATION_ENDORSE SET active = TRUE
+            WHERE explicationID = thisExplID AND profileID = proID;
+        END IF;
+
     ELSE
-        INSERT INTO EXPLICATION (argumentID, profileID, hyperlink, publisher, authorFName, authorLName, title, metaPub, metaName, metaWildcard, firstVisit, lastVisit, active)
-        VALUES (argID, proID, link, '', '', '', '', '', '', '', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, TRUE);
+        INSERT INTO EXPLICATION (argumentID, profileID, hyperlink, publisher, authorFName,
+            authorLName, title, metaPub, metaName, metaWildcard, firstVisit, lastVisit, active)
+        VALUES (argID, proID, link, '', '', '', '', '', '', '',
+            CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, TRUE);
+
+        SET thisExplID = LAST_INSERT_ID();
+
+        INSERT INTO EXPLICATION_ENDORSE (explicationID, argumentID, profileID, weight, active)
+        VALUES (thisExplID, argID, proID, 100, TRUE);
     END IF;
 END //
 DELIMITER ;

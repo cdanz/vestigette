@@ -50,6 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     $allWeighted = []; // [{argID, weight, reciprocate}]
+    $newArgIDs   = []; // argIDs created fresh in this session (for bot queue)
 
     // ── Step 1: create new args ───────────────────────────────────────────────
     foreach ($items as $item) {
@@ -86,6 +87,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             while (mysqli_more_results($db)) { mysqli_next_result($db); if ($r = mysqli_store_result($db)) mysqli_free_result($r); }
 
             $allWeighted[] = ['argID' => $freshArgID, 'weight' => $weight, 'reciprocate' => $recip];
+            $newArgIDs[]   = $freshArgID;
 
         } elseif ($itemType === 'existing') {
             $allWeighted[] = [
@@ -154,6 +156,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
+    // ── Step 5: queue new arguments for bot seeding ──────────────────────────
+    // Uses the normalized weight from $allWeighted so the threshold check in
+    // the queue processor reflects what the user actually assigned.
+    if (!empty($newArgIDs)) {
+        $safeEndorseType = mysqli_real_escape_string($db, $postType);
+        foreach ($allWeighted as $w) {
+            if (in_array($w['argID'], $newArgIDs)) {
+                mysqli_query($db,
+                    "INSERT INTO BOT_SEED_QUEUE
+                         (argumentID, createdBy, parentArgID, parentWeight, endorseType)
+                     VALUES ({$w['argID']}, $profileID, $postArgID, {$w['weight']}, '$safeEndorseType')"
+                );
+            }
+        }
+    }
+
     mysqli_close($db);
     header('Location: /?arg=' . $postArgID);
     exit;
@@ -172,7 +190,8 @@ if ($row) $focalPhrasing = $row[0];
 
 // ── GET: fetch neighborhood ───────────────────────────────────────────────────
 $results = [];
-$sql = "CALL getNeighborhood($argID)";
+$safeType = mysqli_real_escape_string($db, $type);
+$sql = "CALL getNeighborhood($argID, '$safeType')";
 if (mysqli_multi_query($db, $sql)) {
     $result = mysqli_store_result($db);
     if ($result && mysqli_num_rows($result) > 0) {
