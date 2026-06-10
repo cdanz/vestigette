@@ -338,6 +338,23 @@ function init() {
 		});
 	}
 
+	// Header phrasing: when the text is clamped/overflowing, reveal a "(more)"
+	// link that opens the phrasing modal so the full text is reachable.
+	let argPhrasingEl = document.querySelector(".arg-phrasing");
+	let phrasingMore  = document.querySelector(".arg-phrasing-more");
+	if (argPhrasingEl && phrasingMore) {
+		if (argPhrasingEl.scrollHeight > argPhrasingEl.clientHeight + 2) {
+			phrasingMore.classList.remove("hidden");
+		}
+		phrasingMore.addEventListener("click", function(evt) {
+			evt.preventDefault();
+			if (overlayP && putforth) {
+				overlayP.classList.toggle("hidden");
+				putforth.classList.toggle("hidden");
+			}
+		});
+	}
+
 
 	// edit entry when you are the only endorser
 	let rewriteEl = document.querySelectorAll(".rewrite");
@@ -382,6 +399,77 @@ function init() {
 			links.classList.toggle("hidden");
 		});
 	}
+
+	// ── Explication carousel ────────────────────────────────────────────────
+	document.querySelectorAll('.carousel-box').forEach(function(box) {
+		var track = box.querySelector('.carousel-track');
+		if (!track) return;                                  // 0 links — nothing to do
+
+		var inner   = track.querySelector('.carousel-slides');
+		var slides  = inner ? inner.querySelectorAll('.carousel-slide') : [];
+		var total   = slides.length;
+		if (total <= 1) return;                              // 1 link — no nav needed
+
+		var prevBtn  = box.querySelector('.carousel-prev');
+		var nextBtn  = box.querySelector('.carousel-next');
+		var countEl  = box.querySelector('.carousel-count');
+		var label    = countEl ? (countEl.dataset.label || '') : '';
+		var current  = 0;
+
+		// Size the track to the visible slide so short slides don't inherit the
+		// tallest slide's height (which left a gap above the nav arrows).
+		function fit() {
+			if (slides[current]) track.style.height = slides[current].offsetHeight + 'px';
+		}
+
+		function goTo(n) {
+			current = ((n % total) + total) % total;
+			inner.style.transform = 'translateX(-' + (current * 100) + '%)';
+			if (countEl) countEl.textContent = (current + 1) + ' of ' + total + (label ? ' ' + label : '');
+			fit();
+		}
+
+		fit();
+		window.addEventListener('resize', fit);
+
+		if (prevBtn) prevBtn.addEventListener('click', function() { goTo(current - 1); });
+		if (nextBtn) nextBtn.addEventListener('click', function() { goTo(current + 1); });
+
+		// Touch / swipe — horizontal gesture navigates; tap falls through to the link
+		var touchStartX = 0;
+		var touchStartY = 0;
+		var swipeFired  = false;
+
+		track.addEventListener('touchstart', function(e) {
+			touchStartX = e.touches[0].clientX;
+			touchStartY = e.touches[0].clientY;
+			swipeFired  = false;
+		}, { passive: true });
+
+		// Claim horizontal moves early so the browser never scrolls overflowed content
+		track.addEventListener('touchmove', function(e) {
+			var dx = e.touches[0].clientX - touchStartX;
+			var dy = e.touches[0].clientY - touchStartY;
+			if (Math.abs(dx) > Math.abs(dy)) {
+				e.preventDefault();
+			}
+		}, { passive: false });
+
+		track.addEventListener('touchend', function(e) {
+			var dx = e.changedTouches[0].clientX - touchStartX;
+			var dy = e.changedTouches[0].clientY - touchStartY;
+			if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) {
+				swipeFired = true;
+				e.preventDefault();                          // suppress the follow-on click
+				goTo(dx < 0 ? current + 1 : current - 1);
+			}
+		}, { passive: false });
+
+		// Belt-and-suspenders: swallow click if a swipe just happened
+		track.addEventListener('click', function(e) {
+			if (swipeFired) { e.preventDefault(); swipeFired = false; }
+		}, true);
+	});
 
 
 	// ─── Form validation helpers ────────────────────────────────────────────────
@@ -463,13 +551,25 @@ function init() {
 		explicInput.addEventListener('input', function() { clearValidationError(explicError); });
 	}
 
-	// ─── Find sub-section toggles ────────────────────────────────────────────
+	// ─── Find sub-section accordion ──────────────────────────────────────────
+	// Only one sub-section open at a time. Clicking a collapsed header opens it
+	// and closes the others; clicking the open header collapses it (none open).
 	document.querySelectorAll('.find-toggle').forEach(function(toggle) {
 		toggle.addEventListener('click', function() {
 			let content = this.nextElementSibling;
-			if (content) {
-				content.classList.toggle('collapsed');
-				this.classList.toggle('collapsed');
+			if (!content) return;
+			let wasCollapsed = content.classList.contains('collapsed');
+			// Collapse every sub-section first
+			document.querySelectorAll('#find .find-content').forEach(function(c) {
+				c.classList.add('collapsed');
+			});
+			document.querySelectorAll('#find .find-toggle').forEach(function(t) {
+				t.classList.add('collapsed');
+			});
+			// If the clicked one was collapsed, open it (others remain collapsed)
+			if (wasCollapsed) {
+				content.classList.remove('collapsed');
+				this.classList.remove('collapsed');
 			}
 		});
 	});
@@ -786,13 +886,9 @@ function resize(why) {
 			acc[i].classList.add('listening');
 		}
 	}
-	//Grow main phrasing if character count is low
-	let phrasing = document.querySelector("#argument .panel p");
-	if (phrasing && phrasing.innerText.length < 20) { //if phrasing is null it should evaluate to false and skip this
-		phrasing.style.fontSize = "2rem";
-	} else if (phrasing && phrasing.innerText.length < 75) { //same as previous. avoid nulls at checkpoint
-		phrasing.style.fontSize = "1.5rem";
-	}
+	// (Removed the old "grow main phrasing" logic — the phrasing now lives in the
+	// header with a fixed size, and the panel <p> is carousel/helper text that must
+	// not be resized.)
 }
 
 

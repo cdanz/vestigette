@@ -350,10 +350,146 @@ button.hidden {
 	background-color:var(--cddbGreen);
 }
 #argument.container {
-	align-items: center;
+	align-items: stretch;
 	border-color: var(--cddbWhite);
 	display: flex;
+	flex-flow: column nowrap;
+	justify-content: flex-start;
+}
+
+/* ── Argument header: phrasing + verdict always visible, above the panel ── */
+#argument .arg-header {
+	box-sizing: border-box;
+	display: flex;
+	flex-flow: row nowrap;
+	align-items: stretch;
+	gap: 0.75rem;
+	width: 100%;
+	padding: 0.5rem;
+}
+#argument .arg-header-text {
+	display: flex;
+	flex-flow: column nowrap;
 	justify-content: space-between;
+	flex: 1 1 auto;
+	min-width: 0;
+}
+#argument .arg-phrasing {
+	margin: 0;
+	font-size: 1.3rem;
+	font-weight: bold;
+	line-height: 1.25;
+	color: var(--cddbWhite);
+	display: -webkit-box;
+	-webkit-line-clamp: 5;
+	-webkit-box-orient: vertical;
+	overflow: hidden;
+}
+#argument .arg-meta {
+	display: flex;
+	flex-flow: row nowrap;
+	align-items: center;
+	gap: 0.5rem;
+	margin-top: 0.4rem;
+}
+#argument .arg-id {
+	font-size: 0.7rem;
+	letter-spacing: 0.03em;
+	color: var(--cddbGrey);
+}
+#argument .arg-phrasing-wrap {
+	display: block;
+	position: relative;
+}
+#argument .arg-phrasing-more {
+	background: var(--cddbBlack);
+	bottom: 0;
+	color: var(--cddbWhite);
+	cursor: pointer;
+	font-size: 1rem;
+	font-weight: bold;
+	padding-left: 0.4rem;
+	position: absolute;
+	right: 0;
+	text-decoration: underline;
+}
+#argument .arg-phrasing-more.hidden {
+	display: none;
+}
+#argument .arg-header-side {
+	display: flex;
+	flex-flow: column nowrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: 0.6rem;
+	flex: 0 0 auto;
+}
+#argument .arg-rate {
+	display: flex;
+	flex-flow: column nowrap;
+	align-items: center;
+	gap: 0.3rem;
+	line-height: 1.05;
+}
+#argument .arg-rate-num {
+	font-size: 1.7rem;
+	font-weight: bold;
+	color: var(--cddbWhite);
+}
+#argument .arg-rate-detail {
+	font-size: 0.6rem;
+	color: var(--cddbGrey);
+	white-space: nowrap;
+}
+#argument .arg-header-side .opinion {
+	display: flex;
+	flex: 0 0 auto;          /* fixed — does not stretch with phrasing length */
+}
+#argument .arg-header-side .opinion form {
+	display: flex;
+	flex-flow: row nowrap;
+	gap: 0;
+}
+#argument .arg-header-side .opinion button {
+	align-items: center;
+	display: flex;
+	height: 3.4rem;          /* consistent regardless of phrasing length */
+	justify-content: center;
+	padding: 0.3rem 0.4rem;
+	width: 2.7rem;
+}
+#argument .arg-header-side .opinion button svg {
+	width: 26px;
+	height: 26px;
+}
+/* ── Shared carousel-box layout (phrasing + explication panels) ──────────── */
+#argument .panel .carousel-box {
+	align-items: stretch;
+	display: flex;
+	flex-flow: row nowrap;
+	width: 100%;
+}
+#argument .panel .carousel-box:not(:last-child) {
+	margin-bottom: 0.5rem;
+}
+#argument .panel .carousel-box .phrasing-slide {
+	border: 2px var(--cddbLiteGrey) solid;
+	box-sizing: border-box;
+	color: var(--cddbBlack);
+	font-size: 1rem;
+	margin: 0.3rem;
+	overflow-wrap: break-word;
+	padding: 0.4rem;
+	width: calc(100% - 0.6rem);
+}
+#argument .panel .carousel-box .carousel-empty {
+	border: 0;
+	color: var(--cddbGrey);
+	font-size: 0.85rem;
+	margin: 0;
+	padding: 0.6rem 0.5rem;
+	text-align: left;
+	width: 100%;
 }
 #find.container {
 	color: var(--cddbBlack);
@@ -486,13 +622,6 @@ button.hidden {
 	padding: 0.4rem 1rem;
 	user-select: none;
 	width: 100%;
-}
-.find-toggle::after {
-	content: ' ▾';
-	float: right;
-}
-.find-toggle.collapsed::after {
-	content: ' ▸';
 }
 .find-content.collapsed {
 	display: none;
@@ -824,7 +953,8 @@ body.flesh-out-page .flesh-footer button:hover:not(:disabled) {
 	color: var(--cddbGrey);
 }
 #argument .panel {
-	flex-flow: row wrap;
+	flex-flow: column nowrap;
+	justify-content: flex-start;
 }
 #argument .panel .rate_phrase {
 	align-items: center;
@@ -953,31 +1083,122 @@ body.flesh-out-page .flesh-footer button:hover:not(:disabled) {
 	margin-top: auto;
 	margin-bottom: auto;
 }
+/* explicationBox inherits `display:flex; flex-flow:row nowrap` from .container div.
+   We only force align-items:stretch so the ⌘ button stretches to full height. */
 #argument .panel .explicationBox {
-	align-items: center;
-	min-height: 4rem;
+	align-items: stretch;
 	width: 100%;
 }
-.altExplicationBtn {
-	margin-left: auto;
+
+/* ── Left side: card + nav stacked vertically ─────────────────────────── */
+/* High specificity (1,3,0) needed to beat .container div (0,1,1)          */
+#argument .panel .carousel-box .carousel-content {
+	align-items: stretch;  /* override .container div's flex-start so footer spans full width */
+	display: flex;
+	flex: 1 1 0;          /* basis 0 → fills available width, not content width */
+	flex-direction: column;
+	min-width: 0;
+	overflow: hidden;
 }
-.explicationBox a {
+
+/* ── Carousel track ───────────────────────────────────────────────────── */
+/* High specificity (1,3,0) needed to beat .container div (0,1,1)          */
+#argument .panel .carousel-box .carousel-track {
+	display: block;
+	overflow: hidden;
+	touch-action: pan-y;
+	transition: height 0.25s ease;
+	width: 100%;
+}
+.carousel-slides {
+	align-items: flex-start;  /* slides keep their natural height instead of all matching the tallest */
+	display: flex;
+	transition: transform 0.25s ease;
+	width: 100%;          /* definite width so slide flex-basis:100% resolves to viewport, not max-content */
+	will-change: transform;
+}
+.carousel-slide {
+	box-sizing: border-box;
+	flex: 0 0 100%;
+	max-width: 100%;
+	min-width: 0;
+	overflow: hidden;
+}
+#argument .panel .explicationBox .carousel-slide a:not(.link-preview) {
 	border: 2px var(--cddbLiteGrey) solid;
+	box-sizing: border-box;
+	display: block;
+	margin: 0.3rem;
+	padding: 0.3rem;
+	width: calc(100% - 0.6rem);
+	word-break: break-all;
+}
+
+/* ── Carousel nav bar — centered below the card ───────────────────────── */
+#argument .panel .carousel-box .carousel-footer {
+	align-items: center;
+	display: flex;
+	gap: 0.4rem;
+	justify-content: center;
+	padding-top: 0.25rem;
+}
+
+/* Override the half-circle panel button style for carousel nav only */
+#argument .panel .carousel-prev,
+#argument .panel .carousel-next {
+	align-self: auto;
+	background: transparent;
+	border: 1px solid var(--cddbLiteGrey);
+	border-radius: 4px;
+	color: var(--cddbBlack);
+	cursor: pointer;
+	font-size: 0.8rem;
+	font-weight: normal;
+	height: auto;
+	line-height: 1.4;
+	min-width: 0;
+	padding: 0.2rem 0.6rem;
+}
+#argument .panel .carousel-prev:hover,
+#argument .panel .carousel-next:hover {
+	border-color: var(--cddbBlack);
+}
+.carousel-count {
+	color: var(--cddbLiteGrey);
+	font-size: 0.75rem;
+}
+
+/* ── ✎ / ⌘ buttons: half-circle dialog-openers, identical for both rows ── */
+/* flex:none keeps them at min-width instead of growing.                    */
+#argument .panel .altExplicationBtn,
+#argument .panel .altPhraseBtn {
+	align-items: center;
+	display: flex;
+	flex: none;
+	justify-content: center;
+}
+
+/* Plain link (non-OG) inside carousel */
+.explicationBox > a {
+	border: 2px var(--cddbLiteGrey) solid;
+	box-sizing: border-box;
+	display: block;
 	margin: 0.3rem;
 	padding: 0.3rem;
 	width: 100%;
 	word-break: break-all;
-	/* overflow-wrap: break-word;  apparently not relevant in this case */
 }
 /* Link preview card (OG meta) */
 .explicationBox a.link-preview {
+	box-sizing: border-box;
 	display: grid;
-	grid-template-columns: 140px 1fr;
+	grid-template-columns: 100px 1fr;
 	border: 1px solid var(--cddbLiteGrey);
 	border-radius: 4px;
 	overflow: hidden;
 	text-decoration: none;
 	color: inherit;
+	width: 100%;
 	word-break: normal;
 	padding: 0;
 }
@@ -4294,11 +4515,10 @@ input:checked + .toggle:before {
 	#argument .panel {
 		flex-flow: column nowrap;
 		justify-content: flex-start;
-		height: 42.75vh;
-		max-height: 42.75vh;
-	}
-	#argument .panel .rate_phrase {
-		margin-bottom: 1.5rem;
+		flex: 1 1 auto;
+		min-height: 0;
+		max-height: 100%;
+		overflow: auto;
 	}
 	.panel li {
 		min-height: 3rem;
