@@ -32,4 +32,19 @@
 
   //Be skeptical of this. Claude added on 09.05.2026
   $mysqli = $db; // Create $mysqli alias for compatibility with existing queries
+
+  // Restore session from rememberMe cookie if session has expired
+  if (isset($_COOKIE['rememberMe']) && !isset($_SESSION['profile'])) {
+    $rm_stmt = $db->prepare(
+      "SELECT profileID, email FROM REMEMBER_ME WHERE token = ? AND expiry > NOW()"
+    );
+    $rm_stmt->bind_param("s", $_COOKIE['rememberMe']);
+    $rm_stmt->execute();
+    $rm_row = $rm_stmt->get_result()->fetch_assoc();
+    $rm_stmt->close();
+    if ($rm_row) {
+      $_SESSION['profile'] = $rm_row['profileID'];
+      $_SESSION['email']   = $rm_row['email'];
+    }
+  }
 ?>

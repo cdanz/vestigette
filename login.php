@@ -23,7 +23,10 @@ if (isset($_POST['email']) && isset($_POST['password'])) {
 		// Keep me logged in — store token in REMEMBER_ME and set cookie
 		if (isset($_POST['keepLoggedIn'])) {
 			$token = bin2hex(random_bytes(32));
-			$stmt2 = $db->prepare("INSERT INTO REMEMBER_ME (profileID, email, token) VALUES (?, ?, ?)");
+			$stmt2 = $db->prepare(
+				"INSERT INTO REMEMBER_ME (profileID, email, token, expiry)
+				 VALUES (?, ?, ?, DATE_ADD(NOW(), INTERVAL 30 DAY))"
+			);
 			$stmt2->bind_param("iss", $row['profileID'], $email, $token);
 			$stmt2->execute();
 			$stmt2->close();
