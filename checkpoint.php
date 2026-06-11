@@ -49,7 +49,8 @@ function generateTypeLines($results) {
 //   hop 1 (direct neighbors, score 10000) → hop 2 (score 100) → hop 3 (score 1)
 //   → unvisited args by degree centrality (most connected first)
 // Replaces: getAssociated + getAggrEndorse + getAllTheRest + PHP BFS traversal
-$sql = "CALL getNeighborhood($argID)";
+$safeType = mysqli_real_escape_string($db, $type);
+$sql = "CALL getNeighborhood($argID, '$safeType')";
 
 $results = array();
 if (mysqli_multi_query($db, $sql)) {

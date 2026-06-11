@@ -14,12 +14,12 @@ if($_POST['csrfToken'] != $_SESSION['csrfToken']) {
 }
 /*
 $_SESSION['currentArg'] = 77;
-$baseURL = "/index.php";
+$baseURL = "/";
 $argID = $_SESSION['currentArg'];
 //$type = strtolower($_POST["type"]);
 $type = 'because'; //TESTING
 if(!isset($_SESSION['profile'])){
-	header('Location: /index.php?arg='.$_SESSION['currentArg']);
+	header('Location: /?arg='.$_SESSION['currentArg']);
 }
 include("${_SERVER['DOCUMENT_ROOT']}/includes/dbconnect.php");
 require_once("${_SERVER['DOCUMENT_ROOT']}/query_current_argument.php");
@@ -42,7 +42,7 @@ function generateTypeLines($results) {
 				echo "			<li class=\"lineItem\" data-arg-id=\"${line[0]}\">
 					<p class=\"assocArg\">".htmlspecialchars($line[2])."</p>
 					<div class=\"opinion\">
-					<form method=\"POST\" class=\"buttons\" action=\"index.php?arg=".$argID."\">
+					<form method=\"POST\" class=\"buttons\" action=\"/?arg=".$argID."\">
 						<input type=\"hidden\" name=\"useInstead\" value=\"${line[0]}\" /> 
 						<input type=\"hidden\" name=\"type\" value=\"".$type."\" />
 						<button type=\"submit\" class=\"button instead\" name=\"buttonClicked\" value=\"useInstead\">Use Instead</button>

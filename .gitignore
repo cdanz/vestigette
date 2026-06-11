@@ -1,11 +1,16 @@
 # Sensitive configuration
 includes/config.local.php
+persona_credentials.json
+.env
 
 # Database dumps (allow procedure definition scripts)
 *.sql
 !*_procedures.sql
 !*_seed.sql
 dumps/
+
+# Agent / session data
+.claude/
 
 # System files
 .DS_Store
