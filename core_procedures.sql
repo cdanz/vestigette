@@ -175,3 +175,59 @@ BEGIN
     END IF;
 END //
 DELIMITER ;
+
+-- ── rebalanceRecentRejections ───────────────────────────────────────────────
+-- Called from assertOpinion's reject branch. When a user rejects argID, every
+-- endorsement where they used argID as a SUPPORT is removed and the remaining
+-- weights in each affected target distribution are renormalised back to 100%.
+--
+-- Each WHILE loop MUST be scoped to its own endorseType. The previous version
+-- used an unscoped condition (WHILE EXISTS(... supportingArgID=argID AND
+-- profileID=proID)) while the body only deleted 'Because' rows, so once the
+-- Because supports were gone but Therefore/Rebuttal supports remained, the
+-- condition stayed true forever (argToBalance went NULL, the DELETE matched
+-- nothing) — an infinite loop that pegged a CPU and hung the request.
+DROP PROCEDURE IF EXISTS rebalanceRecentRejections;
+DELIMITER //
+CREATE PROCEDURE rebalanceRecentRejections(argID INT UNSIGNED, proID INT UNSIGNED)
+BEGIN
+    DECLARE weightToCut decimal(8,5);
+    DECLARE argToBalance int(10) unsigned;
+
+    WHILE EXISTS(SELECT 1 FROM ENDORSEMENT WHERE supportingArgID = argID AND profileID = proID AND endorseType = 'Because') DO
+        SELECT weight, targArgID INTO weightToCut, argToBalance
+            FROM ENDORSEMENT
+            WHERE supportingArgID = argID AND profileID = proID AND endorseType = 'Because'
+            ORDER BY targArgID DESC LIMIT 1;
+        DELETE FROM ENDORSEMENT
+            WHERE targArgID = argToBalance AND profileID = proID AND supportingArgID = argID AND endorseType = 'Because';
+        UPDATE ENDORSEMENT
+            SET weight = (weight/(100-weightToCut))*100
+            WHERE targArgID = argToBalance AND profileID = proID AND endorseType = 'Because';
+    END WHILE;
+
+    WHILE EXISTS(SELECT 1 FROM ENDORSEMENT WHERE supportingArgID = argID AND profileID = proID AND endorseType = 'Therefore') DO
+        SELECT weight, targArgID INTO weightToCut, argToBalance
+            FROM ENDORSEMENT
+            WHERE supportingArgID = argID AND profileID = proID AND endorseType = 'Therefore'
+            ORDER BY targArgID DESC LIMIT 1;
+        DELETE FROM ENDORSEMENT
+            WHERE targArgID = argToBalance AND profileID = proID AND supportingArgID = argID AND endorseType = 'Therefore';
+        UPDATE ENDORSEMENT
+            SET weight = (weight/(100-weightToCut))*100
+            WHERE targArgID = argToBalance AND profileID = proID AND endorseType = 'Therefore';
+    END WHILE;
+
+    WHILE EXISTS(SELECT 1 FROM ENDORSEMENT WHERE supportingArgID = argID AND profileID = proID AND endorseType = 'Rebuttal') DO
+        SELECT weight, targArgID INTO weightToCut, argToBalance
+            FROM ENDORSEMENT
+            WHERE supportingArgID = argID AND profileID = proID AND endorseType = 'Rebuttal'
+            ORDER BY targArgID DESC LIMIT 1;
+        DELETE FROM ENDORSEMENT
+            WHERE targArgID = argToBalance AND profileID = proID AND supportingArgID = argID AND endorseType = 'Rebuttal';
+        UPDATE ENDORSEMENT
+            SET weight = (weight/(100-weightToCut))*100
+            WHERE targArgID = argToBalance AND profileID = proID AND endorseType = 'Rebuttal';
+    END WHILE;
+END //
+DELIMITER ;
