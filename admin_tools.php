@@ -116,6 +116,16 @@ if (isset($_POST['adminAction'])) {
 			mysqli_close($db);
 			header("Location: /admin_tools.php?arg=$arg");
 			exit;
+
+		case 'resolveFlags':
+			$flagArgID = intval($_POST['flagArgID'] ?? 0);
+			if ($flagArgID > 0) {
+				mysqli_query($db, "CALL resolveArgumentFlags($flagArgID, $realProfileID)");
+				while (mysqli_more_results($db)) { mysqli_next_result($db); }
+			}
+			mysqli_close($db);
+			header("Location: /admin_tools.php?arg=$arg&resolved=$flagArgID");
+			exit;
 	}
 }
 
@@ -140,6 +150,36 @@ $inviteResult = mysqli_query($db,
 	 LIMIT 100");
 $invites = [];
 while ($row = mysqli_fetch_assoc($inviteResult)) { $invites[] = $row; }
+
+// Load active flags, grouped by argument (newest flag first within each group)
+$flagResult = mysqli_query($db,
+	"SELECT f.argumentID, a.currentPhrasing, f.profileID,
+	        CONCAT(up.firstName, ' ', up.lastName) AS flaggerName,
+	        f.reasonCategory, f.comment, f.createdAt
+	 FROM ARGUMENT_FLAG f
+	 JOIN ARGUMENT a ON a.argumentID = f.argumentID
+	 LEFT JOIN USER_PROFILE up ON up.profileID = f.profileID
+	 WHERE f.isActive = 1
+	 ORDER BY f.createdAt DESC");
+$flagged = [];
+while ($row = mysqli_fetch_assoc($flagResult)) {
+	$aid = intval($row['argumentID']);
+	if (!isset($flagged[$aid])) {
+		$flagged[$aid] = ['argumentID' => $aid, 'phrasing' => $row['currentPhrasing'], 'flags' => []];
+	}
+	$flagged[$aid]['flags'][] = $row;
+}
+// Most-flagged argument first
+uasort($flagged, fn($a, $b) => count($b['flags']) <=> count($a['flags']));
+
+$flagCatLabels = [
+	'offensive'         => 'Offensive / inappropriate',
+	'phrasing_mismatch' => 'Phrasing mismatch',
+	'duplicate_assoc'   => 'Duplicated associations',
+	'spam'              => 'Spam / off-topic',
+	'incoherent'        => 'Incomprehensible',
+	'other'             => 'Other',
+];
 
 mysqli_close($db);
 ?>
@@ -169,6 +209,15 @@ mysqli_close($db);
 		hr.divider { border: none; border-top: 1px solid #eee; margin: 1rem 0; }
 		nav { margin-bottom: 1.25rem; font-size: 0.875rem; }
 		nav a { margin-right: 1.25rem; }
+		.flag-card { border: 1px solid #ddd; border-radius: 4px; margin: 0.5rem 0; background: #fff; }
+		.flag-card summary { cursor: pointer; padding: 0.5rem 0.75rem; list-style: none; display: flex; align-items: baseline; gap: 0.6rem; }
+		.flag-card summary::-webkit-details-marker { display: none; }
+		.flag-count { display: inline-block; min-width: 1.5rem; text-align: center; background: #af1a17; color: #fff; border-radius: 10px; font-size: 0.8rem; font-weight: bold; padding: 0.05rem 0.4rem; }
+		.flag-arg { font-size: 0.9rem; }
+		.flag-card-body { padding: 0 0.75rem 0.75rem; }
+		.flag-card-body table { width: 100%; border-collapse: collapse; font-size: 0.82rem; margin: 0.4rem 0 0.6rem; }
+		.flag-card-body th, .flag-card-body td { text-align: left; padding: 0.3rem 0.5rem; border-bottom: 1px solid #eee; vertical-align: top; }
+		.flag-cat-tag { display: inline-block; background: #eee; border-radius: 3px; padding: 0.05rem 0.4rem; font-size: 0.78rem; white-space: nowrap; }
 	</style>
 </head>
 <body>
@@ -328,6 +377,54 @@ mysqli_close($db);
 	<?php endforeach; ?>
 	</tbody>
 </table>
+<?php endif; ?>
+
+<hr class="divider">
+
+<!-- ── Flagged Arguments ─────────────────────── -->
+<h2>Flagged Arguments</h2>
+<p class="desc">Arguments users have flagged, most-flagged first. Expand a row to see each flag, then resolve them all in one click. Resolved flags are kept for audit.</p>
+
+<?php if (isset($_GET['resolved'])): ?>
+<div class="notice">Flags resolved for argument #<?php echo intval($_GET['resolved']); ?>.</div>
+<?php endif; ?>
+
+<?php if (empty($flagged)): ?>
+<p class="desc">No active flags.</p>
+<?php else: ?>
+<?php foreach ($flagged as $fa): $cnt = count($fa['flags']); ?>
+<details class="flag-card">
+	<summary>
+		<span class="flag-count"><?php echo $cnt; ?></span>
+		<span class="flag-arg">#<?php echo $fa['argumentID']; ?> — <?php echo htmlspecialchars($fa['phrasing']); ?></span>
+	</summary>
+	<div class="flag-card-body">
+		<p><a href="/?arg=<?php echo $fa['argumentID']; ?>" target="_blank">View argument ↗</a></p>
+		<table>
+			<thead>
+				<tr><th>Who</th><th>Reason</th><th>Comment</th><th>When</th></tr>
+			</thead>
+			<tbody>
+			<?php foreach ($fa['flags'] as $fl):
+				$catLabel = $flagCatLabels[$fl['reasonCategory']] ?? $fl['reasonCategory'];
+			?>
+				<tr>
+					<td><?php echo htmlspecialchars(trim($fl['flaggerName']) ?: ('#' . $fl['profileID'])); ?></td>
+					<td><span class="flag-cat-tag"><?php echo htmlspecialchars($catLabel); ?></span></td>
+					<td><?php echo $fl['comment'] !== null && $fl['comment'] !== '' ? htmlspecialchars($fl['comment']) : '<span style="color:#aaa;">—</span>'; ?></td>
+					<td style="white-space:nowrap;"><?php echo date('M j, Y', strtotime($fl['createdAt'])); ?></td>
+				</tr>
+			<?php endforeach; ?>
+			</tbody>
+		</table>
+		<form method="POST" action="/admin_tools.php?arg=<?php echo $arg; ?>" style="margin:0;">
+			<input type="hidden" name="adminAction" value="resolveFlags">
+			<input type="hidden" name="flagArgID" value="<?php echo $fa['argumentID']; ?>">
+			<button type="submit" onclick="return confirm('Resolve all <?php echo $cnt; ?> flag(s) for argument #<?php echo $fa['argumentID']; ?>?')">Resolve all flags</button>
+		</form>
+	</div>
+</details>
+<?php endforeach; ?>
 <?php endif; ?>
 
 </body>
