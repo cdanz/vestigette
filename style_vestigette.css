@@ -636,10 +636,11 @@ button.hidden {
 }
 .find-toggle {
 	background-color: var(--cddbBlack);
+	border-bottom: 1px solid var(--cddbGrey);
 	color: var(--cddbWhite);
 	cursor: pointer;
 	font-weight: bold;
-	padding: 0.4rem 1rem;
+	padding: 0.75rem 1rem;
 	user-select: none;
 	width: 100%;
 }
@@ -4556,7 +4557,8 @@ input:checked + .toggle:before {
 	.panel li {
 		min-height: 3rem;
 	}
-	.panel p {
+	.panel p,
+	.find li {
 		font-size: 0.9rem;
 	}
 	.pointBtn {
