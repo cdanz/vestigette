@@ -49,11 +49,6 @@ else {
 	$arr = array($_SESSION['currentArg'],$opinion,$phrasing);
 	array_push($_SESSION['history'],$arr);
 }
-//To aid in seeding with fake user endorsements - display profile for those users
-if (isset($_SESSION['profile']) && ($_SESSION['profile'] < 26)) {
-	echo "Seed User: ".$_SESSION['profile'];
-}
-//End of seeding ids
 $baseURL = "/";
 $arg = isset($_SESSION['currentArg']) ? $_SESSION['currentArg'] : null;
 $profile = isset($_SESSION['profile']) ? $_SESSION['profile'] : null;
