@@ -1,10 +1,66 @@
--- Core argument graph procedures (getAssociated, getMostEndorsed, getHeterodox)
+-- Core argument graph procedures (getAssociated, getMostEndorsed, getHeterodox,
+-- assertOpinion, rebalanceRecentRejections, prepareForNewEndorse, resolveOldWithNewEndorse)
 -- These were rewritten to fix a MySQL 5.7 correlated-subquery bug: derived tables
 -- that are materialized cannot reference outer aliases, so phrasing lookups were
 -- moved out of derived tables and into direct JOIN ARGUMENT + inline COALESCE.
 -- Run against the vestigette database to restore after a DB reset.
 
 USE vestigette;
+
+-- assertOpinion: called on every accept/reject. Handles first-time opinions and
+-- flips. On flip, toggles active state of ENDORSEMENT, PHRASE_ENDORSE, EXPLICATION,
+-- and EXPLICATION_ENDORSE rows. updatePhrasingCache is called on both flip branches.
+-- EXPLICATION_ENDORSE toggle added 2026-06-05 to match EXPLICATION toggle.
+DROP PROCEDURE IF EXISTS assertOpinion;
+DELIMITER //
+CREATE PROCEDURE assertOpinion(op INT, argID INT UNSIGNED, proID INT UNSIGNED)
+BEGIN
+    IF NOT EXISTS(SELECT * FROM OPINION WHERE argumentID = argID AND profileID = proID) THEN
+        IF op = 1 THEN
+            INSERT INTO OPINION VALUES (argID, proID, TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+        ELSE
+            INSERT INTO OPINION VALUES (argID, proID, FALSE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+        END IF;
+    ELSEIF (EXISTS(SELECT * FROM OPINION WHERE argumentID = argID AND profileID = proID AND acceptance = FALSE) AND op = 1) THEN
+        UPDATE OPINION
+            SET acceptance = TRUE, lastVisit = CURRENT_TIMESTAMP
+                WHERE argumentID = argID AND profileID = proID;
+        UPDATE ENDORSEMENT
+            SET active = TRUE, lastVisit = CURRENT_TIMESTAMP
+                WHERE targArgID = argID AND profileID = proID AND (endorseType = 'Because' OR endorseType = 'Therefore');
+        UPDATE ENDORSEMENT
+            SET active = FALSE, lastVisit = CURRENT_TIMESTAMP
+                WHERE targArgID = argID AND profileID = proID AND endorseType = 'Rebuttal';
+        IF (EXISTS(SELECT * FROM PHRASE_ENDORSE WHERE argumentID = argID AND profileID = proID)) THEN
+            UPDATE PHRASE_ENDORSE SET active = TRUE WHERE argumentID = argID AND profileID = proID;
+        END IF;
+        IF (EXISTS(SELECT * FROM EXPLICATION WHERE argumentID = argID AND profileID = proID)) THEN
+            UPDATE EXPLICATION SET active = TRUE WHERE argumentID = argID AND profileID = proID;
+            UPDATE EXPLICATION_ENDORSE SET active = TRUE WHERE argumentID = argID AND profileID = proID;
+        END IF;
+        CALL updatePhrasingCache(argID);
+    ELSEIF (EXISTS(SELECT * FROM OPINION WHERE argumentID = argID AND profileID = proID AND acceptance = TRUE) AND op = -1) THEN
+        UPDATE OPINION
+            SET acceptance = FALSE, lastVisit = CURRENT_TIMESTAMP
+                WHERE argumentID = argID AND profileID = proID;
+        UPDATE ENDORSEMENT
+            SET active = FALSE, lastVisit = CURRENT_TIMESTAMP
+                WHERE targArgID = argID AND profileID = proID AND (endorseType = 'Because' OR endorseType = 'Therefore');
+        UPDATE ENDORSEMENT
+            SET active = TRUE
+                WHERE targArgID = argID AND profileID = proID AND endorseType = 'Rebuttal';
+        IF (EXISTS(SELECT * FROM PHRASE_ENDORSE WHERE argumentID = argID AND profileID = proID)) THEN
+            UPDATE PHRASE_ENDORSE SET active = FALSE WHERE argumentID = argID AND profileID = proID;
+        END IF;
+        IF (EXISTS(SELECT * FROM EXPLICATION WHERE argumentID = argID AND profileID = proID)) THEN
+            UPDATE EXPLICATION SET active = FALSE WHERE argumentID = argID AND profileID = proID;
+            UPDATE EXPLICATION_ENDORSE SET active = FALSE WHERE argumentID = argID AND profileID = proID;
+        END IF;
+        CALL updatePhrasingCache(argID);
+        CALL rebalanceRecentRejections(argID, proID);
+    END IF;
+END //
+DELIMITER ;
 
 DROP PROCEDURE IF EXISTS getAssociated;
 DELIMITER //

@@ -8,18 +8,24 @@ if ($_SESSION['currentArg'] == 0){
 	$_SESSION['currentArg'] = 75; 
 }
 include("${_SERVER['DOCUMENT_ROOT']}/includes/dbconnect.php");
-//Keep me logged in cookie - get value before querying current argument
-if(isset($_COOKIE['rememberMe']) && !isset($_SESSION['profile'])) {
-	$stmt = $db->prepare("SELECT profileID, email FROM REMEMBER_ME WHERE token = ? ");	
-	$stmt->bind_param("s", $_COOKIE['rememberMe']);
-	$stmt->execute();
-	$result = $stmt->get_result()->fetch_all(MYSQLI_NUM);
-	if (!isset($result[1][0]) && isset($result[0][0])) {
-		$_SESSION['profile'] = $result[0][0];
-		$_SESSION['email'] = $result[0][1];
+// Follow ARGUMENT_REDIRECT chain (up to 5 hops) for merged arguments
+if ($_SESSION['currentArg'] > 0) {
+	$_redirCheck = $_SESSION['currentArg'];
+	for ($_hop = 0; $_hop < 5; $_hop++) {
+		$_redirRow = mysqli_fetch_row(mysqli_query($db,
+			"SELECT newArgumentID FROM ARGUMENT_REDIRECT WHERE oldArgumentID=$_redirCheck"));
+		if ($_redirRow) {
+			$_redirCheck = intval($_redirRow[0]);
+		} else {
+			break;
+		}
+	}
+	if ($_redirCheck !== $_SESSION['currentArg']) {
+		header("Location: /?arg=$_redirCheck");
+		exit;
 	}
 }
-//End cookie
+// End redirect check
 require_once("${_SERVER['DOCUMENT_ROOT']}/query_current_argument.php");
 //To do history - add to array of past arguments visited
 if (isset($_SESSION['history'])) {
@@ -48,7 +54,7 @@ if (isset($_SESSION['profile']) && ($_SESSION['profile'] < 26)) {
 	echo "Seed User: ".$_SESSION['profile'];
 }
 //End of seeding ids
-$baseURL = "/index.php";
+$baseURL = "/";
 $arg = isset($_SESSION['currentArg']) ? $_SESSION['currentArg'] : null;
 $profile = isset($_SESSION['profile']) ? $_SESSION['profile'] : null;
 // made obsolete $opinion = isset($_SESSION['opinion']) ? $_SESSION['opinion'] : null;
@@ -64,6 +70,52 @@ if (isset($links[0][3]) && $links[0][3] !== '' && $links[0][8] === null && $link
 	$ogRow = mysqli_fetch_row(mysqli_query($db, "SELECT og_title, og_image, og_description FROM EXPLICATION WHERE explicationID=" . intval($links[0][2])));
 	if ($ogRow) { $links[0][8] = $ogRow[0]; $links[0][9] = $ogRow[1]; $links[0][10] = $ogRow[2]; }
 }
+// --- Admin setup (runs on every GET, results cached in session) ---
+$isAdmin            = false;
+$adminPickerEnabled = false;
+$adminPickerData    = []; // [{profileID, lastName}] ordered: real profile first
+
+if (isset($_SESSION['profile'])) {
+	// Anchor the real (logged-in) profile once per session
+	if (!isset($_SESSION['realProfile'])) {
+		$_SESSION['realProfile'] = $_SESSION['profile'];
+	}
+	$realProfileID = intval($_SESSION['realProfile']);
+
+	// Cache admin flag in session so we don't query every page load
+	if (!isset($_SESSION['isAdmin'])) {
+		$adminChk = mysqli_fetch_row(mysqli_query($db, "SELECT isAdmin FROM USER_PROFILE WHERE profileID=$realProfileID"));
+		$_SESSION['isAdmin'] = ($adminChk && intval($adminChk[0]) === 1);
+	}
+	$isAdmin = (bool)$_SESSION['isAdmin'];
+
+	if ($isAdmin) {
+		$settRow = mysqli_fetch_assoc(mysqli_query($db,
+			"SELECT pickerEnabled, pickerProfiles FROM ADMIN_SETTINGS WHERE profileID=$realProfileID"));
+		$adminPickerEnabled = $settRow ? (bool)$settRow['pickerEnabled'] : false;
+
+		if ($adminPickerEnabled) {
+			$pickerIDs = [$realProfileID];
+			if ($settRow && $settRow['pickerProfiles']) {
+				$extra = array_filter(array_map('intval', explode(',', $settRow['pickerProfiles'])));
+				$pickerIDs = array_unique(array_merge($pickerIDs, $extra));
+			}
+			$idList = implode(',', $pickerIDs);
+			$pickerResult = mysqli_query($db,
+				"SELECT profileID, lastName FROM USER_PROFILE WHERE profileID IN ($idList)");
+			$byID = [];
+			while ($row = mysqli_fetch_assoc($pickerResult)) {
+				$byID[intval($row['profileID'])] = $row['lastName'];
+			}
+			foreach ($pickerIDs as $pid) {
+				if (isset($byID[$pid])) {
+					$adminPickerData[] = ['profileID' => $pid, 'lastName' => $byID[$pid]];
+				}
+			}
+		}
+	}
+}
+// --- End admin setup ---
 mysqli_close($db);
 	
 
@@ -206,12 +258,48 @@ function generateFindLines($results) {
 <!DOCTYPE html>
 <html>
 	<head>
-		<title>Agitate</title>
+<?php
+		// ── Social share (Open Graph / Twitter Card) values ──────────────
+		$shareArgID = intval($_SESSION['currentArg']);
+		$shareValid = isset($phrasing) && $phrasing !== 'Invalid Argument Identifier';
+		$shareTitle = $shareValid ? $phrasing : 'Agitate — structured public debate';
+		if ($shareValid && isset($rate) && $rate !== 'N/A.N/A' && isset($assertions) && $assertions > 0) {
+			$shareNoun = ($assertions == 1) ? 'person accepts' : 'people accept';
+			$shareDesc = "{$rate}% of {$assertions} {$shareNoun} this. Where do you stand?";
+		} else {
+			$shareDesc = 'Agitate maps what people actually believe — and why. Weigh in.';
+		}
+		$shareURL   = 'https://agitate-discourse.org/?arg=' . $shareArgID;
+		$shareImage = 'https://agitate-discourse.org/og_image.php?arg=' . $shareArgID;
+		$e = function ($s) { return htmlspecialchars($s, ENT_QUOTES, 'UTF-8'); };
+		$titleText  = $shareValid ? mb_strimwidth($phrasing, 0, 70, '…') . ' — Agitate' : 'Agitate';
+?>
+		<title><?php echo $e($titleText); ?></title>
 		<meta charset="utf-8"/>
+		<meta name="description" content="<?php echo $e($shareDesc); ?>" />
 		<meta name="keywords" content="argument, dialectic, reasoning, anti-troll, discussion, debate, assertion network, dialogue, public forum, town square, consensus building, diliberation chamber, diliberative body, dynamic polling, self-guided polling, opposition research, best reason why, best reason not"/>
 		<meta name="copyright" content="Copyright 2015 Craig Danz Seattle, WA USA" />
 		<meta name="robots" content="follow" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<link rel="canonical" href="<?php echo $e($shareURL); ?>" />
+
+		<!-- Open Graph -->
+		<meta property="og:type" content="article" />
+		<meta property="og:site_name" content="Agitate" />
+		<meta property="og:title" content="<?php echo $e($shareTitle); ?>" />
+		<meta property="og:description" content="<?php echo $e($shareDesc); ?>" />
+		<meta property="og:url" content="<?php echo $e($shareURL); ?>" />
+		<meta property="og:image" content="<?php echo $e($shareImage); ?>" />
+		<meta property="og:image:type" content="image/png" />
+		<meta property="og:image:width" content="1200" />
+		<meta property="og:image:height" content="630" />
+		<meta property="og:image:alt" content="<?php echo $e($shareTitle); ?>" />
+
+		<!-- Twitter Card -->
+		<meta name="twitter:card" content="summary_large_image" />
+		<meta name="twitter:title" content="<?php echo $e($shareTitle); ?>" />
+		<meta name="twitter:description" content="<?php echo $e($shareDesc); ?>" />
+		<meta name="twitter:image" content="<?php echo $e($shareImage); ?>" />
 		<link rel="stylesheet" href="style_vestigette.css?v=<?php echo filemtime($_SERVER['DOCUMENT_ROOT'].'/style_vestigette.css'); ?>" />
 		<script language="javascript" src="script_vestigette.js?v=<?php echo filemtime($_SERVER['DOCUMENT_ROOT'].'/script_vestigette.js'); ?>"></script>
 		<script>
@@ -233,6 +321,24 @@ function generateFindLines($results) {
 	</head>
 	<body>
 
+<?php if ($isAdmin && $adminPickerEnabled && !empty($adminPickerData)): ?>
+<div id="adminPickerBar">
+	<span class="admin-bar-label">Admin — Viewing as:</span>
+	<form method="POST" id="adminPickerForm" action="/?arg=<?php echo $_SESSION['currentArg']; ?>">
+		<input type="hidden" name="buttonClicked" value="adminSwitchProfile">
+		<?php foreach ($adminPickerData as $p): ?>
+		<label class="admin-picker-option">
+			<input type="radio" name="pickerProfile" value="<?php echo intval($p['profileID']); ?>"
+				<?php if (intval($_SESSION['profile']) === intval($p['profileID'])) echo 'checked'; ?>
+				onchange="this.form.submit()">
+			<?php echo htmlspecialchars($p['lastName']); ?>
+		</label>
+		<?php endforeach; ?>
+	</form>
+	<a class="admin-bar-tools-link" href="/admin_tools.php?arg=<?php echo $_SESSION['currentArg']; ?>">⚙ Tools</a>
+</div>
+<?php endif; ?>
+
 <?php if (!empty($_SESSION['formError'])): ?>
 		<div class="form-error-banner" role="alert">
 			<?php echo htmlspecialchars($_SESSION['formError']); unset($_SESSION['formError']); ?>
@@ -240,14 +346,17 @@ function generateFindLines($results) {
 <?php endif; ?>
 
 		<div id="mastHead" class="container">
-			<h1><a href="index.php?arg=<?php echo $_SESSION['currentArg'];?>">AGITATE</a></h1>
+			<h1><a href="/?arg=<?php echo $_SESSION['currentArg'];?>">AGITATE</a></h1>
 			<div>
 				<a href="About.php?arg=<?php echo $_SESSION['currentArg'];?>">About</a>
 				<a href="Explore.php?arg=<?php echo $_SESSION['currentArg'];?>">Explore</a>
 				<a href="Profile.php?arg=<?php echo $_SESSION['currentArg'];?>">Profile</a>
+				<?php if ($isAdmin): ?>
+				<a href="/admin_tools.php?arg=<?php echo $_SESSION['currentArg']; ?>">Admin</a>
+				<?php endif; ?>
 				<a href="<?php echo ($profile) ? 'logout' : 'login'; ?>.php?arg=<?php echo $_SESSION['currentArg'];?>"><?php echo ($profile) ? 'Logout' : 'Login'; ?></a>
 				<a href="#" class="closenav" onclick="closeNav()">&times;</a>
-			</div> 
+			</div>
 			
 			<a href="#" class="opennav" onclick="openNav()">&equiv;</a>
 		</div>
@@ -264,7 +373,7 @@ $canWeightBecause = isset($opinion) && ($opinion > 0);
 			<input type="hidden" name="becauseWeighInWith" id="becauseWeighInWith" value="" />
 			<?php addCSRFtoken() ?>
 		</form>
-		<button class="button reset hidden" data-container-id="because"><span>&#x27F2;</span></button>
+		<button class="button reset hidden" data-container-id="because">&#x21BA;</button>
 		<button class="button myWeights hidden" data-container-id="because" title="Load my previous weights">
 			<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="18" height="18" aria-hidden="true">
 				<circle cx="12" cy="8" r="4"/>
@@ -295,18 +404,9 @@ else {
 	echo "No Results - Accept the argument to be the first to endorse";
 }
 ?>
-				<div class="assert hidden">
-					<form class="form-inline" method="POST" action="checkpoint.php" accept-charset="utf-8">
-						<label for="assertion">Add Unique:</label>
-						<input type="text" placeholder="An assertion not yet listed here" name="assertion">
-						<input type="hidden" name="type" value="Because" />
-						<button type="submit" class="button addNew" name="buttonClicked" value="addAssertion" data-container-id="because">Submit</button>
-						<?php addCSRFtoken() ?>
-					</form>
-				</div>
 <?php if ((isset($opinion)) && ($opinion > 0)): ?>
 				<div class="bulk-add-bar">
-					<a href="/flesh_out.php?arg=<?php echo $arg; ?>&type=Because" class="button bulk-add-btn">+ Add Many</a>
+					<a href="/flesh_out.php?arg=<?php echo $arg; ?>&type=Because" class="button bulk-add-btn">+ More to Say</a>
 				</div>
 <?php endif; ?>
 			</div>
@@ -314,69 +414,124 @@ else {
 
 
 		<div id="argument" class="accordion container">
-			<h2>Argument <?php echo $arg; ?></h2>
-			<div class="opinion">
-<?php /* refactored */
+			<div class="arg-header">
+				<div class="arg-header-text">
+					<div class="arg-phrasing-wrap">
+						<p class="arg-phrasing"><?php echo htmlspecialchars($phrasing); ?></p>
+						<a href="#" class="arg-phrasing-more hidden">(more)</a>
+					</div>
+					<div class="arg-meta">
+						<span class="arg-id">Argument ID: <?php echo intval($arg); ?></span>
+					</div>
+				</div>
+				<div class="arg-header-side">
+					<div class="arg-rate">
+						<span class="arg-rate-num"><?php echo (strpos((string)$rate, 'N/A') === false) ? htmlspecialchars($rate) . '%' : '&mdash;'; ?></span>
+						<span class="arg-rate-detail">of <?php echo intval($assertions) . (($assertions == 1) ? ' user' : ' users'); ?></span>
+					</div>
+					<div class="opinion">
+<?php
 $accept = 'Open';
 $reject = 'Set';
+$svgCheck = '<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>';
+$svgX     = '<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
 if (isset($_SESSION['profile'])) {
 	echo "<form method=\"POST\" class=\"buttons\" accept-charset=\"utf-8\">";
-	if ($opinion == 0) { 
+	if ($opinion == 0) {
 		$reject = 'Open';
-	}
-	else if ($opinion > 0) { 
+	} else if ($opinion > 0) {
 		$accept = 'Set';
 		$reject = 'Open';
 	}
 	echo "
-		<button type=\"submit\" class=\"button accept accept$accept\" name=\"buttonClicked\" value=\"accept\">Accept" . (($accept == 'Set') ? "ed" : "") . "</button>
-		<button type=\"submit\" class=\"button reject reject$reject\" name=\"buttonClicked\" value=\"reject\">Reject" . (($reject == 'Set') ? "ed" : "") . "</button>";
+		<button type=\"submit\" class=\"button accept accept$accept\" name=\"buttonClicked\" value=\"accept\" aria-label=\"Accept\">$svgCheck</button>
+		<button type=\"submit\" class=\"button reject reject$reject\" name=\"buttonClicked\" value=\"reject\" aria-label=\"Reject\">$svgX</button>";
 } else {
 	echo "<form method=\"GET\" class=\"buttons\" action=\"login.php?arg=" . $_SESSION['currentArg'] . "\" accept-charset=\"utf-8\">
-	<button type=\"submit\" class=\"button accept acceptOpen\" name=\"buttonClicked\">Accept</button>
-	<button type=\"submit\" class=\"button reject rejectOpen\" name=\"buttonClicked\">Reject</button>";
+	<button type=\"submit\" class=\"button accept acceptOpen\" name=\"buttonClicked\" aria-label=\"Accept\">$svgCheck</button>
+	<button type=\"submit\" class=\"button reject rejectOpen\" name=\"buttonClicked\" aria-label=\"Reject\">$svgX</button>";
 }
 addCSRFtoken();
 echo "\n</form>";
 ?>
+					</div>
+				</div>
 			</div>
 			<div class="panel expanded" data-container-id="argument">
-				<div class="rate_phrase">
-					<div class="stat">
-						<span class="statBig"><?php echo explode('.', $rate)[0]; ?></span>
-						<span class="statSmall">.<?php echo explode('.', $rate)[1]; ?>%</span>
-						<span class="statDetail">of <?php echo $assertions . (($assertions == 1) ? " user accept\n" : " users accept\n"); ?></span>
+<?php
+// ── Phrasing carousel (an argument always has ≥1 phrasing) ──────────────────
+$phrasingList  = isset($altPhrasings) ? array_values($altPhrasings) : [];
+$phrasingCount = count($phrasingList);
+?>
+				<div class="phrasingBox carousel-box">
+					<div class="carousel-content">
+<?php if ($phrasingCount > 1): ?>
+						<div class="carousel-track">
+							<div class="carousel-slides">
+<?php foreach ($phrasingList as $pline): ?>
+								<div class="carousel-slide"><p class="phrasing-slide"><?php echo htmlspecialchars($pline[2]); ?></p></div>
+<?php endforeach; ?>
+							</div>
+						</div>
+						<div class="carousel-footer">
+							<button class="carousel-prev" aria-label="Previous phrasing">&#8592;</button>
+							<span class="carousel-count" data-label="alternative phrasings">1 of <?php echo $phrasingCount; ?> alternative phrasings</span>
+							<button class="carousel-next" aria-label="Next phrasing">&#8594;</button>
+						</div>
+<?php else: ?>
+						<p class="carousel-empty">No alternative phrasing - accept the argument to provide one.</p>
+<?php endif; ?>
 					</div>
-					<p><?php echo htmlspecialchars($phrasing); ?></p>
-					<button class="altPhraseBtn" name="buttonClicked" value="altPhrasing" title="Alternate phrasings">
-						<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true">
-							<path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
-						</svg>
+					<button class="altPhraseBtn" name="buttonClicked" value="altPhrasing" title="Alternate phrasings" aria-label="Alternate phrasings">
+						<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
 					</button>
 				</div>
-				<div class="explicationBox">
+				<div class="explicationBox carousel-box">
 <?php
-if (isset($links[0][3]) && $links[0][3] !== '') {
-	$expUrl    = $links[0][3];
-	$expID     = $links[0][2];
-	$ogTitle   = $links[0][8] ?? null;
-	$ogImage   = $links[0][9] ?? null;
-	$ogDesc    = $links[0][10] ?? null;
-	$host = @parse_url($expUrl, PHP_URL_HOST) ?: $expUrl;
-	if ($ogTitle || $ogImage || $ogDesc) {
+$carouselLinks = isset($links) ? array_values(array_filter($links, function($l) { return !empty($l[3]); })) : [];
+$carouselCount = count($carouselLinks);
 ?>
-				<a href="<?php echo htmlspecialchars($expUrl); ?>" target="_blank" class="link-preview">
-<?php if ($ogImage) { ?>				<img src="<?php echo htmlspecialchars($ogImage); ?>" class="link-preview-img" alt="" loading="lazy">
-<?php } ?>				<div class="link-preview-text">
-					<span class="link-preview-title"><?php echo htmlspecialchars($ogTitle ?: $host); ?></span>
-<?php if ($ogDesc) { ?>				<span class="link-preview-desc"><?php echo htmlspecialchars($ogDesc); ?></span>
-<?php } ?>				<span class="link-preview-domain"><?php echo htmlspecialchars($host); ?></span>
-				</div>
-				</a>
-<?php } else { ?>
-				<a href="<?php echo htmlspecialchars($expUrl); ?>" target="_blank"><?php echo htmlspecialchars($expUrl); ?></a>
-<?php } } ?>
-					<button class="altExplicationBtn" name="buttonClicked" value="altExplication">&#x2318;</button>
+					<div class="carousel-content">
+<?php if ($carouselCount > 0): ?>
+						<div class="carousel-track">
+							<div class="carousel-slides">
+<?php foreach ($carouselLinks as $ci => $clink):
+	$cUrl   = $clink[3];
+	$cHost  = @parse_url($cUrl, PHP_URL_HOST) ?: $cUrl;
+	$cOgT   = $clink[8] ?? null;
+	$cOgI   = $clink[9] ?? null;
+	$cOgD   = $clink[10] ?? null;
+	$showOg = ($ci < 5) && ($cOgT || $cOgI || $cOgD);
+?>
+								<div class="carousel-slide">
+<?php if ($showOg): ?>
+									<a href="<?php echo htmlspecialchars($cUrl); ?>" target="_blank" class="link-preview">
+<?php if ($cOgI): ?>										<img src="<?php echo htmlspecialchars($cOgI); ?>" class="link-preview-img" alt="" loading="lazy">
+<?php endif; ?>										<div class="link-preview-text">
+											<span class="link-preview-title"><?php echo htmlspecialchars($cOgT ?: $cHost); ?></span>
+<?php if ($cOgD): ?>											<span class="link-preview-desc"><?php echo htmlspecialchars($cOgD); ?></span>
+<?php endif; ?>											<span class="link-preview-domain"><?php echo htmlspecialchars($cHost); ?></span>
+										</div>
+									</a>
+<?php else: ?>
+									<a href="<?php echo htmlspecialchars($cUrl); ?>" target="_blank"><?php echo htmlspecialchars($cUrl); ?></a>
+<?php endif; ?>
+								</div>
+<?php endforeach; ?>
+							</div>
+						</div>
+<?php if ($carouselCount > 1): ?>
+						<div class="carousel-footer">
+							<button class="carousel-prev" aria-label="Previous link">&#8592;</button>
+							<span class="carousel-count" data-label="explication links">1 of <?php echo $carouselCount; ?> explication links</span>
+							<button class="carousel-next" aria-label="Next link">&#8594;</button>
+						</div>
+<?php endif; ?>
+<?php else: ?>
+						<p class="carousel-empty">No explication links yet &mdash; accept the argument to add one.</p>
+<?php endif; ?>
+					</div>
+					<button class="altExplicationBtn" aria-label="Explication links">&#x2318;</button>
 				</div>
 			</div>
 		</div>
@@ -393,7 +548,7 @@ $canWeightRebuttal = isset($opinion) && ($opinion < 0);
 			<input type="hidden" name="rebuttalWeighInWith" id="rebuttalWeighInWith" value="" />
 			<?php addCSRFtoken() ?>
 		</form>
-		<button class="button reset hidden" data-container-id="rebuttal"><span>&#x27F2;</span></button>
+		<button class="button reset hidden" data-container-id="rebuttal">&#x21BA;</button>
 		<button class="button myWeights hidden" data-container-id="rebuttal" title="Load my previous weights">
 			<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="18" height="18" aria-hidden="true">
 				<circle cx="12" cy="8" r="4"/>
@@ -424,18 +579,9 @@ else {
 	echo "No Results - Reject the argument to be the first to endorse";
 }
 ?>
-				<div class="assert hidden">
-					<form class="form-inline" method="POST" action="checkpoint.php" accept-charset="utf-8">
-						<label for="assertion">Add Unique:</label>
-						<input type="text" placeholder="An assertion not yet listed here" name="assertion">
-						<input type="hidden" name="type" value="Rebuttal" />
-						<button type="submit" class="button addNew" name="buttonClicked" value="addAssertion" data-container-id="rebuttal">Submit</button>
-						<?php addCSRFtoken() ?>
-					</form>
-				</div>
 <?php if ((isset($opinion)) && ($opinion < 0)): ?>
 				<div class="bulk-add-bar">
-					<a href="/flesh_out.php?arg=<?php echo $arg; ?>&type=Rebuttal" class="button bulk-add-btn">+ Add Many</a>
+					<a href="/flesh_out.php?arg=<?php echo $arg; ?>&type=Rebuttal" class="button bulk-add-btn">+ More to Say</a>
 				</div>
 <?php endif; ?>
 			</div>
@@ -453,7 +599,7 @@ $canWeightTherefore = isset($opinion) && ($opinion > 0);
 			<input type="hidden" name="thereforeWeighInWith" id="thereforeWeighInWith" value="" />
 			<?php addCSRFtoken() ?>
 		</form>
-		<button class="button reset hidden" data-container-id="therefore"><span>&#x27F2;</span></button>
+		<button class="button reset hidden" data-container-id="therefore">&#x21BA;</button>
 		<button class="button myWeights hidden" data-container-id="therefore" title="Load my previous weights">
 			<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="18" height="18" aria-hidden="true">
 				<circle cx="12" cy="8" r="4"/>
@@ -484,18 +630,9 @@ $canWeightTherefore = isset($opinion) && ($opinion > 0);
 		echo "No Results - Accept the argument to be the first to endorse";
 	}
 ?>
-				<div class="assert hidden">
-					<form class="form-inline" method="POST" action="checkpoint.php" accept-charset="utf-8">
-						<label for="assertion">Add Unique:</label>
-						<input type="text" placeholder="An assertion not yet listed here" name="assertion">
-						<input type="hidden" name="type" value="Therefore" />
-						<button type="submit" class="button addNew" name="buttonClicked" value="addAssertion" data-container-id="therefore">Submit</button>
-						<?php addCSRFtoken() ?>
-					</form>
-				</div>
 <?php if ((isset($opinion)) && ($opinion > 0)): ?>
 				<div class="bulk-add-bar">
-					<a href="/flesh_out.php?arg=<?php echo $arg; ?>&type=Therefore" class="button bulk-add-btn">+ Add Many</a>
+					<a href="/flesh_out.php?arg=<?php echo $arg; ?>&type=Therefore" class="button bulk-add-btn">+ More to Say</a>
 				</div>
 <?php endif; ?>
 			</div>
@@ -506,8 +643,8 @@ $canWeightTherefore = isset($opinion) && ($opinion > 0);
 			<div class="panel" data-container-id="filter">
 				<div class="find">
 					<div class="find-section">
-						<div class="find-toggle">Last Visited</div>
-						<div class="find-content">
+						<div class="find-toggle collapsed">Last Visited</div>
+						<div class="find-content collapsed">
 <?php
 if (isset($_SESSION['history'])) {
 	$arr = array_reverse($_SESSION['history']);
@@ -527,8 +664,8 @@ if (isset($recent)) {
 						</div>
 					</div>
 					<div class="find-section">
-						<div class="find-toggle">Go to ID</div>
-						<div class="find-content">
+						<div class="find-toggle collapsed">Go to ID</div>
+						<div class="find-content collapsed">
 							<ul><li class="lineItem">
 								<form class="form-inline" id="form" method="get">
 									<input type="text" id="jumpToID" name="arg" placeholder="Argument ID" onchange="document.getElementById('form').action = '<?php echo $baseURL; ?>?arg=' + this.value;">
@@ -574,7 +711,7 @@ if ((isset($opinion)) && ($opinion > 0)) {
                 <input type="hidden" name="phrasingWeighInWith" id="phrasingWeighInWith" value="" />
                 <?php addCSRFtoken() ?>
             </form>
-            <button class="button reset hidden" data-container-id="phrasing">&#x27F2;</button>
+            <button class="button reset hidden" data-container-id="phrasing">&#x21BA;</button>
         </div>
 <?php
 }
@@ -618,7 +755,7 @@ if ((isset($opinion)) && ($opinion > 0)) {
 						<input type="hidden" name="explicWeighInWith" id="explicWeighInWith" value="" />
 						<?php addCSRFtoken() ?>
 					</form>
-					<button class="button reset hidden" data-container-id="explication">&#x27F2;</button>
+					<button class="button reset hidden" data-container-id="explication">&#x21BA;</button>
 				</div>
 <?php
 }

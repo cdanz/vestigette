@@ -1,4 +1,28 @@
 <?php
+	// Queue an existing argument for bot seeding when a genuine external human
+	// (non-admin, non-persona) forms an opinion on it. parentArgID is NULL — a
+	// direct human opinion on an existing argument is itself the validation
+	// signal, so no parent-engagement gate applies. The conditional INSERT
+	// self-filters: only fires for non-admin real users, and only if the arg
+	// isn't already queued/seeded.
+	function queueOpinionForSeeding($db, $argID, $profileID) {
+		$argID     = intval($argID);
+		$profileID = intval($profileID);
+		if ($profileID <= 26) return; // bot persona — never queue
+		mysqli_query($db,
+			"INSERT INTO BOT_SEED_QUEUE
+			     (argumentID, createdBy, parentArgID, parentWeight, endorseType, queuedAt)
+			 SELECT $argID, $profileID, NULL, NULL, NULL, NOW()
+			 FROM USER_PROFILE u
+			 WHERE u.profileID = $profileID AND u.isAdmin = 0
+			   AND NOT EXISTS (SELECT 1 FROM BOT_SEED_QUEUE q
+			                   WHERE q.argumentID = $argID
+			                     AND q.status IN ('pending','processing','done'))
+			   AND NOT EXISTS (SELECT 1 FROM OPINION o
+			                   WHERE o.argumentID = $argID AND o.profileID <= 26)"
+		);
+	}
+
 	if(isset($_SESSION['profile'])){
 		switch ($_POST["buttonClicked"]) {
 	        case "accept":
@@ -8,7 +32,8 @@
 	            $param3 = $_SESSION['profile'];
 				$sql = "CALL assertOpinion($param1,$param2,$param3)";
 				mysqli_query($db, $sql);
-				header('Location: /index.php?arg='.$_SESSION['currentArg']);	
+				queueOpinionForSeeding($db, $param2, $param3);
+				header('Location: /?arg='.$_SESSION['currentArg']);
 	            break;
 	        case "reject":
 	            $opinion=-1;
@@ -17,7 +42,8 @@
 	            $param3 = $_SESSION['profile'];
 				$sql = "CALL assertOpinion($param1,$param2,$param3)";
 				mysqli_query($db, $sql);
-				header('Location: /index.php?arg='.$_SESSION['currentArg']);
+				queueOpinionForSeeding($db, $param2, $param3);
+				header('Location: /?arg='.$_SESSION['currentArg']);
 	            break;
 	        case "weighBecause":
 	        	$arrayOfWeighIns = explode(",",$_POST["becauseWeighInWith"]);
@@ -36,7 +62,7 @@
 				/*Execute queries */
 				if(mysqli_multi_query($db, $query)){
 					while (mysqli_more_results($db)) { mysqli_next_result($db); if ($r = mysqli_store_result($db)) mysqli_free_result($r); }
-					header('Location: /index.php?arg='.$_SESSION['currentArg']);
+					header('Location: /?arg='.$_SESSION['currentArg']);
 				}
 				else
 					echo "Query Failed";
@@ -59,7 +85,7 @@
 				/*Execute queries */
 				if(mysqli_multi_query($db, $query)){
 					while (mysqli_more_results($db)) { mysqli_next_result($db); if ($r = mysqli_store_result($db)) mysqli_free_result($r); }
-					header('Location: /index.php?arg='.$_SESSION['currentArg']);
+					header('Location: /?arg='.$_SESSION['currentArg']);
 				}
 				else
 					echo "Query Failed";
@@ -81,7 +107,7 @@
 				/*Execute queries */
 				if(mysqli_multi_query($db, $query)){
 					while (mysqli_more_results($db)) { mysqli_next_result($db); if ($r = mysqli_store_result($db)) mysqli_free_result($r); }
-					header('Location: /index.php?arg='.$_SESSION['currentArg']);
+					header('Location: /?arg='.$_SESSION['currentArg']);
 				}
 				else
 					echo "Query Failed";
@@ -96,11 +122,26 @@
 
 				/*Execute queries */
 				if(mysqli_query($db, $query)){
-					header('Location: /index.php?arg='.$_SESSION['currentArg']);
+					// Queue new argument for bot seeding. foldInAssertion creates the
+					// argument internally so we retrieve it by creator recency.
+					$safeType = mysqli_real_escape_string($db, $type);
+					$newRow = mysqli_fetch_row(mysqli_query($db,
+						"SELECT argumentID FROM ARGUMENT
+						 WHERE createdBy = $profileID
+						 ORDER BY createdDate DESC LIMIT 1"
+					));
+					if ($newRow) {
+						mysqli_query($db,
+							"INSERT INTO BOT_SEED_QUEUE
+							     (argumentID, createdBy, parentArgID, endorseType)
+							 VALUES (" . intval($newRow[0]) . ", $profileID, $argAtHand, '$safeType')"
+						);
+					}
+					header('Location: /?arg='.$_SESSION['currentArg']);
 				}
-				else 
+				else
 					echo "Query Failed";
-				
+
 	            break;
 			case "addAssertionAndReciprocate":
 				$assertion = mysqli_real_escape_string($db,trim($_POST["assertion"]));
@@ -111,9 +152,23 @@
 
 				/*Execute queries */
 				if(mysqli_query($db, $query)){
-					header('Location: /index.php?arg='.$_SESSION['currentArg']);
+					// Queue new argument for bot seeding (same pattern as addAssertion).
+					$safeType = mysqli_real_escape_string($db, $type);
+					$newRow = mysqli_fetch_row(mysqli_query($db,
+						"SELECT argumentID FROM ARGUMENT
+						 WHERE createdBy = $profileID
+						 ORDER BY createdDate DESC LIMIT 1"
+					));
+					if ($newRow) {
+						mysqli_query($db,
+							"INSERT INTO BOT_SEED_QUEUE
+							     (argumentID, createdBy, parentArgID, endorseType)
+							 VALUES (" . intval($newRow[0]) . ", $profileID, $argAtHand, '$safeType')"
+						);
+					}
+					header('Location: /?arg='.$_SESSION['currentArg']);
 				}
-				else 
+				else
 					echo "Query Failed";
 
 				break;
@@ -128,7 +183,7 @@
 
 				/*Execute queries */
 				if(mysqli_query($db, $query)){
-					header('Location: /index.php?arg='.$_SESSION['currentArg']);
+					header('Location: /?arg='.$_SESSION['currentArg']);
 				}
 				else 
 					echo "Query Failed";
@@ -142,7 +197,7 @@
 
 				/*Execute queries */
 				if(mysqli_query($db, $query)){
-					header('Location: /index.php?arg='.$_SESSION['currentArg']);
+					header('Location: /?arg='.$_SESSION['currentArg']);
 				}
 				else 
 					echo "Query Failed";
@@ -156,7 +211,7 @@
 
 				/*Execute queries */
 				if(mysqli_query($db, $query)){
-					header('Location: /index.php?arg='.$_SESSION['currentArg']);
+					header('Location: /?arg='.$_SESSION['currentArg']);
 				}
 				else 
 					echo "Query Failed";
@@ -172,7 +227,7 @@
 
 				/*Execute queries */
 				if(mysqli_query($db, $query)){
-					header('Location: /index.php?arg='.$_SESSION['currentArg']);
+					header('Location: /?arg='.$_SESSION['currentArg']);
 				}
 				else 
 					echo "Query Failed";
@@ -189,7 +244,7 @@
 
 				/*Execute queries */
 				if(mysqli_query($db, $query)){
-					header('Location: /index.php?arg='.$_SESSION['currentArg']);
+					header('Location: /?arg='.$_SESSION['currentArg']);
 				}
 				else 
 					echo "Query Failed";
@@ -205,7 +260,7 @@
 
 				/*Execute queries */
 				if(mysqli_query($db, $query)){
-					header('Location: /index.php?arg='.$_SESSION['currentArg']);
+					header('Location: /?arg='.$_SESSION['currentArg']);
 				}
 				else 
 					echo "Query Failed";
@@ -224,7 +279,7 @@
 				}
 				$query .= "CALL updatePhrasingCache(".$argAtHand.");";
 				if(mysqli_multi_query($db, $query)){
-					header('Location: /index.php?arg='.$_SESSION['currentArg']);
+					header('Location: /?arg='.$_SESSION['currentArg']);
 				}
 				else
 					echo "Query Failed";
@@ -247,7 +302,7 @@
             	}
             	if ($phrasingError) {
             		$_SESSION['formError'] = $phrasingError;
-            		header('Location: /index.php?arg='.$_SESSION['currentArg']);
+            		header('Location: /?arg='.$_SESSION['currentArg']);
             		exit;
             	}
 	            $argAtHand = intval($_SESSION['currentArg']);
@@ -257,7 +312,7 @@
 
 				/*Execute queries */
 				if(mysqli_query($db, $query)){
-					header('Location: /index.php?arg='.$_SESSION['currentArg']);
+					header('Location: /?arg='.$_SESSION['currentArg']);
 				}
 				else
 					echo "Query Failed";
@@ -273,7 +328,7 @@
 
 				/*Execute queries */
 				if(mysqli_query($db, $query)){
-					header('Location: /index.php?arg='.$_SESSION['currentArg']);
+					header('Location: /?arg='.$_SESSION['currentArg']);
 				}
 				else 
 					echo "Query Failed";
@@ -290,7 +345,7 @@
 	        		$query .= "INSERT INTO EXPLICATION_ENDORSE (explicationID, argumentID, profileID, weight, active) VALUES(" . $explicationIDVal . "," . $argAtHand . "," . $profileID . "," . $weightVal . ",TRUE);";
 	        	}
 	        	if (mysqli_multi_query($db, $query)) {
-	        		header('Location: /index.php?arg=' . $_SESSION['currentArg']);
+	        		header('Location: /?arg=' . $_SESSION['currentArg']);
 	        	} else {
 	        		echo "Query Failed";
 	        	}
@@ -302,7 +357,7 @@
 	        	// Server-side validation: must be a valid http/https URL
 	        	if (!preg_match('#^https?://#i', $explicationLink) || !filter_var($explicationLink, FILTER_VALIDATE_URL)) {
 	        		$_SESSION['formError'] = 'Explications must be a valid URL starting with https:// or http://';
-	        		header('Location: /index.php?arg='.$_SESSION['currentArg']);
+	        		header('Location: /?arg='.$_SESSION['currentArg']);
 	        		exit;
 	        	}
 
@@ -313,9 +368,14 @@
 
 				/*Execute queries */
 				if(mysqli_query($db, $query)){
+					// promoteExplication() creates the creator's EXPLICATION_ENDORSE
+					// row itself, so we only fetch the id here for OG metadata.
+					// (Do NOT insert another endorse row — that double-counts weight.)
 					$idRow = mysqli_fetch_row(mysqli_query($db, "SELECT explicationID FROM EXPLICATION WHERE argumentID=$argAtHand AND profileID=$profileID LIMIT 1"));
-					if ($idRow) storeOgMeta($db, $explicationLink, $idRow[0]);
-					header('Location: /index.php?arg='.$_SESSION['currentArg']);
+					if ($idRow) {
+						storeOgMeta($db, $explicationLink, intval($idRow[0]));
+					}
+					header('Location: /?arg='.$_SESSION['currentArg']);
 				}
 				else
 					echo "Query Failed";
@@ -328,11 +388,29 @@
 
 				/*Execute queries */
 				if(mysqli_query($db, $query)){
-					header('Location: /index.php?arg='.$_SESSION['currentArg']);
+					header('Location: /?arg='.$_SESSION['currentArg']);
 				}
 				else 
 					echo "Query Failed";
 				break;
+
+		case "adminSwitchProfile":
+			if (isset($_SESSION['isAdmin']) && $_SESSION['isAdmin']) {
+				$switchTo      = intval($_POST['pickerProfile'] ?? 0);
+				$realProfileID = intval($_SESSION['realProfile']);
+				// Validate: must be the real profile or one of the designated profiles
+				$settRow = mysqli_fetch_assoc(mysqli_query($db,
+					"SELECT pickerProfiles FROM ADMIN_SETTINGS WHERE profileID=$realProfileID"));
+				$allowed = [$realProfileID];
+				if ($settRow && $settRow['pickerProfiles']) {
+					$allowed = array_merge($allowed, array_map('intval', explode(',', $settRow['pickerProfiles'])));
+				}
+				if (in_array($switchTo, $allowed)) {
+					$_SESSION['profile'] = $switchTo;
+				}
+			}
+			header('Location: /?arg=' . intval($_SESSION['currentArg']));
+			exit;
 
 	    }
 	}

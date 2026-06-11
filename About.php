@@ -1,7 +1,7 @@
 <?php 
 session_start();
 $_SESSION['currentArg'] = intval($_GET["arg"]); 
-$baseURL = "/index.php";
+$baseURL = "/";
 $arg = isset($_SESSION['currentArg']) ? $_SESSION['currentArg'] : null;
 $profile = isset($_SESSION['profile']) ? $_SESSION['profile'] : null;
 ?>
@@ -29,7 +29,7 @@ $profile = isset($_SESSION['profile']) ? $_SESSION['profile'] : null;
 	<body>
 
 		<div id="mastHead" class="container">
-			<h1><a href="index.php?arg=<?php echo $_SESSION['currentArg'];?>">AGITATE</a></h1>
+			<h1><a href="/?arg=<?php echo $_SESSION['currentArg'];?>">AGITATE</a></h1>
 			<div>
 				<a href="About.php?arg=<?php echo $_SESSION['currentArg'];?>"><span style="text-decoration: underline;">About</span></a>
 				<a href="Explore.php?arg=<?php echo $_SESSION['currentArg'];?>">Explore</a>

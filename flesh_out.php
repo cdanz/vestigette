@@ -16,7 +16,7 @@ $type    = isset($_GET['type']) && in_array($_GET['type'], $allowedTypes)
            ? $_GET['type'] : 'Because';
 
 if ($argID === 0) {
-    header('Location: /index.php');
+    header('Location: /');
     exit;
 }
 
@@ -50,6 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     $allWeighted = []; // [{argID, weight, reciprocate}]
+    $newArgIDs   = []; // argIDs created fresh in this session (for bot queue)
 
     // ── Step 1: create new args ───────────────────────────────────────────────
     foreach ($items as $item) {
@@ -86,6 +87,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             while (mysqli_more_results($db)) { mysqli_next_result($db); if ($r = mysqli_store_result($db)) mysqli_free_result($r); }
 
             $allWeighted[] = ['argID' => $freshArgID, 'weight' => $weight, 'reciprocate' => $recip];
+            $newArgIDs[]   = $freshArgID;
 
         } elseif ($itemType === 'existing') {
             $allWeighted[] = [
@@ -154,8 +156,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
+    // ── Step 5: queue new arguments for bot seeding ──────────────────────────
+    // Uses the normalized weight from $allWeighted so the threshold check in
+    // the queue processor reflects what the user actually assigned.
+    if (!empty($newArgIDs)) {
+        $safeEndorseType = mysqli_real_escape_string($db, $postType);
+        foreach ($allWeighted as $w) {
+            if (in_array($w['argID'], $newArgIDs)) {
+                mysqli_query($db,
+                    "INSERT INTO BOT_SEED_QUEUE
+                         (argumentID, createdBy, parentArgID, parentWeight, endorseType)
+                     VALUES ({$w['argID']}, $profileID, $postArgID, {$w['weight']}, '$safeEndorseType')"
+                );
+            }
+        }
+    }
+
     mysqli_close($db);
-    header('Location: /index.php?arg=' . $postArgID);
+    header('Location: /?arg=' . $postArgID);
     exit;
 }
 // ── End POST handler ──────────────────────────────────────────────────────────
@@ -172,7 +190,8 @@ if ($row) $focalPhrasing = $row[0];
 
 // ── GET: fetch neighborhood ───────────────────────────────────────────────────
 $results = [];
-$sql = "CALL getNeighborhood($argID)";
+$safeType = mysqli_real_escape_string($db, $type);
+$sql = "CALL getNeighborhood($argID, '$safeType')";
 if (mysqli_multi_query($db, $sql)) {
     $result = mysqli_store_result($db);
     if ($result && mysqli_num_rows($result) > 0) {
@@ -193,7 +212,7 @@ $typeClass    = 'flesh-' . strtolower($type);
 $showRecipCol = ($type !== 'Rebuttal');
 $typeLabel    = htmlspecialchars($type);
 $argIDEsc     = $argID;
-$baseURL      = '/index.php';
+$baseURL      = '/';
 ?>
 <!DOCTYPE html>
 <html>
@@ -207,7 +226,7 @@ $baseURL      = '/index.php';
 <body class="flesh-out-page">
 
 <div id="mastHead" class="container">
-    <h1><a href="index.php?arg=<?php echo $argIDEsc; ?>">AGITATE</a></h1>
+    <h1><a href="/?arg=<?php echo $argIDEsc; ?>">AGITATE</a></h1>
     <div>
         <a href="About.php?arg=<?php echo $argIDEsc; ?>">About</a>
         <a href="Explore.php?arg=<?php echo $argIDEsc; ?>">Explore</a>
@@ -224,7 +243,7 @@ $baseURL      = '/index.php';
             <p class="flesh-type-label"><?php echo $typeLabel; ?></p>
             <h2><?php echo htmlspecialchars($focalPhrasing); ?></h2>
         </div>
-        <a href="/index.php?arg=<?php echo $argIDEsc; ?>" class="button flesh-cancel">Cancel</a>
+        <a href="/?arg=<?php echo $argIDEsc; ?>" class="button flesh-cancel">Cancel</a>
     </div>
 
 <?php if ($showRecipCol): ?>

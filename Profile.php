@@ -2,7 +2,7 @@
 session_start();
 include("${_SERVER['DOCUMENT_ROOT']}/includes/dbconnect.php");
 $_SESSION['currentArg'] = intval($_GET["arg"]); 
-$baseURL = "/index.php";
+$baseURL = "/";
 $arg = isset($_SESSION['currentArg']) ? $_SESSION['currentArg'] : null;
 $profile = isset($_SESSION['profile']) ? $_SESSION['profile'] : null;
 if (isset($profile)) {
@@ -34,7 +34,7 @@ if (isset($profile)) {
 	<body>
 
 		<div id="mastHead" class="container">
-			<h1><a href="index.php?arg=<?php echo $_SESSION['currentArg'];?>">AGITATE</a></h1>
+			<h1><a href="/?arg=<?php echo $_SESSION['currentArg'];?>">AGITATE</a></h1>
 			<div>
 				<a href="About.php?arg=<?php echo $_SESSION['currentArg'];?>">About</a>
 				<a href="Explore.php?arg=<?php echo $_SESSION['currentArg'];?>">Explore</a>

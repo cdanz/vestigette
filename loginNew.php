@@ -16,7 +16,7 @@
 			if(!isset($_SESSION['currentArg'])){
 				$_SESSION['currentArg'] = intval($_GET["arg"]); 
 			}
-			header('Location: /index.php?arg='.$_SESSION['currentArg']);
+			header('Location: /?arg='.$_SESSION['currentArg']);
 		}
 		else {
 			$fmsg = "Invalid Email/Password";
@@ -56,7 +56,7 @@
 	<body>
 
 		<div id="mastHead" class="container">
-			<h1><a href="index.php?arg=<?php echo $_SESSION['currentArg'];?>">AGITATE</a></h1>
+			<h1><a href="/?arg=<?php echo $_SESSION['currentArg'];?>">AGITATE</a></h1>
 			<div><a href="About.php?arg=<?php echo $_SESSION['currentArg'];?>">About</a></div>
 			<div><a href="Explore.php?arg=<?php echo $_SESSION['currentArg'];?>">Explore</a></div>
 			<div><a href="Profile.php?arg=<?php echo $_SESSION['currentArg'];?>">Profile</a></div>

@@ -118,6 +118,11 @@ button {
 .form-inline > * {
 	margin-right: 0.2rem;
 }
+/* Wider, easier-to-tap "Go" button next to the Argument-ID field in Find */
+#find .form-inline button.instead {
+	padding-left: 1.1rem;
+	padding-right: 1.1rem;
+}
 /*
 
 TODO: Let's not forget to genericize these buttons to apply to more than just #because.
@@ -202,17 +207,17 @@ TODO: Let's not forget to genericize these buttons to apply to more than just #b
 }
 #because button.reset,
 #rebuttal button.reset,
-#therefore button.reset {
-	position: relative;
+#therefore button.reset,
+#argument button.reset,
+#overlayE button.reset {
+	align-items: center;
+	display: flex;
+	font-size: 1.5rem;
+	font-weight: 300;
+	justify-content: center;
+	line-height: 1;
+	padding: 0;
 	width: 2rem;
-}
-#because button.reset span,
-#rebuttal button.reset span,
-#therefore button.reset span {
-	font-size: 250%;
-	left: 0.1rem;
-	position: absolute;
-	top: -0.42rem;
 }
 #argument button {
 	padding-left: 0.5rem;
@@ -350,10 +355,146 @@ button.hidden {
 	background-color:var(--cddbGreen);
 }
 #argument.container {
-	align-items: center;
+	align-items: stretch;
 	border-color: var(--cddbWhite);
 	display: flex;
+	flex-flow: column nowrap;
+	justify-content: flex-start;
+}
+
+/* ── Argument header: phrasing + verdict always visible, above the panel ── */
+#argument .arg-header {
+	box-sizing: border-box;
+	display: flex;
+	flex-flow: row nowrap;
+	align-items: stretch;
+	gap: 0.75rem;
+	width: 100%;
+	padding: 0.5rem;
+}
+#argument .arg-header-text {
+	display: flex;
+	flex-flow: column nowrap;
 	justify-content: space-between;
+	flex: 1 1 auto;
+	min-width: 0;
+}
+#argument .arg-phrasing {
+	margin: 0;
+	font-size: 1.3rem;
+	font-weight: bold;
+	line-height: 1.25;
+	color: var(--cddbWhite);
+	display: -webkit-box;
+	-webkit-line-clamp: 5;
+	-webkit-box-orient: vertical;
+	overflow: hidden;
+}
+#argument .arg-meta {
+	display: flex;
+	flex-flow: row nowrap;
+	align-items: center;
+	gap: 0.5rem;
+	margin-top: 0.4rem;
+}
+#argument .arg-id {
+	font-size: 0.7rem;
+	letter-spacing: 0.03em;
+	color: var(--cddbGrey);
+}
+#argument .arg-phrasing-wrap {
+	display: block;
+	position: relative;
+}
+#argument .arg-phrasing-more {
+	background: var(--cddbBlack);
+	bottom: 0;
+	color: var(--cddbWhite);
+	cursor: pointer;
+	font-size: 1rem;
+	font-weight: bold;
+	padding-left: 0.4rem;
+	position: absolute;
+	right: 0;
+	text-decoration: underline;
+}
+#argument .arg-phrasing-more.hidden {
+	display: none;
+}
+#argument .arg-header-side {
+	display: flex;
+	flex-flow: column nowrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: 0.6rem;
+	flex: 0 0 auto;
+}
+#argument .arg-rate {
+	display: flex;
+	flex-flow: column nowrap;
+	align-items: center;
+	gap: 0.3rem;
+	line-height: 1.05;
+}
+#argument .arg-rate-num {
+	font-size: 1.7rem;
+	font-weight: bold;
+	color: var(--cddbWhite);
+}
+#argument .arg-rate-detail {
+	font-size: 0.6rem;
+	color: var(--cddbGrey);
+	white-space: nowrap;
+}
+#argument .arg-header-side .opinion {
+	display: flex;
+	flex: 0 0 auto;          /* fixed — does not stretch with phrasing length */
+}
+#argument .arg-header-side .opinion form {
+	display: flex;
+	flex-flow: row nowrap;
+	gap: 0;
+}
+#argument .arg-header-side .opinion button {
+	align-items: center;
+	display: flex;
+	height: 3.4rem;          /* consistent regardless of phrasing length */
+	justify-content: center;
+	padding: 0.3rem 0.4rem;
+	width: 2.7rem;
+}
+#argument .arg-header-side .opinion button svg {
+	width: 26px;
+	height: 26px;
+}
+/* ── Shared carousel-box layout (phrasing + explication panels) ──────────── */
+#argument .panel .carousel-box {
+	align-items: stretch;
+	display: flex;
+	flex-flow: row nowrap;
+	width: 100%;
+}
+#argument .panel .carousel-box:not(:last-child) {
+	margin-bottom: 0.5rem;
+}
+#argument .panel .carousel-box .phrasing-slide {
+	border: 2px var(--cddbLiteGrey) solid;
+	box-sizing: border-box;
+	color: var(--cddbBlack);
+	font-size: 1rem;
+	margin: 0.3rem;
+	overflow-wrap: break-word;
+	padding: 0.4rem;
+	width: calc(100% - 0.6rem);
+}
+#argument .panel .carousel-box .carousel-empty {
+	border: 0;
+	color: var(--cddbGrey);
+	font-size: 0.85rem;
+	margin: 0;
+	padding: 0.6rem 0.5rem;
+	text-align: left;
+	width: 100%;
 }
 #find.container {
 	color: var(--cddbBlack);
@@ -376,6 +517,20 @@ button.hidden {
 	transform: translate(-50%);
 	width: 90%;
 	z-index: 3;
+}
+/* Pin the close button to the top-right corner regardless of how the
+   endorse/reset buttons lay out in the header (space-between was dropping it
+   into the middle on desktop). */
+#phrasing #closeP,
+#explication #closeE {
+	position: absolute;
+	top: 0.15rem;
+	right: 0.5rem;
+	z-index: 4;
+}
+#phrasing > h2,
+#explication > h2 {
+	padding-right: 3rem;     /* reserve space so a title never runs under the X */
 }
 .container div {
 	align-items: flex-start;
@@ -487,13 +642,6 @@ button.hidden {
 	user-select: none;
 	width: 100%;
 }
-.find-toggle::after {
-	content: ' ▾';
-	float: right;
-}
-.find-toggle.collapsed::after {
-	content: ' ▸';
-}
 .find-content.collapsed {
 	display: none;
 }
@@ -567,15 +715,31 @@ body.checkpoint-page #checkpoint .panel.expanded {
 .bulk-add-bar {
 	border-top: 2px var(--cddbLiteGrey) solid;
 	display: flex;
-	justify-content: flex-end;
-	padding: 0.4rem 0.5rem;
+	justify-content: center;
+	padding: 0.6rem 0.5rem;
 }
 .bulk-add-btn {
-	font-size: 0.85rem;
+	align-items: center;
+	border-radius: 0;
+	border-style: solid;
+	border-width: 0.2rem;
+	color: var(--cddbWhite);
+	cursor: pointer;
+	display: inline-flex;
+	font-weight: bold;
+	height: 2rem;
+	padding-left: 1em;
+	padding-right: 1em;
+	text-decoration: none;
 }
-#because  .bulk-add-btn { color: var(--cddbBlue); }
-#rebuttal .bulk-add-btn { color: var(--cddbRed); }
-#therefore .bulk-add-btn { color: var(--cddbGreen); }
+#because  .bulk-add-btn { background-color: var(--cddbBlue);  border-color: var(--cddbBlue); }
+#rebuttal .bulk-add-btn { background-color: var(--cddbRed);   border-color: var(--cddbRed); }
+#therefore .bulk-add-btn { background-color: var(--cddbGreen); border-color: var(--cddbGreen); }
+.bulk-add-btn:link,
+.bulk-add-btn:visited { color: var(--cddbWhite); }
+#because  .bulk-add-btn:hover { background-color: var(--cddbWhite); color: var(--cddbBlue); }
+#rebuttal .bulk-add-btn:hover { background-color: var(--cddbWhite); color: var(--cddbRed); }
+#therefore .bulk-add-btn:hover { background-color: var(--cddbWhite); color: var(--cddbGreen); }
 
 /* ── flesh_out.php ─────────────────────────────────────────── */
 body.flesh-out-page {
@@ -634,6 +798,10 @@ body.flesh-out-page #flesh-out {
 .flesh-row {
 	align-items: center;
 	border-bottom: 2px var(--cddbLiteGrey) solid;
+	/* CSS windowing: skip layout/paint for off-screen rows. Rows are a uniform
+	   64px, so the intrinsic-size placeholder is exact and the scrollbar is stable. */
+	content-visibility: auto;
+	contain-intrinsic-size: auto 64px;
 	display: flex;
 	flex-flow: row nowrap;
 	justify-content: flex-start;
@@ -808,7 +976,8 @@ body.flesh-out-page .flesh-footer button:hover:not(:disabled) {
 	color: var(--cddbGrey);
 }
 #argument .panel {
-	flex-flow: row wrap;
+	flex-flow: column nowrap;
+	justify-content: flex-start;
 }
 #argument .panel .rate_phrase {
 	align-items: center;
@@ -937,31 +1106,122 @@ body.flesh-out-page .flesh-footer button:hover:not(:disabled) {
 	margin-top: auto;
 	margin-bottom: auto;
 }
+/* explicationBox inherits `display:flex; flex-flow:row nowrap` from .container div.
+   We only force align-items:stretch so the ⌘ button stretches to full height. */
 #argument .panel .explicationBox {
-	align-items: center;
-	min-height: 4rem;
+	align-items: stretch;
 	width: 100%;
 }
-.altExplicationBtn {
-	margin-left: auto;
+
+/* ── Left side: card + nav stacked vertically ─────────────────────────── */
+/* High specificity (1,3,0) needed to beat .container div (0,1,1)          */
+#argument .panel .carousel-box .carousel-content {
+	align-items: stretch;  /* override .container div's flex-start so footer spans full width */
+	display: flex;
+	flex: 1 1 0;          /* basis 0 → fills available width, not content width */
+	flex-direction: column;
+	min-width: 0;
+	overflow: hidden;
 }
-.explicationBox a {
+
+/* ── Carousel track ───────────────────────────────────────────────────── */
+/* High specificity (1,3,0) needed to beat .container div (0,1,1)          */
+#argument .panel .carousel-box .carousel-track {
+	display: block;
+	overflow: hidden;
+	touch-action: pan-y;
+	transition: height 0.25s ease;
+	width: 100%;
+}
+.carousel-slides {
+	align-items: flex-start;  /* slides keep their natural height instead of all matching the tallest */
+	display: flex;
+	transition: transform 0.25s ease;
+	width: 100%;          /* definite width so slide flex-basis:100% resolves to viewport, not max-content */
+	will-change: transform;
+}
+.carousel-slide {
+	box-sizing: border-box;
+	flex: 0 0 100%;
+	max-width: 100%;
+	min-width: 0;
+	overflow: hidden;
+}
+#argument .panel .explicationBox .carousel-slide a:not(.link-preview) {
 	border: 2px var(--cddbLiteGrey) solid;
+	box-sizing: border-box;
+	display: block;
+	margin: 0.3rem;
+	padding: 0.3rem;
+	width: calc(100% - 0.6rem);
+	word-break: break-all;
+}
+
+/* ── Carousel nav bar — centered below the card ───────────────────────── */
+#argument .panel .carousel-box .carousel-footer {
+	align-items: center;
+	display: flex;
+	gap: 0.4rem;
+	justify-content: center;
+	padding-top: 0.25rem;
+}
+
+/* Override the half-circle panel button style for carousel nav only */
+#argument .panel .carousel-prev,
+#argument .panel .carousel-next {
+	align-self: auto;
+	background: transparent;
+	border: 1px solid var(--cddbLiteGrey);
+	border-radius: 4px;
+	color: var(--cddbBlack);
+	cursor: pointer;
+	font-size: 0.8rem;
+	font-weight: normal;
+	height: auto;
+	line-height: 1.4;
+	min-width: 0;
+	padding: 0.2rem 0.6rem;
+}
+#argument .panel .carousel-prev:hover,
+#argument .panel .carousel-next:hover {
+	border-color: var(--cddbBlack);
+}
+.carousel-count {
+	color: var(--cddbLiteGrey);
+	font-size: 0.75rem;
+}
+
+/* ── ✎ / ⌘ buttons: half-circle dialog-openers, identical for both rows ── */
+/* flex:none keeps them at min-width instead of growing.                    */
+#argument .panel .altExplicationBtn,
+#argument .panel .altPhraseBtn {
+	align-items: center;
+	display: flex;
+	flex: none;
+	justify-content: center;
+}
+
+/* Plain link (non-OG) inside carousel */
+.explicationBox > a {
+	border: 2px var(--cddbLiteGrey) solid;
+	box-sizing: border-box;
+	display: block;
 	margin: 0.3rem;
 	padding: 0.3rem;
 	width: 100%;
 	word-break: break-all;
-	/* overflow-wrap: break-word;  apparently not relevant in this case */
 }
 /* Link preview card (OG meta) */
 .explicationBox a.link-preview {
+	box-sizing: border-box;
 	display: grid;
-	grid-template-columns: 140px 1fr;
+	grid-template-columns: 100px 1fr;
 	border: 1px solid var(--cddbLiteGrey);
 	border-radius: 4px;
 	overflow: hidden;
 	text-decoration: none;
 	color: inherit;
+	width: 100%;
 	word-break: normal;
 	padding: 0;
 }
@@ -1091,6 +1351,7 @@ input:checked + .toggle:before {
 	flex: none;
 	height: 3.6rem;
 	margin: 0.2rem 1.4rem 0.2rem 0.2rem;
+	overflow: hidden;
 	position: relative;
 	width: 3.6rem;
 }
@@ -1098,15 +1359,20 @@ input:checked + .toggle:before {
 	cursor: pointer;
 }
 .pointBtn {
+	/* No GPU layer promotion: translateZ(0)/backface-visibility here created a
+	   separate compositing layer per arc — fine for the few arcs in a modal, but
+	   catastrophic on flesh_out where ~3,700 of them exist. Keeping both arcs
+	   non-composited also removes the layer MISMATCH that caused the modal arc to
+	   snap to 50% on mobile scroll. */
 	border-radius: 50%;
 	border-style: solid;
 	border-width: 1rem;
-	height: 3.5rem;
+	height: 3.6rem;
 	position: absolute;
 	top: 0;
 	left: 0;
 	transform: rotate(-50grad);
-	width: 3.5rem;
+	width: 3.6rem;
 }
 /* arc1 */
 .pointBtn.arc1 {
@@ -4277,11 +4543,10 @@ input:checked + .toggle:before {
 	#argument .panel {
 		flex-flow: column nowrap;
 		justify-content: flex-start;
-		height: 42.75vh;
-		max-height: 42.75vh;
-	}
-	#argument .panel .rate_phrase {
-		margin-bottom: 1.5rem;
+		flex: 1 1 auto;
+		min-height: 0;
+		max-height: 100%;
+		overflow: auto;
 	}
 	.panel li {
 		min-height: 3rem;
@@ -4296,5 +4561,297 @@ input:checked + .toggle:before {
 	}
 	.wrapper {
 		height: 3rem;
+		width: 3rem;
 	}
+}
+/* ═══════════════════════════════════════════════════
+   Admin picker bar (shown on index.php for admins)
+   ═══════════════════════════════════════════════════ */
+#adminPickerBar {
+	align-items: center;
+	background: #1c1c2e;
+	box-sizing: border-box;
+	color: #ccc;
+	display: flex;
+	flex-flow: row wrap;
+	font-size: 0.75rem;
+	gap: 0.5rem 1rem;
+	padding: 0.35rem 1rem;
+	width: 100%;
+}
+.admin-bar-label {
+	color: #aaa;
+	font-size: 0.7rem;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+	white-space: nowrap;
+}
+#adminPickerForm {
+	align-items: center;
+	display: flex;
+	flex-flow: row wrap;
+	gap: 0.25rem 0.75rem;
+}
+.admin-picker-option {
+	align-items: center;
+	color: #e0e0e0;
+	cursor: pointer;
+	display: flex;
+	gap: 0.3rem;
+}
+.admin-picker-option input[type="radio"] {
+	accent-color: #7b91ff;
+	cursor: pointer;
+}
+.admin-bar-tools-link {
+	color: #7b91ff;
+	font-size: 0.72rem;
+	margin-left: auto;
+	text-decoration: none;
+	white-space: nowrap;
+}
+.admin-bar-tools-link:hover {
+	text-decoration: underline;
+}
+
+/* ═══════════════════════════════════════════════════
+   Admin tools page  (at- prefix = admin tools)
+   All rules scoped to body.admin-page to avoid
+   any bleed from the consumer site's dark styles.
+   ═══════════════════════════════════════════════════ */
+body.admin-page {
+	background: #f0f0f3;
+	color: #111;
+}
+
+/* Header */
+.at-header {
+	align-items: center;
+	background: #1c1c2e;
+	box-sizing: border-box;
+	color: white;
+	display: flex;
+	flex-flow: row wrap;
+	gap: 0.5rem 1.5rem;
+	padding: 0.75rem 1.5rem;
+	width: 100%;
+}
+.at-header__brand {
+	font-size: 1.1rem;
+	font-weight: 900;
+	letter-spacing: 0.08em;
+}
+.at-header__title {
+	color: #aab;
+	font-size: 0.85rem;
+	letter-spacing: 0.05em;
+	text-transform: uppercase;
+}
+.at-header__nav {
+	display: flex;
+	gap: 1.25rem;
+	margin-left: auto;
+}
+.at-header__nav a {
+	color: #9ab;
+	font-size: 0.85rem;
+	text-decoration: none;
+}
+.at-header__nav a:hover {
+	color: white;
+}
+
+/* Main content area */
+.at-main {
+	box-sizing: border-box;
+	margin: 0 auto;
+	max-width: 740px;
+	padding: 2rem 1rem;
+}
+
+/* Notice banners */
+.at-notice {
+	border-radius: 5px;
+	font-size: 0.875rem;
+	margin-bottom: 1.25rem;
+	padding: 0.65rem 1rem;
+}
+.at-notice--success {
+	background: #e6f4ea;
+	border: 1px solid #b2dfb9;
+	color: #2d6a4f;
+}
+.at-notice--error {
+	background: #fdecea;
+	border: 1px solid #f5c6c6;
+	color: #922;
+}
+
+/* Tool cards */
+.at-card {
+	background: white;
+	border-radius: 8px;
+	box-shadow: 0 1px 4px rgba(0,0,0,0.09);
+	margin-bottom: 1.5rem;
+	padding: 1.5rem;
+}
+.at-card__title {
+	color: #222;
+	font-size: 0.95rem;
+	font-weight: 700;
+	letter-spacing: 0.05em;
+	margin: 0 0 0.35rem;
+	text-transform: uppercase;
+}
+.at-card__desc {
+	color: #666;
+	font-size: 0.85rem;
+	margin: 0 0 1.25rem;
+}
+
+/* Form fields */
+.at-field {
+	margin-bottom: 1rem;
+}
+.at-field--row {
+	align-items: center;
+	display: flex;
+	flex-flow: row wrap;
+	gap: 0.75rem;
+}
+.at-label {
+	color: #333;
+	display: block;
+	font-size: 0.85rem;
+	font-weight: 600;
+	margin-bottom: 0.35rem;
+}
+.at-hint {
+	color: #888;
+	font-size: 0.78rem;
+	margin-bottom: 0.4rem;
+}
+.at-input {
+	background: white;
+	border: 1px solid #ccc;
+	border-radius: 4px;
+	box-sizing: border-box;
+	color: #111;
+	font-size: 0.9rem;
+	padding: 0.45rem 0.65rem;
+	width: 100%;
+}
+.at-input--narrow {
+	width: 120px;
+}
+.at-input:focus {
+	border-color: #7b91ff;
+	outline: none;
+}
+.at-toggle-row {
+	align-items: center;
+	display: flex;
+	gap: 1rem;
+}
+
+/* Buttons */
+.at-btn {
+	border: none;
+	border-radius: 4px;
+	cursor: pointer;
+	font-size: 0.875rem;
+	font-weight: 600;
+	padding: 0.5rem 1.1rem;
+}
+.at-btn--primary {
+	background: #1c1c2e;
+	color: white;
+}
+.at-btn--primary:hover {
+	background: #2e2e50;
+}
+.at-btn--secondary {
+	background: #555;
+	color: white;
+}
+.at-btn--secondary:hover {
+	background: #333;
+}
+.at-btn--danger {
+	background: #a00;
+	color: white;
+}
+.at-btn--danger:not([disabled]):hover {
+	background: #c00;
+}
+.at-btn[disabled] {
+	cursor: not-allowed;
+	opacity: 0.4;
+}
+
+/* Merge inputs row */
+.at-merge-inputs {
+	align-items: flex-end;
+	display: flex;
+	flex-flow: row wrap;
+	gap: 0.75rem 1rem;
+	margin-bottom: 0.5rem;
+}
+.at-merge-inputs .at-field {
+	margin-bottom: 0;
+}
+.at-merge-plus {
+	color: #999;
+	font-size: 1.4rem;
+	padding-bottom: 0.2rem;
+}
+.at-merge-action {
+	padding-bottom: 0.05rem;
+}
+
+/* Merge preview */
+.at-merge-preview {
+	background: #f7f7f9;
+	border: 1px solid #ddd;
+	border-radius: 6px;
+	display: flex;
+	flex-flow: row wrap;
+	gap: 1rem;
+	margin: 1.25rem 0 0.75rem;
+	padding: 1rem;
+}
+.at-merge-col {
+	flex: 1;
+	min-width: 200px;
+}
+.at-merge-col__tag {
+	background: #e8f0fe;
+	border-radius: 3px;
+	color: #3a5bc7;
+	display: inline-block;
+	font-size: 0.72rem;
+	font-weight: 700;
+	letter-spacing: 0.04em;
+	margin-bottom: 0.5rem;
+	padding: 0.15rem 0.45rem;
+	text-transform: uppercase;
+}
+.at-merge-col__tag--absorb {
+	background: #fce8e8;
+	color: #a00;
+}
+.at-merge-col__text {
+	color: #222;
+	font-size: 0.9rem;
+	margin: 0 0 0.5rem;
+}
+.at-merge-col__link {
+	color: #555;
+	font-size: 0.8rem;
+	text-decoration: underline;
+}
+.at-merge-arrow {
+	align-self: center;
+	color: #bbb;
+	font-size: 1.5rem;
 }
