@@ -421,6 +421,37 @@
 					echo "Query Failed";
 				break;
 
+		case "flagArgument":
+			$argAtHand = intval($_SESSION['currentArg']);
+			$profileID = intval($_SESSION['profile']);
+			$category  = $_POST['flagCategory'] ?? '';
+			$comment   = trim($_POST['flagComment'] ?? '');
+			$allowedCats = ['offensive','phrasing_mismatch','duplicate_assoc','spam','incoherent','other'];
+			if (!in_array($category, $allowedCats, true)) {
+				$_SESSION['formError'] = 'Please choose a reason for flagging this argument.';
+				header('Location: /?arg=' . $argAtHand);
+				exit;
+			}
+			if ($category === 'other' && $comment === '') {
+				$_SESSION['formError'] = 'Please add a comment explaining the issue.';
+				header('Location: /?arg=' . $argAtHand);
+				exit;
+			}
+			if (mb_strlen($comment) > 300) { $comment = mb_substr($comment, 0, 300); }
+			$query = "CALL flagArgument($argAtHand, $profileID, \"" .
+				mysqli_real_escape_string($db, $category) . "\", \"" .
+				mysqli_real_escape_string($db, $comment) . "\")";
+			mysqli_query($db, $query);
+			header('Location: /?arg=' . $argAtHand);
+			exit;
+
+		case "unflagArgument":
+			$argAtHand = intval($_SESSION['currentArg']);
+			$profileID = intval($_SESSION['profile']);
+			mysqli_query($db, "CALL unflagArgument($argAtHand, $profileID)");
+			header('Location: /?arg=' . $argAtHand);
+			exit;
+
 		case "adminSwitchProfile":
 			if (isset($_SESSION['isAdmin']) && $_SESSION['isAdmin']) {
 				$switchTo      = intval($_POST['pickerProfile'] ?? 0);
