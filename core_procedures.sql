@@ -148,3 +148,30 @@ BEGIN
     ORDER BY Difference DESC;
 END //
 DELIMITER ;
+
+-- ── impliedAssertion trigger ────────────────────────────────────────────────
+-- Weighing an argument (inserting an ENDORSEMENT) implies acceptance of the
+-- supporting argument. Record that acceptance only when the user has no opinion
+-- on the support yet.
+--
+-- The trigger must NOT modify ENDORSEMENT — a trigger cannot write the same
+-- table whose statement fired it (MySQL: "Can't update table 'ENDORSEMENT' in
+-- stored function/trigger because it is already used by statement which invoked
+-- this stored function/trigger"). It therefore only inserts an OPINION when the
+-- user has none, and never overrides an existing explicit opinion. (It used to
+-- CALL assertOpinion(1, ...), whose opinion-flip branches UPDATE ENDORSEMENT,
+-- which crashed any weigh-in that supported a previously-rejected argument.)
+DROP TRIGGER IF EXISTS impliedAssertion;
+DELIMITER //
+CREATE TRIGGER impliedAssertion BEFORE INSERT ON ENDORSEMENT
+FOR EACH ROW
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM OPINION
+                   WHERE argumentID = NEW.supportingArgID
+                     AND profileID  = NEW.profileID) THEN
+        INSERT INTO OPINION
+            VALUES (NEW.supportingArgID, NEW.profileID, TRUE,
+                    CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+    END IF;
+END //
+DELIMITER ;
