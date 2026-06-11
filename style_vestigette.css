@@ -4855,3 +4855,113 @@ body.admin-page {
 	color: #bbb;
 	font-size: 1.5rem;
 }
+
+/* ── Argument flagging ──────────────────────────────────────────────────── */
+.flag-row {
+	display: flex;
+	justify-content: flex-end;
+	width: 100%;
+	padding: 0.1rem 0.15rem 0;
+	margin-top: 0.2rem;
+}
+.flagBtn {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.3rem;
+	background: none;
+	border: none;
+	padding: 0.2rem 0.3rem;
+	font-size: 0.72rem;
+	line-height: 1;
+	color: rgba(255,255,255,0.5);
+	cursor: pointer;
+	text-decoration: none;
+	transition: color 0.15s ease;
+}
+.flagBtn:hover,
+.flagBtn:focus { color: rgba(255,255,255,0.92); }
+.flagBtn .flag-icon { display: block; fill: currentColor; }
+.flagBtn.flagged { color: #f2b134; }
+
+/* Flag modal — mirrors the phrasing/explication modals */
+#overlayF {
+	background-color: rgba(0,0,0,0.65);
+	height: 100%;
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	z-index: 2;
+}
+#flagModal.container {
+	background-color: var(--cddbGrey);
+	border: 8px solid var(--cddbGrey);
+	box-sizing: border-box;
+	display: flex;
+	flex-flow: column nowrap;
+	align-items: stretch;
+	justify-content: flex-start;
+	position: absolute;
+	left: 50%;
+	top: 2rem;
+	transform: translateX(-50%);
+	width: 90%;
+	max-width: 460px;
+	max-height: 88vh;
+	overflow: auto;
+	z-index: 3;
+}
+#flagModal #closeF {
+	position: absolute;
+	top: 0.15rem;
+	right: 0.5rem;
+	z-index: 4;
+}
+#flagModal > h2 { padding-right: 3rem; }
+#flagModal .panel.expanded {
+	display: flex;
+	flex-flow: column nowrap;
+	align-items: stretch;
+	width: 100%;
+	gap: 0.55rem;
+	padding: 0.25rem 0.4rem 0.5rem;
+	box-sizing: border-box;
+}
+#flagModal .flag-intro { margin: 0; font-size: 0.85rem; opacity: 0.9; }
+#flagModal .flag-reasons {
+	border: none;
+	margin: 0;
+	padding: 0;
+	display: flex;
+	flex-flow: column nowrap;
+	gap: 0.45rem;
+}
+#flagModal .flag-reason {
+	display: flex;
+	flex-flow: row nowrap;
+	align-items: flex-start;
+	gap: 0.5rem;
+	font-size: 0.9rem;
+	cursor: pointer;
+}
+#flagModal .flag-reason input { margin: 0.12rem 0 0; flex: 0 0 auto; }
+#flagModal #flagComment {
+	width: 100%;
+	box-sizing: border-box;
+	min-height: 3.2rem;
+	resize: vertical;
+	font-size: 0.9rem;
+	padding: 0.4rem;
+	border: 1px solid rgba(0,0,0,0.35);
+	border-radius: 3px;
+}
+#flagModal .flag-actions {
+	display: flex;
+	flex-flow: row nowrap;
+	justify-content: flex-end;
+}
+#flagModal .flag-remove-form {
+	display: flex;
+	justify-content: flex-end;
+	margin-top: 0.2rem;
+}
