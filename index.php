@@ -544,15 +544,11 @@ $carouselCount = count($carouselLinks);
 				</div>
 				<div class="flag-row">
 <?php if ($profile): ?>
-					<button type="button" class="flagBtn<?php echo $userFlag ? ' flagged' : ''; ?>" aria-label="<?php echo $userFlag ? 'You flagged this argument — edit or remove your flag' : 'Flag this argument'; ?>" title="<?php echo $userFlag ? 'You flagged this argument' : 'Flag this argument'; ?>">
-						<svg class="flag-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M6 2a1 1 0 0 0-1 1v18a1 1 0 0 0 2 0v-6.6l11.3.001a.6.6 0 0 0 .5-.93L16 9l2.8-4.47a.6.6 0 0 0-.5-.93H7V3a1 1 0 0 0-1-1z"/></svg>
-						<span class="flag-label"><?php echo $userFlag ? 'Flagged' : 'Flag'; ?></span>
-					</button>
+					<button type="button" class="flagBtn<?php echo $userFlag ? ' flagged' : ''; ?>" aria-label="<?php echo $userFlag ? 'You flagged this argument — edit or remove your flag' : 'Flag this argument'; ?>" title="<?php echo $userFlag ? 'You flagged this argument' : 'Flag this argument'; ?>"><svg class="flag-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="13" height="13" aria-hidden="true"><path d="M6 2a1 1 0 0 0-1 1v18a1 1 0 0 0 2 0v-6.6l11.3.001a.6.6 0 0 0 .5-.93L16 9l2.8-4.47a.6.6 0 0 0-.5-.93H7V3a1 1 0 0 0-1-1z"/></svg></button>
+					<span class="flag-label"><?php echo $userFlag ? 'Flagged' : 'Flag'; ?></span>
 <?php else: ?>
-					<a class="flagBtn" href="/login.php?arg=<?php echo intval($arg); ?>" title="Log in to flag this argument" aria-label="Log in to flag this argument">
-						<svg class="flag-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M6 2a1 1 0 0 0-1 1v18a1 1 0 0 0 2 0v-6.6l11.3.001a.6.6 0 0 0 .5-.93L16 9l2.8-4.47a.6.6 0 0 0-.5-.93H7V3a1 1 0 0 0-1-1z"/></svg>
-						<span class="flag-label">Flag</span>
-					</a>
+					<a class="flagBtn" href="/login.php?arg=<?php echo intval($arg); ?>" title="Log in to flag this argument" aria-label="Log in to flag this argument"><svg class="flag-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="13" height="13" aria-hidden="true"><path d="M6 2a1 1 0 0 0-1 1v18a1 1 0 0 0 2 0v-6.6l11.3.001a.6.6 0 0 0 .5-.93L16 9l2.8-4.47a.6.6 0 0 0-.5-.93H7V3a1 1 0 0 0-1-1z"/></svg></a>
+					<span class="flag-label">Flag</span>
 <?php endif; ?>
 				</div>
 			</div>
@@ -838,16 +834,13 @@ if ((isset($opinion)) && ($opinion > 0)) {
 				<textarea name="flagComment" id="flagComment" maxlength="300" placeholder="Add a comment (required if you pick &ldquo;Other&rdquo;)"><?php echo htmlspecialchars($ufComment); ?></textarea>
 				<span id="flagError" class="validation-error hidden" role="alert">Please add a comment explaining the issue.</span>
 				<div class="flag-actions">
-					<button type="submit" class="button addNew" name="buttonClicked" value="flagArgument"><?php echo $userFlag ? 'Update flag' : 'Submit flag'; ?></button>
+					<button type="submit" class="flag-submit-btn" name="buttonClicked" value="flagArgument"><?php echo $userFlag ? 'Update flag' : 'Submit flag'; ?></button>
+<?php if ($userFlag): ?>
+					<button type="submit" class="flag-remove-btn" name="buttonClicked" value="unflagArgument" formnovalidate>Remove flag</button>
+<?php endif; ?>
 				</div>
 				<?php addCSRFtoken() ?>
 			</form>
-<?php if ($userFlag): ?>
-			<form method="POST" accept-charset="utf-8" class="flag-remove-form">
-				<button type="submit" class="button reset" name="buttonClicked" value="unflagArgument">Remove my flag</button>
-				<?php addCSRFtoken() ?>
-			</form>
-<?php endif; ?>
 		</div>
 	</div>
 </div>

@@ -422,6 +422,7 @@ function init() {
 	let flagForm = document.getElementById("flagForm");
 	if (flagForm) {
 		flagForm.addEventListener("submit", function(evt) {
+			if (evt.submitter && evt.submitter.value === "unflagArgument") return; // removing — skip validation
 			let cat = flagForm.querySelector('input[name="flagCategory"]:checked');
 			let cmt = document.getElementById("flagComment");
 			let err = document.getElementById("flagError");

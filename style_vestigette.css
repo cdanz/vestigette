@@ -3,6 +3,7 @@
 	--cddbRed: #af1a17;
 	--cddbGreen: #10a020;
 	--cddbBlue: #2d58a8;
+	--cddbYellow: #d4a017;
 	--cddbBlack: #0e0e0e;
 	--cddbWhite: white;
 	--cddbGrey: #939393;
@@ -1035,7 +1036,11 @@ body.flesh-out-page .flesh-footer button:hover:not(:disabled) {
 	padding: 0.3rem;
 	width: 100%;
 }
-#argument .panel button {
+/* Half-circle dialog-opener look — scoped to ONLY the two manage buttons
+   (manage phrasing / manage explication) so it never bleeds onto other
+   buttons in the argument section (e.g. the flag control). */
+#argument .panel .altPhraseBtn,
+#argument .panel .altExplicationBtn {
 	align-self: stretch;
 	background-color: var(--cddbBlack);
 	border: 1px var(--cddbWhite) solid;
@@ -4857,31 +4862,60 @@ body.admin-page {
 }
 
 /* ── Argument flagging ──────────────────────────────────────────────────── */
-.flag-row {
+/* Pinned to the BOTTOM of the argument panel: margin-top:auto absorbs any
+   extra vertical space above the flag row (the panel is a flex column).
+   Left-aligned. Scoped under #argument so these rules win over the section's
+   broad button rules (#argument button / #argument .panel ...). */
+#argument .panel .flag-row {
 	display: flex;
-	justify-content: flex-end;
+	flex-flow: row nowrap;
+	align-items: center;
+	justify-content: flex-start;
+	gap: 0.4rem;
 	width: 100%;
-	padding: 0.1rem 0.15rem 0;
-	margin-top: 0.2rem;
+	margin-top: auto;
+	padding: 0.4rem 0.15rem 0.1rem;
 }
-.flagBtn {
+/* Square, radio-like control — ONLY this square (the flag icon) is the hit
+   target. Deliberately NOT the half-curve manage-button style. */
+#argument .flagBtn {
 	display: inline-flex;
 	align-items: center;
-	gap: 0.3rem;
+	justify-content: center;
+	box-sizing: border-box;
+	width: 1.25rem;
+	height: 1.25rem;
+	min-width: 1.25rem;
+	padding: 0;
+	margin: 0;
 	background: none;
-	border: none;
-	padding: 0.2rem 0.3rem;
-	font-size: 0.72rem;
-	line-height: 1;
-	color: rgba(255,255,255,0.5);
+	border: 1px solid rgba(0,0,0,0.4);
+	border-radius: 3px;
+	color: rgba(0,0,0,0.55);
 	cursor: pointer;
-	text-decoration: none;
-	transition: color 0.15s ease;
+	flex: 0 0 auto;
+	transition: color 0.15s ease, border-color 0.15s ease;
 }
-.flagBtn:hover,
-.flagBtn:focus { color: rgba(255,255,255,0.92); }
-.flagBtn .flag-icon { display: block; fill: currentColor; }
-.flagBtn.flagged { color: #f2b134; }
+#argument .flagBtn:hover,
+#argument .flagBtn:focus {
+	color: rgba(0,0,0,0.85);
+	border-color: rgba(0,0,0,0.7);
+}
+#argument .flagBtn .flag-icon { display: block; width: 13px; height: 13px; fill: currentColor; }
+#argument .flagBtn.flagged {
+	color: var(--cddbYellow);
+	border-color: var(--cddbYellow);
+}
+#argument .flagBtn.flagged .flag-icon { fill: var(--cddbYellow); }
+/* Label sits to the right of the square control */
+#argument .flag-label {
+	font-size: 0.72rem;
+	font-weight: normal;
+	line-height: 1;
+	color: rgba(0,0,0,0.6);
+	user-select: none;
+}
+#argument .flagBtn.flagged + .flag-label { color: var(--cddbYellow); }
 
 /* Flag modal — mirrors the phrasing/explication modals */
 #overlayF {
@@ -4911,11 +4945,29 @@ body.admin-page {
 	overflow: auto;
 	z-index: 3;
 }
+/* Cancel button — a circle, not the default tall oval */
 #flagModal #closeF {
 	position: absolute;
-	top: 0.15rem;
-	right: 0.5rem;
+	top: 0.3rem;
+	right: 0.4rem;
 	z-index: 4;
+	width: 1.7rem;
+	height: 1.7rem;
+	padding: 0;
+	border-radius: 50%;
+	border-width: 0.12rem;
+	border-color: var(--cddbBlack);
+	background-color: transparent;
+	color: var(--cddbBlack);
+	font-size: 0.8rem;
+	line-height: 1;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+#flagModal #closeF:hover {
+	background-color: var(--cddbBlack);
+	color: var(--cddbWhite);
 }
 #flagModal > h2 { padding-right: 3rem; }
 #flagModal .panel.expanded {
@@ -4955,13 +5007,37 @@ body.admin-page {
 	border: 1px solid rgba(0,0,0,0.35);
 	border-radius: 3px;
 }
+/* Update + Remove laid out horizontally, both visible rectangular buttons */
 #flagModal .flag-actions {
 	display: flex;
 	flex-flow: row nowrap;
+	gap: 0.5rem;
 	justify-content: flex-end;
+	align-items: center;
 }
-#flagModal .flag-remove-form {
-	display: flex;
-	justify-content: flex-end;
-	margin-top: 0.2rem;
+#flagModal .flag-actions button {
+	height: auto;
+	border-radius: 4px;
+	border-width: 0.12rem;
+	border-style: solid;
+	font-size: 0.85rem;
+	padding: 0.4rem 0.9rem;
+}
+#flagModal .flag-submit-btn {
+	background-color: var(--cddbBlack);
+	border-color: var(--cddbBlack);
+	color: var(--cddbWhite);
+}
+#flagModal .flag-submit-btn:hover {
+	background-color: var(--cddbLiteGrey);
+	color: var(--cddbBlack);
+}
+#flagModal .flag-remove-btn {
+	background-color: transparent;
+	border-color: var(--cddbRed);
+	color: var(--cddbRed);
+}
+#flagModal .flag-remove-btn:hover {
+	background-color: var(--cddbRed);
+	color: var(--cddbWhite);
 }
