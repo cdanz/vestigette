@@ -400,6 +400,45 @@ function init() {
 		});
 	}
 
+	// ── Flag modal ───────────────────────────────────────────────────────────
+	let overlayF  = document.getElementById("overlayF");
+	let flagModal = document.getElementById("flagModal");
+	let openFlag  = document.querySelector(".flagBtn");   // <button> when logged in, <a> when not
+	let closeF    = document.getElementById("closeF");
+	function toggleFlagModal() {
+		if (overlayF)  overlayF.classList.toggle("hidden");
+		if (flagModal) flagModal.classList.toggle("hidden");
+	}
+	if (openFlag && openFlag.tagName === "BUTTON") {
+		openFlag.addEventListener("click", toggleFlagModal);
+	}
+	if (closeF) closeF.addEventListener("click", toggleFlagModal);
+	if (overlayF) {
+		overlayF.addEventListener("click", function(evt) {
+			if (evt.target === overlayF) toggleFlagModal();   // click backdrop to close
+		});
+	}
+	// "Other" requires a comment; also block submitting with no reason chosen
+	let flagForm = document.getElementById("flagForm");
+	if (flagForm) {
+		flagForm.addEventListener("submit", function(evt) {
+			if (evt.submitter && evt.submitter.value === "unflagArgument") return; // removing — skip validation
+			let cat = flagForm.querySelector('input[name="flagCategory"]:checked');
+			let cmt = document.getElementById("flagComment");
+			let err = document.getElementById("flagError");
+			if (!cat) {
+				evt.preventDefault();
+				if (err) { err.textContent = "Please choose a reason."; err.classList.remove("hidden"); }
+				return;
+			}
+			if (cat.value === "other" && cmt && cmt.value.trim() === "") {
+				evt.preventDefault();
+				if (err) { err.textContent = "Please add a comment explaining the issue."; err.classList.remove("hidden"); }
+				return;
+			}
+		});
+	}
+
 	// ── Explication carousel ────────────────────────────────────────────────
 	document.querySelectorAll('.carousel-box').forEach(function(box) {
 		var track = box.querySelector('.carousel-track');

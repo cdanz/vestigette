@@ -116,6 +116,15 @@ if (isset($_SESSION['profile'])) {
 	}
 }
 // --- End admin setup ---
+
+// --- This user's active flag on the current argument (drives the flag control) ---
+$userFlag = null;
+if ($profile && $arg) {
+	$ufRow = mysqli_fetch_assoc(mysqli_query($db,
+		"SELECT reasonCategory, comment FROM ARGUMENT_FLAG
+		 WHERE argumentID=" . intval($arg) . " AND profileID=" . intval($profile) . " AND isActive=1 LIMIT 1"));
+	if ($ufRow) { $userFlag = $ufRow; }
+}
 mysqli_close($db);
 	
 
@@ -533,6 +542,15 @@ $carouselCount = count($carouselLinks);
 					</div>
 					<button class="altExplicationBtn" aria-label="Explication links">&#x2318;</button>
 				</div>
+				<div class="flag-row">
+<?php if ($profile): ?>
+					<button type="button" class="flagBtn<?php echo $userFlag ? ' flagged' : ''; ?>" aria-label="<?php echo $userFlag ? 'You flagged this argument — edit or remove your flag' : 'Flag this argument'; ?>" title="<?php echo $userFlag ? 'You flagged this argument' : 'Flag this argument'; ?>"><svg class="flag-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="13" height="13" aria-hidden="true"><path d="M6 2a1 1 0 0 0-1 1v18a1 1 0 0 0 2 0v-6.6l11.3.001a.6.6 0 0 0 .5-.93L16 9l2.8-4.47a.6.6 0 0 0-.5-.93H7V3a1 1 0 0 0-1-1z"/></svg></button>
+					<span class="flag-label"><?php echo $userFlag ? 'Flagged' : 'Flag'; ?></span>
+<?php else: ?>
+					<a class="flagBtn" href="/login.php?arg=<?php echo intval($arg); ?>" title="Log in to flag this argument" aria-label="Log in to flag this argument"><svg class="flag-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="13" height="13" aria-hidden="true"><path d="M6 2a1 1 0 0 0-1 1v18a1 1 0 0 0 2 0v-6.6l11.3.001a.6.6 0 0 0 .5-.93L16 9l2.8-4.47a.6.6 0 0 0-.5-.93H7V3a1 1 0 0 0-1-1z"/></svg></a>
+					<span class="flag-label">Flag</span>
+<?php endif; ?>
+				</div>
 			</div>
 		</div>
 
@@ -786,5 +804,46 @@ if ((isset($opinion)) && ($opinion > 0)) {
 			</div>
 
 
+<?php if ($profile):
+	$ufCat     = $userFlag ? $userFlag['reasonCategory'] : '';
+	$ufComment = $userFlag ? (string)$userFlag['comment'] : '';
+	$flagCats  = [
+		'offensive'         => 'Offensive or inappropriate',
+		'phrasing_mismatch' => "Top phrasing doesn't make the same assertion",
+		'duplicate_assoc'   => 'Duplicated association(s)',
+		'spam'              => 'Spam or off-topic',
+		'incoherent'        => 'Incomprehensible or nonsensical',
+		'other'             => 'Other',
+	];
+?>
+<!-- Flag Modal -->
+<div id="overlayF" class="hidden">
+	<div id="flagModal" class="container hidden">
+		<h2><?php echo $userFlag ? 'Your flag' : 'Flag this argument'; ?></h2>
+		<div class="buttons">
+			<button id="closeF" class="button">X</button>
+		</div>
+		<div class="panel expanded">
+			<p class="flag-intro"><?php echo $userFlag ? 'You flagged this argument. Update your reason or remove your flag.' : 'Tell the moderators what’s wrong with this argument.'; ?></p>
+			<form method="POST" accept-charset="utf-8" id="flagForm">
+				<fieldset class="flag-reasons">
+<?php foreach ($flagCats as $val => $label): ?>
+					<label class="flag-reason"><input type="radio" name="flagCategory" value="<?php echo $val; ?>"<?php echo ($ufCat === $val) ? ' checked' : ''; ?>> <span><?php echo htmlspecialchars($label); ?></span></label>
+<?php endforeach; ?>
+				</fieldset>
+				<textarea name="flagComment" id="flagComment" maxlength="300" placeholder="Add a comment (required if you pick &ldquo;Other&rdquo;)"><?php echo htmlspecialchars($ufComment); ?></textarea>
+				<span id="flagError" class="validation-error hidden" role="alert">Please add a comment explaining the issue.</span>
+				<div class="flag-actions">
+					<button type="submit" class="flag-submit-btn" name="buttonClicked" value="flagArgument"><?php echo $userFlag ? 'Update flag' : 'Submit flag'; ?></button>
+<?php if ($userFlag): ?>
+					<button type="submit" class="flag-remove-btn" name="buttonClicked" value="unflagArgument" formnovalidate>Remove flag</button>
+<?php endif; ?>
+				</div>
+				<?php addCSRFtoken() ?>
+			</form>
+		</div>
+	</div>
+</div>
+<?php endif; ?>
 	</body>
 </html>

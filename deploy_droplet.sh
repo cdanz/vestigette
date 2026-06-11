@@ -27,6 +27,7 @@ PHP_FILES=(
     index.php
     query_current_argument.php
     login.php
+    admin_tools.php
 )
 
 STATIC_FILES=(
