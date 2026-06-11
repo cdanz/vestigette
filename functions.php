@@ -52,12 +52,21 @@
 	            $profileID = intval($_SESSION['profile']);
 	            $query = "CALL prepareForNewEndorse(\"".$type."\",".$argAtHand.",".$profileID.");";
 
+				$impliedAccepts = "";
 				for ($i = 0; $i < (count($arrayOfWeighIns)-2); $i+=2) {
 					$supportArgVal = intval($arrayOfWeighIns[$i]);
 					$weightVal = floatval($arrayOfWeighIns[$i+1]);
 					$query .= "INSERT INTO ENDORSEMENT VALUES(".$argAtHand.",".$profileID.",\"".$type."\",".$supportArgVal.",".$weightVal.",CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,TRUE);";
+					// Using an argument as a support implies acceptance of it.
+					if ($supportArgVal > 0 && $weightVal > 0) {
+						$impliedAccepts .= "CALL assertOpinion(1,".$supportArgVal.",".$profileID.");";
+					}
 				}
 				$query .= "CALL resolveOldWithNewEndorse(\"".$type."\",".$argAtHand.",".$profileID.");";
+				// Apply implied acceptance AFTER the inserts/resolve so each opinion
+				// flip's ENDORSEMENT updates run outside the insert trigger. Runs at
+				// commit (Endorse) and overrides any prior rejection of a support.
+				$query .= $impliedAccepts;
 
 				/*Execute queries */
 				if(mysqli_multi_query($db, $query)){
@@ -75,12 +84,21 @@
 	            $profileID = intval($_SESSION['profile']);
 	            $query = "CALL prepareForNewEndorse(\"".$type."\",".$argAtHand.",".$profileID.");";
 
+				$impliedAccepts = "";
 				for ($i = 0; $i < (count($arrayOfWeighIns)-2); $i+=2) {
 					$supportArgVal = intval($arrayOfWeighIns[$i]);
 					$weightVal = floatval($arrayOfWeighIns[$i+1]);
 					$query .= "INSERT INTO ENDORSEMENT VALUES(".$argAtHand.",".$profileID.",\"".$type."\",".$supportArgVal.",".$weightVal.",CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,TRUE);";
+					// Using an argument as a support implies acceptance of it.
+					if ($supportArgVal > 0 && $weightVal > 0) {
+						$impliedAccepts .= "CALL assertOpinion(1,".$supportArgVal.",".$profileID.");";
+					}
 				}
 				$query .= "CALL resolveOldWithNewEndorse(\"".$type."\",".$argAtHand.",".$profileID.");";
+				// Apply implied acceptance AFTER the inserts/resolve so each opinion
+				// flip's ENDORSEMENT updates run outside the insert trigger. Runs at
+				// commit (Endorse) and overrides any prior rejection of a support.
+				$query .= $impliedAccepts;
 
 				/*Execute queries */
 				if(mysqli_multi_query($db, $query)){
@@ -97,12 +115,21 @@
 	            $argAtHand = intval($_SESSION['currentArg']);
 	            $profileID = intval($_SESSION['profile']);
 	            $query = "CALL prepareForNewEndorse(\"".$type."\",".$argAtHand.",".$profileID.");";
+				$impliedAccepts = "";
 				for ($i = 0; $i < (count($arrayOfWeighIns)-2); $i+=2) {
 					$supportArgVal = intval($arrayOfWeighIns[$i]);
 					$weightVal = floatval($arrayOfWeighIns[$i+1]);
 					$query .= "INSERT INTO ENDORSEMENT VALUES(".$argAtHand.",".$profileID.",\"".$type."\",".$supportArgVal.",".$weightVal.",CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,TRUE);";
+					// Using an argument as a support implies acceptance of it.
+					if ($supportArgVal > 0 && $weightVal > 0) {
+						$impliedAccepts .= "CALL assertOpinion(1,".$supportArgVal.",".$profileID.");";
+					}
 				}
 				$query .= "CALL resolveOldWithNewEndorse(\"".$type."\",".$argAtHand.",".$profileID.");";
+				// Apply implied acceptance AFTER the inserts/resolve so each opinion
+				// flip's ENDORSEMENT updates run outside the insert trigger. Runs at
+				// commit (Endorse) and overrides any prior rejection of a support.
+				$query .= $impliedAccepts;
 
 				/*Execute queries */
 				if(mysqli_multi_query($db, $query)){
