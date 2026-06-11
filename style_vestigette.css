@@ -647,6 +647,33 @@ button.hidden {
 .find-content.collapsed {
 	display: none;
 }
+.find-nav .form-inline {
+	align-items: center;
+}
+.find-nav #jumpToID {
+	flex: 1 1 auto;
+	min-width: 0;
+}
+/* .find ... beats a:link (color: inherit) so the labels aren't black-on-black */
+.find .find-nav-btn {
+	align-items: center;
+	background-color: var(--cddbBlack);
+	border-radius: 11px;
+	color: var(--cddbWhite);
+	cursor: pointer;
+	display: inline-flex;
+	flex: 0 0 auto;
+	font-weight: bold;
+	justify-content: center;
+	min-width: 2.2rem;
+	padding: 0.35rem 0.7rem;
+	text-align: center;
+	text-decoration: none;
+}
+.find .find-nav-btn:hover {
+	background-color: var(--cddbLiteGrey);
+	color: var(--cddbBlack);
+}
 #phrasing .panel li,
 #explication .panel li, 
 #checkpoint .panel li {

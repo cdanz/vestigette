@@ -120,6 +120,21 @@ if ($profile && $arg) {
 		 WHERE argumentID=" . intval($arg) . " AND profileID=" . intval($profile) . " AND isActive=1 LIMIT 1"));
 	if ($ufRow) { $userFlag = $ufRow; }
 }
+
+// --- Most-opined argument the logged-in user has NOT yet opined on (Find > Go to ID > Popular) ---
+$popularArgID = null;
+if ($profile) {
+	$popRow = mysqli_fetch_row(mysqli_query($db,
+		"SELECT o.argumentID
+		 FROM OPINION o
+		 WHERE o.argumentID <> " . intval($arg) . "
+		   AND NOT EXISTS (SELECT 1 FROM OPINION me
+		                   WHERE me.argumentID = o.argumentID AND me.profileID = " . intval($profile) . ")
+		 GROUP BY o.argumentID
+		 ORDER BY COUNT(*) DESC, o.argumentID ASC
+		 LIMIT 1"));
+	if ($popRow) { $popularArgID = intval($popRow[0]); }
+}
 mysqli_close($db);
 	
 
@@ -679,8 +694,13 @@ if (isset($recent)) {
 					<div class="find-section">
 						<div class="find-toggle collapsed">Go to ID</div>
 						<div class="find-content collapsed">
-							<ul><li class="lineItem">
+							<ul><li class="lineItem find-nav">
 								<form class="form-inline" id="form" method="get">
+									<a class="find-nav-btn" href="<?php echo $baseURL; ?>?arg=<?php echo max(1, intval($arg) - 1); ?>" title="Previous argument (ID &minus;1)" aria-label="Previous argument">&larr;</a>
+									<a class="find-nav-btn" href="<?php echo $baseURL; ?>?arg=<?php echo intval($arg) + 1; ?>" title="Next argument (ID +1)" aria-label="Next argument">&rarr;</a>
+<?php if ($profile && $popularArgID): ?>
+									<a class="find-nav-btn find-popular" href="<?php echo $baseURL; ?>?arg=<?php echo $popularArgID; ?>" title="Most-discussed argument you haven't weighed in on yet">Popular</a>
+<?php endif; ?>
 									<input type="text" id="jumpToID" name="arg" placeholder="Argument ID" onchange="document.getElementById('form').action = '<?php echo $baseURL; ?>?arg=' + this.value;">
 									<button type="submit" class="button instead" value="jumpTo">Go</button>
 								</form>
