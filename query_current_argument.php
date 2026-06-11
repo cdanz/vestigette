@@ -179,6 +179,31 @@ if (mysqli_multi_query($db, $sql)) {
   echo "ERROR - MULTIPLE QUERIES FAILED";
 }
 
+// Recent Assertions (Find section): the 20 newest arguments by creation date.
+// Excludes bot-persona-created nodes (createdBy <= 26) so the list surfaces
+// human/admin-authored arguments as navigation entry points rather than being
+// flooded by bot scaffolding (rebuttals/becauses/therefores).
+// Uses the currentPhrasing cache (falls back to oldest phrasing) so it stays cheap.
+// The middle value (0) is the color/weight slot generateFindLines() expects; recent
+// items carry no endorsement signal, so they render neutral.
+$recent = array();
+$recentRes = mysqli_query($db,
+  "SELECT a.argumentID, 0,
+          COALESCE(a.currentPhrasing,
+                   (SELECT phrasing FROM PHRASING
+                    WHERE argumentID = a.argumentID
+                    ORDER BY createdDate ASC LIMIT 1))
+   FROM ARGUMENT a
+   WHERE a.createdBy > 26
+   ORDER BY a.createdDate DESC
+   LIMIT 20");
+if ($recentRes) {
+  while ($r = mysqli_fetch_row($recentRes)) {
+    $recent[] = array($r[0], $r[1], $r[2]);
+  }
+  mysqli_free_result($recentRes);
+}
+
 function fetchOgMeta($url) {
 	$meta = ['title' => null, 'image' => null, 'description' => null];
 	if (!filter_var($url, FILTER_VALIDATE_URL)) return $meta;
