@@ -456,14 +456,22 @@
 			if (isset($_SESSION['isAdmin']) && $_SESSION['isAdmin']) {
 				$switchTo      = intval($_POST['pickerProfile'] ?? 0);
 				$realProfileID = intval($_SESSION['realProfile']);
-				// Validate: must be the real profile or one of the designated profiles
+				// Validate against the active picker mode.
 				$settRow = mysqli_fetch_assoc(mysqli_query($db,
-					"SELECT pickerProfiles FROM ADMIN_SETTINGS WHERE profileID=$realProfileID"));
-				$allowed = [$realProfileID];
-				if ($settRow && $settRow['pickerProfiles']) {
-					$allowed = array_merge($allowed, array_map('intval', explode(',', $settRow['pickerProfiles'])));
+					"SELECT pickerType, pickerProfiles FROM ADMIN_SETTINGS WHERE profileID=$realProfileID"));
+				$pickerType = $settRow ? ($settRow['pickerType'] ?? 'none') : 'none';
+				$ok = false;
+				if ($switchTo === $realProfileID) {
+					$ok = true; // always allowed to return to own profile
+				} elseif ($pickerType === 'manual') {
+					$allowed = ($settRow && $settRow['pickerProfiles'])
+						? array_map('intval', explode(',', $settRow['pickerProfiles'])) : [];
+					$ok = in_array($switchTo, $allowed, true);
+				} elseif ($pickerType === 'auto') {
+					// Personas (IDs 1-26) only; never switch to a real (non-persona) user.
+					$ok = ($switchTo >= 1 && $switchTo <= 26);
 				}
-				if (in_array($switchTo, $allowed)) {
+				if ($ok) {
 					$_SESSION['profile'] = $switchTo;
 				}
 			}
