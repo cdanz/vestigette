@@ -609,6 +609,8 @@ function init() {
 			if (wasCollapsed) {
 				content.classList.remove('collapsed');
 				this.classList.remove('collapsed');
+				// Remember the choice so it re-opens on the next argument page
+				try { localStorage.setItem('findOpenKey', this.dataset.findKey || ''); } catch (e) {}
 				// Lazy-load the neighborhood list the first time it's opened
 				if (content.id === 'neighborhoodContent' && content.dataset.loaded === '0') {
 					content.dataset.loaded = '1';
@@ -620,9 +622,21 @@ function init() {
 							content.innerHTML = '<ul><li class="lineItem"><span class="find-loading">Could not load — try again.</span></li></ul>';
 						});
 				}
+			} else {
+				// Clicked the open header to close it — nothing is open now
+				try { localStorage.removeItem('findOpenKey'); } catch (e) {}
 			}
 		});
 	});
+
+	// Restore the user's last-opened Find subsection (persists across argument pages)
+	try {
+		let savedFindKey = localStorage.getItem('findOpenKey');
+		if (savedFindKey) {
+			let savedToggle = document.querySelector('#find .find-toggle[data-find-key="' + savedFindKey + '"]');
+			if (savedToggle) savedToggle.click();
+		}
+	} catch (e) {}
 
 	//Filter button
 	let toggle1 = document.getElementById("filter1");
