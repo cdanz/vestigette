@@ -671,7 +671,13 @@ $canWeightTherefore = isset($opinion) && ($opinion > 0);
 			<div class="panel" data-container-id="filter">
 				<div class="find">
 					<div class="find-section">
-						<div class="find-toggle collapsed">Last Visited</div>
+						<div class="find-toggle collapsed" data-find-key="neighborhood">Neighborhood</div>
+						<div class="find-content collapsed" id="neighborhoodContent" data-arg="<?php echo intval($arg); ?>" data-loaded="0">
+							<ul><li class="lineItem"><span class="find-loading">Open to load nearby arguments&hellip;</span></li></ul>
+						</div>
+					</div>
+					<div class="find-section">
+						<div class="find-toggle collapsed" data-find-key="lastVisited">Last Visited</div>
 						<div class="find-content collapsed">
 <?php
 if (isset($_SESSION['history'])) {
@@ -682,8 +688,8 @@ if (isset($_SESSION['history'])) {
 						</div>
 					</div>
 					<div class="find-section">
-						<div class="find-toggle">Recent Assertions</div>
-						<div class="find-content">
+						<div class="find-toggle collapsed" data-find-key="recentAssertions">Recent Assertions</div>
+						<div class="find-content collapsed">
 <?php
 if (isset($recent)) {
 	generateFindLines($recent);
@@ -692,7 +698,7 @@ if (isset($recent)) {
 						</div>
 					</div>
 					<div class="find-section">
-						<div class="find-toggle collapsed">Go to ID</div>
+						<div class="find-toggle collapsed" data-find-key="goToId">Go to ID</div>
 						<div class="find-content collapsed">
 							<ul><li class="lineItem find-nav">
 								<form class="form-inline" id="form" method="get">
