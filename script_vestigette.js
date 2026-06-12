@@ -609,6 +609,17 @@ function init() {
 			if (wasCollapsed) {
 				content.classList.remove('collapsed');
 				this.classList.remove('collapsed');
+				// Lazy-load the neighborhood list the first time it's opened
+				if (content.id === 'neighborhoodContent' && content.dataset.loaded === '0') {
+					content.dataset.loaded = '1';
+					fetch('/neighborhood.php?arg=' + encodeURIComponent(content.dataset.arg))
+						.then(function(r) { return r.text(); })
+						.then(function(html) { content.innerHTML = html; })
+						.catch(function() {
+							content.dataset.loaded = '0';
+							content.innerHTML = '<ul><li class="lineItem"><span class="find-loading">Could not load — try again.</span></li></ul>';
+						});
+				}
 			}
 		});
 	});

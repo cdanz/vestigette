@@ -28,6 +28,7 @@ PHP_FILES=(
     query_current_argument.php
     login.php
     admin_tools.php
+    neighborhood.php
 )
 
 STATIC_FILES=(

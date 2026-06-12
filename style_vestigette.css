@@ -647,6 +647,11 @@ button.hidden {
 .find-content.collapsed {
 	display: none;
 }
+.find-loading {
+	color: var(--cddbGrey);
+	font-size: 0.85rem;
+	padding: 0.5rem;
+}
 .find-nav .form-inline {
 	align-items: center;
 }

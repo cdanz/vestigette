@@ -671,6 +671,12 @@ $canWeightTherefore = isset($opinion) && ($opinion > 0);
 			<div class="panel" data-container-id="filter">
 				<div class="find">
 					<div class="find-section">
+						<div class="find-toggle collapsed">Neighborhood</div>
+						<div class="find-content collapsed" id="neighborhoodContent" data-arg="<?php echo intval($arg); ?>" data-loaded="0">
+							<ul><li class="lineItem"><span class="find-loading">Open to load nearby arguments&hellip;</span></li></ul>
+						</div>
+					</div>
+					<div class="find-section">
 						<div class="find-toggle collapsed">Last Visited</div>
 						<div class="find-content collapsed">
 <?php
