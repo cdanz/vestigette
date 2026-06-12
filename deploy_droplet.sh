@@ -32,11 +32,20 @@ PHP_FILES=(
     donate.php
     create_donation_session.php
     donate_success.php
+    blog.php
+    post.php
+    admin_content.php
 )
 
 STATIC_FILES=(
     style_vestigette.css
     script_vestigette.js
+)
+
+# Files under includes/ — synced to $WEB_ROOT/includes/ (not the flat web root).
+INCLUDE_FILES=(
+    Parsedown.php
+    content_chrome.php
 )
 
 BOT_FILES=(
@@ -56,10 +65,20 @@ deploy_php() {
     # One scp connection for everything
     scp "${php_paths[@]}" "${static_paths[@]}" "$DROPLET:$WEB_ROOT/"
 
+    # includes/ files (separate destination dir)
+    if [ ${#INCLUDE_FILES[@]} -gt 0 ]; then
+        local include_paths=()
+        for f in "${INCLUDE_FILES[@]}"; do include_paths+=("$SRC/includes/$f"); done
+        scp "${include_paths[@]}" "$DROPLET:$WEB_ROOT/includes/"
+    fi
+
     echo "→ Linting deployed PHP (single connection)"
     local lint_cmd=""
     for f in "${PHP_FILES[@]}"; do
         lint_cmd+="php -l $WEB_ROOT/$f || exit 1; "
+    done
+    for f in "${INCLUDE_FILES[@]}"; do
+        lint_cmd+="php -l $WEB_ROOT/includes/$f || exit 1; "
     done
     if ssh "$DROPLET" "$lint_cmd" >/dev/null; then
         echo "   ok: all PHP files lint clean"
