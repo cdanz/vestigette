@@ -403,6 +403,18 @@ button.hidden {
 	letter-spacing: 0.03em;
 	color: var(--cddbGrey);
 }
+/* AI-persona transparency badge — robot head in the flag yellow */
+#argument .persona-badge {
+	display: inline-flex;
+	align-items: center;
+	color: var(--cddbYellow);
+	line-height: 0;
+	/* Negative block margins let the icon grow larger without adding to the
+	   Argument-ID row height — it overflows into the existing gap above and
+	   the header's slack/padding below, so no other content is pushed. */
+	margin: -0.5rem 0;
+}
+#argument .persona-badge svg { display: block; width: 24px; height: 24px; }
 #argument .arg-phrasing-wrap {
 	display: block;
 	position: relative;
