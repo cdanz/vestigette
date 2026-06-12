@@ -1,786 +1,180 @@
-# Agitate.org - Discourse Mapping Platform
+# Agitate — Project Hub
 
-**Project Restored:** May 2026  
-**Original Deployment:** 2019-2021  
-**Current Status:** Local Development on MAMP
+_Discourse-mapping platform. Live (alpha) at **agitate-discourse.org**.
+Repo: **github.com/cdanz/vestigette**. Local working dir: `/Users/Razzmatazz/vestigette-dev`._
 
----
+**This file is the entry point.** It gives orientation + the operational workflow, and
+links to focused docs you only need to open when relevant. It's a living document —
+keep it current and let **git history** be the version trail (don't create dated copies).
 
-## Vision & Mission
-
-### The Big Picture
-Agitate.org aims to become a foundational resource for humanity - as consequential as dictionaries, encyclopedias, and atlases - by mapping "the discourse" in a structured, navigable way. Like a topographic map helps users navigate terrain, Agitate helps users navigate how people think.
-
-### Core Innovation
-A novel method for capturing individual lines of reasoning and aggregating them into a collective consciousness, revealing the crux of arguments and helping people identify gaps in their own thinking.
-
-### Long-term Goal
-With sufficient users, provide a representative sample of aggregate human thought that could:
-- Replace traditional polling
-- Inform policy decisions
-- Create a superior system for organizing governing bodies
-- Chart courses for collective action
-
-### Immediate Goals
-1. **Improve user experience** with more content and consistency
-2. **Lower barriers to content creation** - make it easier for users to add arguments
-3. **Leverage LLMs** to generate placeholder "dummy" content for users to refine
-4. **Encourage consensus** - bias users toward adopting and improving existing arguments rather than creating duplicates
+> New session? Read this top-to-bottom first. Claude also auto-loads its own notes from
+> `~/.claude/projects/-Users-Razzmatazz-vestigette-dev/memory/MEMORY.md`.
 
 ---
 
-## How It Works
+## What it is
 
-### The Discourse Graph
+A tool for mapping the structure of an argument/debate as a weighted graph, so a reader
+can see *why* people accept or reject a claim, what follows from it, and what rebuts it —
+and weigh in themselves.
 
-Agitate models discourse as a **directed graph** where:
+- **Argument** = a claim (a shell with an ID; not tied to specific wording).
+- **Phrasing** = an alternate wording of an argument. Users weight which phrasing best
+  states the claim; the winner is cached on `ARGUMENT.currentPhrasing` / `currentPhrasingID`.
+- **Opinion** = each user **accepts** or **rejects** an argument. Accepting unlocks the
+  Because/Therefore weighting UI; rejecting unlocks Rebuttal.
+- **Relationships** (`ENDORSEMENT`, the weighted edges):
+  - **Because** — supporting reasons
+  - **Therefore** — consequences that follow
+  - **Rebuttal** — counters
+- **Explications** = external links that elaborate an argument (also weighted).
+- **Personas** (profileIDs **1–26**) = LLM/admin-driven "dialectic scaffolding" used to
+  seed poorly-populated, low-engagement arguments. The goal is to remove persona input
+  once an argument has enough genuine human engagement. **Admin** = profileID **28**
+  (`isAdmin`). A yellow robot badge marks any argument a persona holds an opinion on.
 
-- **Vertices (Nodes)** = Arguments (core claims/positions)
-- **Edges (Connections)** = Weighted relationships between arguments
-
-### Three Types of Relationships
-
-1. **Because** - Supporting argument (justification/evidence)
-2. **Therefore** - Consequent argument (logical conclusion)
-3. **Rebuttal** - Opposing argument (counter-claim)
-
-### The Accept/Reject Dichotomy
-
-Users first decide: **Do I accept or reject this argument?**
-
-This choice determines what they can interact with:
-
-#### **ACCEPTORS can:**
-- Endorse or create phrasings
-- Provide or endorse explication links
-- Weight "Because" arguments (how strongly they support)
-- Weight "Therefore" arguments (how strongly they follow)
-- **CANNOT** interact with rebuttals
-
-#### **REJECTORS can:**
-- Weight "Rebuttal" arguments (how strongly they counter)
-- **CANNOT** interact with phrasings, explications, because, or therefore
-
-**Business Rule:** Only active opinions count. When a user toggles accept/reject, their previous opinions become inactive and their new opinions become active.
+### The 100% invariant (important)
+For each `(profileID, targArgID, endorseType)`, the **active** endorsement weights sum to
+**100%**. Phrasing and explication endorsements follow the same per-user/per-arg rule.
+Anything touching `ENDORSEMENT` must preserve this (see the merge and rebalance logic).
 
 ---
 
-## Data Model
+## Infrastructure & how to work  (read this before touching anything)
 
-### Core Tables
-
-#### **ARGUMENT**
-- The shell/container for a claim
-- Identified by `argumentID`
-- Not tied to specific wording - that's what phrasings are for
-
-#### **PHRASING_NEW**
-- Different wordings for the same argument
-- `putForthID` = unique identifier for this phrasing
-- `argumentID` = which argument this phrasing represents
-- `phrasing` = the actual text (varchar 300)
-- `coinedBy` = user who created it
-- Multiple phrasings can exist for one argument
-
-#### **PUT_FORTH_NEW**
-- Tracks which users endorse which phrasings
-- `argumentID`, `putForthID`, `profileID` = composite key
-- Endorsement tracking for phrasing preferences
-- **NOTE:** Relationship between PUT_FORTH_NEW and PHRASE_ENDORSE is currently unclear and needs investigation
-
-#### **PHRASE_ENDORSE**
-- Another layer of phrasing endorsement tracking
-- `phraseEndorseID` = auto-increment primary key
-- `phrasingID` references `PHRASING_NEW.putForthID`
-- **Needs clarification on how this differs from PUT_FORTH_NEW**
-
-#### **ENDORSEMENT**
-- The weighted edges of the discourse graph
-- `argumentID` = the main argument being viewed
-- `supportingArgID` = the related argument
-- `endorseType` = 'Because', 'Therefore', or 'Rebuttal'
-- `weight` = strength of relationship (how strongly it supports/follows/rebuts)
-- `profileID` = who provided this endorsement
-- `active` = whether this endorsement currently counts
-
-#### **OPINION**
-- Tracks accept/reject for each user on each argument
-- `argumentID`, `profileID` = composite key
-- `acceptance` = TRUE (accept) or FALSE (reject)
-- Determines which interface/features user can access
-
-#### **EXPLICATION**
-- External links that explain/elaborate on arguments
-- `argumentID` = which argument this explains
-- `explicationType` = type of link (article, video, etc.)
-- `link` = URL to external content
-
-#### **USER_PROFILE**
-- User accounts
-- `profileID` = unique identifier
-- Currently 59 users in database
+- **Production:** a DigitalOcean droplet `root@178.128.74.45` (= agitate-discourse.org).
+  Apache + PHP + MySQL. Web root `/var/www/html`, persona bot in `/var/www/bot`.
+- **Database:** `ssh root@178.128.74.45 "mysql vestigette ..."` — root connects via the
+  unix socket, **no password**. Use `-N -B` for terse output. **Batch your SSH** — rapid
+  repeated connections trip **fail2ban** and you'll get "Connection refused" for a while.
+- **No git on the server.** Deploy by scp via **`./deploy_droplet.sh {php|bot|all}`**
+  (batches scp + ssh into single connections and lints PHP afterward). New web files must
+  be added to `PHP_FILES` / `STATIC_FILES` in that script or they won't ship.
+- **Stored procs / triggers** are deployed by piping SQL to `ssh "mysql vestigette"` as
+  root. This is **MySQL 8, not MariaDB** → use `DROP PROCEDURE IF EXISTS` + `CREATE`
+  (there is **no** `CREATE OR REPLACE PROCEDURE`). Canonical proc/trigger source lives in
+  the tracked `*_procedures.sql` files; some helpers historically lived only in the live
+  DB — when you touch one, bring it into a `*_procedures.sql` file.
+- **Git workflow:** work in `/Users/Razzmatazz/vestigette-dev`. Branch off `main`, make
+  focused commits, push, open a PR; **the owner merges**; then sync `main` and delete the
+  branch. Only commit/push when asked. End commit messages with the
+  `Co-Authored-By: Claude ...` trailer.
+- **Cache-busting:** `index.php` links CSS/JS with `?v=<filemtime>` so every deploy busts
+  the browser cache automatically.
+- **Secrets:** `.env` and `persona_credentials.json` are gitignored — never commit them.
+  The persona/test-account password is intentionally weak (`Pa$word`) for alpha accounts.
 
 ---
 
-## Current Database State (May 2026)
+## Data model (run `SHOW TABLES` / `SHOW PROCEDURE STATUS` for the live, full list)
 
-### Table Counts
-- **ARGUMENT:** 219 arguments
-- **USER_PROFILE:** 59 users
-- **PHRASING_NEW:** 233 phrasings
-- **PUT_FORTH_NEW:** 250 endorsements
-- **PHRASE_ENDORSE:** 249 endorsements (incomplete - references missing phrasing data)
-- **ENDORSEMENT:** 6,146 weighted connections
-- **OPINION:** 1,276 accept/reject decisions
-- **EXPLICATION:** 11 external links
-- **AFFILIATION:** 11 (purpose unclear)
-- **MEMBER:** 44 (purpose unclear)
+Current key tables:
 
-### Known Data Issues
-- PHRASE_ENDORSE only has 249 rows instead of full dataset (~1,789 in original backup)
-- Missing phrasing records (only 233 exist, but endorsements reference up to ID 1762)
-- Some table relationships unclear (PUT_FORTH_NEW vs PHRASE_ENDORSE)
-- Data discrepancies visible in UI (unexpected information displaying)
-
----
-
-## Technology Stack
-
-### Current Setup
-- **Server:** MAMP 5.7 (free version)
-- **OS:** macOS Monterey 12.7.6
-- **Hardware:** Intel MacBook Pro (early 2015)
-- **PHP Version:** (matched to project needs)
-- **Database:** MySQL 5.7
-- **Ports:** Apache 80, MySQL 3306
-- **Web Root:** Custom folder (not default MAMP htdocs)
-
-### Key Technologies
-- **Backend:** PHP, MySQL
-- **Frontend:** JavaScript, HTML, CSS
-- **Database:** MySQL with stored procedures
-
----
-
-## File Structure & Key Files
-
-### Entry Point
-**URL Pattern:** `agitate.org/index.php?arg=[argumentID]`
-- Default argument (if none specified): `argID = 75` (help page)
-- Each argument has its own entry point URL
-- Intended use: Share links to specific arguments from other platforms
-
-### Core PHP Files
-
-#### **index.php**
-- Main UI foundation
-- Uses multiple include/require_once statements
-- Orchestrates page assembly
-
-#### **query_current_argument.php**
-- Fetches all data related to current argument being viewed
-- Calls stored procedures via `mysqli_multi_query()`
-- Provides:
-  - Rate of acceptance for argument
-  - Current preferred phrasing (aggregate of user endorsements)
-  - Explication links
-  - Related arguments (Because/Therefore/Rebuttal)
-  - Weighted connections
-- Recently fixed to handle empty result sets properly
-
-#### **functions.php**
-- Performs user actions/tasks
-- Handles interactions with database
-
-#### **dbconnect.php**
-- Database connection configuration
-- Loads from `includes/config.local.php`
-- Creates `$db` connection object (aliased as `$mysqli`)
-
-#### **includes/config.local.php**
-```php
-return [
-    'environment' => 'DEVELOPMENT',
-    'dblocation' => 'LOCAL',
-    'servername' => 'localhost',
-    'username' => 'root',
-    'pass' => 'root',
-    'dbname' => 'vestigette'
-];
-```
-
----
-
-## Stored Procedures (25 total)
-
-### Key Procedures
-
-#### **getAssociated**
-- Fetches related arguments (Because/Therefore/Rebuttal)
-- Returns weighted aggregate connections
-- Recently updated to use PHRASING_NEW table
-
-#### **getDetail**
-- Gets main argument details
-- Returns current preferred phrasing
-- Acceptance rate and assertion count
-- Complex COALESCE logic for phrasing selection
-- Recently updated to use PHRASING_NEW and correct column names
-
-#### **getAltPhrasing**
-- Returns alternative phrasings for current argument
-- Sorted by endorsement count
-- Recently updated to use PHRASING_NEW
-
-#### **getOpinion**
-- Gets current user's opinion (accept/reject) on argument
-- Returns user's preferred phrasing
-
-#### **getExplication**
-- Fetches explication links for argument
-
-#### **getUserAssociated**
-- Gets user's specific endorsements on related arguments
-
-### Other Procedures
-- assertOpinion
-- cosignMotJuste
-- cosignPutForth
-- foldInAssertion
-- getAggrEndorse
-- getAllTheRest
-- getHeterodox
-- getMostEndorsed
-- newExplication
-- newPutForth
-- prepareForNewEndorse
-- promoteExplication
-- promoteMotJuste
-- promotePhrasing
-- promotePutForth
-- rebalanceRecentRejections
-- replacePutForth
-- resolveOldWithNewEndorse
-- updateCurrentPhrasing
-- useInstead
-
----
-
-## Current User Workflows
-
-### Viewing an Argument
-1. User navigates to `index.php?arg=X`
-2. System loads argument details via stored procedures
-3. Page displays:
-   - Argument phrasing (aggregate preferred version)
-   - Acceptance rate
-   - Related arguments (Because/Therefore/Rebuttal)
-   - Explication links (if any)
-   - Alternative phrasings (if user has endorsed)
-
-### Accepting an Argument
-**User sees:**
-- Interface to endorse or create phrasings
-- Interface to add/endorse explication links
-- Weighting controls for "Because" arguments
-- Weighting controls for "Therefore" arguments
-- **NO access to rebuttals**
-
-**Current Issues:**
-- Creating new content is too difficult
-- Phrasing/explication interface inconsistent with weighting interface
-
-### Rejecting an Argument
-**User sees:**
-- Weighting controls for "Rebuttal" arguments
-- **NO access to phrasings, explications, because, or therefore**
-
-### Toggling Opinion
-When user switches between accept/reject:
-- Previous opinions become inactive (`active = 0`)
-- User sees different interface based on new opinion
-- Can provide new opinions which become active
-
----
-
-## Known Issues & Technical Debt
-
-### High Priority
-1. **Difficult to add new content** - Current UI makes creating arguments/phrasings too hard
-2. **Missing phrasing data** - Only 233/1762 phrasings present
-3. **Incomplete PHRASE_ENDORSE** - Only 249/1789 endorsements imported
-4. **Unclear table relationships** - PUT_FORTH_NEW vs PHRASE_ENDORSE needs investigation
-5. **Inconsistent interfaces** - Phrasing/explication UX different from weighting UX
-
-### Medium Priority
-6. **Data discrepancies** - Some information displaying incorrectly
-7. **Navigation challenges** - Hard to discover what parts of graph exist
-8. **No identity verification** - Need "one person, one vote" enforcement
-9. **No merging mechanism** - Can't consolidate duplicate arguments
-10. **No splitting mechanism** - Can't separate arguments that should be distinct
-
-### Low Priority (Future)
-11. **Stored procedure optimization** - Some may have inefficient queries
-12. **Error handling** - Could be more robust
-13. **Security review** - Authentication/authorization needs assessment
-
----
-
-## Development Priorities (Ordered)
-
-### Phase 1: Foundation (Current)
-✅ **1.1 Restore local environment**
-- MAMP installed and configured
-- Database schema rebuilt
-- Core data imported
-- Stored procedures updated
-- Application loading without errors
-
-🔲 **1.2 Establish development best practices**
-- Create comprehensive documentation (this file)
-- Set up version control access
-- Define deployment workflow
-- Establish testing procedures
-
-🔲 **1.3 Investigate data model ambiguities**
-- Clarify PUT_FORTH_NEW vs PHRASE_ENDORSE relationship
-- Document phrasing endorsement workflow
-- Map complete user interaction flows
-
-### Phase 2: Data Integrity
-🔲 **2.1 Add database safeguards**
-- Validate business rules in stored procedures
-- Prevent acceptors from weighting rebuttals
-- Prevent rejectors from endorsing phrasings
-- Ensure opinion toggles properly activate/deactivate related data
-
-🔲 **2.2 Build AI agent for data quality**
-- Detect duplicate arguments
-- Identify arguments that should be split
-- Flag inconsistent data
-- Suggest corrections
-
-### Phase 3: Content Creation UX
-🔲 **3.1 Improved interface for new content**
-- Streamlined argument creation
-- Easier phrasing submission
-- Simpler explication linking
-- Better related argument connection
-
-🔲 **3.2 Unified interface for preferences**
-- Consistent UX for phrasing endorsement
-- Consistent UX for explication selection
-- Match existing weighting interface design
-- Nuanced preference expression
-
-### Phase 4: LLM Content Generation
-🔲 **4.1 Generate placeholder arguments**
-- AI generates "Because" arguments (supporting)
-- AI generates "Therefore" arguments (consequences)
-- AI generates "Rebuttal" arguments (counter-claims)
-- Users refine AI-generated content rather than creating from scratch
-
-🔲 **4.2 Generate alternative phrasings**
-- AI suggests different wordings for same argument
-- Users select/refine preferred versions
-- Reduces burden on users to create phrasings
-
-🔲 **4.3 Generate explications**
-- AI finds relevant external content
-- AI generates explanatory text
-- Users validate/improve suggestions
-
-### Phase 5: Navigation & Discovery
-🔲 **5.1 Graph visualization**
-- Visual map of discourse
-- Navigate by clicking on arguments
-- See strength of connections visually
-
-🔲 **5.2 Search & explore**
-- Search for arguments by keyword
-- Browse by topic/category
-- Discover highly-weighted connections
-- Find consensus vs. contested areas
-
-### Phase 6: Scaling & Identity
-🔲 **6.1 Identity verification**
-- "One person, one vote" enforcement
-- Prevent multiple accounts
-- Maintain data integrity at scale
-
-🔲 **6.2 Invite-only growth**
-- High-integrity group invitations
-- Gradual rollout strategy
-- Community moderation
-
----
-
-## Resources & References
-
-### Database
-- **Name:** vestigette
-- **Location:** localhost:3306
-- **Access:** root/root (local dev only)
-- **phpMyAdmin:** http://localhost/phpMyAdmin
-
-### Backups
-- **Primary:** `/Users/Razzmatazz/dumps/Dump20201013-1/`
-- **Alternative:** `/mnt/user-data/uploads/Cloud_SQL_Export_2023-03-01__09_47_23_.sql`
-- **Note:** March 2023 backup appears most complete but not fully analyzed
-
-### Code
-- **Project Root:** `~/Library/Mobile Documents/com~apple~CloudDocs/Desktop/ArguAtlas Site Files`
-- **Web Root:** Custom MAMP location
-- **Config:** `includes/config.local.php`
-
-### Documentation
-- **This file:** PROJECT.md
-- **Session transcript:** `/mnt/transcripts/2026-05-11-18-24-46-vestigette-database-restoration.txt`
-
----
-
-## Open Questions & Investigations Needed
-
-### Data Model
-1. What is the exact relationship between PUT_FORTH_NEW and PHRASE_ENDORSE?
-2. Why do both tables exist? Do they serve different purposes?
-3. What are AFFILIATION and MEMBER tables for?
-4. Are there other missing tables from original schema?
-
-### User Workflows
-5. What is the complete flow for endorsing a phrasing?
-6. How does phrasing selection aggregate across users?
-7. What determines the "current phrasing" shown?
-8. How do users discover alternative phrasings?
-
-### Technical
-9. Which stored procedures are actually used vs. deprecated?
-10. Are there any API endpoints or just web UI?
-11. What JavaScript libraries/frameworks are used?
-12. Are there any automated tests?
-
----
-
-## Immediate Next Steps
-
-### For Developer (Claude)
-1. ✅ Create comprehensive PROJECT.md
-2. 🔲 Investigate PUT_FORTH_NEW vs PHRASE_ENDORSE relationship
-3. 🔲 Document complete phrasing endorsement workflow
-4. 🔲 Create data model diagram
-5. 🔲 Map user interaction flows
-
-### For Project Owner
-1. 🔲 Review and validate this documentation
-2. 🔲 Answer open questions about data model
-3. 🔲 Provide access to Git repository (if exists)
-4. 🔲 Share any existing design documents
-5. 🔲 Prioritize which Phase 2+ items to tackle first
-
-### Together
-1. 🔲 Set up version control workflow
-2. 🔲 Define testing strategy
-3. 🔲 Plan first feature implementation (likely Phase 3.1)
-4. 🔲 Establish communication/collaboration process
-
----
-
-## Success Metrics
-
-### Short-term (Next 3 months)
-- Application running stably on local dev
-- Core workflows documented and validated
-- Data integrity safeguards in place
-- New content creation UX improved
-
-### Medium-term (6-12 months)
-- LLM content generation working
-- Consistent interface for all preference types
-- AI agent detecting/correcting data issues
-- Small group of test users invited
-
-### Long-term (1+ years)
-- Scaled user base with quality discourse
-- "One person, one vote" enforced
-- Replacing traditional polling in some contexts
-- Demonstrable impact on collective decision-making
-
----
-
-*Document Version: 2.0*  
-*Last Updated: May 23, 2026*  
-*Next Review: [After Phase 3 UI work begins]*
-
-
----
-
-## Recent Updates (May 15, 2026)
-
-### Database Cleanup Completed
-- ✅ Dropped orphaned PUT_FORTH_NEW table (never used)
-- ✅ Dropped MOT_JUSTE and QUIBBLES_N_BITS (unused advanced system)
-- ✅ Archived legacy PHRASING → PHRASING_ARCHIVE (1,762 phrasings preserved)
-- ✅ Archived legacy PUT_FORTH → PUT_FORTH_ARCHIVE (103 cached phrasings)
-- ✅ Renamed PHRASING_NEW → PHRASING (cleaner naming)
-- ✅ Renamed putForthID → phrasingID (less confusing)
-
-### Weighted Phrasing System Implemented
-- ✅ Added weight column to PHRASE_ENDORSE (supports 0-100 weighting)
-- ✅ Migrated all 1,762 phrasings from archive to active PHRASING table
-- ✅ Added cache columns to ARGUMENT (currentPhrasing, currentPhrasingID)
-- ✅ Created populatePhrasingCache() procedure
-- ✅ Populated cache for 1,699 of 1,701 arguments
-
-**Cache Statistics:**
-- 136 arguments use phrasings from weighted user endorsements
-- 1,563 arguments use fallback phrasings (oldest from PHRASING table)
-
-### Updated Table Counts (May 15, 2026)
-- ARGUMENT: 1,701 arguments (was 219 - miscount corrected)
-- USER_PROFILE: 59 users
-- PHRASING: 1,762 phrasings (complete dataset)
-- PHRASE_ENDORSE: 249 endorsements (now with weight support)
-- ENDORSEMENT: 6,146 weighted connections
-- OPINION: 1,276 accept/reject decisions
-- EXPLICATION: 11 external links
-
-### Remaining Work for Weighted Phrasings
-- Fix getOpinion procedure
-- Fix newPutForth procedure
-- Update getDetail to use weighted aggregation
-- Update getAltPhrasing to show weighted scores
-- Create endorsePhrasing() procedure for UI
-- Create updatePhrasingCache() procedure
-- Update assertOpinion to refresh cache on toggle
-- Build UI for weighted phrasing endorsement
-
-# Session Summary - May 15, 2026
-
-## Accomplishments
-
-### 1. Fixed Critical Bugs
-- Login system working (fixed email mismatch, JavaScript errors)
-- Weigh-in functionality operational (fixed script_vestigette.js errors)
-- Identified correct file location
-
-### 2. Established Git Workflow
-- Cloned GitHub repository
-- Created deployment script
-- Committed working baseline
-- Set up .gitignore for sensitive files
-
-### 3. Database Investigation & Cleanup
-- Mapped phrasing table relationships
-- Dropped orphaned tables
-- Archived legacy tables
-- Renamed for clarity
-
-### 4. Implemented Weighted Phrasing System
-- Added weight column to PHRASE_ENDORSE
-- Migrated 1,762 phrasings from archive
-- Added cache to ARGUMENT table
-- Created populatePhrasingCache() procedure
-- Successfully cached 1,699 arguments
-
-### 5. Documentation
-- Created comprehensive PROJECT.md
-- Created PHRASING_SYSTEM_ANALYSIS.md
-- Created GIT_WORKFLOW.md
-
-## Next Session Priorities
-
-1. Fix stored procedures
-2. Create endorsePhrasing() and updatePhrasingCache() procedures
-3. Update assertOpinion to refresh cache
-4. Test weighted phrasing system
-5. Build UI for phrasing weights
-
-
-## Current Work In Progress (May 18, 2026)
-
-### Weighted Phrasing UI - 80% Complete
-
-**Goal:** Allow users to weight multiple phrasings like they weight Because/Therefore/Rebuttal
-
-**Completed:**
-- ✅ Modal UI updated with Weigh In/Endorse/Reset buttons
-- ✅ generatePhrasingLines() function created (displays phrasings with circles)
-- ✅ bumpPhrasing() JavaScript function added to script_vestigette.js
-- ✅ PHP handler for weighPhrasing action in functions.php
-- ✅ endorsePhrasing() stored procedure
-
-**In Progress:**
-- ⚠️ getAltPhrasing procedure needs update to show ALL phrasings for argument (not just endorsed ones)
-- ⚠️ Need to test full flow: click "Weigh In", weight phrasings, click "Endorse"
-
-**Issue Found:**
-Argument 50 has 5 phrasings but getAltPhrasing returns 0 results because all PHRASE_ENDORSE records have `active=0`. Need to modify getAltPhrasing to show all phrasings from PHRASING table, with endorsement data joined.
-
-**Next Steps:**
-1. Update getAltPhrasing to use LEFT JOIN on PHRASING (show all) instead of PHRASE_ENDORSE (only endorsed)
-2. Test weighting flow on argument 50
-3. Get user's current weights to pre-populate in UI
-4. Handle case where user hasn't endorsed any phrasings yet
-
----
-
-## Development Environment & Workflow
-
-### Two-Location Pattern (Critical)
-
-Every code change requires touching **two separate directories**:
-
-| Location | Purpose |
+| Table | Role |
 |---|---|
-| `/Users/Razzmatazz/vestigette-dev/` | Git repository — where edits are made |
-| `/Users/Razzmatazz/localHost/root/` | MAMP web root — what the browser actually serves |
+| `ARGUMENT` | the claim shell; caches `currentPhrasing` / `currentPhrasingID` |
+| `PHRASING` | alternate wordings of an argument |
+| `PHRASE_ENDORSE` | per-user weighted endorsement of phrasings |
+| `ENDORSEMENT` | weighted edges. PK `(targArgID, profileID, endorseType, supportingArgID, active)` |
+| `OPINION` | accept/reject. PK `(argumentID, profileID)`, `acceptance` |
+| `EXPLICATION` | external links; UNIQUE `(argumentID, profileID)` |
+| `EXPLICATION_ENDORSE` | weighted endorsement of explications |
+| `ARGUMENT_REDIRECT` | `oldArgumentID → newArgumentID` for merged arguments |
+| `ARGUMENT_FLAG` | user flags (one active per user/arg; resolved rows kept) |
+| `ADMIN_SETTINGS` | admin prefs incl. `pickerType` = `none`/`manual`/`auto` |
+| `BOT_SEED_QUEUE` | persona-bot seeding queue |
+| `USER_PROFILE` | accounts (personas = 1–26, admin = 28) |
+| `INVITATION`, `REMEMBER_ME` | invite codes; persistent-login tokens |
+| `PHRASING_ARCHIVE`, `PUT_FORTH_ARCHIVE` | legacy tables |
 
-**After editing any file in `vestigette-dev/`, sync it to `localHost/root/` before testing:**
-```bash
-cp /Users/Razzmatazz/vestigette-dev/About.php /Users/Razzmatazz/localHost/root/About.php
-```
+> Older docs mention `PHRASING_NEW` / `PUT_FORTH_NEW` — those no longer exist (now
+> `PHRASING` + the `*_ARCHIVE` tables).
 
-Or sync multiple files at once:
-```bash
-cp /Users/Razzmatazz/vestigette-dev/{About,Explore,Profile,login}.php /Users/Razzmatazz/localHost/root/
-```
+**Trigger:** `impliedAssertion` (BEFORE INSERT on `ENDORSEMENT`) records an implied
+acceptance of the supporting argument. It must **not** modify `ENDORSEMENT` (a trigger
+can't write the table that fired it).
 
-**Never edit files directly in `localHost/root/`** — changes there won't be tracked by git.
-
-### Git Repository
-
-- **Remote:** GitHub (origin)
-- **Branch:** `main`
-- **Local path:** `/Users/Razzmatazz/vestigette-dev/`
-- The repo is ~29 commits ahead of origin as of May 2026
-
-### MAMP Configuration
-
-- **Web root:** `/Users/Razzmatazz/localHost/root/` (custom, not default htdocs)
-- **Apache port:** 80
-- **MySQL port:** 3306
-- **phpMyAdmin:** `http://localhost/phpMyAdmin`
-- **display_errors:** ON (development mode — errors print inline in HTML output)
+**Notable procedures:** `assertOpinion` (accept/reject + cascade; reject branch calls
+`rebalanceRecentRejections`), `getAssociated`, `getNeighborhood` / `getNeighborhoodAll`,
+`mergeArguments`, `flagArgument` / `unflagArgument` / `resolveArgumentFlags`,
+`prepareForNewEndorse` / `resolveOldWithNewEndorse`, `updatePhrasingCache`,
+`foldInAssertion`, `promoteExplication`. (35 total — list is in the DB.)
 
 ---
 
-## Frontend Architecture
+## Key code files
 
-### Pages
-
-| File | Purpose | Notes |
-|---|---|---|
-| `index.php` | Main argument viewer | Includes `query_current_argument.php` and `functions.php` |
-| `About.php` | About / How-To | Static content only |
-| `Explore.php` | Browse arguments | Calls `getMostEndorsed()` and `getAllTheRest()` stored procs |
-| `Profile.php` | User profile / Most Heterodox | Calls `getHeterodox($profileID)` |
-| `login.php` | Login form | Was historically broken (script commented out) — now fixed |
-| `logout.php` | Session destroy | Redirects to login |
-
-### CSS — `style_vestigette.css`
-
-All pages link with **cache-busting**:
-```php
-<link rel="stylesheet" href="style_vestigette.css?v=<?php echo filemtime($_SERVER['DOCUMENT_ROOT'].'/style_vestigette.css'); ?>" />
-```
-
-**Desktop layout (`@media (min-width: 1200px)`):**
-
-The page body becomes a flex container with a 3-row / 2-column grid. Layout uses fixed `vh` heights:
-
-| Section ID | Column | Row | Width | Height |
-|---|---|---|---|---|
-| `#mastHead` | Right | 1 | 33% | 25vh |
-| `#because` | Left | 1 | 66% | 25vh |
-| `#rebuttal` | Right | 2 | 33% | 50vh |
-| `#argument` | Left | 2 | 66% | 50vh |
-| `#find` / `#filter` | Right | 3 | 33% | — |
-| `#therefore` | Left | 3 | 66% | 25vh |
-
-On desktop, **all panels are always visible** at their fixed viewport heights — the accordion expand/collapse has no visible effect. This is intentional, not a bug.
-
-**Mobile layout (below 1200px):**
-
-Sections stack vertically. Each `.accordion` section collapses to just its `<h2>` header. Clicking an `<h2>` expands that section's `.panel` (max-height animates from 0 → 338px) and collapses all others. This is handled by `accordionExpand()` in `script_vestigette.js`.
-
-**Panel default state:**
-
-Only the `#argument` panel starts with `class="panel expanded"` on secondary pages (About, Explore, Profile, login). All other panels start collapsed (`class="panel"` only) and expand on click.
-
-### JavaScript — `script_vestigette.js`
-
-Single JS file shared by all pages. Key functions:
-
-- **`init()`** — Called on `DOMContentLoaded`. Attaches all handlers.
-- **`resize(why)`** — Attaches `accordionExpand` click listener to every `.accordion` element. Uses a `listening` class guard to prevent duplicate listeners.
-- **`accordionExpand(evt)`** — Handles accordion clicks. Guards against clicks originating inside `.panel, button, a, input, select, textarea, form` (returns early). Closes all panels, then opens the clicked one (unless it was already open).
-- **`openNav()` / `closeNav()`** — Adds/removes `shownav` class on `#mastHead div`, which slides the mobile nav into view via CSS transition.
-
-### Inline PHP Script Block (All Pages)
-
-Every page has an inline `<script>` block that passes PHP variables to JS:
-
-```javascript
-let arg = <?php echo isset($arg) ? $arg : 'undefined'; ?>,
-    profile = <?php echo isset($profile) ? $profile : 'undefined'; ?>,
-    opinion = <?php echo isset($opinion) ? $opinion : 'undefined'; ?>,
-    assoc = <?php echo isset($assocWeights) ? "JSON.parse(" + $assocWeights + ")" : 'undefined'; ?>,
-    because = <?php echo json_encode(isset($because) ? $because : null); ?>,
-    therefore = <?php echo json_encode(isset($therefore) ? $therefore : null); ?>,
-    rebuttal = <?php echo json_encode(isset($rebuttal) ? $rebuttal : null); ?>;
-```
+- **`index.php`** — main page: argument header (phrasing, verdict %, "Argument ID" +
+  persona badge), Because/Therefore/Rebuttal sections, Find section, admin picker bar,
+  flag control. Loads its data, **closes `$db` early** (~line 159), then renders.
+- **`query_current_argument.php`** — fetches the current argument's data via procs.
+- **`functions.php`** — POST action handler (`buttonClicked` switch: accept/reject,
+  `weighBecause/Therefore/Rebuttal`, flag/unflag, etc.). Weighting a support also applies
+  **implied acceptance** at commit (overrides a prior rejection of that support).
+- **`flesh_out.php`** — the association-builder page (uses `getNeighborhood`).
+- **`admin_tools.php`** — admin-only: merge arguments, Profile Picker config, flagged-args
+  resolve, invite codes. Requires `isAdmin`.
+- **`neighborhood.php`** — lazy-load endpoint for the Find ▸ Neighborhood list.
+- **`includes/dbconnect.php`** — provides `$db` (mysqli).
+- **`style_vestigette.css`**, **`script_vestigette.js`** — front end. Palette includes
+  `--cddbYellow` (#d4a017), used for flagged state and the persona badge.
 
 ---
 
-## Critical Gotchas
+## Current feature set (built & live)
 
-### 1. `$because` / `$therefore` / `$rebuttal` Only Defined on index.php
-
-These variables are populated by `query_current_argument.php`, which is **only included in `index.php`**. Secondary pages (About, Explore, Profile, login) do not include it.
-
-**If you use `json_encode($because)` without an `isset()` guard on a secondary page**, MAMP's `display_errors = On` will inject a PHP Warning directly into the JavaScript block, producing output like:
-
-```html
-because = <br /><b>Warning</b>:  Undefined variable $because in ...line 65<br />
-null,
-```
-
-This is a JavaScript syntax error that silently kills **all** JS on the page — accordion, nav button, everything stops working. Always use:
-```php
-<?php echo json_encode(isset($because) ? $because : null); ?>
-```
-
-### 2. CSS Changes Don't Apply on Mobile Until Hard Refresh
-
-Mobile browsers aggressively cache CSS. The `?v=filemtime()` cache-buster on the stylesheet link handles this automatically when the file changes. To force a manual cache bypass while testing on device, append a dummy query param to the URL:
-```
-http://localhost/About.php?v=2
-```
-DuckDuckGo browser has a "Fire" button that wipes all cache in one tap.
-
-### 3. Always Sync to localHost After Editing
-
-Git commits in `vestigette-dev/` have **no effect** on what MAMP serves. You must `cp` the file to `localHost/root/` to see changes in the browser.
-
-### 4. Do Not Re-Scope the Desktop CSS Grid
-
-A past mistake scoped the `@media (min-width: 1200px)` desktop grid rules to `body.index-layout`, intending to make the accordion work on secondary pages. This broke the grid layout on all non-index pages. **The grid CSS must remain unscoped** — it applies to all pages by ID (`#because`, `#argument`, etc.), which exist on all pages.
+- Weighted **Because / Therefore / Rebuttal**, **phrasing**, and **explication**
+  endorsement (100% per user, per type).
+- **Argument merge** (admin) — `mergeArguments` conserves weights (sums support
+  collisions, keep-wins on target collisions, renormalizes self-loops) and writes
+  `ARGUMENT_REDIRECT` so old URLs resolve.
+- **Argument flagging** — users flag (offensive / phrasing-mismatch / duplicate-assoc /
+  spam / incoherent / other); admin "Flagged Arguments" list resolves them.
+- **Find section** — Last Visited, Recent Assertions, Go to ID (← / → / Popular), and a
+  lazy-loaded **Neighborhood** list (`getNeighborhoodAll`, hop-3 adaptive). Open subsection
+  persists across pages via `localStorage`.
+- **Admin Profile Picker** — `manual` (designated IDs) or `auto` (personas with an opinion
+  on the current arg + you, by last-name initial); mutually exclusive via
+  `ADMIN_SETTINGS.pickerType`.
+- **AI-persona transparency badge** — yellow robot beside "Argument ID" when any persona
+  (1–26) holds an opinion on the argument.
+- **Persona seeding bot** — queue + cron: `BOT_SEED_QUEUE → process_seed_queue.py →
+  persona_bot.py` (in `/var/www/bot`). See `PERSONA_SEEDING_PROCESS.md`.
+- **Persistent login** — rememberMe cookie (30-day).
 
 ---
 
-## Session Summary — May 23, 2026
+## Gotchas
 
-### Problems Solved
+- **MySQL ≠ MariaDB:** `DROP`+`CREATE` for procs; no `CREATE OR REPLACE PROCEDURE`.
+- **fail2ban:** don't hammer SSH; batch connections (the deploy script already does).
+- **Light panel vs dark header:** the expanded argument panel renders on a **light**
+  background while the argument header is **dark**. Style for the surface you're on
+  (e.g., the flag control uses dark colors because it sits on the light panel).
+- **Preserve the 100% invariant** on any `ENDORSEMENT` change.
+- **Trigger rule:** `impliedAssertion` can't touch `ENDORSEMENT`.
+- **`rebalanceRecentRejections`** loops must stay scoped per `endorseType` (an unscoped
+  condition once caused an infinite loop / hung requests).
 
-**1. Secondary pages had broken desktop layout**
-Commit `5b3b197` incorrectly scoped the desktop CSS grid to `body.index-layout`, causing About/Explore/Profile to render sections as a single stacked column instead of the 3-row/2-col grid. Fix: reverted the CSS scoping and removed `class="index-layout"` from `index.php` body tag.
+---
 
-**2. All JavaScript dead on secondary pages (mobile and desktop)**
-The inline `<script>` block on About.php, Explore.php, Profile.php, and login.php referenced `$because`, `$therefore`, `$rebuttal` without `isset()` guards. With MAMP's `display_errors = On`, PHP injected warning HTML into the JS block on every page load, causing a syntax error that prevented `script_vestigette.js` from initializing. Nothing clicked — not accordion headers, not the mobile nav button. Fix: added `isset()` guards to all three variables on all four pages.
+## Deeper references
 
-**3. login.php had JS entirely commented out**
-Historically, the entire `<script language="javascript" src="script_vestigette.js"></script>` block and the inline variable script on `login.php` were wrapped in `<!-- -->` HTML comment tags, disabling all JavaScript. Fix: removed the comment tags (done in the previous session cycle).
+- **`PERSONA_SEEDING_PROCESS.md`** — persona seeding workflow (current).
+- **`DATA_CLEANUP_BACKLOG.md`** — known data-quality issues to clean (current).
+- **`core_procedures.sql`, `merge_procedures.sql`, `flag_procedures.sql`,
+  `neighborhood_procedures.sql`, `explication_procedures.sql`** — canonical proc/trigger
+  source.
+- **`deploy_droplet.sh`** — the deploy script (also the source of truth for which files
+  ship).
 
-### Commits This Session
-- `ca036aa` — Revert bad CSS scoping; restore panel defaults on secondary pages
-- `b444b46` — Fix JS broken on secondary pages: guard undefined PHP vars in inline script
+---
+
+## Roadmap / parked
+
+- Phase out persona input on arguments that reach enough human engagement (the badge is
+  the transparency bridge until then).
+- Tutorial/demo experience; first-login weighting indicators; About / Explore / Profile
+  pages; bot transparency + blog; cost monitoring & scale-back rules; branding pass.
+
+_Last refreshed: 2026-06-12._
