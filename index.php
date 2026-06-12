@@ -86,10 +86,12 @@ if (isset($_SESSION['profile'])) {
 
 	if ($isAdmin) {
 		$settRow = mysqli_fetch_assoc(mysqli_query($db,
-			"SELECT pickerEnabled, pickerProfiles FROM ADMIN_SETTINGS WHERE profileID=$realProfileID"));
-		$adminPickerEnabled = $settRow ? (bool)$settRow['pickerEnabled'] : false;
+			"SELECT pickerType, pickerProfiles FROM ADMIN_SETTINGS WHERE profileID=$realProfileID"));
+		$pickerType = $settRow ? ($settRow['pickerType'] ?? 'none') : 'none';
+		$adminPickerEnabled = ($pickerType !== 'none');
 
-		if ($adminPickerEnabled) {
+		if ($pickerType === 'manual') {
+			// Manual list: the admin's own profile + the specific IDs designated.
 			$pickerIDs = [$realProfileID];
 			if ($settRow && $settRow['pickerProfiles']) {
 				$extra = array_filter(array_map('intval', explode(',', $settRow['pickerProfiles'])));
@@ -104,8 +106,27 @@ if (isset($_SESSION['profile'])) {
 			}
 			foreach ($pickerIDs as $pid) {
 				if (isset($byID[$pid])) {
-					$adminPickerData[] = ['profileID' => $pid, 'lastName' => $byID[$pid]];
+					$adminPickerData[] = ['profileID' => $pid, 'label' => $byID[$pid]];
 				}
+			}
+		} elseif ($pickerType === 'auto') {
+			// Personas (IDs 1-26) with an opinion on the current argument, plus the
+			// admin's own profile. Labelled by last-name initial.
+			$pickerResult = mysqli_query($db,
+				"SELECT u.profileID, u.lastName
+				 FROM USER_PROFILE u
+				 WHERE u.profileID = $realProfileID
+				    OR (u.profileID BETWEEN 1 AND 26
+				        AND EXISTS (SELECT 1 FROM OPINION o
+				                    WHERE o.profileID = u.profileID
+				                      AND o.argumentID = " . intval($arg) . "))
+				 ORDER BY (u.profileID = $realProfileID) DESC, u.lastName ASC");
+			while ($row = mysqli_fetch_assoc($pickerResult)) {
+				$ln = (string)$row['lastName'];
+				$adminPickerData[] = [
+					'profileID' => intval($row['profileID']),
+					'label'     => ($ln !== '' ? mb_substr($ln, 0, 1) : '#' . intval($row['profileID'])),
+				];
 			}
 		}
 	}
@@ -350,7 +371,7 @@ function generateFindLines($results) {
 			<input type="radio" name="pickerProfile" value="<?php echo intval($p['profileID']); ?>"
 				<?php if (intval($_SESSION['profile']) === intval($p['profileID'])) echo 'checked'; ?>
 				onchange="this.form.submit()">
-			<?php echo htmlspecialchars($p['lastName']); ?>
+			<?php echo htmlspecialchars($p['label']); ?>
 		</label>
 		<?php endforeach; ?>
 	</form>

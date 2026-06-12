@@ -35,7 +35,9 @@ if (isset($_POST['adminAction'])) {
 	switch ($_POST['adminAction']) {
 
 		case 'savePickerSettings':
-			$enabled = isset($_POST['pickerEnabled']) ? 1 : 0;
+			$type = $_POST['pickerType'] ?? 'none';
+			if (!in_array($type, ['none', 'manual', 'auto'], true)) $type = 'none';
+			$enabled = ($type !== 'none') ? 1 : 0;
 			$raw     = trim($_POST['pickerProfiles'] ?? '');
 			$ids     = [];
 			if ($raw !== '') {
@@ -47,12 +49,13 @@ if (isset($_POST['adminAction'])) {
 			}
 			$profilesStr = implode(',', $ids);
 			$stmt = $db->prepare(
-				"INSERT INTO ADMIN_SETTINGS (profileID, pickerEnabled, pickerProfiles)
-				 VALUES (?, ?, ?)
+				"INSERT INTO ADMIN_SETTINGS (profileID, pickerEnabled, pickerType, pickerProfiles)
+				 VALUES (?, ?, ?, ?)
 				 ON DUPLICATE KEY UPDATE pickerEnabled  = VALUES(pickerEnabled),
+				                         pickerType     = VALUES(pickerType),
 				                         pickerProfiles = VALUES(pickerProfiles)"
 			);
-			$stmt->bind_param("iis", $realProfileID, $enabled, $profilesStr);
+			$stmt->bind_param("iiss", $realProfileID, $enabled, $type, $profilesStr);
 			$stmt->execute();
 			mysqli_close($db);
 			header("Location: /admin_tools.php?arg=$arg&saved=1");
@@ -132,8 +135,8 @@ if (isset($_POST['adminAction'])) {
 // ---------- Load current settings ----------
 $invitesSaved = isset($_GET['invites']);
 $settRow        = mysqli_fetch_assoc(mysqli_query($db,
-	"SELECT pickerEnabled, pickerProfiles FROM ADMIN_SETTINGS WHERE profileID=$realProfileID"));
-$pickerEnabled  = $settRow ? (bool)$settRow['pickerEnabled']  : false;
+	"SELECT pickerEnabled, pickerType, pickerProfiles FROM ADMIN_SETTINGS WHERE profileID=$realProfileID"));
+$pickerType     = $settRow ? ($settRow['pickerType'] ?? 'none') : 'none';
 $pickerProfiles = $settRow ? ($settRow['pickerProfiles'] ?? '') : '';
 
 $mergeArgA = intval($_POST['mergeArgA'] ?? 0) ?: '';
@@ -245,21 +248,22 @@ mysqli_close($db);
 
 <!-- ── Profile Picker ─────────────────────────── -->
 <h2>Profile Picker</h2>
-<p class="desc">When enabled, a bar at the top of each page lets you quickly switch between designated profiles.</p>
+<p class="desc">A bar at the top of each page lets you quickly switch which profile you view and act as. Choose one mode (the two cannot be on at once).</p>
 
 <form method="POST" action="/admin_tools.php?arg=<?php echo $arg; ?>">
 	<input type="hidden" name="adminAction" value="savePickerSettings">
 
 	<div class="field">
-		<label>
-			<input type="checkbox" name="pickerEnabled" value="1"
-				<?php if ($pickerEnabled) echo 'checked'; ?>>
-			Picker enabled
-		</label>
+		<label><input type="radio" name="pickerType" value="none"
+			<?php if ($pickerType === 'none') echo 'checked'; ?>> Off</label>
+		<label><input type="radio" name="pickerType" value="manual"
+			<?php if ($pickerType === 'manual') echo 'checked'; ?>> Manual list — the specific profiles you list below</label>
+		<label><input type="radio" name="pickerType" value="auto"
+			<?php if ($pickerType === 'auto') echo 'checked'; ?>> Personas with an opinion — every persona (IDs 1&ndash;26) that has an opinion on the argument being viewed, plus you</label>
 	</div>
 
 	<div class="field">
-		<label for="pickerProfiles">Additional profile IDs (comma-separated, up to 10 — your own is always included)</label>
+		<label for="pickerProfiles">Manual list — additional profile IDs (comma-separated, up to 10 — your own is always included)</label>
 		<input type="text" id="pickerProfiles" name="pickerProfiles"
 			placeholder="e.g. 3, 7, 12"
 			value="<?php echo htmlspecialchars($pickerProfiles); ?>">
