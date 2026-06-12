@@ -156,6 +156,15 @@ if ($profile) {
 		 LIMIT 1"));
 	if ($popRow) { $popularArgID = intval($popRow[0]); }
 }
+
+// --- AI-persona transparency: does any persona (IDs 1-26) hold an opinion here? ---
+$hasPersonaOpinion = false;
+if ($arg) {
+	$ppRow = mysqli_fetch_row(mysqli_query($db,
+		"SELECT EXISTS(SELECT 1 FROM OPINION
+		               WHERE argumentID = " . intval($arg) . " AND profileID BETWEEN 1 AND 26)"));
+	$hasPersonaOpinion = $ppRow && intval($ppRow[0]) === 1;
+}
 mysqli_close($db);
 	
 
@@ -462,6 +471,20 @@ else {
 					</div>
 					<div class="arg-meta">
 						<span class="arg-id">Argument ID: <?php echo intval($arg); ?></span>
+<?php if ($hasPersonaOpinion): ?>
+						<span class="persona-badge" title="AI personas are active on this argument &mdash; its state is not yet fully human" aria-label="AI personas active on this argument">
+							<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+								<line x1="12" y1="2.6" x2="12" y2="5"/>
+								<circle cx="12" cy="2" r="1.05" fill="currentColor" stroke="none"/>
+								<rect x="4.5" y="5" width="15" height="13" rx="3"/>
+								<path d="M4.5 9.5 H2.6 a1.1 1.1 0 0 0 -1.1 1.1 v1.8 a1.1 1.1 0 0 0 1.1 1.1 H4.5"/>
+								<path d="M19.5 9.5 H21.4 a1.1 1.1 0 0 1 1.1 1.1 v1.8 a1.1 1.1 0 0 1 -1.1 1.1 H19.5"/>
+								<circle cx="9.5" cy="10.6" r="1.25" fill="currentColor" stroke="none"/>
+								<circle cx="14.5" cy="10.6" r="1.25" fill="currentColor" stroke="none"/>
+								<rect x="8.4" y="13.6" width="7.2" height="2.6" rx="1.3"/>
+							</svg>
+						</span>
+<?php endif; ?>
 					</div>
 				</div>
 				<div class="arg-header-side">
