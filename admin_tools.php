@@ -234,6 +234,7 @@ mysqli_close($db);
 <h1>Admin Tools</h1>
 <nav>
 	<a href="/?arg=<?php echo $arg; ?>">← Back to site</a>
+	<a href="/admin_content.php">Content</a>
 	<a href="/Profile.php?arg=<?php echo $arg; ?>">Profile</a>
 	<a href="/logout.php?arg=<?php echo $arg; ?>">Logout</a>
 </nav>
