@@ -202,6 +202,12 @@ mysqli_close($db);
 		input[type="text"], input[type="number"] { border: 1px solid #bbb; border-radius: 3px; font-size: 0.9rem; padding: 0.35rem 0.5rem; }
 		input[type="text"] { width: 280px; max-width: 100%; }
 		input[type="number"] { width: 90px; }
+		/* Merge ID fields: no spinner arrows (they get bumped by stray clicks/touches) */
+		#mergeArgA, #mergeArgB { -moz-appearance: textfield; appearance: textfield; }
+		#mergeArgA::-webkit-outer-spin-button, #mergeArgA::-webkit-inner-spin-button,
+		#mergeArgB::-webkit-outer-spin-button, #mergeArgB::-webkit-inner-spin-button {
+			-webkit-appearance: none; margin: 0;
+		}
 		.field { margin-bottom: 0.85rem; }
 		button { font-size: 0.875rem; padding: 0.35rem 0.85rem; cursor: pointer; }
 		.notice { background: #eef; border: 1px solid #99b; border-radius: 3px; padding: 0.5rem 0.75rem; margin-bottom: 1rem; font-size: 0.875rem; }
