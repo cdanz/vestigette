@@ -400,6 +400,7 @@ function generateFindLines($results) {
 				<a href="About.php?arg=<?php echo $_SESSION['currentArg'];?>">About</a>
 				<a href="Explore.php?arg=<?php echo $_SESSION['currentArg'];?>">Explore</a>
 				<a href="Profile.php?arg=<?php echo $_SESSION['currentArg'];?>">Profile</a>
+				<a href="/donate.php">Support</a>
 				<?php if ($isAdmin): ?>
 				<a href="/admin_tools.php?arg=<?php echo $_SESSION['currentArg']; ?>">Admin</a>
 				<?php endif; ?>
