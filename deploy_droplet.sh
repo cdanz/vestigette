@@ -29,6 +29,9 @@ PHP_FILES=(
     login.php
     admin_tools.php
     neighborhood.php
+    donate.php
+    create_donation_session.php
+    donate_success.php
 )
 
 STATIC_FILES=(
