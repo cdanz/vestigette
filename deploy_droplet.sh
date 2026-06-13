@@ -35,6 +35,7 @@ PHP_FILES=(
     blog.php
     post.php
     admin_content.php
+    upload_image.php
 )
 
 STATIC_FILES=(

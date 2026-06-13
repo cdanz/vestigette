@@ -127,6 +127,8 @@ $arg = isset($_GET['arg']) ? intval($_GET['arg']) : 75;
 		.pill.published { background:#e7f6e9; color:#176b25; }
 		.pill.draft { background:#f0f0f0; color:#666; }
 		.actions { display:flex; gap:0.5rem; align-items:center; margin-top:1rem; }
+		.img-uploader { display:flex; gap:0.5rem; align-items:center; flex-wrap:wrap; }
+		.img-uploader input[type=file] { font-size:0.85rem; }
 	</style>
 </head>
 <body>
@@ -178,6 +180,14 @@ $arg = isset($_GET['arg']) ? intval($_GET['arg']) : 75;
 		<label>Summary (optional — shown in the list)</label>
 		<input type="text" name="summary" value="<?php echo $f('summary'); ?>" maxlength="400">
 
+		<label>Image</label>
+		<div class="img-uploader">
+			<input type="file" id="imgFile" accept="image/png,image/jpeg,image/gif,image/webp">
+			<button type="button" id="imgUploadBtn" onclick="uploadContentImage()">Upload &amp; insert</button>
+			<span id="imgStatus" class="hint"></span>
+		</div>
+		<div class="hint">PNG / JPG / GIF / WebP up to 5&nbsp;MB. The image's Markdown is inserted into the Body at your cursor &mdash; tweak the alt text in <code>![alt](&hellip;)</code> afterward.</div>
+
 		<label>Body (Markdown)</label>
 		<textarea name="body" placeholder="# Heading&#10;&#10;Write in Markdown — **bold**, _italic_, lists, [links](https://…), &gt; quotes."><?php echo $f('body'); ?></textarea>
 		<div class="hint">Markdown supported (headings, lists, links, bold/italic, quotes, code). Raw HTML is escaped for safety.</div>
@@ -217,5 +227,30 @@ $arg = isset($_GET['arg']) ? intval($_GET['arg']) : 75;
 		</tbody>
 	</table>
 <?php endif; ?>
+	<script>
+	function uploadContentImage() {
+		var input  = document.getElementById('imgFile');
+		var status = document.getElementById('imgStatus');
+		var btn    = document.getElementById('imgUploadBtn');
+		if (!input.files || !input.files.length) { status.textContent = 'Choose an image first.'; return; }
+		var fd = new FormData();
+		fd.append('image', input.files[0]);
+		btn.disabled = true; status.textContent = 'Uploading…';
+		fetch('/upload_image.php', { method: 'POST', body: fd })
+			.then(function (r) { return r.json(); })
+			.then(function (d) {
+				btn.disabled = false;
+				if (!d || !d.ok) { status.textContent = (d && d.error) ? d.error : 'Upload failed.'; return; }
+				var ta = document.querySelector('textarea[name="body"]');
+				var snippet = '\n\n' + d.markdown + '\n\n';
+				var pos = (ta.selectionStart != null) ? ta.selectionStart : ta.value.length;
+				ta.value = ta.value.slice(0, pos) + snippet + ta.value.slice(pos);
+				ta.focus();
+				status.innerHTML = 'Inserted &rarr; ' + d.url;
+				input.value = '';
+			})
+			.catch(function () { btn.disabled = false; status.textContent = 'Upload failed.'; });
+	}
+	</script>
 </body>
 </html>
