@@ -444,13 +444,31 @@ function fleshBumpNew(n) {
     var item = fleshPool.find(function(x) { return x.id === id; });
 
     if (!item) {
-        // First click: add to pool and insert a fresh empty row above this one
-        fleshPool.push({id: id, clicks: 1});
-        fleshNewCounter++;
-        fleshAddNewRow(fleshNewCounter, document.getElementById('flesh-' + id));
+        // Suggestion already showing for this row — don't stack another
+        if (document.getElementById('similar-' + n)) return;
+
+        var row  = document.getElementById('flesh-new-' + n);
+        var text = row ? row.querySelector('.new-arg-text').value.trim() : '';
+
+        if (text.length >= 10) {
+            if (similarCache[n] === null) { fleshAwaitSuggestion(n); return; }
+            if (similarCache[n] && similarCache[n].length > 0) {
+                fleshShowSuggestion(n, similarCache[n]); return;
+            }
+        }
+        fleshDoPinNew(n);
     } else {
         item.clicks++;
+        fleshTotalClicks++;
+        fleshUpdateAll();
     }
+}
+
+function fleshDoPinNew(n) {
+    var id = 'new-' + n;
+    fleshPool.push({id: id, clicks: 1});
+    fleshNewCounter++;
+    fleshAddNewRow(fleshNewCounter, document.getElementById('flesh-new-' + n));
     fleshTotalClicks++;
     fleshUpdateAll();
 }
@@ -537,6 +555,161 @@ function fleshSerialize() {
 
     document.getElementById('pinnedData').value = JSON.stringify(items);
     return true;
+}
+
+// ── Duplicate detection ───────────────────────────────────────────────────────
+
+var similarCache  = {}; // n → null (in-flight) | [] (no results) | [{argID, phrasing}, …]
+var similarFlight = {}; // n → XHR (to cancel on re-type)
+
+function escapeHtml(str) {
+    var d = document.createElement('div');
+    d.appendChild(document.createTextNode(str || ''));
+    return d.innerHTML;
+}
+
+// Prefetch on blur so results are ready before the user clicks the circle
+document.getElementById('new-arg-zone').addEventListener('focusout', function(e) {
+    if (!e.target.classList.contains('new-arg-text')) return;
+    var row = e.target;
+    while (row && !row.classList.contains('flesh-row')) row = row.parentNode;
+    if (!row) return;
+    var n    = parseInt(row.id.replace('flesh-new-', ''), 10);
+    var text = e.target.value.trim();
+
+    if (text.length < 10) { similarCache[n] = []; return; }
+    if (similarFlight[n]) { similarFlight[n].abort(); delete similarFlight[n]; }
+
+    similarCache[n] = null; // mark in-flight
+    var xhr = new XMLHttpRequest();
+    similarFlight[n] = xhr;
+    xhr.open('POST', '/find_similar.php', true);
+    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+    xhr.onload = function() {
+        try { similarCache[n] = xhr.status === 200 ? JSON.parse(xhr.responseText) : []; }
+        catch (err) { similarCache[n] = []; }
+        delete similarFlight[n];
+    };
+    xhr.onerror = function() { similarCache[n] = []; delete similarFlight[n]; };
+    xhr.send('q=' + encodeURIComponent(text) + '&arg=<?php echo $argIDEsc; ?>');
+});
+
+function fleshShowSuggestion(n, matches) {
+    fleshClearSuggestion(n);
+    var row = document.getElementById('flesh-new-' + n);
+    if (!row) return;
+
+    var panel = document.createElement('div');
+    panel.className = 'similar-suggestion';
+    panel.id = 'similar-' + n;
+
+    var label = matches.length === 1
+        ? 'Similar argument already exists'
+        : 'Similar arguments already exist';
+
+    var listHtml = '<ul class="similar-matches">';
+    matches.forEach(function(match) {
+        listHtml += '<li class="similar-match">'
+            + '<span class="similar-phrasing">' + escapeHtml(match.phrasing) + '</span>'
+            + '<button type="button" class="similar-use">Use this</button>'
+            + '</li>';
+    });
+    listHtml += '</ul>';
+
+    panel.innerHTML =
+        '<div class="similar-label">' + label + '</div>'
+        + listHtml
+        + '<div class="similar-secondary">'
+        + '<button type="button" class="similar-keep">Keep mine</button>'
+        + '<button type="button" class="similar-cancel">Start over</button>'
+        + '</div>';
+
+    panel.querySelectorAll('.similar-use').forEach(function(btn, i) {
+        btn.addEventListener('click', function() {
+            fleshUseSuggestion(n, matches[i].argID, matches[i].phrasing);
+        });
+    });
+    panel.querySelector('.similar-keep').addEventListener('click', function() {
+        fleshDismissSuggestion(n);
+    });
+    panel.querySelector('.similar-cancel').addEventListener('click', function() {
+        fleshCancelNew(n);
+    });
+
+    row.parentNode.insertBefore(panel, row.nextSibling);
+}
+
+function fleshClearSuggestion(n) {
+    var panel = document.getElementById('similar-' + n);
+    if (panel) panel.parentNode.removeChild(panel);
+}
+
+function fleshDismissSuggestion(n) {
+    fleshClearSuggestion(n);
+    fleshDoPinNew(n);
+}
+
+function fleshCancelNew(n) {
+    fleshClearSuggestion(n);
+    similarCache[n] = [];
+    var row = document.getElementById('flesh-new-' + n);
+    if (row) {
+        var input = row.querySelector('.new-arg-text');
+        if (input) { input.value = ''; input.focus(); }
+    }
+}
+
+function fleshUseSuggestion(n, argID, phrasing) {
+    fleshClearSuggestion(n);
+    // Clear the typed text so the input row resets cleanly for new entries
+    var srcRow = document.getElementById('flesh-new-' + n);
+    if (srcRow) {
+        var input = srcRow.querySelector('.new-arg-text');
+        if (input) input.value = '';
+    }
+    similarCache[n] = [];
+    // If this arg isn't in the neighbourhood list, create a row for it so
+    // fleshBumpExisting can find and move it to the pinned zone
+    if (!document.getElementById('flesh-ex-' + argID)) {
+        var recip = showRecipCol
+            ? '<label class="switch flesh-reciprocate" title="Reciprocate">'
+            + '<input type="checkbox" class="reciprocate-toggle" checked>'
+            + '<span class="toggle round"></span></label>'
+            : '';
+        var exRow = document.createElement('div');
+        exRow.className = 'flesh-row lineItem pct0_0 half1';
+        exRow.id = 'flesh-ex-' + argID;
+        exRow.setAttribute('data-arg-id', String(argID));
+        exRow.innerHTML =
+            '<div class="wrapper"'
+            + ' onclick="if(inCircle(event,this)) fleshBumpExisting(' + argID + ')"'
+            + ' oncontextmenu="fleshUnpinExisting(' + argID + ');return false;">'
+            + '<div class="pointBtn arc1"></div><div class="pointBtn arc2"></div></div>'
+            + '<p class="assocArg"><span class="inLinePct"></span>'
+            + '<a href="/?arg=' + argID + '">' + escapeHtml(phrasing) + '</a></p>'
+            + recip;
+        document.querySelector('.flesh-list').appendChild(exRow);
+    }
+    fleshBumpExisting(argID);
+}
+
+function fleshAwaitSuggestion(n) {
+    var row = document.getElementById('flesh-new-' + n);
+    if (row) row.classList.add('similar-loading');
+    var checks = 0;
+    var poll = setInterval(function() {
+        checks++;
+        if (similarCache[n] !== null || checks > 40) {
+            clearInterval(poll);
+            if (row) row.classList.remove('similar-loading');
+            if (similarCache[n] && similarCache[n].length > 0) {
+                fleshShowSuggestion(n, similarCache[n]);
+            } else {
+                similarCache[n] = [];
+                fleshDoPinNew(n);
+            }
+        }
+    }, 50);
 }
 </script>
 

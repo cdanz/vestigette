@@ -24,6 +24,10 @@ SRC="/Users/Razzmatazz/vestigette-dev"
 PHP_FILES=(
     functions.php
     flesh_out.php
+    find_similar.php
+    About.php
+    Explore.php
+    Profile.php
     index.php
     query_current_argument.php
     login.php
