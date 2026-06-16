@@ -32,13 +32,13 @@ body {
 #right-col {
 	display: contents;
 }
-#mastHead { order: 1; }
-#because   { order: 2; }
-#argument  { order: 3; }
-#rebuttal  { order: 4; }
-#therefore { order: 5; }
-#find      { order: 6; }
-#filter    { order: 7; }
+body:has(#left-col) #mastHead  { order: 1; }
+body:has(#left-col) #because   { order: 2; }
+body:has(#left-col) #argument  { order: 3; }
+body:has(#left-col) #rebuttal  { order: 4; }
+body:has(#left-col) #therefore { order: 5; }
+body:has(#left-col) #find      { order: 6; }
+body:has(#left-col) #filter    { order: 7; }
 a:link{
 	color: inherit;
 	text-decoration: none;
@@ -859,12 +859,9 @@ body.flesh-out-page #flesh-out {
 	font-size: 1.2rem;
 	font-weight: bold;
 }
-.flesh-type-label {
-	color: var(--cddbGrey);
-	font-size: 0.8rem;
-	font-weight: bold;
-	letter-spacing: 0.05em;
-	text-transform: uppercase;
+.flesh-type-suffix {
+	font-style: italic;
+	opacity: 0.6;
 }
 .flesh-cancel {
 	flex: none;
@@ -872,6 +869,8 @@ body.flesh-out-page #flesh-out {
 }
 .flesh-col-labels {
 	background-color: var(--cddbLiteGrey);
+	border-left: 6px solid var(--flesh-color);
+	border-right: 6px solid var(--flesh-color);
 	color: var(--cddbGrey);
 	display: flex;
 	font-size: 0.7rem;
@@ -882,12 +881,18 @@ body.flesh-out-page #flesh-out {
 }
 .flesh-col-weight  { flex: none; width: 5.2rem; }
 .flesh-col-phrasing { flex: 1; }
-.flesh-col-recip   { flex: none; width: 5rem; text-align: center; }
+.flesh-col-recip   { flex: none; visibility: hidden; width: 5rem; text-align: center; }
+body:has(#pinned-zone:not(:empty)) .flesh-col-recip { visibility: visible; }
 .flesh-list {
 	background-color: white;
+	border-left: 6px solid var(--flesh-color);
+	border-right: 6px solid var(--flesh-color);
 	flex: 1;
 	min-height: 0;
 	overflow-y: auto;
+}
+@keyframes flesh-row-depart {
+	to { opacity: 0; transform: translateY(-10px); }
 }
 .flesh-row {
 	align-items: center;
@@ -902,6 +907,11 @@ body.flesh-out-page #flesh-out {
 	min-height: 4rem;
 }
 .flesh-row:last-child { border-bottom: none; }
+.flesh-row.departing {
+	animation: flesh-row-depart 0.22s ease-in forwards;
+	content-visibility: visible;
+	pointer-events: none;
+}
 .flesh-text-col {
 	align-items: center;
 	display: flex;
@@ -919,7 +929,9 @@ body.flesh-out-page #flesh-out {
 .flesh-reciprocate {
 	flex: none;
 	margin-right: 0.6rem;
+	visibility: hidden;
 }
+#pinned-zone .flesh-reciprocate { visibility: visible; }
 #pinned-zone:not(:empty)::before {
 	background-color: var(--cddbLiteGrey);
 	color: var(--cddbGrey);
@@ -931,9 +943,20 @@ body.flesh-out-page #flesh-out {
 	padding: 0.2rem 0.5rem;
 	text-transform: uppercase;
 }
+#pinned-zone:not(:empty)::after {
+	background-color: var(--cddbLiteGrey);
+	color: var(--cddbGrey);
+	content: 'Available';
+	display: block;
+	font-size: 0.7rem;
+	font-weight: bold;
+	letter-spacing: 0.04em;
+	padding: 0.2rem 0.5rem;
+	text-transform: uppercase;
+}
 .flesh-footer {
 	align-items: center;
-	background-color: var(--cddbBlack);
+	background-color: var(--flesh-color);
 	display: flex;
 	flex-flow: row nowrap;
 	gap: 0.5rem;
@@ -963,7 +986,8 @@ body.flesh-out-page .pct0_0 .pointBtn.arc2 { border-color: transparent; }
 /* Counteract .container / .container div cascade on flesh_out.php */
 body.flesh-out-page .flesh-list,
 body.flesh-out-page #new-arg-zone,
-body.flesh-out-page #pinned-zone {
+body.flesh-out-page #pinned-zone,
+body.flesh-out-page .similar-suggestion {
 	display: block;
 }
 body.flesh-out-page .flesh-list {
@@ -981,7 +1005,7 @@ body.flesh-out-page .assocArg {
 }
 body.flesh-out-page .flesh-footer button {
 	background-color: var(--flesh-color);
-	border-color: var(--flesh-color);
+	border-color: var(--cddbWhite);
 	border-radius: 0;
 	padding-left: 1em;
 	padding-right: 1em;
@@ -989,6 +1013,15 @@ body.flesh-out-page .flesh-footer button {
 body.flesh-out-page .flesh-footer button:hover:not(:disabled) {
 	background-color: var(--cddbWhite);
 	color: var(--flesh-color);
+}
+body.flesh-out-page .flesh-reciprocate .toggle {
+	background-color: var(--cddbGrey);
+}
+body.flesh-out-page .flesh-reciprocate input:checked + .toggle {
+	background-color: var(--flesh-color);
+}
+body.flesh-out-page .flesh-reciprocate input:focus + .toggle {
+	box-shadow: 0 0 1px var(--flesh-color);
 }
 /* Counteract responsive grid breakpoints on flesh_out.php */
 @media only screen and (min-width: 1200px) {
@@ -1014,17 +1047,23 @@ body.flesh-out-page .flesh-footer button:hover:not(:disabled) {
 	background-color: #fdfbf2;
 	padding: 0.55rem 0.75rem 0.6rem;
 }
+.similar-header {
+	align-items: center;
+	display: flex;
+	gap: 0.5rem;
+	margin-bottom: 0.4rem;
+}
 .similar-label {
 	color: var(--cddbGrey);
+	flex: 1;
 	font-size: 0.7rem;
 	font-weight: bold;
 	letter-spacing: 0.04em;
 	text-transform: uppercase;
-	margin-bottom: 0.3rem;
 }
 .similar-matches {
 	list-style: none;
-	margin: 0 0 0.45rem;
+	margin: 0;
 	padding: 0;
 }
 .similar-match {
@@ -1052,11 +1091,6 @@ body.flesh-out-page .flesh-footer button:hover:not(:disabled) {
 .similar-use:hover {
 	background-color: var(--cddbWhite);
 	color: var(--flesh-color);
-}
-.similar-secondary {
-	align-items: center;
-	display: flex;
-	gap: 0.75rem;
 }
 .similar-keep,
 .similar-cancel {

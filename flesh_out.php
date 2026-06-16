@@ -240,8 +240,7 @@ $baseURL      = '/';
 
     <div class="flesh-header">
         <div class="flesh-header-text">
-            <p class="flesh-type-label"><?php echo $typeLabel; ?></p>
-            <h2><?php echo htmlspecialchars($focalPhrasing); ?></h2>
+            <h2><?php echo htmlspecialchars($focalPhrasing); ?> <span class="flesh-type-suffix"><?php echo $typeLabel; ?>…</span></h2>
         </div>
         <a href="/?arg=<?php echo $argIDEsc; ?>" class="button flesh-cancel">Cancel</a>
     </div>
@@ -397,11 +396,18 @@ function fleshBumpExisting(argID) {
     var item = fleshPool.find(function(x) { return x.id === id; });
 
     if (!item) {
-        // First click: move row to pinned zone
+        // First click: animate then move row to pinned zone
         var row        = document.getElementById('flesh-' + id);
         var pinnedZone = document.getElementById('pinned-zone');
-        pinnedZone.appendChild(row);
-        fleshPool.push({id: id, clicks: 1});
+        row.classList.add('departing');
+        row.addEventListener('animationend', function() {
+            row.classList.remove('departing');
+            pinnedZone.appendChild(row);
+            fleshPool.push({id: id, clicks: 1});
+            fleshTotalClicks++;
+            fleshUpdateAll();
+        }, { once: true });
+        return;
     } else {
         item.clicks++;
     }
@@ -603,10 +609,6 @@ function fleshShowSuggestion(n, matches) {
     panel.className = 'similar-suggestion';
     panel.id = 'similar-' + n;
 
-    var label = matches.length === 1
-        ? 'Similar argument already exists'
-        : 'Similar arguments already exist';
-
     var listHtml = '<ul class="similar-matches">';
     matches.forEach(function(match) {
         listHtml += '<li class="similar-match">'
@@ -617,12 +619,12 @@ function fleshShowSuggestion(n, matches) {
     listHtml += '</ul>';
 
     panel.innerHTML =
-        '<div class="similar-label">' + label + '</div>'
-        + listHtml
-        + '<div class="similar-secondary">'
+        '<div class="similar-header">'
+        + '<span class="similar-label">Existing similar arguments</span>'
         + '<button type="button" class="similar-keep">Keep mine</button>'
-        + '<button type="button" class="similar-cancel">Start over</button>'
-        + '</div>';
+        + '<button type="button" class="similar-cancel">Try again</button>'
+        + '</div>'
+        + listHtml;
 
     panel.querySelectorAll('.similar-use').forEach(function(btn, i) {
         btn.addEventListener('click', function() {
