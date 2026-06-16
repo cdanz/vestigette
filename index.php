@@ -394,22 +394,7 @@ function generateFindLines($results) {
 		</div>
 <?php endif; ?>
 
-		<div id="mastHead" class="container">
-			<h1><a href="/?arg=<?php echo $_SESSION['currentArg'];?>">AGITATE</a></h1>
-			<div>
-				<a href="About.php?arg=<?php echo $_SESSION['currentArg'];?>">About</a>
-				<a href="Explore.php?arg=<?php echo $_SESSION['currentArg'];?>">Explore</a>
-				<a href="Profile.php?arg=<?php echo $_SESSION['currentArg'];?>">Profile</a>
-				<a href="/donate.php">Support</a>
-				<?php if ($isAdmin): ?>
-				<a href="/admin_tools.php?arg=<?php echo $_SESSION['currentArg']; ?>">Admin</a>
-				<?php endif; ?>
-				<a href="<?php echo ($profile) ? 'logout' : 'login'; ?>.php?arg=<?php echo $_SESSION['currentArg'];?>"><?php echo ($profile) ? 'Logout' : 'Login'; ?></a>
-				<a href="#" class="closenav" onclick="closeNav()">&times;</a>
-			</div>
-			
-			<a href="#" class="opennav" onclick="openNav()">&equiv;</a>
-		</div>
+	<div id="left-col">
 
 		<div id="because" class="accordion container">
 			<h2>Because</h2>
@@ -461,7 +446,6 @@ else {
 <?php endif; ?>
 			</div>
 		</div>
-
 
 		<div id="argument" class="accordion container">
 			<div class="arg-header">
@@ -609,57 +593,6 @@ $carouselCount = count($carouselLinks);
 			</div>
 		</div>
 
-		<div id="rebuttal" class="accordion container">
-			<h2>Rebuttal</h2>
-<?php
-$canWeightRebuttal = isset($opinion) && ($opinion < 0);
-?>
-	<div class="buttons">
-<?php if ($canWeightRebuttal): ?>
-		<form method="POST" accept-charset="utf-8">
-			<button type="submit" class="button endorse hidden" name="buttonClicked" value="weighRebuttal" data-container-id="rebuttal">Endorse</button>
-			<input type="hidden" name="rebuttalWeighInWith" id="rebuttalWeighInWith" value="" />
-			<?php addCSRFtoken() ?>
-		</form>
-		<button class="button reset hidden" data-container-id="rebuttal">&#x21BA;</button>
-		<button class="button myWeights hidden" data-container-id="rebuttal" title="Load my previous weights">
-			<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="18" height="18" aria-hidden="true">
-				<circle cx="12" cy="8" r="4"/>
-				<path d="M4 20c0-3.866 3.582-7 8-7s8 3.134 8 7" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round"/>
-			</svg>
-		</button>
-		<span class="section-lock unlocked" title="Rebuttal is unlocked — click a circle to start weighting">
-			<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
-				<rect x="3" y="11" width="18" height="12" rx="2.5" fill="white"/>
-				<path d="M7 12V8a5 5 0 0 1 10 0V3" fill="none" stroke="white" stroke-width="3" stroke-linecap="round"/>
-			</svg>
-		</span>
-<?php else: ?>
-		<span class="section-lock locked" title="Reject the argument to weight this section">
-			<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
-				<rect x="3" y="11" width="18" height="12" rx="2.5" fill="white"/>
-				<path d="M7 12V8a5 5 0 0 1 10 0v4" fill="none" stroke="white" stroke-width="3" stroke-linecap="round"/>
-			</svg>
-		</span>
-<?php endif; ?>
-	</div>
-			<div class="panel" data-container-id="rebuttal">
-<?php
-if (isset($rebuttal)) {
-	generateTypeLines("rebuttal", $rebuttal);
-}
-else {
-	echo "No Results - Reject the argument to be the first to endorse";
-}
-?>
-<?php if ((isset($opinion)) && ($opinion < 0)): ?>
-				<div class="bulk-add-bar">
-					<a href="/flesh_out.php?arg=<?php echo $arg; ?>&type=Rebuttal" class="button bulk-add-btn">+ More to Say</a>
-				</div>
-<?php endif; ?>
-			</div>
-		</div>
-
 		<div id="therefore" class="accordion container">
 			<h2>Therefore</h2>
 <?php
@@ -706,6 +639,80 @@ $canWeightTherefore = isset($opinion) && ($opinion > 0);
 <?php if ((isset($opinion)) && ($opinion > 0)): ?>
 				<div class="bulk-add-bar">
 					<a href="/flesh_out.php?arg=<?php echo $arg; ?>&type=Therefore" class="button bulk-add-btn">+ More to Say</a>
+				</div>
+<?php endif; ?>
+			</div>
+		</div>
+
+	</div>
+
+	<div id="right-col">
+
+		<div id="mastHead" class="container">
+			<h1><a href="/?arg=<?php echo $_SESSION['currentArg'];?>">AGITATE</a></h1>
+			<div>
+				<a href="About.php?arg=<?php echo $_SESSION['currentArg'];?>">About</a>
+				<a href="Explore.php?arg=<?php echo $_SESSION['currentArg'];?>">Explore</a>
+				<a href="Profile.php?arg=<?php echo $_SESSION['currentArg'];?>">Profile</a>
+				<?php if ($isAdmin): ?>
+				<a href="/admin_tools.php?arg=<?php echo $_SESSION['currentArg']; ?>">Admin</a>
+				<?php endif; ?>
+				<a href="<?php echo ($profile) ? 'logout' : 'login'; ?>.php?arg=<?php echo $_SESSION['currentArg'];?>"><?php echo ($profile) ? 'Logout' : 'Login'; ?></a>
+				<a href="#" class="closenav" onclick="closeNav()">&times;</a>
+			</div>
+			<a href="/donate.php" class="donate-btn">
+				<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="14" height="14" aria-hidden="true"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+				Donate
+			</a>
+			<a href="#" class="opennav" onclick="openNav()">&equiv;</a>
+		</div>
+
+		<div id="rebuttal" class="accordion container">
+			<h2>Rebuttal</h2>
+<?php
+$canWeightRebuttal = isset($opinion) && ($opinion < 0);
+?>
+	<div class="buttons">
+<?php if ($canWeightRebuttal): ?>
+		<form method="POST" accept-charset="utf-8">
+			<button type="submit" class="button endorse hidden" name="buttonClicked" value="weighRebuttal" data-container-id="rebuttal">Endorse</button>
+			<input type="hidden" name="rebuttalWeighInWith" id="rebuttalWeighInWith" value="" />
+			<?php addCSRFtoken() ?>
+		</form>
+		<button class="button reset hidden" data-container-id="rebuttal">&#x21BA;</button>
+		<button class="button myWeights hidden" data-container-id="rebuttal" title="Load my previous weights">
+			<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="18" height="18" aria-hidden="true">
+				<circle cx="12" cy="8" r="4"/>
+				<path d="M4 20c0-3.866 3.582-7 8-7s8 3.134 8 7" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round"/>
+			</svg>
+		</button>
+		<span class="section-lock unlocked" title="Rebuttal is unlocked — click a circle to start weighting">
+			<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+				<rect x="3" y="11" width="18" height="12" rx="2.5" fill="white"/>
+				<path d="M7 12V8a5 5 0 0 1 10 0V3" fill="none" stroke="white" stroke-width="3" stroke-linecap="round"/>
+			</svg>
+		</span>
+<?php else: ?>
+		<span class="section-lock locked" title="Reject the argument to weight this section">
+			<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+				<rect x="3" y="11" width="18" height="12" rx="2.5" fill="white"/>
+				<path d="M7 12V8a5 5 0 0 1 10 0v4" fill="none" stroke="white" stroke-width="3" stroke-linecap="round"/>
+			</svg>
+		</span>
+<?php endif; ?>
+	</div>
+			<div class="panel" data-container-id="rebuttal">
+<?php
+if (isset($rebuttal)) {
+	generateTypeLines("rebuttal", $rebuttal);
+}
+else {
+	echo "No Results - Reject the argument to be the first to endorse";
+}
+?>
+<?php if ((isset($opinion)) && ($opinion < 0)): ?>
+				<div class="bulk-add-bar">
+					<a href="/flesh_out.php?arg=<?php echo $arg; ?>&type=Rebuttal" class="button bulk-add-btn">+ More to Say</a>
 				</div>
 <?php endif; ?>
 			</div>
@@ -763,6 +770,8 @@ if (isset($recent)) {
 			</div>
 		</div>
 
+	</div>
+
 		<!-- You not ready for this -->
 		<div id="filter" class="accordion container hidden">
 			<h2>Filter</h2>
@@ -782,24 +791,24 @@ if (isset($recent)) {
 <!-- Phrasing Modal -->
 <div id="overlayP" class="hidden">
     <div id="phrasing" class="container hidden">
-        <h2>Put Another Way</h2>
-        <div class="buttons">
-            <button id="closeP" class="button">X</button> 
-        </div>
+        <div class="overlay-header">
+            <h2>Put Another Way</h2>
 <?php
-if ((isset($opinion)) && ($opinion > 0)) { 
+if ((isset($opinion)) && ($opinion > 0)) {
 ?>
-        <div class="buttons">
-            <form method="POST" accept-charset="utf-8">
-                <button type="submit" class="button endorse hidden" name="buttonClicked" value="weighPhrasing" data-container-id="phrasing">Endorse</button>
-                <input type="hidden" name="phrasingWeighInWith" id="phrasingWeighInWith" value="" />
-                <?php addCSRFtoken() ?>
-            </form>
-            <button class="button reset hidden" data-container-id="phrasing">&#x21BA;</button>
-        </div>
+            <div class="overlay-actions">
+                <form method="POST" accept-charset="utf-8">
+                    <button type="submit" class="button endorse hidden" name="buttonClicked" value="weighPhrasing" data-container-id="phrasing">Endorse</button>
+                    <input type="hidden" name="phrasingWeighInWith" id="phrasingWeighInWith" value="" />
+                    <?php addCSRFtoken() ?>
+                </form>
+                <button class="button reset hidden" data-container-id="phrasing">&#x21BA;</button>
+            </div>
 <?php
 }
 ?>
+            <button id="closeP" class="button">X</button>
+        </div>
         <div class="panel expanded" data-container-id="phrasing">
 <?php
     if (isset($altPhrasings)) {
@@ -826,24 +835,24 @@ if ((isset($opinion)) && ($opinion > 0)) {
 
 			<div id="overlayE" class="hidden">
 				<div id="explication" class="container hidden">
-					<h2>Explication Links</h2>
-					<div class="buttons">
-						<button id="closeE" class="button">X</button>
-					</div>
+					<div class="overlay-header">
+						<h2>Explication Links</h2>
 <?php
 if ((isset($opinion)) && ($opinion > 0)) {
 ?>
-				<div class="buttons">
-					<form method="POST" accept-charset="utf-8">
-						<button type="submit" class="button endorse hidden" name="buttonClicked" value="weighExplication" data-container-id="explication">Endorse</button>
-						<input type="hidden" name="explicWeighInWith" id="explicWeighInWith" value="" />
-						<?php addCSRFtoken() ?>
-					</form>
-					<button class="button reset hidden" data-container-id="explication">&#x21BA;</button>
-				</div>
+					<div class="overlay-actions">
+						<form method="POST" accept-charset="utf-8">
+							<button type="submit" class="button endorse hidden" name="buttonClicked" value="weighExplication" data-container-id="explication">Endorse</button>
+							<input type="hidden" name="explicWeighInWith" id="explicWeighInWith" value="" />
+							<?php addCSRFtoken() ?>
+						</form>
+						<button class="button reset hidden" data-container-id="explication">&#x21BA;</button>
+					</div>
 <?php
 }
 ?>
+					<button id="closeE" class="button">X</button>
+					</div>
 					<div class="panel expanded" data-container-id="explication">
 
 <?php

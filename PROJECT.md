@@ -107,6 +107,11 @@ can't write the table that fired it).
 - **`index.php`** — main page: argument header (phrasing, verdict %, "Argument ID" +
   persona badge), Because/Therefore/Rebuttal sections, Find section, admin picker bar,
   flag control. Loads its data, **closes `$db` early** (~line 159), then renders.
+  Desktop layout uses two sibling wrapper divs: `#left-col` (60% — Because/Argument/Therefore)
+  and `#right-col` (40% — mastHead/Rebuttal/Find). On mobile both use `display: contents`
+  so sections stack in natural order via `order` properties on `body { display:flex; flex-column }`.
+  `#argument` uses `flex: 0 0 auto` (sizes to content, never scrolls); `#because` /
+  `#therefore` share remaining height equally via `flex: 1 1 0`.
 - **`query_current_argument.php`** — fetches the current argument's data via procs.
 - **`functions.php`** — POST action handler (`buttonClicked` switch: accept/reject,
   `weighBecause/Therefore/Rebuttal`, flag/unflag, etc.). Weighting a support also applies
@@ -114,6 +119,9 @@ can't write the table that fired it).
 - **`flesh_out.php`** — the association-builder page (uses `getNeighborhood`).
 - **`admin_tools.php`** — admin-only: merge arguments, Profile Picker config, flagged-args
   resolve, invite codes. Requires `isAdmin`.
+- **`find_similar.php`** — similarity search endpoint (full-text + SOUNDEX fallback).
+  Used by `flesh_out.php` to suggest existing arguments before a user adds a new one
+  (duplicate detection), and by `Explore.php` for the live search box.
 - **`neighborhood.php`** — lazy-load endpoint for the Find ▸ Neighborhood list.
 - **`includes/dbconnect.php`** — provides `$db` (mysqli).
 - **`style_vestigette.css`**, **`script_vestigette.js`** — front end. Palette includes
@@ -135,11 +143,20 @@ can't write the table that fired it).
   persists across pages via `localStorage`.
 - **Admin Profile Picker** — `manual` (designated IDs) or `auto` (personas with an opinion
   on the current arg + you, by last-name initial); mutually exclusive via
-  `ADMIN_SETTINGS.pickerType`.
+  `ADMIN_SETTINGS.pickerType`. On desktop the bar is `position: fixed` at the top;
+  `body:has(#adminPickerBar)` nudges `#left-col` / `#right-col` down by `2rem`.
+- **Donate button** — white heart icon + "Donate" label in the masthead on every page
+  (`index.php`, `About.php`, `Explore.php`, `Profile.php`, `login.php`). Hamburger (☰)
+  on mobile is on the **left** so it doesn't crowd the donate button on the right.
 - **AI-persona transparency badge** — yellow robot beside "Argument ID" when any persona
   (1–26) holds an opinion on the argument.
 - **Persona seeding bot** — queue + cron: `BOT_SEED_QUEUE → process_seed_queue.py →
   persona_bot.py` (in `/var/www/bot`). See `PERSONA_SEEDING_PROCESS.md`.
+- **Persona retirement** — `assertOpinion` now probabilistically retires personas as
+  human engagement grows (S-curve: probability = `(humanCount/100)²`; completes by ~100
+  human opinions). Procedure `retirePersonaFromArgument` in `persona_retirement_procedures.sql`.
+- **Trending / Most Contested** — `getTrending()` and `getMostContested()` procedures
+  (in `core_procedures.sql`) power the Explore page lists.
 - **Persistent login** — rememberMe cookie (30-day).
 
 ---
@@ -177,4 +194,4 @@ can't write the table that fired it).
 - Tutorial/demo experience; first-login weighting indicators; About / Explore / Profile
   pages; bot transparency + blog; cost monitoring & scale-back rules; branding pass.
 
-_Last refreshed: 2026-06-12._
+_Last refreshed: 2026-06-16._

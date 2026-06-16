@@ -1,119 +1,144 @@
-<?php 
+<?php
 session_start();
-$_SESSION['currentArg'] = intval($_GET["arg"]); 
-$baseURL = "/";
-$arg = isset($_SESSION['currentArg']) ? $_SESSION['currentArg'] : null;
-$profile = isset($_SESSION['profile']) ? $_SESSION['profile'] : null;
+$_SESSION['currentArg'] = intval($_GET["arg"] ?? 0);
+$baseURL  = "/";
+$arg      = $_SESSION['currentArg'] ?? null;
+$profile  = $_SESSION['profile']    ?? null;
+
+include("${_SERVER['DOCUMENT_ROOT']}/includes/dbconnect.php");
+require_once("${_SERVER['DOCUMENT_ROOT']}/includes/content_chrome.php");
+
+$posts = [];
+$stmt = $db->prepare(
+    "SELECT slug, title, summary, tags, createdAt, updatedAt
+     FROM CONTENT WHERE status='published' ORDER BY updatedAt DESC"
+);
+if ($stmt) {
+    $stmt->execute();
+    $res = $stmt->get_result();
+    while ($row = $res->fetch_assoc()) { $posts[] = $row; }
+    $stmt->close();
+}
+mysqli_close($db);
 ?>
 <!DOCTYPE html>
 <html>
-	<head>
-		<title>Agitate - About</title>
-		<meta charset="utf-8"/>
-		<meta name="keywords" content="argument, dialectic, reasoning, anti-troll, discussion, debate, assertion network, dialogue, public forum, town square, consensus building, diliberation chamber, diliberative body, dynamic polling, self-guided polling, opposition research, best reason why, best reason not"/>
-		<meta name="copyright" content="Copyright 2015 Craig Danz Seattle, WA USA" />
-		<meta name="robots" content="follow" />
-		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<link rel="stylesheet" href="style_vestigette.css?v=<?php echo filemtime($_SERVER['DOCUMENT_ROOT'].'/style_vestigette.css'); ?>" />
-		<script language="javascript" src="script_vestigette.js"></script>
-		<script language="javascript">
-			let arg = <?php echo isset($arg) ? $arg : 'undefined'; ?>,
-				profile = <?php echo isset($profile) ? $profile : 'undefined'; ?>,
-				opinion = <?php echo isset($opinion) ? $opinion : 'undefined'; ?>,
-				assoc = <?php echo isset($assocWeights) ? "JSON.parse(" + $assocWeights + ")" : 'undefined'; ?>, //not used
-				because = <?php echo json_encode(isset($because) ? $because : null); ?>,
-				therefore = <?php echo json_encode(isset($therefore) ? $therefore : null); ?>,
-				rebuttal = <?php echo json_encode(isset($rebuttal) ? $rebuttal : null); ?>;
-		</script>
-	</head>
-	<body>
+<head>
+    <title>Agitate – About</title>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="robots" content="follow"/>
+    <link rel="stylesheet" href="style_vestigette.css?v=<?php echo filemtime($_SERVER['DOCUMENT_ROOT'].'/style_vestigette.css'); ?>"/>
+    <script src="script_vestigette.js?v=<?php echo filemtime($_SERVER['DOCUMENT_ROOT'].'/script_vestigette.js'); ?>"></script>
+    <script>
+        let arg     = <?php echo $arg     ?? 'undefined'; ?>,
+            profile = <?php echo $profile ?? 'undefined'; ?>,
+            opinion = undefined, because = null, therefore = null, rebuttal = null;
+    </script>
+</head>
+<body class="content-page">
 
-		<div id="mastHead" class="container">
-			<h1><a href="/?arg=<?php echo $_SESSION['currentArg'];?>">AGITATE</a></h1>
-			<div>
-				<a href="About.php?arg=<?php echo $_SESSION['currentArg'];?>"><span style="text-decoration: underline;">About</span></a>
-				<a href="Explore.php?arg=<?php echo $_SESSION['currentArg'];?>">Explore</a>
-				<a href="Profile.php?arg=<?php echo $_SESSION['currentArg'];?>">Profile</a>
-				<a href="<?php echo ($profile) ? 'logout' : 'login'; ?>.php?arg=<?php echo $_SESSION['currentArg'];?>"><?php echo ($profile) ? 'Logout' : 'Login'; ?></a>
-				<a href="#" class="closenav" onclick="closeNav()">&times;</a>
-			</div> 
-			
-			<a href="#" class="opennav" onclick="openNav()">&equiv;</a>
-		</div>
-		<div id="because" class="accordion container">
-			<h2>About</h2>
+<div id="mastHead" class="container">
+    <h1><a href="/?arg=<?php echo $arg; ?>">AGITATE</a></h1>
+    <div>
+        <a href="About.php?arg=<?php echo $arg; ?>" style="text-decoration:underline;">About</a>
+        <a href="Explore.php?arg=<?php echo $arg; ?>">Explore</a>
+        <a href="Profile.php?arg=<?php echo $arg; ?>">Profile</a>
+        <a href="<?php echo $profile ? 'logout' : 'login'; ?>.php?arg=<?php echo $arg; ?>"><?php echo $profile ? 'Logout' : 'Login'; ?></a>
+        <a href="#" class="closenav" onclick="closeNav()">&times;</a>
+    </div>
+    <a href="/donate.php" class="donate-btn">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="14" height="14" aria-hidden="true"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+        Donate
+    </a>
+    <a href="#" class="opennav" onclick="openNav()">&equiv;</a>
+</div>
 
-			<div class="panel" data-container-id="because">
-				<br>
-				<p>Agitate is the world's first consensus building platform. Discussion as a single, collective, ongoing project.</p>
-				<br>
-				<p>Agitate produces a model of our discourse. A map to study, use, and improve. Passively participated in, resistant to trolls, and anonymous - bizarro social media.</p>
-				<br>
-				<p><strong>Why?</strong></p>
-				<br>
-				<p>Consider the sci-fi trope: a powerful technology is discovered, however, instead of sharing it with the world, the hero decides it must be destroyed. Humanity is simply not mature enough to be trusted with such power.
-				<br><br>
-				The thing is - who is to say humanity will ever truly mature any further? And who is to say we can be trusted with the technologies humanity has already unleashed? How do we best play the hand we've been dealt?
-				<br><br>
-				A reason for hope is we are not all bad. There is a great deal of good to be found amongst us. There is a great deal of wisdom. There is a great deal of sense. But there also is an impression that too often what is right is not what's brought to the fore. The question Agitate aims to answer then is: how do we access the best of humanity for guidance?
-				<br><br>
-				Through a dogged pursuit of fair representation, it is the mission of Agitate to conduct the most extensive exercise in open inquiry in history.</p>
-				<br>
-				<p><strong>What does "Agitate" mean?</strong></p>
-				<br>
-				<p>Agitate is a made-up word. From the Latin "vestigium" - to track, trace, or mark. The most common descendant "Vestige" is notable because it is so inextricably of the past. There is not a more intentional, affirmative, present form of the word. Agitate means to lay down a marker with the intention of aiding those that follow. The suffix, "-gette", invokes suffrage because Agitate aims to add clarity and context to our dialogue by giving voice to the underrepresented.</p>
-				<br>
-			</div>
-		</div>
+<main class="about-main">
 
-		<div id="rebuttal" class="accordion container">
-			<h2>How-To</h2>
-			<div class="panel" data-container-id="because">
-				<br>
-				<p style="white-space:normal;">Agitate is an abstraction of common argument mapping techniques. Each argument is an assertion - phrased as its proponents prefer best. Arguments are linked together in 3 different ways: those that (1) precede - <span style="color: var(--cddbBlue); font-weight:bold;">Because</span>, (2) follow - <span style="color: var(--cddbGreen); font-weight:bold;">Therefore</span>, or (3) refute - <span style="color: var(--cddbRed); font-weight:bold;">Rebuttal</span>.
-				<br>
-				<br>
-				<span style="color: var(--cddbBlue); text-decoration: underline;"><a href="https://youtu.be/gSlucDTMsmA">30 Second Video Tutorial</a></span>
-				<br>
-				<br>
-				Users develop and track their own personal lines of reasoning within the Agitate framework. Maintaining a line of reasoning that is optimally compelling while consistent with principles and beliefs previously tracked involves continuous reconsideration and fine-tuning. This collective effort produces a map of both the common wisdom and where/how it deviates.
-				<br>
-				<br>
-				Users interact with an argument first by choosing to "Accept" or "Reject". Accepting an argument gives a user the right to endorse which other arguments should be linked as its <span style="color: var(--cddbBlue); font-weight:bold;">Because</span> or <span style="color: var(--cddbGreen); font-weight:bold;">Therefore</span> types. Users that accept an argument also improve the argument by deciding a <span style="color: var(--cddbBlack); font-weight:bold;">Phrasing (&#x270e;)</span> that better puts the argument forth and promote a preferred <span style="color: var(--cddbBlack); font-weight:bold;">Explication (&#x2318;)</span> - a link to any kind of content (news article, academic paper, explainer video, meme) that better exemplifies, expands upon or gives evidence toward the point of the the argument. Rejecting the argument gives opponents the right to prioritize arguments linked to refute it as its <span style="color: var(--cddbRed); font-weight:bold;">Rebuttal</span> types.
-				<br>
-				<br>
-				Start with <span style="color: var(--cddbGreen); font-weight:bold;">Accept</span> or <span style="color: var(--cddbRed); font-weight:bold;">Reject</span><br>
-				&emsp;&#x2022;  If you <span style="color: var(--cddbGreen); font-weight:bold;">Accept</span>:<br>
-				&emsp;&emsp;&#x2022;  1. Weigh in, distributing proportional significance to arguments connected as either <span style="color: var(--cddbBlue); font-weight:bold;">Because</span> or <span style="color: var(--cddbGreen); font-weight:bold;">Therefore</span> arguments<br>
-				&emsp;&emsp;&#x2022;  2. Vote on the best <span style="color: var(--cddbBlack); font-weight:bold;">Phrasing</span> of the argument<br>
-				&emsp;&emsp;&#x2022;  3. Vote on the best <span style="color: var(--cddbBlack); font-weight:bold;">Explication</span> (link to content)<br>
-				&emsp;&#x2022;  If you <span style="color: var(--cddbRed); font-weight:bold;">Reject</span>:<br>
-				&emsp;&emsp;&#x2022;  1. Weigh in, distributing proportional significance to arguments connected as <span style="color: var(--cddbRed); font-weight:bold;">Rebuttal</span> arguments<br>
-				<br>
-				<br>
-				The links from the argument at hand to others are applied with a <span style="font-weight:bold;">weight</span>. Each user can give their full <span style="font-weight:bold;">weight</span> to a single argument of any type they have rights to, or distribute <span style="font-weight:bold;">weight</span> proportionally among many. The circular chart to the left of each argument becomes a button upon choosing to <span style="font-weight:bold;">weigh in</span>. Apply <span style="font-weight:bold;">weight</span> to arguments of your choosing by clicking the circle button to its left. Each click gives an argument more <span style="font-weight:bold;">weight</span> relative to the others. Once satisfied, submit your endorsement and add to the collective whole.</p>
-				<br>
-			</div>
-		</div> 
+    <div class="accordion container about-section">
+        <h2>What is Agitate</h2>
+        <div class="panel expanded">
+            <p>Agitate maps public discourse as a weighted argument graph. Each node is a claim — accepted or rejected by users, connected to the reasons that support or follow from it, and the counterarguments that challenge it. The result is a living model of how people actually think, not a measure of what's loudest.</p>
+            <p>There are no followers, no algorithmic feed, and no mechanism for amplifying outrage. What rises to the top is determined entirely by the proportional weight users assign to it — collectively, over time.</p>
+        </div>
+    </div>
 
-		<div id="therefore" class="accordion container">
-			<h2>Contribute</h2>
-			<div class="panel" data-container-id="because">
-				<br>
-				<p>Agitate is in its inital development stage and self-funded. Software development guidance, legal assistance, financial support or general user feedback are all accepted graciously.</p>
-				<br>
-				<p>To request to become a beta user, email your request to <a href="mailto:craig@vestigette.org">craig@vestigette.org</a></p>
-				<br>
-			</div>
-		</div>
-		<div id="argument" class="accordion container">
-			<div class="panel expanded" data-container-id="argument">
-				<br>
-				<p>Agitate was created by Craig Danz of Seattle, WA, U.S.A. Copyright <?php echo date("Y"); ?></p>
-				<a href="https://twitter.com/vestigette?ref_src=twsrc%5Etfw" class="twitter-follow-button" data-show-count="false">Follow @vestigette</a><script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
-				<br>
-			</div>
-		</div>
+    <div class="accordion container about-section">
+        <h2>Why</h2>
+        <div class="panel expanded">
+            <p>There is a great deal of wisdom to be found among us. There is good sense and a genuine willingness to reason carefully. The problem is that what's right too rarely rises to the surface of public discourse.</p>
+            <p>Agitate is built around a single question: how do we reliably draw out the best of what people have to offer? The answer it pursues is a persistent, open, and fair exercise in collective inquiry — one argument at a time. Through a dogged commitment to fair representation, it is the mission of Agitate to conduct the most extensive exercise in open inquiry in history.</p>
+        </div>
+    </div>
 
-	</body>
+    <div class="accordion container about-section">
+        <h2>Get Started</h2>
+        <div class="panel expanded">
+            <p>The best way to understand Agitate is to use it. <a href="/?arg=75">Argument #75</a> is a good place to start — it walks through the platform from the inside, as an argument itself.</p>
+            <p>For a quick orientation, the <a href="https://youtu.be/gSlucDTMsmA">video tutorial</a> covers the basics. An updated version with the current UI is in progress.</p>
+        </div>
+    </div>
+
+    <div class="accordion container about-section">
+        <h2>Blog</h2>
+        <div class="panel expanded">
+            <?php if (empty($posts)): ?>
+                <p>Nothing here yet.</p>
+            <?php else: ?>
+                <ul class="about-post-list">
+                <?php foreach ($posts as $p): ?>
+                    <li class="about-post-item">
+                        <a class="about-post-title" href="/post.php?slug=<?php echo urlencode($p['slug']); ?>"><?php echo htmlspecialchars($p['title']); ?></a>
+                        <div class="about-post-meta"><?php echo date('M j, Y', strtotime($p['updatedAt'] ?: $p['createdAt'])); ?></div>
+                        <?php if (!empty($p['summary'])): ?>
+                            <div class="about-post-summary"><?php echo htmlspecialchars($p['summary']); ?></div>
+                        <?php endif; ?>
+                        <?php $tg = content_parse_tags($p['tags']); if ($tg): ?>
+                            <div class="about-post-tags">
+                            <?php foreach ($tg as $t): ?>
+                                <a class="about-post-tag" href="/blog.php?tag=<?php echo urlencode($t); ?>"><?php echo htmlspecialchars($t); ?></a>
+                            <?php endforeach; ?>
+                            </div>
+                        <?php endif; ?>
+                    </li>
+                <?php endforeach; ?>
+                </ul>
+            <?php endif; ?>
+        </div>
+    </div>
+
+    <div class="accordion container about-section">
+        <h2>AI Transparency</h2>
+        <div class="panel expanded">
+            <p>Arguments in the early stages of human engagement may display a <span class="about-robot-badge">&#x1F916; robot badge</span>. This indicates that AI personas contributed to the argument's initial scaffolding — seeding Because, Therefore, and Rebuttal connections so new users encounter a populated graph rather than an empty room.</p>
+            <p>These contributions are temporary by design. As genuine human engagement grows on an argument, AI persona input phases out automatically. When the badge disappears, the argument is fully human-driven. The badge exists to be honest about when that transition is still in progress.</p>
+        </div>
+    </div>
+
+    <div class="accordion container about-section">
+        <h2>Privacy</h2>
+        <div class="panel expanded">
+            <p>Agitate has no public profiles, no follower counts, and no social graph. Your positions are recorded to your account for continuity of your own experience, but they are not displayed as a public identity and are not associated with your name.</p>
+            <p>There is no feed designed to hold your attention, no mechanism for content to go viral, and no advertising. What you see is a function of the argument graph — not of who you are or what keeps you engaged longest.</p>
+        </div>
+    </div>
+
+    <div class="accordion container about-section">
+        <h2>Contribute</h2>
+        <div class="panel expanded">
+            <p>Agitate is in active alpha development and self-funded. The graph is live and growing. The most valuable thing you can do right now is use it honestly and bring others into the conversation.</p>
+            <a class="bluesky-follow" href="https://bsky.app/profile/agitate-discourse.bsky.social" target="_blank" rel="noopener">🦋 Follow @agitate-discourse on Bluesky</a>
+            <p class="bluesky-context">Arguments worth arguing about — follow for updates, debate, and a direct line to the people building this. Feedback, bug reports, and questions are all welcome there.</p>
+            <p>Software development guidance, legal assistance, and financial support are also accepted gratefully.</p>
+        </div>
+    </div>
+
+    <footer class="about-footer">
+        <p>Agitate was created by Craig Danz of Seattle, WA, U.S.A. &copy; <?php echo date('Y'); ?></p>
+    </footer>
+
+</main>
+
+</body>
 </html>
