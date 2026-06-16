@@ -1,122 +1,219 @@
-<?php 
+<?php
 session_start();
 include("${_SERVER['DOCUMENT_ROOT']}/includes/dbconnect.php");
-$_SESSION['currentArg'] = intval($_GET["arg"]); 
-$baseURL = "/";
-$arg = isset($_SESSION['currentArg']) ? $_SESSION['currentArg'] : null;
-$profile = isset($_SESSION['profile']) ? $_SESSION['profile'] : null;
-if (isset($profile)) {
-	$sql = "CALL getHeterodox($profile)";
-	mysqli_multi_query($db, $sql);
+
+$_SESSION['currentArg'] = intval($_GET['arg'] ?? 0);
+$arg     = $_SESSION['currentArg'];
+$profile = $_SESSION['profile'] ?? null;
+
+$stats    = null;
+$topPct   = null;
+$recent   = [];
+$heterodox = [];
+
+if ($profile) {
+    // Opinion summary: total count and accept split
+    $stmt = $db->prepare(
+        "SELECT COUNT(*) AS total,
+                SUM(CASE WHEN acceptance = TRUE THEN 1 ELSE 0 END) AS accepts
+         FROM OPINION WHERE profileID = ?"
+    );
+    $stmt->bind_param('i', $profile);
+    $stmt->execute();
+    $stats = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
+
+    // Percentile rank among human users (profileID > 26)
+    if ($stats && $stats['total'] > 0) {
+        $myCount = intval($stats['total']);
+        $stmt = $db->prepare(
+            "SELECT COUNT(*) AS pool,
+                    SUM(CASE WHEN cnt < ? THEN 1 ELSE 0 END) AS below
+             FROM (
+                 SELECT COUNT(*) AS cnt
+                 FROM OPINION
+                 WHERE profileID > 26
+                 GROUP BY profileID
+             ) AS user_counts"
+        );
+        $stmt->bind_param('i', $myCount);
+        $stmt->execute();
+        $row = $stmt->get_result()->fetch_assoc();
+        $stmt->close();
+        if ($row && $row['pool'] >= 3) {
+            $pct    = $row['pool'] > 0 ? round(100 * $row['below'] / $row['pool']) : 0;
+            $topPct = max(1, 100 - $pct);
+        }
+    }
+
+    // Recent activity: last 10 arguments with an opinion
+    $stmt = $db->prepare(
+        "SELECT O.argumentID,
+                COALESCE(A.currentPhrasing,
+                    (SELECT phrasing FROM PHRASING
+                     WHERE argumentID = A.argumentID ORDER BY createdDate ASC LIMIT 1)
+                ) AS phrased,
+                O.acceptance,
+                O.lastVisit
+         FROM OPINION O
+         JOIN ARGUMENT A ON O.argumentID = A.argumentID
+         WHERE O.profileID = ?
+         ORDER BY O.lastVisit DESC
+         LIMIT 10"
+    );
+    $stmt->bind_param('i', $profile);
+    $stmt->execute();
+    $res = $stmt->get_result();
+    while ($row = $res->fetch_assoc()) { $recent[] = $row; }
+    $stmt->close();
+
+    // Most Heterodox
+    $res = mysqli_query($db, "CALL getHeterodox($profile)");
+    if ($res) {
+        while ($row = mysqli_fetch_assoc($res)) { $heterodox[] = $row; }
+        mysqli_free_result($res);
+    }
+    while (mysqli_more_results($db)) { mysqli_next_result($db); }
 }
+
+mysqli_close($db);
 ?>
 <!DOCTYPE html>
 <html>
-	<head>
-		<title>Agitate - Profile</title>
-		<meta charset="utf-8"/>
-		<meta name="keywords" content="argument, dialectic, reasoning, anti-troll, discussion, debate, assertion network, dialogue, public forum, town square, consensus building, diliberation chamber, diliberative body, dynamic polling, self-guided polling, opposition research, best reason why, best reason not"/>
-		<meta name="copyright" content="Copyright 2015 Craig Danz Seattle, WA USA" />
-		<meta name="robots" content="follow" />
-		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<link rel="stylesheet" href="style_vestigette.css?v=<?php echo filemtime($_SERVER['DOCUMENT_ROOT'].'/style_vestigette.css'); ?>" />
-		<script language="javascript" src="script_vestigette.js"></script>
-		<script language="javascript">
-			let arg = <?php echo isset($arg) ? $arg : 'undefined'; ?>,
-				profile = <?php echo isset($profile) ? $profile : 'undefined'; ?>,
-				opinion = <?php echo isset($opinion) ? $opinion : 'undefined'; ?>,
-				assoc = <?php echo isset($assocWeights) ? "JSON.parse(" + $assocWeights + ")" : 'undefined'; ?>, //not used
-				because = <?php echo json_encode(isset($because) ? $because : null); ?>,
-				therefore = <?php echo json_encode(isset($therefore) ? $therefore : null); ?>,
-				rebuttal = <?php echo json_encode(isset($rebuttal) ? $rebuttal : null); ?>;
-		</script>
-	</head>
-	<body>
+<head>
+    <title>Agitate – Profile</title>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="robots" content="noindex"/>
+    <link rel="stylesheet" href="style_vestigette.css?v=<?php echo filemtime($_SERVER['DOCUMENT_ROOT'].'/style_vestigette.css'); ?>"/>
+    <script src="script_vestigette.js?v=<?php echo filemtime($_SERVER['DOCUMENT_ROOT'].'/script_vestigette.js'); ?>"></script>
+    <script>
+        let arg     = <?php echo $arg     ?? 'undefined'; ?>,
+            profile = <?php echo $profile ?? 'undefined'; ?>,
+            opinion = undefined, because = null, therefore = null, rebuttal = null;
+    </script>
+</head>
+<body class="content-page">
 
-		<div id="mastHead" class="container">
-			<h1><a href="/?arg=<?php echo $_SESSION['currentArg'];?>">AGITATE</a></h1>
-			<div>
-				<a href="About.php?arg=<?php echo $_SESSION['currentArg'];?>">About</a>
-				<a href="Explore.php?arg=<?php echo $_SESSION['currentArg'];?>">Explore</a>
-				<a href="Profile.php?arg=<?php echo $_SESSION['currentArg'];?>"><span style="text-decoration: underline;">Profile</span></a>
-				<a href="<?php echo ($profile) ? 'logout' : 'login'; ?>.php?arg=<?php echo $_SESSION['currentArg'];?>"><?php echo ($profile) ? 'Logout' : 'Login'; ?></a>
-				<a href="#" class="closenav" onclick="closeNav()">&times;</a>
-			</div> 
-			
-			<a href="#" class="opennav" onclick="openNav()">&equiv;</a>
-		</div>
+<div id="mastHead" class="container">
+    <h1><a href="/?arg=<?php echo $arg; ?>">AGITATE</a></h1>
+    <div>
+        <a href="About.php?arg=<?php echo $arg; ?>">About</a>
+        <a href="Explore.php?arg=<?php echo $arg; ?>">Explore</a>
+        <a href="Profile.php?arg=<?php echo $arg; ?>" style="text-decoration:underline;">Profile</a>
+        <a href="<?php echo $profile ? 'logout' : 'login'; ?>.php?arg=<?php echo $arg; ?>"><?php echo $profile ? 'Logout' : 'Login'; ?></a>
+        <a href="#" class="closenav" onclick="closeNav()">&times;</a>
+    </div>
+    <a href="/donate.php" class="donate-btn">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="14" height="14" aria-hidden="true"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+        Donate
+    </a>
+    <a href="#" class="opennav" onclick="openNav()">&equiv;</a>
+</div>
 
-		<div id="because" class="accordion container">
-			<h2>Agitate Profiles</h2>
+<main class="about-main">
 
-			<div class="panel" data-container-id="because">
-				<br>
-				<p>Agitate is anonymous. There are not profile pictures, person details, nor people to follow. The only thing Agitate cares about is that you actually exist and if you exist you deserve a voice. But that voice is only ever as loud as everyone else’s on Agitate.
-				<br>
-				<br>
-				The Agitate profile is mostly about refining your contribution to the collective whole. Basic information such as geographic location and age (and maybe a few other things that haven’t been firmly decided) should be available to filter upon but your name does not matter here.
-				<br>
-				<br>
-				Only one feature is available currently: "Most Heterodox" the arguments where you go most against the grain of every other user on here. New features will focus on enabling you to better clarify or revisit postions you have taken.
-				<br>
-				<br>
-				You may be just one anonymous voice but it matters and it should be as clear and nuanced as desired.</p>
-				<br>
-			</div>
-		</div>
+<?php if (!$profile): ?>
 
-		<div id="rebuttal" class="accordion container">
-			<h2>Most Heterodox</h2>
-			<div class="panel" data-container-id="because">
-				<?php
-					if (isset($profile)) {
-						$result = mysqli_store_result($db);
-						if (mysqli_num_rows($result) > 0) {
-							$lineColorIterator = 0;
-							echo "<ul>\n";
-							while($row = mysqli_fetch_row($result)) {
-								if ($lineColorIterator % 2  == 0) { 
-								echo "<li class=\"lineItem\">";
-								}
-								else{
-								echo "<li class=\"lineItem\" style=\"background-color: var(--cddbLiteGrey);\">";
-								}
-								$lineColorIterator++;
-								$aOrR = ($row[1]==1) ? "Accept" : "Reject";
-								$doOrDont = ($row[1]==1) ? "don't" : "do";
-								echo "<p class=\"assocArg\">You ".$aOrR.": <a href=".$baseURL."?arg=".$row[0].">".htmlspecialchars($row[6])."</a> ".($row[4]*100)."% ".$doOrDont."</p>
-								</li>";
-							}
-							echo "</ul>\n";
-							unset($row);
-							while (mysqli_more_results($db)) {
-								mysqli_next_result($db);
-							}
-						}
-					}
-					else {
-							echo "No results - Log in to see results. If you ARE logged in... well go be controversial already! For the sake of seeding the database.";
-						}
-				?>
-			</div>
-		</div> 
+    <div class="accordion container about-section">
+        <h2>Your Profile</h2>
+        <div class="panel expanded">
+            <p>Agitate is anonymous. There are no public profiles, no follower counts, and nothing tied to your name. Your voice on Agitate is equal to everyone else's — no louder, no quieter.</p>
+            <p><a href="/login.php?arg=<?php echo $arg; ?>">Log in</a> to see your participation summary, recent activity, and where your positions diverge most from the rest of the graph.</p>
+        </div>
+    </div>
 
-		<div id="therefore" class="accordion container">
-			<h2>Profile Actions</h2>
-			<div class="panel" data-container-id="because">
-				<br>
-				<p>None of these have been built yet. But thanks for visiting.</p>
-				<br>
-			</div>
-		</div>
-		<div id="argument" class="accordion container">
-			<div class="panel expanded" data-container-id="argument">
-				<br>
-				<p>Agitate was created by Craig Danz of Seattle, WA, U.S.A. Copyright <?php echo date("Y"); ?></p>
-				<a href="https://twitter.com/vestigette?ref_src=twsrc%5Etfw" class="twitter-follow-button" data-show-count="false">Follow @vestigette</a><script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
-				<br>
-			</div>
-		</div>
+<?php else: ?>
 
-	</body>
+    <!-- ── Summary ──────────────────────────────────────────────────────────── -->
+    <?php if ($stats && $stats['total'] > 0):
+        $total   = intval($stats['total']);
+        $accepts = intval($stats['accepts']);
+        $rejects = $total - $accepts;
+        $acceptPct = round(100 * $accepts / $total);
+    ?>
+    <div class="accordion container about-section">
+        <h2>Your Participation</h2>
+        <div class="panel expanded">
+        <div class="profile-summary">
+            <div class="profile-stat">
+                <span class="profile-stat-value"><?php echo $total; ?></span>
+                <span class="profile-stat-label">arguments weighed in on</span>
+            </div>
+            <div class="profile-stat">
+                <span class="profile-stat-value"><?php echo $acceptPct; ?>%</span>
+                <span class="profile-stat-label">acceptance rate</span>
+            </div>
+            <?php if ($topPct !== null): ?>
+            <div class="profile-stat">
+                <span class="profile-stat-value">top <?php echo $topPct; ?>%</span>
+                <span class="profile-stat-label">of contributors</span>
+            </div>
+            <?php endif; ?>
+        </div>
+        </div>
+    </div>
+    <?php endif; ?>
+
+    <!-- ── Recent Activity ──────────────────────────────────────────────────── -->
+    <?php if (!empty($recent)): ?>
+    <div class="accordion container about-section">
+        <h2>Recent Activity</h2>
+        <div class="panel expanded">
+        <ul class="explore-list">
+        <?php foreach ($recent as $row):
+            $label = $row['acceptance'] ? 'Accept' : 'Reject';
+            $cls   = $row['acceptance'] ? 'profile-accept' : 'profile-reject';
+        ?>
+            <li class="explore-item">
+                <a href="/?arg=<?php echo intval($row['argumentID']); ?>">
+                    <?php echo htmlspecialchars($row['phrased'] ?? '(untitled)'); ?>
+                </a>
+                <div class="explore-item-meta <?php echo $cls; ?>"><?php echo $label; ?></div>
+            </li>
+        <?php endforeach; ?>
+        </ul>
+        </div>
+    </div>
+    <?php endif; ?>
+
+    <!-- ── Most Heterodox ───────────────────────────────────────────────────── -->
+    <div class="accordion container about-section">
+        <h2>Most Heterodox</h2>
+        <div class="panel expanded">
+        <?php if (empty($heterodox)): ?>
+            <p style="color:var(--cddbGrey);font-size:0.9rem;">No heterodox positions yet — your opinions align with the majority so far, or you haven't weighed in enough to diverge.</p>
+        <?php else: ?>
+            <ul class="explore-list">
+            <?php foreach ($heterodox as $row):
+                $accepted  = (bool)$row['acceptance'];
+                $majorityPct = round($row['Percent'] * 100);
+                $minorityPct = 100 - $majorityPct;
+                $userVerb  = $accepted ? 'Accept' : 'Reject';
+                $crowdVerb = $accepted ? 'reject' : 'accept';
+                $cls       = $accepted ? 'profile-accept' : 'profile-reject';
+            ?>
+                <li class="explore-item">
+                    <a href="/?arg=<?php echo intval($row['argumentID']); ?>">
+                        <?php echo htmlspecialchars($row['phrased'] ?? '(untitled)'); ?>
+                    </a>
+                    <div class="explore-item-meta <?php echo $cls; ?>">
+                        You <?php echo $userVerb; ?> &middot; <?php echo $majorityPct; ?>% <?php echo $crowdVerb; ?>
+                    </div>
+                </li>
+            <?php endforeach; ?>
+            </ul>
+        <?php endif; ?>
+        </div>
+    </div>
+
+<?php endif; ?>
+
+    <footer class="about-footer">
+        <p>Agitate was created by Craig Danz of Seattle, WA, U.S.A. &copy; <?php echo date('Y'); ?></p>
+    </footer>
+
+</main>
+
+</body>
 </html>

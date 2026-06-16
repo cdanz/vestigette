@@ -1,167 +1,225 @@
-<?php 
+<?php
 session_start();
-switch ($_POST["buttonClicked"]) {
-	case "jumpTo":
-		header('Location: /?arg='.$_POST["jumpTo"]);	
-		break;
+
+if (!empty($_POST['buttonClicked']) && $_POST['buttonClicked'] === 'jumpTo') {
+    $dest = intval($_POST['jumpTo'] ?? 0);
+    if ($dest > 0) {
+        header('Location: /?arg=' . $dest);
+        exit;
+    }
 }
+
 include("${_SERVER['DOCUMENT_ROOT']}/includes/dbconnect.php");
-$_SESSION['currentArg'] = intval($_GET["arg"]); 
-$baseURL = "/";
-$arg = isset($_SESSION['currentArg']) ? $_SESSION['currentArg'] : null;
-$profile = isset($_SESSION['profile']) ? $_SESSION['profile'] : null;
-$sql = "CALL getMostEndorsed();";
-$sql .= "CALL getAllTheRest()";
-mysqli_multi_query($db, $sql);
+
+$_SESSION['currentArg'] = intval($_GET['arg'] ?? 0);
+$arg     = $_SESSION['currentArg'];
+$profile = $_SESSION['profile'] ?? null;
+
+// Trending
+$trending = [];
+$res = mysqli_query($db, 'CALL getTrending()');
+if ($res) {
+    while ($row = mysqli_fetch_assoc($res)) { $trending[] = $row; }
+    mysqli_free_result($res);
+    while (mysqli_more_results($db)) { mysqli_next_result($db); }
+}
+
+// Most Contested
+$contested = [];
+$res = mysqli_query($db, 'CALL getMostContested()');
+if ($res) {
+    while ($row = mysqli_fetch_assoc($res)) { $contested[] = $row; }
+    mysqli_free_result($res);
+    while (mysqli_more_results($db)) { mysqli_next_result($db); }
+}
+
+mysqli_close($db);
+
+$entryPoints = [
+    ['Abortion',                      '/?arg=124'],
+    ['Black Lives Matter',             '/?arg=546'],
+    ['Cancel Culture',                 '/?arg=288'],
+    ['Capitalism as a System',         '/?arg=136'],
+    ['Catholic Church Abuse',          '/?arg=983'],
+    ['Christianity &amp; Faith',       '/?arg=1385'],
+    ['Climate Change',                 '/?arg=123'],
+    ['Conspiracy Theories',            '/?arg=1714'],
+    ['COVID Mandates',                 '/?arg=1396'],
+    ['Cryptocurrency',                 '/?arg=808'],
+    ['Environmental Policy',           '/?arg=757'],
+    ['Gender &amp; Trans Rights',      '/?arg=791'],
+    ['GMO Crops',                      '/?arg=5'],
+    ['Government &amp; Free Markets',  '/?arg=400'],
+    ['Gun Rights',                     '/?arg=140'],
+    ['Housing &amp; Homelessness',     '/?arg=682'],
+    ['Immigration Policy',             '/?arg=612'],
+    ['Informal Debates',               '/?arg=58'],
+    ['Israel &amp; Palestine',         '/?arg=1627'],
+    ['Labor &amp; Unions',             '/?arg=494'],
+    ['Media &amp; Social Media',       '/?arg=367'],
+    ['Policing in America',            '/?arg=561'],
+    ['Pop Culture',                    '/?arg=1016'],
+    ['Public Health',                  '/?arg=427'],
+    ['Race &amp; Racism',              '/?arg=1192'],
+    ['Republican Politics &amp; Trump','/?arg=120'],
+    ['Sports &amp; Athletics',         '/?arg=883'],
+    ['The Supreme Court',              '/?arg=1443'],
+    ['Voting Rights',                  '/?arg=182'],
+    ['War &amp; Military',             '/?arg=1479'],
+    ['Wealth &amp; Taxation',          '/?arg=265'],
+];
 ?>
 <!DOCTYPE html>
 <html>
-	<head>
-		<title>Agitate - Explore</title>
-		<meta charset="utf-8"/>
-		<meta name="keywords" content="argument, dialectic, reasoning, anti-troll, discussion, debate, assertion network, dialogue, public forum, town square, consensus building, diliberation chamber, diliberative body, dynamic polling, self-guided polling, opposition research, best reason why, best reason not"/>
-		<meta name="copyright" content="Copyright 2015 Craig Danz Seattle, WA USA" />
-		<meta name="robots" content="follow" />
-		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<link rel="stylesheet" href="style_vestigette.css?v=<?php echo filemtime($_SERVER['DOCUMENT_ROOT'].'/style_vestigette.css'); ?>" />
-		<script language="javascript" src="script_vestigette.js"></script>
-		<script language="javascript">
-			let arg = <?php echo isset($arg) ? $arg : 'undefined'; ?>,
-				profile = <?php echo isset($profile) ? $profile : 'undefined'; ?>,
-				opinion = <?php echo isset($opinion) ? $opinion : 'undefined'; ?>,
-				assoc = <?php echo isset($assocWeights) ? "JSON.parse(" + $assocWeights + ")" : 'undefined'; ?>, //not used
-				because = <?php echo json_encode(isset($because) ? $because : null); ?>,
-				therefore = <?php echo json_encode(isset($therefore) ? $therefore : null); ?>,
-				rebuttal = <?php echo json_encode(isset($rebuttal) ? $rebuttal : null); ?>;
-		</script>
-	</head>
-	<body>
+<head>
+    <title>Agitate – Explore</title>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="robots" content="follow"/>
+    <link rel="stylesheet" href="style_vestigette.css?v=<?php echo filemtime($_SERVER['DOCUMENT_ROOT'].'/style_vestigette.css'); ?>"/>
+    <script src="script_vestigette.js?v=<?php echo filemtime($_SERVER['DOCUMENT_ROOT'].'/script_vestigette.js'); ?>"></script>
+    <script>
+        let arg     = <?php echo $arg     ?? 'undefined'; ?>,
+            profile = <?php echo $profile ?? 'undefined'; ?>,
+            opinion = undefined, because = null, therefore = null, rebuttal = null;
+    </script>
+</head>
+<body class="content-page">
 
-		<div id="mastHead" class="container">
-			<h1><a href="/?arg=<?php echo $_SESSION['currentArg'];?>">AGITATE</a></h1>
-			<div>
-				<a href="About.php?arg=<?php echo $_SESSION['currentArg'];?>">About</a>
-				<a href="Explore.php?arg=<?php echo $_SESSION['currentArg'];?>"><span style="text-decoration: underline;">Explore</span></a></span>
-				<a href="Profile.php?arg=<?php echo $_SESSION['currentArg'];?>">Profile</a>
-				<a href="<?php echo ($profile) ? 'logout' : 'login'; ?>.php?arg=<?php echo $_SESSION['currentArg'];?>"><?php echo ($profile) ? 'Logout' : 'Login'; ?></a>
-				<a href="#" class="closenav" onclick="closeNav()">&times;</a>
-			</div> 
-			
-			<a href="#" class="opennav" onclick="openNav()">&equiv;</a>
-		</div>
+<div id="mastHead" class="container">
+    <h1><a href="/?arg=<?php echo $arg; ?>">AGITATE</a></h1>
+    <div>
+        <a href="About.php?arg=<?php echo $arg; ?>">About</a>
+        <a href="Explore.php?arg=<?php echo $arg; ?>" style="text-decoration:underline;">Explore</a>
+        <a href="Profile.php?arg=<?php echo $arg; ?>">Profile</a>
+        <a href="<?php echo $profile ? 'logout' : 'login'; ?>.php?arg=<?php echo $arg; ?>"><?php echo $profile ? 'Logout' : 'Login'; ?></a>
+        <a href="#" class="closenav" onclick="closeNav()">&times;</a>
+    </div>
+    <a href="/donate.php" class="donate-btn">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="14" height="14" aria-hidden="true"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+        Donate
+    </a>
+    <a href="#" class="opennav" onclick="openNav()">&equiv;</a>
+</div>
 
-		<div id="because" class="accordion container">
-			<h2>Common Entry Points</h2>
-			<div class="panel" data-container-id="because">
-				<?php
-				$entryPoints = [
-					['Abortion',                  '/?arg=124'],
-					['Black Lives Matter',         '/?arg=546'],
-					['Cancel Culture',             '/?arg=288'],
-					['Capitalism as a System',     '/?arg=136'],
-					['Catholic Church Abuse',      '/?arg=983'],
-					['Christianity &amp; Faith',   '/?arg=1385'],
-					['Climate Change',             '/?arg=123'],
-					['Conspiracy Theories',        '/?arg=1714'],
-					['COVID Mandates',             '/?arg=1396'],
-					['Cryptocurrency',             '/?arg=808'],
-					['Environmental Policy',       '/?arg=757'],
-					['Gender &amp; Trans Rights',  '/?arg=791'],
-					['GMO Crops',                  '/?arg=5'],
-					['Government &amp; Free Markets', '/?arg=400'],
-					['Gun Rights',                 '/?arg=140'],
-					['Housing &amp; Homelessness', '/?arg=682'],
-					['Immigration Policy',         '/?arg=612'],
-					['Informal Debates',           '/?arg=58'],
-					['Israel &amp; Palestine',     '/?arg=1627'],
-					['Labor &amp; Unions',         '/?arg=494'],
-					['Media &amp; Social Media',   '/?arg=367'],
-					['Policing in America',        '/?arg=561'],
-					['Pop Culture',                '/?arg=1016'],
-					['Public Health',              '/?arg=427'],
-					['Race &amp; Racism',          '/?arg=1192'],
-					['Republican Politics &amp; Trump', '/?arg=120'],
-					['Sports &amp; Athletics',     '/?arg=883'],
-					['The Supreme Court',          '/?arg=1443'],
-					['Voting Rights',              '/?arg=182'],
-					['War &amp; Military',         '/?arg=1479'],
-					['Wealth &amp; Taxation',      '/?arg=265'],
-				];
-				echo "<ul>\n";
-				foreach ($entryPoints as $i => $entry) {
-					$bg = ($i % 2 === 1) ? ' style="background-color: var(--cddbLiteGrey)"' : '';
-					echo "\t\t\t\t\t<li class='lineItem'$bg>"
-					   . "<p class=\"assocArg\"><a href=\"{$entry[1]}\">{$entry[0]}</a></p>"
-					   . "</li>\n";
-				}
-				echo "</ul>\n";
-				?>
-			</div>
-		</div>
-		<div id="argument" class="accordion container">
-			<h2>Recent Assertions</h2>
-			<div class="panel expanded" data-container-id="argument">
-				<?php
-					$result = mysqli_store_result($db);
-					$lineColorIterator = 0;
-					echo "<ul>\n";
-					while($row = mysqli_fetch_row($result)) {
-						if ($lineColorIterator % 2  == 0) {
-						echo "<li class=\"lineItem\">";
-						}
-						else{
-						echo "<li class=\"lineItem\" style=\"background-color: var(--cddbLiteGrey);\">";
-						}
-						$lineColorIterator++;
-						echo "<p class=\"assocArg\"><a href=".$baseURL."?arg=".$row[0].">".htmlspecialchars($row[2])."</a></p>
-						</li>";
-					}
-					echo "</ul>\n";
-					unset($row);
-					mysqli_free_result($result);
-					mysqli_next_result($db);
-					mysqli_next_result($db);
-					mysqli_next_result($db);
-				?>
-			</div>
-		</div>
-		<div id="rebuttal" class="accordion container">
-			<h2>Most Endorsed</h2>
-			<div class="panel" data-container-id="rebuttal">
-				<?php
-					$result = mysqli_store_result($db);
-					$lineColorIterator = 0;
-					echo "<ul>\n";
-					while($row = mysqli_fetch_row($result)) {
-						if ($lineColorIterator % 2  == 0) {
-						echo "<li class=\"lineItem\">";
-						}
-						else{
-						echo "<li class=\"lineItem\" style=\"background-color: var(--cddbLiteGrey);\">";
-						}
-						$lineColorIterator++;
-						echo "<p class=\"assocArg\"><a href=".$baseURL."?arg=".$row[0].">".htmlspecialchars($row[2])."</a></p>
-						</li>";
-					}
-					echo "</ul>\n";
-					unset($row);
-					while (mysqli_more_results($db)) {
-						mysqli_next_result($db);
-					}
-				?>
-			</div>
-		</div>
-		<div id="therefore" class="accordion container">
-			<h2>Go to Argument ID</h2>
-			<div class="panel expanded" data-container-id="therefore">
-				<div class="assert">
-					<form class="form-inline" method="POST">
-						<label for="jumpToID">Jump to: </label>
-						<input type="text" id="jumpToID" placeholder="Argument ID" name="jumpTo">
-						<button type="submit" class="button instead" name="buttonClicked" value="jumpTo">Go</button>
-					</form>
-				</div>
-			</div>
-		</div>
-	</body>
+<main class="explore-main">
+
+    <!-- ── Common Entry Points ─────────────────────────────────────────────── -->
+    <div class="accordion container explore-section">
+        <h2>Common Entry Points</h2>
+        <div class="panel expanded">
+            <ul class="explore-entry-grid">
+            <?php foreach ($entryPoints as $entry): ?>
+                <li><a href="<?php echo $entry[1]; ?>"><?php echo $entry[0]; ?></a></li>
+            <?php endforeach; ?>
+            </ul>
+        </div>
+    </div>
+
+    <!-- ── Trending ────────────────────────────────────────────────────── -->
+        <div class="accordion container explore-section">
+            <h2>Trending</h2>
+            <div class="panel expanded">
+                <?php if (empty($trending)): ?>
+                    <p style="color:var(--cddbGrey);font-size:0.9rem;">No recent activity yet.</p>
+                <?php else: ?>
+                    <ul class="explore-list">
+                    <?php foreach ($trending as $row): ?>
+                        <li class="explore-item">
+                            <a href="/?arg=<?php echo intval($row['argumentID']); ?>">
+                                <?php echo htmlspecialchars($row['phrased'] ?? '(untitled)'); ?>
+                            </a>
+                        </li>
+                    <?php endforeach; ?>
+                    </ul>
+                <?php endif; ?>
+            </div>
+        </div>
+
+        <!-- ── Most Contested ──────────────────────────────────────────────── -->
+        <div class="accordion container explore-section">
+            <h2>Most Contested</h2>
+            <div class="panel expanded">
+                <?php if (empty($contested)): ?>
+                    <p style="color:var(--cddbGrey);font-size:0.9rem;">Not enough votes yet.</p>
+                <?php else: ?>
+                    <ul class="explore-list">
+                    <?php foreach ($contested as $row):
+                        $total  = intval($row['total_votes']);
+                        $accept = intval($row['accept_count']);
+                        $reject = $total - $accept;
+                    ?>
+                        <li class="explore-item">
+                            <a href="/?arg=<?php echo intval($row['argumentID']); ?>">
+                                <?php echo htmlspecialchars($row['phrased'] ?? '(untitled)'); ?>
+                            </a>
+                            <div class="explore-item-meta"><?php echo $accept; ?> accept &middot; <?php echo $reject; ?> reject</div>
+                        </li>
+                    <?php endforeach; ?>
+                    </ul>
+                <?php endif; ?>
+            </div>
+        </div>
+
+    <!-- ── Search ──────────────────────────────────────────────────────────── -->
+    <div class="accordion container explore-section">
+        <h2>Search</h2>
+        <div class="panel expanded">
+            <input type="search" class="explore-search-input" placeholder="Search arguments…" autocomplete="off" oninput="exploreSearch(this.value)">
+            <ul class="explore-list" id="explore-search-results"></ul>
+        </div>
+    </div>
+
+    <!-- ── Jump to Argument ID ─────────────────────────────────────────────── -->
+    <div class="accordion container explore-section">
+        <h2>Go to Argument</h2>
+        <div class="panel expanded">
+            <form class="explore-jump" method="POST">
+                <input type="text" name="jumpTo" placeholder="Argument ID" inputmode="numeric" pattern="[0-9]*">
+                <button type="submit" name="buttonClicked" value="jumpTo">Go</button>
+            </form>
+        </div>
+    </div>
+
+</main>
+
+<script>
+(function() {
+    var _timer = null;
+    window.exploreSearch = function(q) {
+        clearTimeout(_timer);
+        var out = document.getElementById('explore-search-results');
+        if (!out) return;
+        q = q.trim();
+        if (q.length < 3) { out.innerHTML = ''; return; }
+        _timer = setTimeout(function() {
+            var fd = new FormData();
+            fd.append('q', q);
+            fd.append('mode', 'explore');
+            fetch('/find_similar.php', { method: 'POST', body: fd })
+                .then(function(r) { return r.json(); })
+                .then(function(matches) {
+                    out.innerHTML = '';
+                    if (!matches.length) {
+                        var li = document.createElement('li');
+                        li.className = 'explore-search-empty';
+                        li.textContent = 'No matches found.';
+                        out.appendChild(li);
+                        return;
+                    }
+                    matches.forEach(function(m) {
+                        var li = document.createElement('li');
+                        li.className = 'explore-item';
+                        var a = document.createElement('a');
+                        a.href = '/?arg=' + m.argID;
+                        a.textContent = m.phrasing || '(untitled)';
+                        li.appendChild(a);
+                        out.appendChild(li);
+                    });
+                });
+        }, 300);
+    };
+}());
+</script>
+</body>
 </html>
