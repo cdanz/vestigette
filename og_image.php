@@ -27,7 +27,7 @@ $ratePct    = null;
 
 include("{$_SERVER['DOCUMENT_ROOT']}/includes/dbconnect.php");
 
-if ($argID > 0 && mysqli_multi_query($db, "CALL getDetail($argID)")) {
+if ($argID > 0 && mysqli_multi_query($db, "CALL getDetail($argID, 0)")) {
     $result = mysqli_store_result($db);
     if ($result && mysqli_num_rows($result) > 0) {
         $row = mysqli_fetch_row($result);

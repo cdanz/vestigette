@@ -61,6 +61,32 @@ if (isset($_POST['adminAction'])) {
 			header("Location: /admin_tools.php?arg=$arg&saved=1");
 			exit;
 
+		case 'saveFilterSettings':
+			$filterOn = isset($_POST['filterEnabled']) ? 1 : 0;
+			$stmt = $db->prepare(
+				"INSERT INTO ADMIN_SETTINGS (profileID, filterEnabled)
+				 VALUES (?, ?)
+				 ON DUPLICATE KEY UPDATE filterEnabled = VALUES(filterEnabled)"
+			);
+			$stmt->bind_param("ii", $realProfileID, $filterOn);
+			$stmt->execute();
+			mysqli_close($db);
+			header("Location: /admin_tools.php?arg=$arg&saved=1");
+			exit;
+
+		case 'saveDemoSettings':
+			$demoOn = isset($_POST['demoMode']) ? 1 : 0;
+			$stmt = $db->prepare(
+				"INSERT INTO ADMIN_SETTINGS (profileID, demoMode)
+				 VALUES (?, ?)
+				 ON DUPLICATE KEY UPDATE demoMode = VALUES(demoMode)"
+			);
+			$stmt->bind_param("ii", $realProfileID, $demoOn);
+			$stmt->execute();
+			mysqli_close($db);
+			header("Location: /admin_tools.php?arg=$arg&saved=1");
+			exit;
+
 		case 'executeMerge':
 			$keepID = intval($_POST['mergeArgA'] ?? 0);
 			$dropID = intval($_POST['mergeArgB'] ?? 0);
@@ -135,9 +161,11 @@ if (isset($_POST['adminAction'])) {
 // ---------- Load current settings ----------
 $invitesSaved = isset($_GET['invites']);
 $settRow        = mysqli_fetch_assoc(mysqli_query($db,
-	"SELECT pickerEnabled, pickerType, pickerProfiles FROM ADMIN_SETTINGS WHERE profileID=$realProfileID"));
+	"SELECT pickerEnabled, pickerType, pickerProfiles, filterEnabled, demoMode FROM ADMIN_SETTINGS WHERE profileID=$realProfileID"));
 $pickerType     = $settRow ? ($settRow['pickerType'] ?? 'none') : 'none';
 $pickerProfiles = $settRow ? ($settRow['pickerProfiles'] ?? '') : '';
+$filterEnabled  = $settRow ? intval($settRow['filterEnabled'] ?? 0) : 0;
+$demoMode       = $settRow ? intval($settRow['demoMode'] ?? 0) : 0;
 
 $mergeArgA = intval($_POST['mergeArgA'] ?? 0) ?: '';
 $mergeArgB = intval($_POST['mergeArgB'] ?? 0) ?: '';
@@ -278,6 +306,44 @@ mysqli_close($db);
 
 	<div class="field">
 		<button type="submit">Save picker settings</button>
+	</div>
+</form>
+
+<hr class="divider">
+
+<!-- ── Filter Lens ──────────────────────────── -->
+<h2>Filter Lens</h2>
+<p class="desc">When enabled, all logged-in users see the Filter section. When disabled, only admins see it.</p>
+
+<form method="POST" action="/admin_tools.php?arg=<?php echo $arg; ?>">
+	<input type="hidden" name="adminAction" value="saveFilterSettings">
+
+	<div class="field">
+		<label><input type="checkbox" name="filterEnabled" value="1"
+			<?php if ($filterEnabled) echo 'checked'; ?>> Enable Filter section for all users</label>
+	</div>
+
+	<div class="field">
+		<button type="submit">Save filter settings</button>
+	</div>
+</form>
+
+<hr class="divider">
+
+<!-- ── Demo Mode ───────────────────────────── -->
+<h2>Demo Mode</h2>
+<p class="desc">Stabilizes the mobile view for screen recording. Suppresses iOS auto-zoom on inputs, scroll-to-focus jumps, and rubber-band overscroll. Applies site-wide while enabled.</p>
+
+<form method="POST" action="/admin_tools.php?arg=<?php echo $arg; ?>">
+	<input type="hidden" name="adminAction" value="saveDemoSettings">
+
+	<div class="field">
+		<label><input type="checkbox" name="demoMode" value="1"
+			<?php if ($demoMode) echo 'checked'; ?>> Enable demo mode</label>
+	</div>
+
+	<div class="field">
+		<button type="submit">Save demo settings</button>
 	</div>
 </form>
 

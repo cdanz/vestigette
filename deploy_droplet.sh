@@ -25,6 +25,7 @@ PHP_FILES=(
     functions.php
     flesh_out.php
     find_similar.php
+    search_affiliations.php
     About.php
     Explore.php
     Profile.php
@@ -40,6 +41,8 @@ PHP_FILES=(
     post.php
     admin_content.php
     upload_image.php
+    og_image.php
+    graph_search.php
 )
 
 STATIC_FILES=(

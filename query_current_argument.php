@@ -1,15 +1,57 @@
 <?php
 $argID = $_SESSION['currentArg'];
 $opinion = 0;
-$sql = "CALL getAssociated($argID);";
-$sql .= "CALL getDetail($argID);";
-$sql .= "CALL getExplication($argID);";
+
+// --- Filter lens: resolve active filters into a temp table of profileIDs ---
+$filtered = 0;
+$activeFilters = isset($_SESSION['filters']) ? $_SESSION['filters'] : [];
+$hasOpinionFilters = !empty($activeFilters['opinions']);
+$hasAffiliationFilters = !empty($activeFilters['affiliations']);
+
+if ($hasOpinionFilters || $hasAffiliationFilters) {
+  mysqli_query($db, "CREATE TEMPORARY TABLE IF NOT EXISTS FILTER_PROFILES (profileID INT UNSIGNED PRIMARY KEY)");
+  mysqli_query($db, "CREATE TEMPORARY TABLE IF NOT EXISTS FILTER_PROFILES_2 (profileID INT UNSIGNED PRIMARY KEY)");
+  mysqli_query($db, "TRUNCATE TABLE FILTER_PROFILES");
+  mysqli_query($db, "TRUNCATE TABLE FILTER_PROFILES_2");
+
+  $sets = [];
+
+  if ($hasOpinionFilters) {
+    $opClauses = [];
+    foreach ($activeFilters['opinions'] as $opf) {
+      $oArgID = intval($opf['argumentID']);
+      $oAccept = intval($opf['acceptance']);
+      $opClauses[] = "SELECT profileID FROM OPINION WHERE argumentID=$oArgID AND acceptance=$oAccept";
+    }
+    $sets[] = '(' . implode(' INTERSECT ', $opClauses) . ')';
+  }
+
+  if ($hasAffiliationFilters) {
+    $affIDs = array_map('intval', $activeFilters['affiliations']);
+    $affList = implode(',', $affIDs);
+    $sets[] = "(SELECT DISTINCT profileID FROM MEMBER WHERE affiliationID IN ($affList))";
+  }
+
+  if (count($sets) === 1) {
+    $finalQuery = "INSERT INTO FILTER_PROFILES " . $sets[0];
+  } else {
+    $finalQuery = "INSERT INTO FILTER_PROFILES " . implode(' INTERSECT ', $sets);
+  }
+
+  mysqli_query($db, $finalQuery);
+  mysqli_query($db, "INSERT INTO FILTER_PROFILES_2 SELECT profileID FROM FILTER_PROFILES");
+  $filtered = 1;
+}
+
+$sql = "CALL getAssociated($argID, $filtered);";
+$sql .= "CALL getDetail($argID, $filtered);";
+$sql .= "CALL getExplication($argID, $filtered);";
 if (isset($_SESSION['profile'])) {
   $proID = $_SESSION['profile'];
   $sql .= "CALL getOpinion($argID,$proID);";
   $sql .= "CALL getUserAssociated($argID,$proID);";
 }
-$sql .= "CALL getAltPhrasing($argID)";
+$sql .= "CALL getAltPhrasing($argID, $filtered)";
 
 if (mysqli_multi_query($db, $sql)) {
   $assocArgs = array();

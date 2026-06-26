@@ -69,6 +69,8 @@ if (isset($links[0][3]) && $links[0][3] !== '' && $links[0][8] === null && $link
 $isAdmin            = false;
 $adminPickerEnabled = false;
 $adminPickerData    = []; // [{profileID, lastName}] ordered: real profile first
+$filterVisible      = false;
+$demoMode           = false;
 
 if (isset($_SESSION['profile'])) {
 	// Anchor the real (logged-in) profile once per session
@@ -86,9 +88,11 @@ if (isset($_SESSION['profile'])) {
 
 	if ($isAdmin) {
 		$settRow = mysqli_fetch_assoc(mysqli_query($db,
-			"SELECT pickerType, pickerProfiles FROM ADMIN_SETTINGS WHERE profileID=$realProfileID"));
+			"SELECT pickerType, pickerProfiles, filterEnabled, demoMode FROM ADMIN_SETTINGS WHERE profileID=$realProfileID"));
 		$pickerType = $settRow ? ($settRow['pickerType'] ?? 'none') : 'none';
 		$adminPickerEnabled = ($pickerType !== 'none');
+		$filterEnabled = $settRow ? intval($settRow['filterEnabled'] ?? 0) : 0;
+		$filterVisible = true;
 
 		if ($pickerType === 'manual') {
 			// Manual list: the admin's own profile + the specific IDs designated.
@@ -130,8 +134,49 @@ if (isset($_SESSION['profile'])) {
 			}
 		}
 	}
+	if (!$isAdmin && isset($_SESSION['profile'])) {
+		$fRow = mysqli_fetch_assoc(mysqli_query($db,
+			"SELECT filterEnabled FROM ADMIN_SETTINGS LIMIT 1"));
+		if ($fRow && intval($fRow['filterEnabled']) === 1) {
+			$filterVisible = true;
+		}
+	}
 }
+// Demo mode: check if any admin has it enabled (applies to all users)
+$dmRow = mysqli_fetch_assoc(mysqli_query($db,
+	"SELECT demoMode FROM ADMIN_SETTINGS WHERE demoMode = 1 LIMIT 1"));
+$demoMode = $dmRow && intval($dmRow['demoMode']) === 1;
 // --- End admin setup ---
+
+// --- Resolve active filter labels for rendering tags ---
+$filterTagData = ['opinions' => [], 'affiliations' => []];
+if ($filterVisible && isset($_SESSION['filters'])) {
+	if (!empty($_SESSION['filters']['opinions'])) {
+		foreach ($_SESSION['filters']['opinions'] as $opf) {
+			$oaID = intval($opf['argumentID']);
+			$pRow = mysqli_fetch_row(mysqli_query($db,
+				"SELECT COALESCE(currentPhrasing, (SELECT phrasing FROM PHRASING WHERE argumentID=$oaID ORDER BY createdDate ASC LIMIT 1))
+				 FROM ARGUMENT WHERE argumentID=$oaID"));
+			$filterTagData['opinions'][] = [
+				'argumentID' => $oaID,
+				'acceptance' => intval($opf['acceptance']),
+				'phrasing'   => $pRow ? mb_substr($pRow[0], 0, 40) : "Arg #$oaID",
+			];
+		}
+	}
+	if (!empty($_SESSION['filters']['affiliations'])) {
+		$affIDs = array_map('intval', $_SESSION['filters']['affiliations']);
+		$affList = implode(',', $affIDs);
+		$affRes = mysqli_query($db,
+			"SELECT affiliationID, orgName FROM AFFILIATION WHERE affiliationID IN ($affList)");
+		while ($row = mysqli_fetch_assoc($affRes)) {
+			$filterTagData['affiliations'][] = [
+				'affiliationID' => intval($row['affiliationID']),
+				'orgName'       => $row['orgName'],
+			];
+		}
+	}
+}
 
 // --- This user's active flag on the current argument (drives the flag control) ---
 $userFlag = null;
@@ -329,7 +374,7 @@ function generateFindLines($results) {
 		<meta name="keywords" content="argument, dialectic, reasoning, anti-troll, discussion, debate, assertion network, dialogue, public forum, town square, consensus building, diliberation chamber, diliberative body, dynamic polling, self-guided polling, opposition research, best reason why, best reason not"/>
 		<meta name="copyright" content="Copyright 2015 Craig Danz Seattle, WA USA" />
 		<meta name="robots" content="follow" />
-		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0<?php if ($demoMode) echo ', interactive-widget=resizes-content'; ?>" />
 		<link rel="canonical" href="<?php echo $e($shareURL); ?>" />
 
 		<!-- Open Graph -->
@@ -357,7 +402,10 @@ function generateFindLines($results) {
 				opinion = <?php echo isset($opinion) ? intval($opinion) : 'null'; ?>,
 				because = <?php echo json_encode(isset($because) ? $because : null); ?>,
 				therefore = <?php echo json_encode(isset($therefore) ? $therefore : null); ?>,
-				rebuttal = <?php echo json_encode(isset($rebuttal) ? $rebuttal : null); ?>;
+				rebuttal = <?php echo json_encode(isset($rebuttal) ? $rebuttal : null); ?>,
+				filterVisible = <?php echo $filterVisible ? 'true' : 'false'; ?>,
+				demoMode = <?php echo $demoMode ? 'true' : 'false'; ?>,
+				csrfToken = <?php echo json_encode($csrfToken); ?>;
 		</script>
 		<!-- Global site tag (gtag.js) - Google Analytics -->
 		<script async src="https://www.googletagmanager.com/gtag/js?id=G-38LM87XMGN"></script>
@@ -368,7 +416,7 @@ function generateFindLines($results) {
 			gtag('config', 'G-38LM87XMGN');
 		</script>
 	</head>
-	<body>
+	<body<?php if ($demoMode) echo ' class="demo-mode"'; ?>>
 
 <?php if ($isAdmin && $adminPickerEnabled && !empty($adminPickerData)): ?>
 <div id="adminPickerBar">
@@ -770,23 +818,81 @@ if (isset($recent)) {
 			</div>
 		</div>
 
-	</div>
-
-		<!-- You not ready for this -->
-		<div id="filter" class="accordion container hidden">
+<?php if ($filterVisible): ?>
+		<div id="filter" class="accordion container">
 			<h2>Filter</h2>
 			<div class="panel" data-container-id="filter">
-				<div class="filter">
-					<div class="filterLabel" id="filter1A">All Users</div>
-					<label class="switch" id="filter1">	
-						<input type="checkbox" id="check1">
-						<span class="toggle round"></span>
-					</label>
-					<div class="filterLabel" id="filter1B">Current User</div>
-				</div>
+				<div class="filter-inner">
 
+					<div class="filter-section">
+						<div class="filter-section-label">Filter other arguments by who accepts or rejects this one:</div>
+						<div class="filter-opinion-controls">
+							<form method="POST" action="/?arg=<?php echo intval($arg); ?>">
+								<input type="hidden" name="buttonClicked" value="addOpinionFilter">
+								<input type="hidden" name="argumentID" value="<?php echo intval($arg); ?>">
+								<button type="submit" name="acceptance" value="1" class="filter-add-btn filter-accept">Acceptors</button>
+								<button type="submit" name="acceptance" value="0" class="filter-add-btn filter-reject">Rejectors</button>
+								<?php addCSRFtoken() ?>
+							</form>
+						</div>
+						<a href="#" id="openFilterOverlay" class="filter-advanced-link">Advanced Filter Options</a>
+					</div>
+
+					<div class="filter-section">
+						<div class="filter-section-label">
+							Active Opinion Filters
+<?php if (!empty($filterTagData['opinions'])): ?>
+							<form method="POST" action="/?arg=<?php echo intval($arg); ?>" class="filter-clear-form">
+								<input type="hidden" name="buttonClicked" value="clearAllFilters">
+								<button type="submit" class="filter-clear-btn">Clear All</button>
+								<?php addCSRFtoken() ?>
+							</form>
+<?php endif; ?>
+						</div>
+						<div class="filter-tags">
+<?php foreach ($filterTagData['opinions'] as $otag): ?>
+							<form method="POST" action="/?arg=<?php echo intval($arg); ?>" class="filter-tag-form">
+								<input type="hidden" name="buttonClicked" value="removeOpinionFilter">
+								<input type="hidden" name="argumentID" value="<?php echo $otag['argumentID']; ?>">
+								<span class="filter-tag <?php echo $otag['acceptance'] ? 'filter-tag-accept' : 'filter-tag-reject'; ?>">
+									<?php echo $otag['acceptance'] ? 'Accepts' : 'Rejects'; ?>: <?php echo htmlspecialchars($otag['phrasing']); ?>
+									<button type="submit" class="filter-tag-x">&times;</button>
+								</span>
+								<?php addCSRFtoken() ?>
+							</form>
+<?php endforeach; ?>
+<?php if (empty($filterTagData['opinions'])): ?>
+							<span class="filter-none">None</span>
+<?php endif; ?>
+						</div>
+					</div>
+
+					<div class="filter-section">
+						<div class="filter-section-label">Active Group Filters</div>
+						<div class="filter-tags">
+<?php foreach ($filterTagData['affiliations'] as $atag): ?>
+							<form method="POST" action="/?arg=<?php echo intval($arg); ?>" class="filter-tag-form">
+								<input type="hidden" name="buttonClicked" value="removeAffiliationFilter">
+								<input type="hidden" name="affiliationID" value="<?php echo $atag['affiliationID']; ?>">
+								<span class="filter-tag filter-tag-group">
+									<?php echo htmlspecialchars($atag['orgName']); ?>
+									<button type="submit" class="filter-tag-x">&times;</button>
+								</span>
+								<?php addCSRFtoken() ?>
+							</form>
+<?php endforeach; ?>
+<?php if (empty($filterTagData['affiliations'])): ?>
+							<span class="filter-none">None</span>
+<?php endif; ?>
+						</div>
+					</div>
+
+				</div>
 			</div>
 		</div>
+<?php endif; ?>
+
+	</div>
 
 <!-- Phrasing Modal -->
 <div id="overlayP" class="hidden">
@@ -916,6 +1022,22 @@ if ((isset($opinion)) && ($opinion > 0)) {
 				</div>
 				<?php addCSRFtoken() ?>
 			</form>
+		</div>
+	</div>
+</div>
+<?php endif; ?>
+
+<?php if ($filterVisible): ?>
+<div id="overlayFilter" class="hidden">
+	<div id="filterModal" class="container">
+		<h2>Filter Options</h2>
+		<button id="closeFilter" class="button">X</button>
+		<div class="panel expanded" data-container-id="filterModal">
+			<div class="filter-modal-section">
+				<label for="affiliationSearch" class="filter-modal-label">Search Groups</label>
+				<input type="text" class="filter-search" id="affiliationSearch" placeholder="Search groups..." autocomplete="off">
+				<ul id="affiliationResults" class="filter-results"></ul>
+			</div>
 		</div>
 	</div>
 </div>

@@ -89,31 +89,199 @@ DELIMITER ;
 
 DROP PROCEDURE IF EXISTS getAssociated;
 DELIMITER //
-CREATE PROCEDURE getAssociated(argID INT UNSIGNED)
+CREATE PROCEDURE getAssociated(argID INT UNSIGNED, filtered TINYINT)
 BEGIN
-    SELECT E1.targArgID, E1.endorseType, E1.supportingArgID,
-           SUM(E1.weight)/TotalUsers AS AggWeight,
-           COALESCE(A1.currentPhrasing,
-               (SELECT phrasing FROM PHRASING
-                WHERE argumentID = A1.argumentID
-                ORDER BY createdDate ASC LIMIT 1)
-           ) AS phrasing
-    FROM ENDORSEMENT E1
-    JOIN (
-        SELECT targArgID, endorseType, COUNT(DISTINCT profileID) AS TotalUsers
-        FROM ENDORSEMENT
-        WHERE targArgID = argID AND active = TRUE
-        GROUP BY endorseType
-    ) E2 ON E1.endorseType = E2.endorseType
-    JOIN ARGUMENT A1 ON E1.supportingArgID = A1.argumentID
-    WHERE E1.targArgID = argID AND E1.active = TRUE
-    GROUP BY E1.endorseType, E1.supportingArgID, A1.currentPhrasing, A1.argumentID
-    ORDER BY CASE
-        WHEN E1.endorseType = 'Because' THEN '1'
-        WHEN E1.endorseType = 'Rebuttal' THEN '2'
-        WHEN E1.endorseType = 'Therefore' THEN '3'
-        ELSE E1.endorseType
-    END ASC, AggWeight DESC;
+    IF filtered = 1 THEN
+        SELECT E1.targArgID, E1.endorseType, E1.supportingArgID,
+               SUM(E1.weight)/TotalUsers AS AggWeight,
+               COALESCE(A1.currentPhrasing,
+                   (SELECT phrasing FROM PHRASING
+                    WHERE argumentID = A1.argumentID
+                    ORDER BY createdDate ASC LIMIT 1)
+               ) AS phrasing
+        FROM ENDORSEMENT E1
+        INNER JOIN FILTER_PROFILES fp1 ON E1.profileID = fp1.profileID
+        JOIN (
+            SELECT targArgID, endorseType, COUNT(DISTINCT E.profileID) AS TotalUsers
+            FROM ENDORSEMENT E
+            INNER JOIN FILTER_PROFILES_2 fp2 ON E.profileID = fp2.profileID
+            WHERE targArgID = argID AND active = TRUE
+            GROUP BY endorseType
+        ) E2 ON E1.endorseType = E2.endorseType
+        JOIN ARGUMENT A1 ON E1.supportingArgID = A1.argumentID
+        WHERE E1.targArgID = argID AND E1.active = TRUE
+        GROUP BY E1.endorseType, E1.supportingArgID, A1.currentPhrasing, A1.argumentID
+        ORDER BY CASE
+            WHEN E1.endorseType = 'Because' THEN '1'
+            WHEN E1.endorseType = 'Rebuttal' THEN '2'
+            WHEN E1.endorseType = 'Therefore' THEN '3'
+            ELSE E1.endorseType
+        END ASC, AggWeight DESC;
+    ELSE
+        SELECT E1.targArgID, E1.endorseType, E1.supportingArgID,
+               SUM(E1.weight)/TotalUsers AS AggWeight,
+               COALESCE(A1.currentPhrasing,
+                   (SELECT phrasing FROM PHRASING
+                    WHERE argumentID = A1.argumentID
+                    ORDER BY createdDate ASC LIMIT 1)
+               ) AS phrasing
+        FROM ENDORSEMENT E1
+        JOIN (
+            SELECT targArgID, endorseType, COUNT(DISTINCT profileID) AS TotalUsers
+            FROM ENDORSEMENT
+            WHERE targArgID = argID AND active = TRUE
+            GROUP BY endorseType
+        ) E2 ON E1.endorseType = E2.endorseType
+        JOIN ARGUMENT A1 ON E1.supportingArgID = A1.argumentID
+        WHERE E1.targArgID = argID AND E1.active = TRUE
+        GROUP BY E1.endorseType, E1.supportingArgID, A1.currentPhrasing, A1.argumentID
+        ORDER BY CASE
+            WHEN E1.endorseType = 'Because' THEN '1'
+            WHEN E1.endorseType = 'Rebuttal' THEN '2'
+            WHEN E1.endorseType = 'Therefore' THEN '3'
+            ELSE E1.endorseType
+        END ASC, AggWeight DESC;
+    END IF;
+END //
+DELIMITER ;
+
+-- ── getDetail ──────────────────────────────────────────────────────────────
+-- Returns the argument's phrasing, accept count, total assertion count, and
+-- accept percentage. The phrasing resolution is unaffected by the filter;
+-- only the opinion counts are scoped when filtered = 1.
+DROP PROCEDURE IF EXISTS getDetail;
+DELIMITER //
+CREATE PROCEDURE getDetail(argID INT UNSIGNED, filtered TINYINT)
+BEGIN
+    DECLARE acceptCnt INT DEFAULT 0;
+    DECLARE assertCnt INT DEFAULT 0;
+
+    IF filtered = 1 THEN
+        SELECT COUNT(*) INTO acceptCnt
+        FROM OPINION o INNER JOIN FILTER_PROFILES fp ON o.profileID = fp.profileID
+        WHERE o.argumentID = argID AND o.acceptance = TRUE;
+
+        SELECT COUNT(*) INTO assertCnt
+        FROM OPINION o INNER JOIN FILTER_PROFILES fp ON o.profileID = fp.profileID
+        WHERE o.argumentID = argID;
+    ELSE
+        SELECT COUNT(acceptance) INTO acceptCnt
+        FROM OPINION WHERE argumentID = argID AND acceptance = TRUE;
+
+        SELECT COUNT(acceptance) INTO assertCnt
+        FROM OPINION WHERE argumentID = argID;
+    END IF;
+
+    SELECT X.argumentID, X.phrased,
+        acceptCnt AS AcceptCount,
+        assertCnt AS AssertCount,
+        CASE WHEN assertCnt = 0 THEN 0 ELSE acceptCnt / assertCnt END AS percentAccept
+    FROM (
+        SELECT
+            A.argumentID,
+            IFNULL(B.phrasingID, 0) as phraseID,
+            IFNULL(B.phrasing, "Nothing to see here") as phrased
+        FROM ARGUMENT A
+        LEFT JOIN PHRASING B ON A.argumentID = B.argumentID AND
+            B.phrasingID = COALESCE(
+                (SELECT C1.phrasingID FROM (
+                    SELECT A1.phrasingID, SUM(A1.weight) as totalWeight
+                    FROM PHRASE_ENDORSE A1
+                    JOIN PHRASING B1 ON A1.phrasingID = B1.phrasingID
+                    WHERE A1.active = TRUE AND A1.argumentID = argID
+                    GROUP BY A1.phrasingID
+                    HAVING totalWeight > 100
+                    ORDER BY totalWeight DESC
+                ) C1 LIMIT 1),
+                (SELECT C2.phrasingID FROM (
+                    SELECT A2.phrasingID, SUM(A2.weight) as totalWeight, MIN(A2.firstVisit) as earliest
+                    FROM PHRASE_ENDORSE A2
+                    JOIN PHRASING B2 ON A2.phrasingID = B2.phrasingID
+                    WHERE A2.active = TRUE AND A2.argumentID = argID
+                    GROUP BY A2.phrasingID
+                    HAVING totalWeight > 100
+                    ORDER BY totalWeight DESC, earliest ASC
+                ) C2 LIMIT 1),
+                (SELECT C3.phrasingID FROM (
+                    SELECT A3.phrasingID, SUM(A3.weight) as totalWeight, MIN(A3.firstVisit) as earliest
+                    FROM PHRASE_ENDORSE A3
+                    JOIN PHRASING B3 ON A3.phrasingID = B3.phrasingID
+                    WHERE A3.active = TRUE AND A3.argumentID = argID
+                    GROUP BY A3.phrasingID
+                    HAVING totalWeight <= 100
+                    ORDER BY earliest ASC
+                ) C3 LIMIT 1),
+                A.currentPhrasingID,
+                (SELECT C4.phrasingID FROM PHRASING C4
+                 WHERE C4.argumentID = argID
+                 ORDER BY C4.createdDate ASC LIMIT 1)
+            )
+        WHERE A.argumentID = argID
+        ORDER BY A.argumentID ASC
+    ) X
+    WHERE argumentID = argID;
+END //
+DELIMITER ;
+
+-- ── getAltPhrasing ─────────────────────────────────────────────────────────
+-- Returns all phrasings for an argument with averaged endorsement weights.
+-- When filtered = 1, only endorsements from FILTER_PROFILES are counted.
+DROP PROCEDURE IF EXISTS getAltPhrasing;
+DELIMITER //
+CREATE PROCEDURE getAltPhrasing(IN argID INT, filtered TINYINT)
+BEGIN
+    DECLARE cachedID INT DEFAULT NULL;
+    SELECT currentPhrasingID INTO cachedID FROM ARGUMENT WHERE argumentID = argID;
+
+    IF filtered = 1 THEN
+        SELECT
+            CASE
+                WHEN TotEndorsers.cnt > 0 THEN
+                    COALESCE(SUM(CASE WHEN E.active = TRUE THEN E.weight ELSE 0 END), 0) / TotEndorsers.cnt
+                ELSE 0
+            END AS avgWeight,
+            COUNT(CASE WHEN E.active = TRUE THEN E.profileID ELSE NULL END) AS endorsementCount,
+            P.phrasing,
+            P.phrasingID
+        FROM PHRASING P
+        LEFT JOIN (
+            SELECT pe.* FROM PHRASE_ENDORSE pe
+            INNER JOIN FILTER_PROFILES fp ON pe.profileID = fp.profileID
+        ) E ON P.phrasingID = E.phrasingID AND E.argumentID = argID
+        CROSS JOIN (
+            SELECT COUNT(DISTINCT pe2.profileID) AS cnt
+            FROM PHRASE_ENDORSE pe2
+            INNER JOIN FILTER_PROFILES_2 fp2 ON pe2.profileID = fp2.profileID
+            WHERE pe2.argumentID = argID AND pe2.active = TRUE
+        ) TotEndorsers
+        WHERE P.argumentID = argID
+        GROUP BY P.phrasingID, P.phrasing, P.createdDate, TotEndorsers.cnt
+        ORDER BY avgWeight DESC,
+            CASE WHEN P.phrasingID = cachedID THEN 0 ELSE 1 END ASC,
+            P.createdDate ASC;
+    ELSE
+        SELECT
+            CASE
+                WHEN TotEndorsers.cnt > 0 THEN
+                    COALESCE(SUM(CASE WHEN E.active = TRUE THEN E.weight ELSE 0 END), 0) / TotEndorsers.cnt
+                ELSE 0
+            END AS avgWeight,
+            COUNT(CASE WHEN E.active = TRUE THEN E.profileID ELSE NULL END) AS endorsementCount,
+            P.phrasing,
+            P.phrasingID
+        FROM PHRASING P
+        LEFT JOIN PHRASE_ENDORSE E ON P.phrasingID = E.phrasingID AND E.argumentID = argID
+        CROSS JOIN (
+            SELECT COUNT(DISTINCT profileID) AS cnt
+            FROM PHRASE_ENDORSE
+            WHERE argumentID = argID AND active = TRUE
+        ) TotEndorsers
+        WHERE P.argumentID = argID
+        GROUP BY P.phrasingID, P.phrasing, P.createdDate, TotEndorsers.cnt
+        ORDER BY avgWeight DESC,
+            CASE WHEN P.phrasingID = cachedID THEN 0 ELSE 1 END ASC,
+            P.createdDate ASC;
+    END IF;
 END //
 DELIMITER ;
 

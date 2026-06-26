@@ -88,36 +88,70 @@ DELIMITER ;
 -- Step 3c: Replace getExplication procedure — returns OG preview columns in addition to core fields.
 -- avgWeight = SUM(weight) / total distinct endorsers, matching getAssociated/getAltPhrasing pattern.
 -- Keeps display values on a 0-100 scale regardless of endorser count; sorted by avgWeight DESC.
+-- When filtered = 1, only endorsements from FILTER_PROFILES are counted.
 DROP PROCEDURE IF EXISTS getExplication;
 DELIMITER //
-CREATE PROCEDURE getExplication(IN argID INT)
+CREATE PROCEDURE getExplication(IN argID INT, filtered TINYINT)
 BEGIN
-    SELECT
-        CASE
-            WHEN TotEndorsers.cnt > 0 THEN
-                COALESCE(SUM(CASE WHEN EE.active = TRUE THEN EE.weight ELSE 0 END), 0) / TotEndorsers.cnt
-            ELSE 0
-        END AS avgWeight,
-        COUNT(CASE WHEN EE.active = TRUE THEN EE.profileID ELSE NULL END) AS endorsementCount,
-        E.explicationID,
-        E.hyperlink,
-        E.publisher,
-        E.authorFName,
-        E.authorLName,
-        E.title,
-        E.og_title,
-        E.og_image,
-        E.og_description
-    FROM EXPLICATION E
-    LEFT JOIN EXPLICATION_ENDORSE EE ON E.explicationID = EE.explicationID AND EE.argumentID = argID
-    CROSS JOIN (
-        SELECT COUNT(DISTINCT profileID) AS cnt
-        FROM EXPLICATION_ENDORSE
-        WHERE argumentID = argID AND active = TRUE
-    ) TotEndorsers
-    WHERE E.argumentID = argID AND E.active = TRUE
-    GROUP BY E.explicationID, E.hyperlink, E.publisher, E.authorFName, E.authorLName, E.title, E.firstVisit, E.og_title, E.og_image, E.og_description, TotEndorsers.cnt
-    ORDER BY avgWeight DESC, E.firstVisit ASC;
+    IF filtered = 1 THEN
+        SELECT
+            CASE
+                WHEN TotEndorsers.cnt > 0 THEN
+                    COALESCE(SUM(CASE WHEN EE.active = TRUE THEN EE.weight ELSE 0 END), 0) / TotEndorsers.cnt
+                ELSE 0
+            END AS avgWeight,
+            COUNT(CASE WHEN EE.active = TRUE THEN EE.profileID ELSE NULL END) AS endorsementCount,
+            E.explicationID,
+            E.hyperlink,
+            E.publisher,
+            E.authorFName,
+            E.authorLName,
+            E.title,
+            E.og_title,
+            E.og_image,
+            E.og_description
+        FROM EXPLICATION E
+        LEFT JOIN (
+            SELECT ee.* FROM EXPLICATION_ENDORSE ee
+            INNER JOIN FILTER_PROFILES fp ON ee.profileID = fp.profileID
+        ) EE ON E.explicationID = EE.explicationID AND EE.argumentID = argID
+        CROSS JOIN (
+            SELECT COUNT(DISTINCT ee2.profileID) AS cnt
+            FROM EXPLICATION_ENDORSE ee2
+            INNER JOIN FILTER_PROFILES_2 fp2 ON ee2.profileID = fp2.profileID
+            WHERE ee2.argumentID = argID AND ee2.active = TRUE
+        ) TotEndorsers
+        WHERE E.argumentID = argID AND E.active = TRUE
+        GROUP BY E.explicationID, E.hyperlink, E.publisher, E.authorFName, E.authorLName, E.title, E.firstVisit, E.og_title, E.og_image, E.og_description, TotEndorsers.cnt
+        ORDER BY avgWeight DESC, E.firstVisit ASC;
+    ELSE
+        SELECT
+            CASE
+                WHEN TotEndorsers.cnt > 0 THEN
+                    COALESCE(SUM(CASE WHEN EE.active = TRUE THEN EE.weight ELSE 0 END), 0) / TotEndorsers.cnt
+                ELSE 0
+            END AS avgWeight,
+            COUNT(CASE WHEN EE.active = TRUE THEN EE.profileID ELSE NULL END) AS endorsementCount,
+            E.explicationID,
+            E.hyperlink,
+            E.publisher,
+            E.authorFName,
+            E.authorLName,
+            E.title,
+            E.og_title,
+            E.og_image,
+            E.og_description
+        FROM EXPLICATION E
+        LEFT JOIN EXPLICATION_ENDORSE EE ON E.explicationID = EE.explicationID AND EE.argumentID = argID
+        CROSS JOIN (
+            SELECT COUNT(DISTINCT profileID) AS cnt
+            FROM EXPLICATION_ENDORSE
+            WHERE argumentID = argID AND active = TRUE
+        ) TotEndorsers
+        WHERE E.argumentID = argID AND E.active = TRUE
+        GROUP BY E.explicationID, E.hyperlink, E.publisher, E.authorFName, E.authorLName, E.title, E.firstVisit, E.og_title, E.og_image, E.og_description, TotEndorsers.cnt
+        ORDER BY avgWeight DESC, E.firstVisit ASC;
+    END IF;
 END //
 DELIMITER ;
 

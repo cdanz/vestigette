@@ -1,5 +1,5 @@
 <?php
-	$sql = "CALL getAssociated($argID);";
+	$sql = "CALL getAssociated($argID, 0);";
 	$sql .= "CALL getAllTheRest();";
 	$sql .= "CALL getAggrEndorse();";
 	$sql .= "CALL getAggrEndorsements()"; //testing

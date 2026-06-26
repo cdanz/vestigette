@@ -478,6 +478,58 @@
 			header('Location: /?arg=' . intval($_SESSION['currentArg']));
 			exit;
 
+		case "addOpinionFilter":
+			if (!isset($_SESSION['filters'])) $_SESSION['filters'] = ['opinions' => [], 'affiliations' => []];
+			$fArgID = intval($_POST['argumentID'] ?? 0);
+			$fAccept = intval($_POST['acceptance'] ?? -1);
+			if ($fArgID > 0 && ($fAccept === 0 || $fAccept === 1)) {
+				foreach ($_SESSION['filters']['opinions'] as $existing) {
+					if (intval($existing['argumentID']) === $fArgID) {
+						goto skipOpinionAdd;
+					}
+				}
+				$_SESSION['filters']['opinions'][] = ['argumentID' => $fArgID, 'acceptance' => $fAccept];
+				skipOpinionAdd:
+			}
+			header('Location: /?arg=' . intval($_SESSION['currentArg']));
+			exit;
+
+		case "removeOpinionFilter":
+			if (isset($_SESSION['filters']['opinions'])) {
+				$rArgID = intval($_POST['argumentID'] ?? 0);
+				$_SESSION['filters']['opinions'] = array_values(array_filter(
+					$_SESSION['filters']['opinions'],
+					fn($o) => intval($o['argumentID']) !== $rArgID
+				));
+			}
+			header('Location: /?arg=' . intval($_SESSION['currentArg']));
+			exit;
+
+		case "addAffiliationFilter":
+			if (!isset($_SESSION['filters'])) $_SESSION['filters'] = ['opinions' => [], 'affiliations' => []];
+			$affID = intval($_POST['affiliationID'] ?? 0);
+			if ($affID > 0 && !in_array($affID, $_SESSION['filters']['affiliations'], true)) {
+				$_SESSION['filters']['affiliations'][] = $affID;
+			}
+			header('Location: /?arg=' . intval($_SESSION['currentArg']));
+			exit;
+
+		case "removeAffiliationFilter":
+			if (isset($_SESSION['filters']['affiliations'])) {
+				$rAffID = intval($_POST['affiliationID'] ?? 0);
+				$_SESSION['filters']['affiliations'] = array_values(array_filter(
+					$_SESSION['filters']['affiliations'],
+					fn($a) => $a !== $rAffID
+				));
+			}
+			header('Location: /?arg=' . intval($_SESSION['currentArg']));
+			exit;
+
+		case "clearAllFilters":
+			unset($_SESSION['filters']);
+			header('Location: /?arg=' . intval($_SESSION['currentArg']));
+			exit;
+
 	    }
 	}
 

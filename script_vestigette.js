@@ -638,25 +638,139 @@ function init() {
 		}
 	} catch (e) {}
 
-	//Filter button
-	let toggle1 = document.getElementById("filter1");
-	let toggleLabelA = document.getElementById("filter1A");
-	let toggleLabelB = document.getElementById("filter1B");
-	if(toggleLabelB) {
-		toggleLabelB.style.color = "var(--cddbGrey)";
-	}
-	if (toggle1) {
-		toggle1.addEventListener("click", function(evt) {
-			if(document.getElementById("check1").checked) {
-				toggleLabelA.style.color = "var(--cddbGrey)";
-				toggleLabelB.style.color = "var(--cddbBlue)";
+	// ── Find/Filter desktop accordion pair ──────────────────────────────────
+	(function() {
+		var findEl = document.getElementById('find');
+		var filterEl = document.getElementById('filter');
+		if (!findEl) return;
+
+		var isDesktop = function() { return window.innerWidth >= 1200; };
+
+		function applyDesktopState(openFilter) {
+			if (!isDesktop() || !filterEl) return;
+			if (openFilter) {
+				findEl.classList.remove('desktop-expanded');
+				filterEl.classList.add('desktop-expanded');
+			} else {
+				findEl.classList.add('desktop-expanded');
+				filterEl.classList.remove('desktop-expanded');
 			}
-			else {
-				toggleLabelA.style.color = "var(--cddbBlack)";
-				toggleLabelB.style.color = "var(--cddbGrey)";
+		}
+
+		var savedPanel = null;
+		try { savedPanel = localStorage.getItem('filterPanelOpen'); } catch (e) {}
+		applyDesktopState(savedPanel === '1');
+		if (!savedPanel && isDesktop()) findEl.classList.add('desktop-expanded');
+
+		var findH2 = findEl.querySelector('h2');
+		if (findH2) {
+			findH2.addEventListener('click', function(e) {
+				if (!isDesktop() || !filterEl) return;
+				e.stopPropagation();
+				applyDesktopState(false);
+				try { localStorage.setItem('filterPanelOpen', '0'); } catch (e) {}
+			});
+		}
+
+		if (filterEl) {
+			var filterH2 = filterEl.querySelector('h2');
+			if (filterH2) {
+				filterH2.addEventListener('click', function(e) {
+					if (!isDesktop()) return;
+					e.stopPropagation();
+					applyDesktopState(true);
+					try { localStorage.setItem('filterPanelOpen', '1'); } catch (e) {}
+				});
+			}
+		}
+
+		window.addEventListener('resize', function() {
+			if (isDesktop()) {
+				var open = null;
+				try { open = localStorage.getItem('filterPanelOpen'); } catch (e) {}
+				applyDesktopState(open === '1');
+				if (!open) findEl.classList.add('desktop-expanded');
+			} else {
+				if (findEl) findEl.classList.remove('desktop-expanded');
+				if (filterEl) filterEl.classList.remove('desktop-expanded');
 			}
 		});
-	}
+	})();
+
+	// ── Filter Options overlay (open / close) ───────────────────────────────
+	(function() {
+		var openBtn = document.getElementById('openFilterOverlay');
+		var overlay = document.getElementById('overlayFilter');
+		var closeBtn = document.getElementById('closeFilter');
+		if (!openBtn || !overlay) return;
+
+		openBtn.addEventListener('click', function(e) {
+			e.preventDefault();
+			overlay.classList.remove('hidden');
+			var input = overlay.querySelector('#affiliationSearch');
+			if (input) setTimeout(function() { input.focus(); }, 100);
+		});
+
+		if (closeBtn) {
+			closeBtn.addEventListener('click', function() {
+				overlay.classList.add('hidden');
+			});
+		}
+
+		overlay.addEventListener('click', function(e) {
+			if (e.target === overlay) overlay.classList.add('hidden');
+		});
+	})();
+
+	// ── Affiliation search (AJAX, inside overlay) ───────────────────────────
+	(function() {
+		var searchInput = document.getElementById('affiliationSearch');
+		var resultsList = document.getElementById('affiliationResults');
+		if (!searchInput || !resultsList) return;
+
+		var debounceTimer = null;
+
+		searchInput.addEventListener('input', function() {
+			clearTimeout(debounceTimer);
+			var q = searchInput.value.trim();
+			if (q.length < 2) {
+				resultsList.innerHTML = '';
+				return;
+			}
+			debounceTimer = setTimeout(function() {
+				var fd = new FormData();
+				fd.append('q', q);
+				fetch('/search_affiliations.php', { method: 'POST', body: fd })
+					.then(function(r) { return r.json(); })
+					.then(function(matches) {
+						resultsList.innerHTML = '';
+						matches.forEach(function(m) {
+							var li = document.createElement('li');
+							li.textContent = m.orgName;
+							li.addEventListener('click', function() {
+								var form = document.createElement('form');
+								form.method = 'POST';
+								form.action = '/?arg=' + (typeof arg !== 'undefined' ? arg : '');
+								var inp1 = document.createElement('input');
+								inp1.type = 'hidden'; inp1.name = 'buttonClicked'; inp1.value = 'addAffiliationFilter';
+								var inp2 = document.createElement('input');
+								inp2.type = 'hidden'; inp2.name = 'affiliationID'; inp2.value = m.affiliationID;
+								var inp3 = document.createElement('input');
+								inp3.type = 'hidden'; inp3.name = 'csrfToken';
+								inp3.value = typeof csrfToken !== 'undefined' ? csrfToken : '';
+								form.appendChild(inp1);
+								form.appendChild(inp2);
+								form.appendChild(inp3);
+								document.body.appendChild(form);
+								form.submit();
+							});
+							resultsList.appendChild(li);
+						});
+					})
+					.catch(function() { resultsList.innerHTML = ''; });
+			}, 300);
+		});
+	})();
 
 
 	//Checkbox on Checkpoint page to reciprocate
@@ -682,11 +796,21 @@ function init() {
 	}
 
 
-	// endorse button -- submit form 
+	// endorse button -- submit form
 	// endorse click handler needs to EXIT edit mode -- but since it's submitting, the page will reload anyway
 	// let endorses = document.querySelectorAll(".endorse");
-	// TODO Still would like a history button. resets back historical weights by user, just uses 
-	// loadUserWeights function. No button to give this fuctionality to yet. 
+	// TODO Still would like a history button. resets back historical weights by user, just uses
+	// loadUserWeights function. No button to give this fuctionality to yet.
+
+	// ── Demo mode: suppress iOS scroll-to-focus jumps ───────────────────────
+	if (typeof demoMode !== 'undefined' && demoMode) {
+		document.querySelectorAll('input, textarea, select').forEach(function(el) {
+			el.addEventListener('focus', function() {
+				var sx = window.scrollX, sy = window.scrollY;
+				setTimeout(function() { window.scrollTo(sx, sy); }, 0);
+			});
+		});
+	}
 }
 
 
@@ -919,6 +1043,9 @@ This is the named function used for accordion expansion
 function accordionExpand(evt) {
 	// Ignore clicks that originated inside the panel or on interactive elements
 	if (evt.target.closest('.panel, button, a, input, select, textarea, form')) return;
+
+	// On desktop, Find/Filter use their own desktop-expanded toggle — skip here
+	if (window.innerWidth >= 1200 && (this.id === 'find' || this.id === 'filter')) return;
 
 	let targetPanel = this.querySelector('.panel');
 	let isOpen = targetPanel.classList.contains('expanded');

@@ -206,6 +206,10 @@ if (mysqli_multi_query($db, $sql)) {
     }
 }
 
+$dmRow = mysqli_fetch_assoc(mysqli_query($db,
+    "SELECT demoMode FROM ADMIN_SETTINGS WHERE demoMode = 1 LIMIT 1"));
+$demoMode = $dmRow && intval($dmRow['demoMode']) === 1;
+
 mysqli_close($db);
 
 $typeClass    = 'flesh-' . strtolower($type);
@@ -217,13 +221,14 @@ $baseURL      = '/';
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Flesh Out – <?php echo $typeLabel; ?></title>
+    <title><?php echo htmlspecialchars($focalPhrasing); ?> – Agitate</title>
     <meta charset="utf-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0<?php if ($demoMode) echo ', interactive-widget=resizes-content'; ?>"/>
     <link rel="stylesheet" href="style_vestigette.css?v=<?php echo filemtime($_SERVER['DOCUMENT_ROOT'].'/style_vestigette.css'); ?>"/>
     <script language="javascript" src="script_vestigette.js?v=<?php echo filemtime($_SERVER['DOCUMENT_ROOT'].'/script_vestigette.js'); ?>"></script>
+    <script>var demoMode = <?php echo $demoMode ? 'true' : 'false'; ?>;</script>
 </head>
-<body class="flesh-out-page">
+<body class="flesh-out-page<?php if ($demoMode) echo ' demo-mode'; ?>">
 
 <div id="mastHead" class="container">
     <h1><a href="/?arg=<?php echo $argIDEsc; ?>">AGITATE</a></h1>
@@ -245,18 +250,10 @@ $baseURL      = '/';
         <a href="/?arg=<?php echo $argIDEsc; ?>" class="button flesh-cancel">Cancel</a>
     </div>
 
-<?php if ($showRecipCol): ?>
-    <div class="flesh-col-labels">
-        <span class="flesh-col-weight">Weight</span>
-        <span class="flesh-col-phrasing">Assertion</span>
-        <span class="flesh-col-recip">Reciprocate</span>
-    </div>
-<?php else: ?>
     <div class="flesh-col-labels">
         <span class="flesh-col-weight">Weight</span>
         <span class="flesh-col-phrasing">Assertion</span>
     </div>
-<?php endif; ?>
 
     <div class="flesh-list">
 
@@ -271,7 +268,7 @@ $baseURL      = '/';
                 </div>
                 <div class="flesh-text-col">
                     <span class="inLinePct"></span>
-                    <input type="text" class="new-arg-text" placeholder="Type a new argument…">
+                    <textarea class="new-arg-text" placeholder="Type a new argument…" rows="1"></textarea>
                 </div>
 <?php if ($showRecipCol): ?>
                 <label class="switch flesh-reciprocate" title="Reciprocate">
@@ -283,8 +280,16 @@ $baseURL      = '/';
         </div>
 
         <!-- ── Pinned existing args jump here ────────────────── -->
-        <div id="pinned-zone"></div>
+        <div id="pinned-zone">
+            <div class="pinned-label hidden">
+                <span>Weighted</span>
+<?php if ($showRecipCol): ?>
+                <span class="pinned-label-recip">Reciprocate</span>
+<?php endif; ?>
+            </div>
+        </div>
 
+        <div class="available-label" id="available-label">Available</div>
         <!-- ── Full neighbourhood list ───────────────────────── -->
 <?php foreach ($results as $item): ?>
         <div class="flesh-row lineItem pct0_0 half1"
@@ -297,10 +302,7 @@ $baseURL      = '/';
                 <div class="pointBtn arc2"></div>
             </div>
             <p class="assocArg">
-                <span class="inLinePct"></span>
-                <a href="<?php echo $baseURL; ?>?arg=<?php echo $item[0]; ?>">
-                    <?php echo htmlspecialchars($item[2]); ?>
-                </a>
+                <span class="inLinePct"></span><?php echo htmlspecialchars($item[2]); ?>
             </p>
 <?php if ($showRecipCol): ?>
             <label class="switch flesh-reciprocate" title="Reciprocate">
@@ -380,13 +382,25 @@ function fleshUpdateAll() {
         el.classList.add(fleshPctClass(pct), half);
 
         var span = el.querySelector('.inLinePct');
-        if (span) span.textContent = pct.toFixed(2) + '% – ';
+        if (span) span.textContent = pct.toFixed(1) + '% – ';
     });
 
     // Also zero out anything in the pool that's lost clicks (shouldn't happen
     // but be safe)
 
     document.getElementById('flesh-submit').disabled = (fleshPool.length === 0);
+
+    var pinnedLabel = document.querySelector('.pinned-label');
+    var availLabel = document.getElementById('available-label');
+    if (pinnedLabel) {
+        if (fleshPool.length > 0) {
+            pinnedLabel.classList.remove('hidden');
+            if (availLabel) availLabel.classList.add('shown');
+        } else {
+            pinnedLabel.classList.add('hidden');
+            if (availLabel) availLabel.classList.remove('shown');
+        }
+    }
 }
 
 // ── Existing-arg handlers ─────────────────────────────────────────────────────
@@ -520,7 +534,7 @@ function fleshAddNewRow(n, beforeEl) {
         + '</div>'
         + '<div class="flesh-text-col">'
         + '<span class="inLinePct"></span>'
-        + '<input type="text" class="new-arg-text" placeholder="Type a new argument…">'
+        + '<textarea class="new-arg-text" placeholder="Type a new argument…" rows="1"></textarea>'
         + '</div>'
         + recipHtml;
 
@@ -562,6 +576,17 @@ function fleshSerialize() {
     document.getElementById('pinnedData').value = JSON.stringify(items);
     return true;
 }
+
+// ── New-arg textarea auto-resize ─────────────────────────────────────────────
+
+function autoResizeNewArg(ta) {
+    ta.style.height = '0';
+    ta.style.height = ta.scrollHeight + 'px';
+}
+
+document.getElementById('new-arg-zone').addEventListener('input', function(e) {
+    if (e.target.classList.contains('new-arg-text')) autoResizeNewArg(e.target);
+});
 
 // ── Duplicate detection ───────────────────────────────────────────────────────
 
@@ -657,7 +682,7 @@ function fleshCancelNew(n) {
     var row = document.getElementById('flesh-new-' + n);
     if (row) {
         var input = row.querySelector('.new-arg-text');
-        if (input) { input.value = ''; input.focus(); }
+        if (input) { input.value = ''; autoResizeNewArg(input); input.focus(); }
     }
 }
 
@@ -667,7 +692,7 @@ function fleshUseSuggestion(n, argID, phrasing) {
     var srcRow = document.getElementById('flesh-new-' + n);
     if (srcRow) {
         var input = srcRow.querySelector('.new-arg-text');
-        if (input) input.value = '';
+        if (input) { input.value = ''; autoResizeNewArg(input); }
     }
     similarCache[n] = [];
     // If this arg isn't in the neighbourhood list, create a row for it so

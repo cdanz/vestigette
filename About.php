@@ -76,7 +76,7 @@ mysqli_close($db);
         <h2>Get Started</h2>
         <div class="panel expanded">
             <p>The best way to understand Agitate is to use it. <a href="/?arg=75">Argument #75</a> is a good place to start — it walks through the platform from the inside, as an argument itself.</p>
-            <p>For a quick orientation, the <a href="https://youtu.be/gSlucDTMsmA">video tutorial</a> covers the basics. An updated version with the current UI is in progress.</p>
+            <p>For a quick orientation, the <a href="https://youtube.com/shorts/LD45DZA6ZIc?feature=share">video tutorial</a> covers the basics.</p>
         </div>
     </div>
 
