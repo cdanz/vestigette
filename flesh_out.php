@@ -231,7 +231,7 @@ $baseURL      = '/';
 <body class="flesh-out-page<?php if ($demoMode) echo ' demo-mode'; ?>">
 
 <div id="mastHead" class="container">
-    <h1><a href="/?arg=<?php echo $argIDEsc; ?>">AGITATE</a></h1>
+    <h1><a href="/?arg=<?php echo $argIDEsc; ?>">AGITATE<span class="exclaim">!</span></a></h1>
     <div>
         <a href="About.php?arg=<?php echo $argIDEsc; ?>">About</a>
         <a href="Explore.php?arg=<?php echo $argIDEsc; ?>">Explore</a>
@@ -391,14 +391,28 @@ function fleshUpdateAll() {
     document.getElementById('flesh-submit').disabled = (fleshPool.length === 0);
 
     var pinnedLabel = document.querySelector('.pinned-label');
-    var availLabel = document.getElementById('available-label');
+    var availLabel  = document.getElementById('available-label');
+    var pinnedZone  = document.getElementById('pinned-zone');
+    // Only show "Weighted" header when existing args have been moved into
+    // pinned-zone. New typed args stay in new-arg-zone, so pinned-zone can
+    // have items in fleshPool without having any .flesh-row children — in
+    // that state the two consecutive grey bars ("Weighted" + "Available")
+    // merged into a confusing double-height block.
+    var hasPinnedRows = pinnedZone
+        ? pinnedZone.querySelectorAll('.flesh-row').length > 0
+        : false;
     if (pinnedLabel) {
-        if (fleshPool.length > 0) {
+        if (hasPinnedRows) {
             pinnedLabel.classList.remove('hidden');
-            if (availLabel) availLabel.classList.add('shown');
         } else {
             pinnedLabel.classList.add('hidden');
-            if (availLabel) availLabel.classList.remove('shown');
+        }
+    }
+    if (availLabel) {
+        if (fleshPool.length > 0) {
+            availLabel.classList.add('shown');
+        } else {
+            availLabel.classList.remove('shown');
         }
     }
 }
