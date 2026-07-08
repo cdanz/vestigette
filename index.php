@@ -361,14 +361,29 @@ function generateFindLines($results) {
 		$shareArgID = intval($_SESSION['currentArg']);
 		$shareValid = isset($phrasing) && $phrasing !== 'Invalid Argument Identifier';
 		$shareTitle = $shareValid ? $phrasing : 'Agitate — structured public debate';
-		if ($shareValid && isset($rate) && $rate !== 'N/A.N/A' && isset($assertions) && $assertions > 0) {
+		// Social proof only once enough real humans have weighed in
+		// (SOCIAL_PROOF_MIN_HUMANS in dbconnect.php) — persona-inflated
+		// headcounts on shared links are a credibility risk.
+		if ($shareValid && isset($rate) && $rate !== 'N/A.N/A' && isset($assertions) && $assertions > 0
+		    && isset($humanOpinions) && $humanOpinions >= SOCIAL_PROOF_MIN_HUMANS) {
 			$shareNoun = ($assertions == 1) ? 'person accepts' : 'people accept';
 			$shareDesc = "{$rate}% of {$assertions} {$shareNoun} this. Where do you stand?";
+		} elseif ($shareValid) {
+			$shareDesc = 'See the strongest cases for and against — and weigh in. Where do you stand?';
 		} else {
 			$shareDesc = 'Agitate maps what people actually believe — and why. Weigh in.';
 		}
 		$shareURL   = 'https://agitate-discourse.org/?arg=' . $shareArgID;
-		$shareImage = 'https://agitate-discourse.org/og_image.php?arg=' . $shareArgID;
+		// Version param: Bluesky/Twitter cache cards per-URL, so bust it when
+		// the card's inputs move (verdict, top Because/Rebuttal, phrasing).
+		$shareVer = substr(md5(implode('|', array(
+			isset($rate) ? $rate : '',
+			isset($assertions) ? $assertions : '',
+			isset($because[0]) ? $because[0][0] . ':' . $because[0][1] : '',
+			isset($rebuttal[0]) ? $rebuttal[0][0] . ':' . $rebuttal[0][1] : '',
+			$shareTitle,
+		))), 0, 10);
+		$shareImage = 'https://agitate-discourse.org/og_image.php?arg=' . $shareArgID . '&v=' . $shareVer;
 		$e = function ($s) { return htmlspecialchars($s, ENT_QUOTES, 'UTF-8'); };
 		$titleText  = $shareValid ? mb_strimwidth($phrasing, 0, 70, '…') . ' — Agitate' : 'Agitate';
 ?>

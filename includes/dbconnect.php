@@ -33,6 +33,12 @@
   // ALL_PUBLIC_AFF_ID: affiliationID for "All Users - Public" (the universal default group).
   define('ALL_PUBLIC_AFF_ID', 12);
 
+  // Minimum human opinions (profileID > 26, excluding admin 28) an argument
+  // needs before share surfaces (og:description, og_image.php) cite headcounts
+  // or percentages. Persona-inflated numbers on publicly shared cards are a
+  // credibility risk.
+  define('SOCIAL_PROOF_MIN_HUMANS', 25);
+
   //Be skeptical of this. Claude added on 09.05.2026
   $mysqli = $db; // Create $mysqli alias for compatibility with existing queries
 

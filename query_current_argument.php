@@ -239,6 +239,18 @@ if (mysqli_multi_query($db, $sql)) {
   echo "ERROR - MULTIPLE QUERIES FAILED";
 }
 
+// Human-opinion count for the current argument (personas = profileID 1–26,
+// admin = 28). Gates the social-proof copy in index.php's og:description —
+// headcounts only appear once SOCIAL_PROOF_MIN_HUMANS real humans have
+// weighed in. og_image.php runs the same check for the card itself.
+$humanOpinions = 0;
+$hoRes = mysqli_query($db,
+  "SELECT COUNT(*) FROM OPINION
+   WHERE argumentID = " . intval($argID) . " AND profileID > 26 AND profileID <> 28");
+if ($hoRes && ($hoRow = mysqli_fetch_row($hoRes))) {
+  $humanOpinions = intval($hoRow[0]);
+}
+
 // Recent Assertions (Find section): the 20 newest arguments by creation date.
 // Excludes bot-persona-created nodes (createdBy <= 26) so the list surfaces
 // human/admin-authored arguments as navigation entry points rather than being

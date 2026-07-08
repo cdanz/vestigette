@@ -1,149 +1,247 @@
 <?php
 // og_image.php — dynamic Open Graph / Twitter share image for an argument.
-// Renders a 1200×630 PNG: the assertion text + the live accept stat, branded.
-// Output is cached in the system temp dir with a short TTL.
+// Dialectic card, 1200×630 PNG: the assertion text, an accept/reject verdict
+// strip, and the strongest Because / strongest Rebuttal panels. Cached in the
+// system temp dir with a short TTL.
+//
+// Social-proof gate: percentages render only when the argument has at least
+// SOCIAL_PROOF_MIN_HUMANS human opinions (personas = profileID 1–26, admin =
+// 28). Persona-inflated headcounts on a publicly shared card are a
+// credibility risk, so below the threshold the verdict bar is unlabeled.
+//
+// The renderer is a plain function so a CLI harness can include this file and
+// render fixture data; the web flow at the bottom only runs under a web SAPI.
 
-session_start();
+// ── Data fetch ────────────────────────────────────────────────────────────
+function ogFetchData($db, $argID) {
+    $d = [
+        'argID'      => $argID,
+        'phrasing'   => null,
+        'acceptPct'  => null,   // 0–100, from getDetail (public scope)
+        'assertions' => 0,
+        'humans'     => 0,
+        'because'    => null,   // strongest Because phrasing
+        'rebuttal'   => null,   // strongest Rebuttal phrasing
+    ];
 
-$argID = isset($_GET['arg']) ? intval($_GET['arg']) : 0;
+    // getDetail/getAssociated reference @vtime_dir/@vtime_date (time filter);
+    // they must be set to the no-filter state or every predicate is NULL and
+    // the counts come back empty.
+    mysqli_query($db, "SET @vtime_dir = 0, @vtime_date = NULL");
 
-// ── Cache check ───────────────────────────────────────────────────────────
-$cacheDir = sys_get_temp_dir() . '/agitate_og';
-if (!is_dir($cacheDir)) { @mkdir($cacheDir, 0775, true); }
-$cacheFile = $cacheDir . "/arg_{$argID}.png";
-$ttl = 1800; // 30 minutes — platforms cache far longer than this anyway
+    ogFirstResult($db, "CALL getDetail($argID, 0)", function ($res) use (&$d) {
+        if ($row = mysqli_fetch_row($res)) {
+            // row: [1]=phrasing, [3]=assertion count, [4]=accept rate (0–1)
+            if (!empty($row[1])) $d['phrasing'] = $row[1];
+            $d['assertions'] = (int) $row[3];
+            $d['acceptPct']  = $d['assertions'] > 0 ? $row[4] * 100 : null;
+        }
+    });
 
-if ($argID > 0 && is_file($cacheFile) && (time() - filemtime($cacheFile)) < $ttl) {
-    header('Content-Type: image/png');
-    header('Cache-Control: public, max-age=86400');
-    readfile($cacheFile);
-    exit;
+    // Rows arrive grouped by type, AggWeight DESC within each — the first
+    // Because/Rebuttal row is the strongest.
+    ogFirstResult($db, "CALL getAssociated($argID, 0)", function ($res) use (&$d) {
+        while ($row = mysqli_fetch_row($res)) {
+            if ($row[1] === 'Because'  && $d['because']  === null) $d['because']  = $row[4];
+            if ($row[1] === 'Rebuttal' && $d['rebuttal'] === null) $d['rebuttal'] = $row[4];
+        }
+    });
+
+    // Human opinions: personas are profileID 1–26, admin is 28.
+    $hRes = mysqli_query($db,
+        "SELECT COUNT(*) FROM OPINION
+         WHERE argumentID = $argID AND profileID > 26 AND profileID <> 28");
+    if ($hRes && ($hRow = mysqli_fetch_row($hRes))) $d['humans'] = (int) $hRow[0];
+
+    return $d;
 }
 
-// ── Fetch argument data (same source as the main page: getDetail) ─────────
-$phrasing   = 'Join the debate on Agitate';
-$assertions = 0;
-$ratePct    = null;
+// Run a CALL, hand the first result set to $cb, drain the rest.
+function ogFirstResult($db, $sql, $cb) {
+    if (!mysqli_multi_query($db, $sql)) return;
+    $first = true;
+    do {
+        if ($res = mysqli_store_result($db)) {
+            if ($first) { $cb($res); $first = false; }
+            mysqli_free_result($res);
+        }
+    } while (mysqli_more_results($db) && mysqli_next_result($db));
+}
 
-include("{$_SERVER['DOCUMENT_ROOT']}/includes/dbconnect.php");
+// ── Renderer ──────────────────────────────────────────────────────────────
+function ogRenderCard($d) {
+    $W = 1200; $H = 630; $mX = 60;
+    $font     = ogFontPath(false);
+    $fontBold = ogFontPath(true);
 
-if ($argID > 0 && mysqli_multi_query($db, "CALL getDetail($argID, 0)")) {
-    $result = mysqli_store_result($db);
-    if ($result && mysqli_num_rows($result) > 0) {
-        $row = mysqli_fetch_row($result);
-        // row: [1]=phrasing, [3]=assertion count, [4]=accept rate (0–1)
-        if (!empty($row[1])) $phrasing = $row[1];
-        $assertions = (int) $row[3];
-        $ratePct    = (int) round($row[4] * 100);
+    $img = imagecreatetruecolor($W, $H);
+
+    $cBlack  = imagecolorallocate($img, 14, 14, 14);    // #0e0e0e
+    $cPanel  = imagecolorallocate($img, 27, 27, 27);    // #1b1b1b
+    $cWhite  = imagecolorallocate($img, 255, 255, 255);
+    $cGrey   = imagecolorallocate($img, 147, 147, 147); // #939393
+    $cRed    = imagecolorallocate($img, 175, 26, 23);   // --cddbRed
+    $cGreen  = imagecolorallocate($img, 16, 160, 32);   // --cddbGreen
+    $cBlue   = imagecolorallocate($img, 45, 88, 168);   // --cddbBlue
+    $cYellow = imagecolorallocate($img, 212, 160, 23);  // --cddbYellow
+
+    imagefilledrectangle($img, 0, 0, $W, $H, $cBlack);
+
+    // Tri-color top bar (blue / red / green thirds)
+    imagefilledrectangle($img, 0,   0, 400, 12, $cBlue);
+    imagefilledrectangle($img, 400, 0, 800, 12, $cRed);
+    imagefilledrectangle($img, 800, 0, $W,  12, $cGreen);
+
+    // Wordmark: AGITATE with the brand's tri-color offset shadow
+    $wmSize = 30; $wmY = 84; $wm = 'AGITATE';
+    imagettftext($img, $wmSize, 0, $mX + 5, $wmY,     $cRed,   $fontBold, $wm);
+    imagettftext($img, $wmSize, 0, $mX,     $wmY - 5, $cBlue,  $fontBold, $wm);
+    imagettftext($img, $wmSize, 0, $mX,     $wmY + 5, $cGreen, $fontBold, $wm);
+    imagettftext($img, $wmSize, 0, $mX,     $wmY,     $cWhite, $fontBold, $wm);
+
+    // Argument ID, top-right corner
+    if ($d['argID'] > 0) {
+        $idText = 'Argument #' . $d['argID'];
+        imagettftext($img, 18, 0, $W - $mX - ogTextW(18, $font, $idText), $wmY,
+                     $cGrey, $font, $idText);
     }
-    if ($result) mysqli_free_result($result);
-    while (mysqli_more_results($db)) {
-        mysqli_next_result($db);
-        if ($r = mysqli_store_result($db)) mysqli_free_result($r);
+
+    // ── Title: markdown-stripped phrasing, auto-fit in y 120–300 ──────────
+    $title = ogTruncate(ogStripMarkdown($d['phrasing'] !== null
+        ? $d['phrasing'] : 'Join the debate on Agitate'), 96);
+    $maxW = $W - 2 * $mX;
+    $topY = 120; $botY = 300; $availH = $botY - $topY;
+
+    $chosen = null;
+    foreach ([48, 42, 36, 30] as $sz) {
+        $lines = ogWrap($sz, $fontBold, $title, $maxW);
+        $lineH = $sz * 1.28;
+        if (count($lines) * $lineH <= $availH) { $chosen = [$sz, $lines, $lineH]; break; }
+    }
+    if ($chosen === null) {
+        $sz = 30; $lineH = $sz * 1.28;
+        $lines = ogClampLines(ogWrap($sz, $fontBold, $title, $maxW),
+                              max(1, (int) floor($availH / $lineH)));
+        $chosen = [$sz, $lines, $lineH];
+    }
+    list($sz, $lines, $lineH) = $chosen;
+    $y = $topY + ($availH - count($lines) * $lineH) / 2 + $sz;
+    foreach ($lines as $line) {
+        imagettftext($img, $sz, 0, $mX, (int) $y, $cWhite, $fontBold, $line);
+        $y += $lineH;
+    }
+
+    // ── Verdict strip: accept/reject split bar, y ~330–392 ────────────────
+    $barY0 = 358; $barY1 = 390; $labelY = 344; $barW = $W - 2 * $mX;
+    $showProof = defined('SOCIAL_PROOF_MIN_HUMANS')
+        ? $d['humans'] >= SOCIAL_PROOF_MIN_HUMANS : false;
+
+    if ($d['assertions'] > 0 && $d['acceptPct'] !== null) {
+        $pct = max(0, min(100, $d['acceptPct']));
+        $acceptLabel = 'ACCEPT'; $rejectLabel = 'REJECT';
+        if ($showProof) {
+            $acceptLabel .= ' · ' . round($pct) . '%';
+            $rejectLabel  = round(100 - $pct) . '% · ' . $rejectLabel;
+        }
+        imagettftext($img, 17, 0, $mX, $labelY,
+                     $showProof ? $cGreen : $cGrey, $fontBold, $acceptLabel);
+        imagettftext($img, 17, 0, $W - $mX - ogTextW(17, $fontBold, $rejectLabel),
+                     $labelY, $showProof ? $cRed : $cGrey, $fontBold, $rejectLabel);
+
+        $gap = 4;
+        $aW  = (int) round(($barW - $gap) * $pct / 100);
+        // Keep a sliver of each color visible unless the split is truly 0/100
+        if ($pct > 0   && $aW < 8)             $aW = 8;
+        if ($pct < 100 && $aW > $barW - $gap - 8) $aW = $barW - $gap - 8;
+        if ($aW > 0)
+            imagefilledrectangle($img, $mX, $barY0, $mX + $aW, $barY1, $cGreen);
+        if ($aW < $barW - $gap)
+            imagefilledrectangle($img, $mX + $aW + $gap, $barY0, $mX + $barW, $barY1, $cRed);
+    } else {
+        $noneText = 'No verdicts yet — be the first to weigh in.';
+        imagettftext($img, 20, 0, (int) (($W - ogTextW(20, $font, $noneText)) / 2),
+                     $barY0 + 22, $cGrey, $font, $noneText);
+    }
+
+    // ── Panels: strongest Because (blue) / strongest Rebuttal (red) ───────
+    $pY0 = 416; $pY1 = 552; $pGap = 30;
+    $pW  = (int) (($W - 2 * $mX - $pGap) / 2);
+    ogPanel($img, $mX,               $pY0, $pW, $pY1 - $pY0, 'BECAUSE', $cBlue,
+            $d['because'],  'No supporting case yet — make the first argument for it.',
+            $cPanel, $cWhite, $cGrey, $font, $fontBold);
+    ogPanel($img, $mX + $pW + $pGap, $pY0, $pW, $pY1 - $pY0, 'REBUTTAL', $cRed,
+            $d['rebuttal'], 'No rebuttals yet — make the first case against.',
+            $cPanel, $cWhite, $cGrey, $font, $fontBold);
+
+    // ── Footer: CTA + domain ───────────────────────────────────────────────
+    $footY = 604;
+    imagettftext($img, 23, 0, $mX, $footY, $cYellow, $fontBold, 'Where do you stand?');
+    $domain = 'agitate-discourse.org';
+    imagettftext($img, 19, 0, $W - $mX - ogTextW(19, $font, $domain), $footY,
+                 $cGrey, $font, $domain);
+
+    return $img;
+}
+
+// One Because/Rebuttal panel: accent edge, type label, clamped body text.
+function ogPanel($img, $x, $y, $w, $h, $label, $cAccent, $text, $emptyText,
+                 $cPanel, $cWhite, $cGrey, $font, $fontBold) {
+    imagefilledrectangle($img, $x, $y, $x + $w, $y + $h, $cPanel);
+    imagefilledrectangle($img, $x, $y, $x + 5, $y + $h, $cAccent);
+
+    $pad = 20;
+    imagettftext($img, 15, 0, $x + $pad, $y + 32, $cAccent, $fontBold, $label);
+
+    $isEmpty = ($text === null || trim($text) === '');
+    $body    = $isEmpty ? $emptyText : ogStripMarkdown($text);
+    $bodySz  = 20; $bodyLineH = $bodySz * 1.32;
+    $lines   = ogClampLines(ogWrap($bodySz, $font, $body, $w - 2 * $pad - 5), 3);
+    $ly = $y + 62;
+    foreach ($lines as $line) {
+        imagettftext($img, $bodySz, 0, $x + $pad, (int) $ly,
+                     $isEmpty ? $cGrey : $cWhite, $font, $line);
+        $ly += $bodyLineH;
     }
 }
-mysqli_close($db);
-
-// ── Canvas + palette ──────────────────────────────────────────────────────
-$W = 1200; $H = 630;
-$font     = '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf';
-$fontBold = '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf';
-
-$img = imagecreatetruecolor($W, $H);
-
-$cBlack = imagecolorallocate($img, 14, 14, 14);    // #0e0e0e
-$cWhite = imagecolorallocate($img, 255, 255, 255);
-$cGrey  = imagecolorallocate($img, 147, 147, 147); // #939393
-$cRed   = imagecolorallocate($img, 175, 26, 23);   // #af1a17
-$cGreen = imagecolorallocate($img, 16, 160, 32);   // #10a020
-$cBlue  = imagecolorallocate($img, 45, 88, 168);   // #2d58a8
-
-imagefilledrectangle($img, 0, 0, $W, $H, $cBlack);
-
-// Tri-color top bar (blue / red / green thirds)
-imagefilledrectangle($img, 0,   0, 400, 12, $cBlue);
-imagefilledrectangle($img, 400, 0, 800, 12, $cRed);
-imagefilledrectangle($img, 800, 0, $W,  12, $cGreen);
-
-// ── Wordmark: AGITATE with the brand's tri-color offset shadow ────────────
-$wmSize = 40; $wmX = 60; $wmY = 105; $wm = 'AGITATE';
-imagettftext($img, $wmSize, 0, $wmX + 6, $wmY,     $cRed,   $fontBold, $wm); // right
-imagettftext($img, $wmSize, 0, $wmX,     $wmY - 6, $cBlue,  $fontBold, $wm); // up
-imagettftext($img, $wmSize, 0, $wmX,     $wmY + 6, $cGreen, $fontBold, $wm); // down
-imagettftext($img, $wmSize, 0, $wmX,     $wmY,     $cWhite, $fontBold, $wm); // face
-
-// ── Assertion text: word-wrapped, auto-fit to the middle band ─────────────
-$marginX  = 60;
-$maxWidth = $W - 2 * $marginX;
-$topY     = 180;
-$bottomY  = 485;
-$availH   = $bottomY - $topY;
-
-$chosen = null;
-foreach ([56, 50, 44, 38, 32] as $sz) {
-    $lines = ogWrap($sz, $fontBold, $phrasing, $maxWidth);
-    $lineH = $sz * 1.32;
-    if (count($lines) * $lineH <= $availH) { $chosen = [$sz, $lines, $lineH]; break; }
-}
-if ($chosen === null) {
-    $sz = 32;
-    $lines = ogWrap($sz, $fontBold, $phrasing, $maxWidth);
-    $lineH = $sz * 1.32;
-    $maxLines = max(1, (int) floor($availH / $lineH));
-    if (count($lines) > $maxLines) {
-        $lines = array_slice($lines, 0, $maxLines);
-        $lines[$maxLines - 1] = rtrim($lines[$maxLines - 1]) . '…';
-    }
-    $chosen = [$sz, $lines, $lineH];
-}
-list($sz, $lines, $lineH) = $chosen;
-
-// Vertically center the wrapped block within [topY, bottomY]
-$blockH = count($lines) * $lineH;
-$y = $topY + ($availH - $blockH) / 2 + $sz; // +$sz → first baseline
-foreach ($lines as $line) {
-    imagettftext($img, $sz, 0, $marginX, (int) $y, $cWhite, $fontBold, $line);
-    $y += $lineH;
-}
-
-// ── Stat block (bottom-left): big % colored by sentiment ──────────────────
-$statY = 568;
-if ($ratePct !== null && $assertions > 0) {
-    $pctText  = $ratePct . '%';
-    $pctColor = $ratePct >= 50 ? $cGreen : $cRed;
-    imagettftext($img, 52, 0, $marginX, $statY, $pctColor, $fontBold, $pctText);
-
-    $bbox = imagettfbbox(52, 0, $fontBold, $pctText);
-    $pctW = abs($bbox[2] - $bbox[0]);
-
-    $noun = $assertions === 1 ? 'person accepts' : 'people accept';
-    imagettftext($img, 24, 0, $marginX + $pctW + 18, $statY, $cGrey, $font,
-                 "of {$assertions} {$noun}");
-}
-
-// Domain (bottom-right)
-$domain = 'agitate-discourse.org';
-$dbbox  = imagettfbbox(24, 0, $font, $domain);
-$dW     = abs($dbbox[2] - $dbbox[0]);
-imagettftext($img, 24, 0, $W - $marginX - $dW, $statY, $cGrey, $font, $domain);
-
-// ── Output + cache ────────────────────────────────────────────────────────
-if ($argID > 0) { @imagepng($img, $cacheFile); }
-header('Content-Type: image/png');
-header('Cache-Control: public, max-age=86400');
-imagepng($img);
-imagedestroy($img);
 
 // ── Helpers ───────────────────────────────────────────────────────────────
+function ogFontPath($bold) {
+    $candidates = $bold
+        ? ['/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf',
+           '/System/Library/Fonts/Supplemental/Arial Bold.ttf']
+        : ['/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',
+           '/System/Library/Fonts/Supplemental/Arial.ttf'];
+    foreach ($candidates as $f) { if (is_file($f)) return $f; }
+    return $candidates[0];
+}
+
+function ogStripMarkdown($t) {
+    $t = preg_replace('/!\[([^\]]*)\]\([^)]*\)/', '$1', $t);   // images → alt text
+    $t = preg_replace('/\[([^\]]+)\]\([^)]*\)/',  '$1', $t);   // links → link text
+    $t = preg_replace('/(\*\*|__)(.*?)\1/s',      '$2', $t);   // bold
+    $t = preg_replace('/(\*|_)(.*?)\1/s',         '$2', $t);   // italic
+    $t = preg_replace('/`([^`]*)`/',              '$1', $t);   // inline code
+    $t = preg_replace('/^\s{0,3}#{1,6}\s*/m',     '',   $t);   // headings
+    $t = preg_replace('/^\s{0,3}>\s?/m',          '',   $t);   // blockquotes
+    $t = html_entity_decode(strip_tags($t), ENT_QUOTES, 'UTF-8');
+    return trim(preg_replace('/\s+/', ' ', $t));
+}
+
+function ogTruncate($t, $max) {
+    if (mb_strlen($t) <= $max) return $t;
+    $cut = mb_substr($t, 0, $max);
+    $sp  = mb_strrpos($cut, ' ');
+    if ($sp !== false && $sp > $max * 0.6) $cut = mb_substr($cut, 0, $sp);
+    return rtrim($cut, ' ,;:.') . '…';
+}
+
 function ogWrap($size, $fontFile, $text, $maxWidth) {
     $words = preg_split('/\s+/', trim($text));
     $lines = [];
     $cur   = '';
     foreach ($words as $w) {
-        $try  = $cur === '' ? $w : $cur . ' ' . $w;
-        $bbox = imagettfbbox($size, 0, $fontFile, $try);
-        $width = abs($bbox[2] - $bbox[0]);
-        if ($width > $maxWidth && $cur !== '') {
+        $try = $cur === '' ? $w : $cur . ' ' . $w;
+        if (ogTextW($size, $fontFile, $try) > $maxWidth && $cur !== '') {
             $lines[] = $cur;
             $cur = $w;
         } else {
@@ -152,4 +250,53 @@ function ogWrap($size, $fontFile, $text, $maxWidth) {
     }
     if ($cur !== '') $lines[] = $cur;
     return $lines;
+}
+
+function ogClampLines($lines, $max) {
+    if (count($lines) > $max) {
+        $lines = array_slice($lines, 0, $max);
+        $lines[$max - 1] = rtrim($lines[$max - 1]) . '…';
+    }
+    return $lines;
+}
+
+function ogTextW($size, $fontFile, $text) {
+    $bbox = imagettfbbox($size, 0, $fontFile, $text);
+    return abs($bbox[2] - $bbox[0]);
+}
+
+// ── Web entry point (skipped when included by the CLI test harness) ───────
+if (PHP_SAPI !== 'cli') {
+    session_start();
+
+    $argID = isset($_GET['arg']) ? intval($_GET['arg']) : 0;
+
+    // Cache: per-argID PNG. Content changes are picked up by the version
+    // param index.php appends to the og:image URL; this TTL just bounds how
+    // stale a re-scraped card can be.
+    $cacheDir = sys_get_temp_dir() . '/agitate_og';
+    if (!is_dir($cacheDir)) { @mkdir($cacheDir, 0775, true); }
+    $cacheFile = $cacheDir . "/arg_{$argID}.png";
+    $ttl = 3600;
+
+    if ($argID > 0 && is_file($cacheFile) && (time() - filemtime($cacheFile)) < $ttl) {
+        header('Content-Type: image/png');
+        header('Cache-Control: public, max-age=86400');
+        readfile($cacheFile);
+        exit;
+    }
+
+    include("{$_SERVER['DOCUMENT_ROOT']}/includes/dbconnect.php");
+    $data = ogFetchData($db, $argID);
+    mysqli_close($db);
+
+    $img = ogRenderCard($data);
+
+    // Only cache real content — a DB hiccup shouldn't pin the fallback card
+    // for a valid argument.
+    if ($argID > 0 && $data['phrasing'] !== null) { @imagepng($img, $cacheFile); }
+    header('Content-Type: image/png');
+    header('Cache-Control: public, max-age=86400');
+    imagepng($img);
+    imagedestroy($img);
 }
