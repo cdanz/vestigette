@@ -222,7 +222,10 @@ modify `ENDORSEMENT` (trigger can't write the table that fired it).
 - **Trending / Most Contested** — `getTrending` and `getMostContested` power Explore lists.
 - **Persistent login** — 30-day rememberMe cookie via `REMEMBER_ME` table.
 - **Invite-only registration** — `INVITATION` table; admin manages codes in admin_tools.
-- **OG preview metadata** — `og_image.php` generates share-card images.
+- **OG share cards** — `og_image.php` renders a dialectic card (verdict bar + strongest
+  Because/Rebuttal). Headcounts/percentages gated behind `SOCIAL_PROOF_MIN_HUMANS` (25
+  human opinions; personas excluded). `index.php` versions the og:image URL by a content
+  hash so platforms re-scrape when the card's inputs change.
 - **Demo mode** — admin toggle that suppresses iOS auto-zoom / scroll jumps for screen
   recording. Site-wide while enabled.
 - **Donate button** — masthead on every page; mobile hamburger on left to avoid crowding.
