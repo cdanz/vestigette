@@ -100,7 +100,7 @@ deploy_php() {
 deploy_bot() {
     echo "→ Deploying bot scripts to $BOT_DIR (single transfer)"
     local bot_paths=()
-    for f in "${BOT_FILES[@]}"; do bot_paths+=("$SRC/$f"); done
+    for f in "${BOT_FILES[@]}"; do bot_paths+=("$SRC/bots/$f"); done
     ssh "$DROPLET" "mkdir -p $BOT_DIR"
     scp "${bot_paths[@]}" "$DROPLET:$BOT_DIR/"
 
