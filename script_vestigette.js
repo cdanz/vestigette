@@ -647,7 +647,11 @@ function init() {
 		var isDesktop = function() { return window.innerWidth >= 1200; };
 
 		function applyDesktopState(openFilter) {
-			if (!isDesktop() || !filterEl) return;
+			if (!isDesktop()) return;
+			if (!filterEl) {
+				findEl.classList.add('desktop-expanded');
+				return;
+			}
 			if (openFilter) {
 				findEl.classList.remove('desktop-expanded');
 				filterEl.classList.add('desktop-expanded');
@@ -665,7 +669,7 @@ function init() {
 		var findH2 = findEl.querySelector('h2');
 		if (findH2) {
 			findH2.addEventListener('click', function(e) {
-				if (!isDesktop() || !filterEl) return;
+				if (!isDesktop()) return;
 				e.stopPropagation();
 				applyDesktopState(false);
 				try { localStorage.setItem('filterPanelOpen', '0'); } catch (e) {}

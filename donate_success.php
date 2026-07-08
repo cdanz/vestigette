@@ -12,8 +12,11 @@
 		* { box-sizing: border-box; }
 		body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 			color: #161616; background: #fafafa; line-height: 1.6; }
+		@import url('https://fonts.googleapis.com/css2?family=Anton&display=swap');
 		.masthead { background: #0e0e0e; padding: 0.6rem 1rem; }
-		.masthead a { color: #fff; text-decoration: none; font-weight: 800; letter-spacing: 0.06em; font-size: 1.1rem; }
+		.masthead a { font-family: 'Anton', Impact, 'Arial Black', Arial, sans-serif; color: #fff; text-decoration: none; font-weight: normal; font-size: 1.5rem;
+			text-shadow: 0.4em 0em 0.05em #af1a17, 0em -0.4em 0.05em #2d58a8, 0em 0.4em 0.05em #10a020; }
+		.masthead a .exclaim { color: #d4a017; }
 		.wrap { max-width: 560px; margin: 0 auto; padding: 3rem 1.25rem; text-align: center; }
 		.check { width: 64px; height: 64px; border-radius: 50%; background: #10a020; color: #fff;
 			display: inline-flex; align-items: center; justify-content: center; font-size: 2rem; margin-bottom: 1rem; }
@@ -25,7 +28,7 @@
 	</style>
 </head>
 <body>
-	<div class="masthead"><a href="/">AGITATE</a></div>
+	<div class="masthead"><a href="/">AGITATE<span class="exclaim">!</span></a></div>
 	<div class="wrap">
 		<div class="check">&#10003;</div>
 		<h1>Thank you.</h1>

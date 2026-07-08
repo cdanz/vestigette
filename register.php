@@ -14,8 +14,10 @@ $registered  = false;
 // Validate the invite code
 if ($code !== '') {
 	$stmt = $db->prepare(
-		"SELECT inviteID, createdBy FROM INVITATION
-		 WHERE code = ? AND usedBy IS NULL AND expiresAt > NOW()"
+		"SELECT inviteID, createdBy, affiliationID FROM INVITATION
+		 WHERE code = ? AND usedBy IS NULL
+		   AND (expiresAt IS NULL OR expiresAt > NOW())
+		   AND (usesRemaining IS NULL OR usesRemaining > 0)"
 	);
 	$stmt->bind_param("s", $code);
 	$stmt->execute();
@@ -57,17 +59,41 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $inviteRow) {
 		$hash = password_hash($password, PASSWORD_BCRYPT);
 
 		$ins = $db->prepare(
-			"INSERT INTO USER_PROFILE (firstName, lastName, email, securityCode)
-			 VALUES (?, ?, ?, ?)"
+			"INSERT INTO USER_PROFILE (firstName, lastName, email, securityCode, activeAffiliationID)
+			 VALUES (?, ?, ?, ?, ?)"
 		);
-		$ins->bind_param("ssss", $firstName, $lastName, $email, $hash);
+		$allPublicAffID = ALL_PUBLIC_AFF_ID;
+		$ins->bind_param("ssssi", $firstName, $lastName, $email, $hash, $allPublicAffID);
 		$ins->execute();
 		$newProfileID = $ins->insert_id;
 		$ins->close();
 
-		// Mark invitation as used
+		// Enroll new user in "All Users - Public"
+		$mem = $db->prepare("INSERT INTO MEMBER (affiliationID, profileID, dateAdded) VALUES (?, ?, NOW())");
+		$mem->bind_param("ii", $allPublicAffID, $newProfileID);
+		$mem->execute();
+		$mem->close();
+
+		// If the invite is tied to a group, enroll in that group and make it the active affiliation
+		$groupAffID = !empty($inviteRow['affiliationID']) ? intval($inviteRow['affiliationID']) : 0;
+		if ($groupAffID > 0) {
+			$gmem = $db->prepare("INSERT IGNORE INTO MEMBER (affiliationID, profileID, dateAdded) VALUES (?, ?, NOW())");
+			$gmem->bind_param("ii", $groupAffID, $newProfileID);
+			$gmem->execute();
+			$gmem->close();
+
+			$upd2 = $db->prepare("UPDATE USER_PROFILE SET activeAffiliationID = ? WHERE profileID = ?");
+			$upd2->bind_param("ii", $groupAffID, $newProfileID);
+			$upd2->execute();
+			$upd2->close();
+		}
+
+		// Mark invitation as used, decrement usesRemaining for group codes
 		$upd = $db->prepare(
-			"UPDATE INVITATION SET usedBy = ?, usedAt = NOW() WHERE inviteID = ?"
+			"UPDATE INVITATION
+			 SET usedBy = ?, usedAt = NOW(),
+			     usesRemaining = CASE WHEN usesRemaining IS NOT NULL THEN GREATEST(0, usesRemaining - 1) ELSE NULL END
+			 WHERE inviteID = ?"
 		);
 		$upd->bind_param("ii", $newProfileID, $inviteRow['inviteID']);
 		$upd->execute();
@@ -99,7 +125,7 @@ mysqli_close($db);
 <body>
 
 <div id="mastHead" class="container">
-	<h1><a href="/?arg=<?php echo $_SESSION['currentArg']; ?>">AGITATE</a></h1>
+	<h1><a href="/?arg=<?php echo $_SESSION['currentArg']; ?>">AGITATE<span class="exclaim">!</span></a></h1>
 	<div>
 		<a href="About.php?arg=<?php echo $_SESSION['currentArg']; ?>">About</a>
 		<a href="Explore.php?arg=<?php echo $_SESSION['currentArg']; ?>">Explore</a>

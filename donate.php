@@ -31,8 +31,11 @@ unset($_SESSION['donateError']);
 		body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 			color: var(--ink); background: var(--bg); line-height: 1.55; }
 		a { color: var(--blue); }
+		@import url('https://fonts.googleapis.com/css2?family=Anton&display=swap');
 		.masthead { background: #0e0e0e; padding: 0.6rem 1rem; }
-		.masthead a { color: #fff; text-decoration: none; font-weight: 800; letter-spacing: 0.06em; font-size: 1.1rem; }
+		.masthead a { font-family: 'Anton', Impact, 'Arial Black', Arial, sans-serif; color: #fff; text-decoration: none; font-weight: normal; font-size: 1.5rem;
+			text-shadow: 0.4em 0em 0.05em #af1a17, 0em -0.4em 0.05em #2d58a8, 0em 0.4em 0.05em #10a020; }
+		.masthead a .exclaim { color: #d4a017; }
 		.wrap { max-width: 640px; margin: 0 auto; padding: 1.5rem 1.25rem 3rem; }
 		h1 { font-size: 1.7rem; margin: 1rem 0 0.5rem; }
 		h2 { font-size: 1.05rem; margin: 1.75rem 0 0.4rem; }
@@ -71,7 +74,7 @@ unset($_SESSION['donateError']);
 	</style>
 </head>
 <body>
-	<div class="masthead"><a href="/">AGITATE</a></div>
+	<div class="masthead"><a href="/">AGITATE<span class="exclaim">!</span></a></div>
 	<div class="wrap">
 		<h1>Support Agitate</h1>
 		<p class="lede">Agitate is a tool for mapping where people stand on contested questions &mdash; and <em>why</em>: the reasons behind a claim, what follows from it, and what rebuts it. It's built and run independently, and your support keeps it going and growing.</p>

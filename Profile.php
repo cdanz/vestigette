@@ -3,13 +3,38 @@ session_start();
 include("${_SERVER['DOCUMENT_ROOT']}/includes/dbconnect.php");
 
 $_SESSION['currentArg'] = intval($_GET['arg'] ?? 0);
-$arg     = $_SESSION['currentArg'];
-$profile = $_SESSION['profile'] ?? null;
+$arg           = $_SESSION['currentArg'];
+$profile       = $_SESSION['profile'] ?? null;
+$realProfileID = $profile ? intval($_SESSION['realProfile'] ?? $profile) : null;
 
-$stats    = null;
-$topPct   = null;
-$recent   = [];
-$heterodox = [];
+// Handle group activation posted from this page
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'switchGroup' && $realProfileID) {
+    $newAffID = intval($_POST['affiliationID'] ?? 0);
+    if ($newAffID > 0) {
+        $chk = $db->prepare("SELECT 1 FROM MEMBER WHERE affiliationID = ? AND profileID = ? LIMIT 1");
+        $chk->bind_param("ii", $newAffID, $realProfileID);
+        $chk->execute();
+        if ($chk->get_result()->fetch_row()) {
+            $upd = $db->prepare("UPDATE USER_PROFILE SET activeAffiliationID = ? WHERE profileID = ?");
+            $upd->bind_param("ii", $newAffID, $realProfileID);
+            $upd->execute();
+            $upd->close();
+        }
+        $chk->close();
+    }
+    mysqli_close($db);
+    header('Location: /Profile.php?arg=' . $arg);
+    exit;
+}
+
+$stats       = null;
+$topPct      = null;
+$recent      = [];
+$heterodox   = [];
+$groups      = [];
+$activeGroup = null;
+$otherGroups = [];
+$activeGroupName = '';
 
 if ($profile) {
     // Opinion summary: total count and accept split
@@ -74,9 +99,51 @@ if ($profile) {
         mysqli_free_result($res);
     }
     while (mysqli_more_results($db)) { mysqli_next_result($db); }
+
+    // Group memberships — active group first, then All Users - Public, then alpha
+    $res = mysqli_query($db,
+        "SELECT a.affiliationID, a.orgName, a.description, a.public,
+                m.isCaptain,
+                (up.activeAffiliationID = a.affiliationID) AS isActive
+         FROM MEMBER m
+         JOIN AFFILIATION a ON a.affiliationID = m.affiliationID
+         JOIN USER_PROFILE up ON up.profileID = $realProfileID
+         WHERE m.profileID = $realProfileID
+         ORDER BY (up.activeAffiliationID = a.affiliationID) DESC,
+                  (a.orgName = 'All Users - Public') DESC,
+                  a.orgName ASC"
+    );
+    while ($row = mysqli_fetch_assoc($res)) { $groups[] = $row; }
+
+    // Pending invite codes for any group where the user is captain
+    foreach ($groups as &$g) {
+        $g['pendingInvites'] = [];
+        if (intval($g['isCaptain'])) {
+            $affID  = intval($g['affiliationID']);
+            $invRes = mysqli_query($db,
+                "SELECT code FROM INVITATION
+                 WHERE affiliationID = $affID
+                   AND usedBy IS NULL
+                   AND (expiresAt IS NULL OR expiresAt > NOW())
+                 ORDER BY createdAt ASC
+                 LIMIT 100"
+            );
+            while ($inv = mysqli_fetch_assoc($invRes)) {
+                $g['pendingInvites'][] = $inv['code'];
+            }
+        }
+    }
+    unset($g);
+
+    $activeGroup     = !empty($groups) ? $groups[0] : null;
+    $otherGroups     = array_slice($groups, 1);
+    $activeGroupName = ($activeGroup && intval($activeGroup['affiliationID']) !== ALL_PUBLIC_AFF_ID) ? $activeGroup['orgName'] : '';
 }
 
 mysqli_close($db);
+
+// Shared copy-icon SVG
+$copyIcon = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
 ?>
 <!DOCTYPE html>
 <html>
@@ -96,7 +163,10 @@ mysqli_close($db);
 <body class="content-page">
 
 <div id="mastHead" class="container">
-    <h1><a href="/?arg=<?php echo $arg; ?>">AGITATE</a></h1>
+    <h1><a href="/?arg=<?php echo $arg; ?>">AGITATE<span class="exclaim">!</span></a></h1>
+    <?php if ($profile && $activeGroupName !== ''): ?>
+    <a href="/Profile.php?arg=<?php echo $arg; ?>" class="group-badge" title="<?php echo htmlspecialchars($activeGroupName); ?>"><?php echo htmlspecialchars($activeGroupName); ?></a>
+    <?php endif; ?>
     <div>
         <a href="About.php?arg=<?php echo $arg; ?>">About</a>
         <a href="Explore.php?arg=<?php echo $arg; ?>">Explore</a>
@@ -125,16 +195,16 @@ mysqli_close($db);
 
 <?php else: ?>
 
-    <!-- ── Summary ──────────────────────────────────────────────────────────── -->
+    <!-- ── Your Participation ─────────────────────────────────────────────────── -->
     <?php if ($stats && $stats['total'] > 0):
-        $total   = intval($stats['total']);
-        $accepts = intval($stats['accepts']);
-        $rejects = $total - $accepts;
+        $total     = intval($stats['total']);
+        $accepts   = intval($stats['accepts']);
+        $rejects   = $total - $accepts;
         $acceptPct = round(100 * $accepts / $total);
     ?>
     <div class="accordion container about-section">
         <h2>Your Participation</h2>
-        <div class="panel expanded">
+        <div class="panel">
         <div class="profile-summary">
             <div class="profile-stat">
                 <span class="profile-stat-value"><?php echo $total; ?></span>
@@ -155,11 +225,85 @@ mysqli_close($db);
     </div>
     <?php endif; ?>
 
-    <!-- ── Recent Activity ──────────────────────────────────────────────────── -->
+    <!-- ── Groups ────────────────────────────────────────────────────────────── -->
+    <div class="accordion container about-section">
+        <h2>Groups</h2>
+        <div class="panel expanded">
+        <?php if (empty($groups)): ?>
+            <p style="color:var(--cddbGrey);font-size:0.9rem;">You are not a member of any groups.</p>
+        <?php else: ?>
+
+            <p class="group-section-label">Current Group Enabled</p>
+            <div class="group-list">
+                <div class="group-row group-row-active">
+                    <div class="group-info">
+                        <span class="group-name"><?php echo htmlspecialchars($activeGroup['orgName']); ?></span>
+                        <?php if (!empty($activeGroup['description'])): ?>
+                        <span class="group-desc"><?php echo htmlspecialchars($activeGroup['description']); ?></span>
+                        <?php endif; ?>
+                    </div>
+                    <?php if (intval($activeGroup['isCaptain'])):
+                        $cnt       = count($activeGroup['pendingInvites']);
+                        $firstCode = $activeGroup['pendingInvites'][0] ?? null;
+                    ?>
+                    <div class="group-actions">
+                        <?php if ($cnt > 0): ?>
+                        <button class="copy-invite-btn" data-code="<?php echo htmlspecialchars($firstCode); ?>">
+                            <?php echo $cnt; ?> Invite Code<?php echo $cnt !== 1 ? 's' : ''; ?> Remaining
+                            <?php echo $copyIcon; ?>
+                        </button>
+                        <?php else: ?>
+                        <span class="no-invites">No invite codes remaining</span>
+                        <?php endif; ?>
+                    </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+
+            <?php if (!empty($otherGroups)): ?>
+            <div class="group-list group-list-others">
+                <?php foreach ($otherGroups as $g):
+                    $cnt       = count($g['pendingInvites'] ?? []);
+                    $firstCode = ($g['pendingInvites'] ?? [])[0] ?? null;
+                ?>
+                <div class="group-row">
+                    <div class="group-info">
+                        <span class="group-name"><?php echo htmlspecialchars($g['orgName']); ?></span>
+                        <?php if (!empty($g['description'])): ?>
+                        <span class="group-desc"><?php echo htmlspecialchars($g['description']); ?></span>
+                        <?php endif; ?>
+                    </div>
+                    <div class="group-actions">
+                        <form method="POST" action="/Profile.php?arg=<?php echo $arg; ?>">
+                            <input type="hidden" name="action" value="switchGroup">
+                            <input type="hidden" name="affiliationID" value="<?php echo intval($g['affiliationID']); ?>">
+                            <button type="submit" class="group-activate-btn">Activate</button>
+                        </form>
+                        <?php if (intval($g['isCaptain'])): ?>
+                        <?php if ($cnt > 0): ?>
+                        <button class="copy-invite-btn" data-code="<?php echo htmlspecialchars($firstCode); ?>">
+                            <?php echo $cnt; ?> Invite Code<?php echo $cnt !== 1 ? 's' : ''; ?> Remaining
+                            <?php echo $copyIcon; ?>
+                        </button>
+                        <?php else: ?>
+                        <span class="no-invites">No invite codes remaining</span>
+                        <?php endif; ?>
+                        <?php endif; ?>
+                    </div>
+                </div>
+                <?php endforeach; ?>
+            </div>
+            <?php endif; ?>
+
+        <?php endif; ?>
+        </div>
+    </div>
+
+    <!-- ── Recent Activity ───────────────────────────────────────────────────── -->
     <?php if (!empty($recent)): ?>
     <div class="accordion container about-section">
         <h2>Recent Activity</h2>
-        <div class="panel expanded">
+        <div class="panel">
         <ul class="explore-list">
         <?php foreach ($recent as $row):
             $label = $row['acceptance'] ? 'Accept' : 'Reject';
@@ -177,21 +321,21 @@ mysqli_close($db);
     </div>
     <?php endif; ?>
 
-    <!-- ── Most Heterodox ───────────────────────────────────────────────────── -->
+    <!-- ── Most Heterodox ────────────────────────────────────────────────────── -->
     <div class="accordion container about-section">
         <h2>Most Heterodox</h2>
-        <div class="panel expanded">
+        <div class="panel">
         <?php if (empty($heterodox)): ?>
             <p style="color:var(--cddbGrey);font-size:0.9rem;">No heterodox positions yet — your opinions align with the majority so far, or you haven't weighed in enough to diverge.</p>
         <?php else: ?>
             <ul class="explore-list">
             <?php foreach ($heterodox as $row):
-                $accepted  = (bool)$row['acceptance'];
+                $accepted    = (bool)$row['acceptance'];
                 $majorityPct = round($row['Percent'] * 100);
                 $minorityPct = 100 - $majorityPct;
-                $userVerb  = $accepted ? 'Accept' : 'Reject';
-                $crowdVerb = $accepted ? 'reject' : 'accept';
-                $cls       = $accepted ? 'profile-accept' : 'profile-reject';
+                $userVerb    = $accepted ? 'Accept' : 'Reject';
+                $crowdVerb   = $accepted ? 'reject' : 'accept';
+                $cls         = $accepted ? 'profile-accept' : 'profile-reject';
             ?>
                 <li class="explore-item">
                     <a href="/?arg=<?php echo intval($row['argumentID']); ?>">
@@ -214,6 +358,39 @@ mysqli_close($db);
     </footer>
 
 </main>
+
+<script>
+document.querySelectorAll('.copy-invite-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+        var code = this.dataset.code;
+        var url  = 'https://agitate-discourse.org/register.php?code=' + code;
+        var self = this;
+        var orig = self.innerHTML;
+        function showCopied() {
+            self.textContent = 'Copied!';
+            setTimeout(function() { self.innerHTML = orig; }, 2000);
+        }
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(url).then(showCopied).catch(function() {
+                fallbackCopy(url, showCopied);
+            });
+        } else {
+            fallbackCopy(url, showCopied);
+        }
+    });
+});
+function fallbackCopy(text, cb) {
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.opacity  = '0';
+    document.body.appendChild(ta);
+    ta.focus();
+    ta.select();
+    try { document.execCommand('copy'); cb(); } catch(e) {}
+    document.body.removeChild(ta);
+}
+</script>
 
 </body>
 </html>

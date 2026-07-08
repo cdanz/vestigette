@@ -24,6 +24,8 @@ BEGIN
         ELSE
             INSERT INTO OPINION VALUES (argID, proID, FALSE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
         END IF;
+        INSERT IGNORE INTO SCOPE_OPINION (argumentID, profileID, affiliationID)
+        VALUES (argID, proID, @active_aff_id);
 
         -- Probabilistic persona retirement: fires only for real human users (not personas 1-26).
         -- Probability = (humanCount / 100)^2, giving an S-curve that accelerates through
@@ -106,10 +108,12 @@ BEGIN
             FROM ENDORSEMENT E
             INNER JOIN FILTER_PROFILES_2 fp2 ON E.profileID = fp2.profileID
             WHERE targArgID = argID AND active = TRUE
+              AND (@vtime_dir = 0 OR IF(@vtime_dir = 1, E.lastVisit <= @vtime_date, E.lastVisit >= @vtime_date))
             GROUP BY endorseType
         ) E2 ON E1.endorseType = E2.endorseType
         JOIN ARGUMENT A1 ON E1.supportingArgID = A1.argumentID
         WHERE E1.targArgID = argID AND E1.active = TRUE
+          AND (@vtime_dir = 0 OR IF(@vtime_dir = 1, E1.lastVisit <= @vtime_date, E1.lastVisit >= @vtime_date))
         GROUP BY E1.endorseType, E1.supportingArgID, A1.currentPhrasing, A1.argumentID
         ORDER BY CASE
             WHEN E1.endorseType = 'Because' THEN '1'
@@ -126,14 +130,18 @@ BEGIN
                     ORDER BY createdDate ASC LIMIT 1)
                ) AS phrasing
         FROM ENDORSEMENT E1
+        INNER JOIN SCOPE_ENDORSEMENT SE1 ON E1.profileID = SE1.profileID AND E1.targArgID = SE1.targArgID AND SE1.affiliationID = @active_aff_id
         JOIN (
-            SELECT targArgID, endorseType, COUNT(DISTINCT profileID) AS TotalUsers
-            FROM ENDORSEMENT
-            WHERE targArgID = argID AND active = TRUE
-            GROUP BY endorseType
+            SELECT E.targArgID, E.endorseType, COUNT(DISTINCT E.profileID) AS TotalUsers
+            FROM ENDORSEMENT E
+            INNER JOIN SCOPE_ENDORSEMENT SE2 ON E.profileID = SE2.profileID AND E.targArgID = SE2.targArgID AND SE2.affiliationID = @active_aff_id
+            WHERE E.targArgID = argID AND E.active = TRUE
+              AND (@vtime_dir = 0 OR IF(@vtime_dir = 1, E.lastVisit <= @vtime_date, E.lastVisit >= @vtime_date))
+            GROUP BY E.endorseType
         ) E2 ON E1.endorseType = E2.endorseType
         JOIN ARGUMENT A1 ON E1.supportingArgID = A1.argumentID
         WHERE E1.targArgID = argID AND E1.active = TRUE
+          AND (@vtime_dir = 0 OR IF(@vtime_dir = 1, E1.lastVisit <= @vtime_date, E1.lastVisit >= @vtime_date))
         GROUP BY E1.endorseType, E1.supportingArgID, A1.currentPhrasing, A1.argumentID
         ORDER BY CASE
             WHEN E1.endorseType = 'Because' THEN '1'
@@ -159,17 +167,27 @@ BEGIN
     IF filtered = 1 THEN
         SELECT COUNT(*) INTO acceptCnt
         FROM OPINION o INNER JOIN FILTER_PROFILES fp ON o.profileID = fp.profileID
-        WHERE o.argumentID = argID AND o.acceptance = TRUE;
+        WHERE o.argumentID = argID AND o.acceptance = TRUE
+          AND (@vtime_dir = 0 OR IF(@vtime_dir = 1, o.lastVisit <= @vtime_date, o.lastVisit >= @vtime_date));
 
         SELECT COUNT(*) INTO assertCnt
         FROM OPINION o INNER JOIN FILTER_PROFILES fp ON o.profileID = fp.profileID
-        WHERE o.argumentID = argID;
+        WHERE o.argumentID = argID
+          AND (@vtime_dir = 0 OR IF(@vtime_dir = 1, o.lastVisit <= @vtime_date, o.lastVisit >= @vtime_date));
     ELSE
-        SELECT COUNT(acceptance) INTO acceptCnt
-        FROM OPINION WHERE argumentID = argID AND acceptance = TRUE;
+        SELECT COUNT(O.acceptance) INTO acceptCnt
+        FROM OPINION O
+        INNER JOIN SCOPE_OPINION SO ON O.argumentID = SO.argumentID AND O.profileID = SO.profileID
+        WHERE SO.affiliationID = @active_aff_id
+          AND O.argumentID = argID AND O.acceptance = TRUE
+          AND (@vtime_dir = 0 OR IF(@vtime_dir = 1, O.lastVisit <= @vtime_date, O.lastVisit >= @vtime_date));
 
-        SELECT COUNT(acceptance) INTO assertCnt
-        FROM OPINION WHERE argumentID = argID;
+        SELECT COUNT(O.acceptance) INTO assertCnt
+        FROM OPINION O
+        INNER JOIN SCOPE_OPINION SO ON O.argumentID = SO.argumentID AND O.profileID = SO.profileID
+        WHERE SO.affiliationID = @active_aff_id
+          AND O.argumentID = argID
+          AND (@vtime_dir = 0 OR IF(@vtime_dir = 1, O.lastVisit <= @vtime_date, O.lastVisit >= @vtime_date));
     END IF;
 
     SELECT X.argumentID, X.phrased,
@@ -247,12 +265,14 @@ BEGIN
         LEFT JOIN (
             SELECT pe.* FROM PHRASE_ENDORSE pe
             INNER JOIN FILTER_PROFILES fp ON pe.profileID = fp.profileID
+            WHERE (@vtime_dir = 0 OR IF(@vtime_dir = 1, pe.firstVisit <= @vtime_date, pe.firstVisit >= @vtime_date))
         ) E ON P.phrasingID = E.phrasingID AND E.argumentID = argID
         CROSS JOIN (
             SELECT COUNT(DISTINCT pe2.profileID) AS cnt
             FROM PHRASE_ENDORSE pe2
             INNER JOIN FILTER_PROFILES_2 fp2 ON pe2.profileID = fp2.profileID
             WHERE pe2.argumentID = argID AND pe2.active = TRUE
+              AND (@vtime_dir = 0 OR IF(@vtime_dir = 1, pe2.firstVisit <= @vtime_date, pe2.firstVisit >= @vtime_date))
         ) TotEndorsers
         WHERE P.argumentID = argID
         GROUP BY P.phrasingID, P.phrasing, P.createdDate, TotEndorsers.cnt
@@ -270,11 +290,17 @@ BEGIN
             P.phrasing,
             P.phrasingID
         FROM PHRASING P
-        LEFT JOIN PHRASE_ENDORSE E ON P.phrasingID = E.phrasingID AND E.argumentID = argID
+        LEFT JOIN (
+            SELECT PE.* FROM PHRASE_ENDORSE PE
+            INNER JOIN SCOPE_PHRASE_ENDORSE SPE ON PE.profileID = SPE.profileID AND PE.argumentID = SPE.argumentID AND SPE.affiliationID = @active_aff_id
+            WHERE @vtime_dir = 0 OR IF(@vtime_dir = 1, PE.firstVisit <= @vtime_date, PE.firstVisit >= @vtime_date)
+        ) E ON P.phrasingID = E.phrasingID AND E.argumentID = argID
         CROSS JOIN (
-            SELECT COUNT(DISTINCT profileID) AS cnt
-            FROM PHRASE_ENDORSE
-            WHERE argumentID = argID AND active = TRUE
+            SELECT COUNT(DISTINCT PE2.profileID) AS cnt
+            FROM PHRASE_ENDORSE PE2
+            INNER JOIN SCOPE_PHRASE_ENDORSE SPE2 ON PE2.profileID = SPE2.profileID AND PE2.argumentID = SPE2.argumentID AND SPE2.affiliationID = @active_aff_id
+            WHERE PE2.argumentID = argID AND PE2.active = TRUE
+              AND (@vtime_dir = 0 OR IF(@vtime_dir = 1, PE2.firstVisit <= @vtime_date, PE2.firstVisit >= @vtime_date))
         ) TotEndorsers
         WHERE P.argumentID = argID
         GROUP BY P.phrasingID, P.phrasing, P.createdDate, TotEndorsers.cnt
@@ -365,6 +391,8 @@ BEGIN
         INSERT INTO OPINION
             VALUES (NEW.supportingArgID, NEW.profileID, TRUE,
                     CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+        INSERT IGNORE INTO SCOPE_OPINION (argumentID, profileID, affiliationID)
+        VALUES (NEW.supportingArgID, NEW.profileID, @active_aff_id);
     END IF;
 END //
 DELIMITER ;

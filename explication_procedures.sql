@@ -57,6 +57,8 @@ BEGIN
                       WHERE explicationID = thisExplID AND profileID = proID) THEN
             INSERT INTO EXPLICATION_ENDORSE (explicationID, argumentID, profileID, weight, active)
             VALUES (thisExplID, argID, proID, 100, TRUE);
+            INSERT IGNORE INTO SCOPE_EXPLICATION_ENDORSE (profileID, argumentID, affiliationID)
+            VALUES (proID, argID, @active_aff_id);
         ELSE
             UPDATE EXPLICATION_ENDORSE SET active = TRUE
             WHERE explicationID = thisExplID AND profileID = proID;
@@ -72,6 +74,8 @@ BEGIN
 
         INSERT INTO EXPLICATION_ENDORSE (explicationID, argumentID, profileID, weight, active)
         VALUES (thisExplID, argID, proID, 100, TRUE);
+        INSERT IGNORE INTO SCOPE_EXPLICATION_ENDORSE (profileID, argumentID, affiliationID)
+        VALUES (proID, argID, @active_aff_id);
     END IF;
 END //
 DELIMITER ;
@@ -114,12 +118,14 @@ BEGIN
         LEFT JOIN (
             SELECT ee.* FROM EXPLICATION_ENDORSE ee
             INNER JOIN FILTER_PROFILES fp ON ee.profileID = fp.profileID
+            WHERE @vtime_dir = 0 OR IF(@vtime_dir = 1, ee.updatedAt <= @vtime_date, ee.updatedAt >= @vtime_date)
         ) EE ON E.explicationID = EE.explicationID AND EE.argumentID = argID
         CROSS JOIN (
             SELECT COUNT(DISTINCT ee2.profileID) AS cnt
             FROM EXPLICATION_ENDORSE ee2
             INNER JOIN FILTER_PROFILES_2 fp2 ON ee2.profileID = fp2.profileID
             WHERE ee2.argumentID = argID AND ee2.active = TRUE
+              AND (@vtime_dir = 0 OR IF(@vtime_dir = 1, ee2.updatedAt <= @vtime_date, ee2.updatedAt >= @vtime_date))
         ) TotEndorsers
         WHERE E.argumentID = argID AND E.active = TRUE
         GROUP BY E.explicationID, E.hyperlink, E.publisher, E.authorFName, E.authorLName, E.title, E.firstVisit, E.og_title, E.og_image, E.og_description, TotEndorsers.cnt
@@ -142,11 +148,17 @@ BEGIN
             E.og_image,
             E.og_description
         FROM EXPLICATION E
-        LEFT JOIN EXPLICATION_ENDORSE EE ON E.explicationID = EE.explicationID AND EE.argumentID = argID
+        LEFT JOIN (
+            SELECT EE2.* FROM EXPLICATION_ENDORSE EE2
+            INNER JOIN SCOPE_EXPLICATION_ENDORSE SEE ON EE2.profileID = SEE.profileID AND EE2.argumentID = SEE.argumentID AND SEE.affiliationID = @active_aff_id
+            WHERE @vtime_dir = 0 OR IF(@vtime_dir = 1, EE2.updatedAt <= @vtime_date, EE2.updatedAt >= @vtime_date)
+        ) EE ON E.explicationID = EE.explicationID AND EE.argumentID = argID
         CROSS JOIN (
-            SELECT COUNT(DISTINCT profileID) AS cnt
-            FROM EXPLICATION_ENDORSE
-            WHERE argumentID = argID AND active = TRUE
+            SELECT COUNT(DISTINCT EE3.profileID) AS cnt
+            FROM EXPLICATION_ENDORSE EE3
+            INNER JOIN SCOPE_EXPLICATION_ENDORSE SEE3 ON EE3.profileID = SEE3.profileID AND EE3.argumentID = SEE3.argumentID AND SEE3.affiliationID = @active_aff_id
+            WHERE EE3.argumentID = argID AND EE3.active = TRUE
+              AND (@vtime_dir = 0 OR IF(@vtime_dir = 1, EE3.updatedAt <= @vtime_date, EE3.updatedAt >= @vtime_date))
         ) TotEndorsers
         WHERE E.argumentID = argID AND E.active = TRUE
         GROUP BY E.explicationID, E.hyperlink, E.publisher, E.authorFName, E.authorLName, E.title, E.firstVisit, E.og_title, E.og_image, E.og_description, TotEndorsers.cnt

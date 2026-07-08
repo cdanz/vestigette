@@ -77,6 +77,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             mysqli_query($db, "INSERT INTO PHRASE_ENDORSE
                                    (argumentID, phrasingID, weight, profileID, firstVisit, lastVisit, active)
                                VALUES ($freshArgID, $freshPhraseID, 100, $profileID, NOW(), NOW(), TRUE)");
+            mysqli_query($db, "INSERT IGNORE INTO SCOPE_PHRASE_ENDORSE (profileID, argumentID, affiliationID) VALUES ($profileID, $freshArgID, @active_aff_id)");
 
             // Accept the new argument
             mysqli_query($db, "CALL assertOpinion(1, $freshArgID, $profileID)");
@@ -127,6 +128,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $query .= "INSERT INTO ENDORSEMENT VALUES($postArgID, $profileID, \"$safeType\", "
                 . $w['argID'] . ", " . $w['weight'] . ", NOW(), NOW(), TRUE);";
     }
+    $query .= "INSERT IGNORE INTO SCOPE_ENDORSEMENT (profileID, targArgID, affiliationID) VALUES($profileID, $postArgID, @active_aff_id);";
     $query .= "CALL resolveOldWithNewEndorse(\"$safeType\", $postArgID, $profileID);";
 
     if (mysqli_multi_query($db, $query)) {
@@ -152,6 +154,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     mysqli_next_result($db);
                     if ($r = mysqli_store_result($db)) mysqli_free_result($r);
                 }
+                mysqli_query($db, "INSERT IGNORE INTO SCOPE_ENDORSEMENT (profileID, targArgID, affiliationID) VALUES ($profileID, " . $w['argID'] . ", @active_aff_id)");
             }
         }
     }

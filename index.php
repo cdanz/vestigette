@@ -69,7 +69,6 @@ if (isset($links[0][3]) && $links[0][3] !== '' && $links[0][8] === null && $link
 $isAdmin            = false;
 $adminPickerEnabled = false;
 $adminPickerData    = []; // [{profileID, lastName}] ordered: real profile first
-$filterVisible      = false;
 $demoMode           = false;
 
 if (isset($_SESSION['profile'])) {
@@ -88,11 +87,9 @@ if (isset($_SESSION['profile'])) {
 
 	if ($isAdmin) {
 		$settRow = mysqli_fetch_assoc(mysqli_query($db,
-			"SELECT pickerType, pickerProfiles, filterEnabled, demoMode FROM ADMIN_SETTINGS WHERE profileID=$realProfileID"));
+			"SELECT pickerType, pickerProfiles, demoMode FROM ADMIN_SETTINGS WHERE profileID=$realProfileID"));
 		$pickerType = $settRow ? ($settRow['pickerType'] ?? 'none') : 'none';
 		$adminPickerEnabled = ($pickerType !== 'none');
-		$filterEnabled = $settRow ? intval($settRow['filterEnabled'] ?? 0) : 0;
-		$filterVisible = true;
 
 		if ($pickerType === 'manual') {
 			// Manual list: the admin's own profile + the specific IDs designated.
@@ -134,13 +131,6 @@ if (isset($_SESSION['profile'])) {
 			}
 		}
 	}
-	if (!$isAdmin && isset($_SESSION['profile'])) {
-		$fRow = mysqli_fetch_assoc(mysqli_query($db,
-			"SELECT filterEnabled FROM ADMIN_SETTINGS LIMIT 1"));
-		if ($fRow && intval($fRow['filterEnabled']) === 1) {
-			$filterVisible = true;
-		}
-	}
 }
 // Demo mode: check if any admin has it enabled (applies to all users)
 $dmRow = mysqli_fetch_assoc(mysqli_query($db,
@@ -148,9 +138,20 @@ $dmRow = mysqli_fetch_assoc(mysqli_query($db,
 $demoMode = $dmRow && intval($dmRow['demoMode']) === 1;
 // --- End admin setup ---
 
+// Active group name for masthead badge (uses real profile, not persona)
+$activeGroupName = '';
+if (isset($realProfileID)) {
+	$agRow = mysqli_fetch_row(mysqli_query($db,
+		"SELECT a.orgName FROM USER_PROFILE up
+		 JOIN AFFILIATION a ON a.affiliationID = up.activeAffiliationID
+		 WHERE up.profileID = $realProfileID
+		 AND up.activeAffiliationID != " . ALL_PUBLIC_AFF_ID . " LIMIT 1"));
+	if ($agRow) $activeGroupName = $agRow[0];
+}
+
 // --- Resolve active filter labels for rendering tags ---
-$filterTagData = ['opinions' => [], 'affiliations' => []];
-if ($filterVisible && isset($_SESSION['filters'])) {
+$filterTagData = ['opinions' => [], 'affiliations' => [], 'time' => null];
+if (isset($_SESSION['filters'])) {
 	if (!empty($_SESSION['filters']['opinions'])) {
 		foreach ($_SESSION['filters']['opinions'] as $opf) {
 			$oaID = intval($opf['argumentID']);
@@ -175,6 +176,9 @@ if ($filterVisible && isset($_SESSION['filters'])) {
 				'orgName'       => $row['orgName'],
 			];
 		}
+	}
+	if (!empty($_SESSION['filters']['time']['date'])) {
+		$filterTagData['time'] = $_SESSION['filters']['time'];
 	}
 }
 
@@ -403,7 +407,7 @@ function generateFindLines($results) {
 				because = <?php echo json_encode(isset($because) ? $because : null); ?>,
 				therefore = <?php echo json_encode(isset($therefore) ? $therefore : null); ?>,
 				rebuttal = <?php echo json_encode(isset($rebuttal) ? $rebuttal : null); ?>,
-				filterVisible = <?php echo $filterVisible ? 'true' : 'false'; ?>,
+				filterVisible = true,
 				demoMode = <?php echo $demoMode ? 'true' : 'false'; ?>,
 				csrfToken = <?php echo json_encode($csrfToken); ?>;
 		</script>
@@ -517,6 +521,17 @@ else {
 								<rect x="8.4" y="13.6" width="7.2" height="2.6" rx="1.3"/>
 							</svg>
 						</span>
+<?php endif; ?>
+<?php
+$filterCount = 0;
+if ($hasOpinionFilters)    $filterCount += count($activeFilters['opinions']);
+if ($hasAffiliationFilters) $filterCount += count($activeFilters['affiliations']);
+if ($hasTimeFilter)         $filterCount += 1;
+if ($filterCount > 0):
+?>
+						<a href="#filter" class="filter-badge" onclick="if(typeof applyDesktopState==='function'){applyDesktopState(true);}" title="<?php echo $filterCount; ?> active filter<?php echo $filterCount !== 1 ? 's' : ''; ?> — click to adjust" aria-label="<?php echo $filterCount; ?> active filter<?php echo $filterCount !== 1 ? 's' : ''; ?>">
+							<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg><?php if ($filterCount > 1): ?><span class="filter-badge-count"><?php echo $filterCount; ?></span><?php endif; ?>
+						</a>
 <?php endif; ?>
 					</div>
 				</div>
@@ -697,7 +712,10 @@ $canWeightTherefore = isset($opinion) && ($opinion > 0);
 	<div id="right-col">
 
 		<div id="mastHead" class="container">
-			<h1><a href="/?arg=<?php echo $_SESSION['currentArg'];?>">AGITATE</a></h1>
+			<h1><a href="/?arg=<?php echo $_SESSION['currentArg'];?>">AGITATE<span class="exclaim">!</span></a></h1>
+			<?php if ($profile && $activeGroupName !== ''): ?>
+			<a href="/Profile.php?arg=<?php echo intval($arg); ?>" class="group-badge" title="<?php echo htmlspecialchars($activeGroupName); ?>"><?php echo htmlspecialchars($activeGroupName); ?></a>
+			<?php endif; ?>
 			<div>
 				<a href="About.php?arg=<?php echo $_SESSION['currentArg'];?>">About</a>
 				<a href="Explore.php?arg=<?php echo $_SESSION['currentArg'];?>">Explore</a>
@@ -818,7 +836,6 @@ if (isset($recent)) {
 			</div>
 		</div>
 
-<?php if ($filterVisible): ?>
 		<div id="filter" class="accordion container">
 			<h2>Filter</h2>
 			<div class="panel" data-container-id="filter">
@@ -887,10 +904,31 @@ if (isset($recent)) {
 						</div>
 					</div>
 
+					<div class="filter-section">
+						<div class="filter-section-label">Active Time Filter</div>
+						<div class="filter-tags">
+<?php if (!empty($filterTagData['time'])): ?>
+<?php
+	$tDir = ucfirst($filterTagData['time']['direction']);
+	$tDateFmt = date('M j, Y', strtotime($filterTagData['time']['date']));
+?>
+							<form method="POST" action="/?arg=<?php echo intval($arg); ?>" class="filter-tag-form">
+								<input type="hidden" name="buttonClicked" value="clearTimeFilter">
+								<span class="filter-tag filter-tag-time">
+									<?php echo htmlspecialchars("$tDir $tDateFmt"); ?>
+									<button type="submit" class="filter-tag-x">&times;</button>
+								</span>
+								<?php addCSRFtoken() ?>
+							</form>
+<?php else: ?>
+							<span class="filter-none">None</span>
+<?php endif; ?>
+						</div>
+					</div>
+
 				</div>
 			</div>
 		</div>
-<?php endif; ?>
 
 	</div>
 
@@ -1027,20 +1065,33 @@ if ((isset($opinion)) && ($opinion > 0)) {
 </div>
 <?php endif; ?>
 
-<?php if ($filterVisible): ?>
 <div id="overlayFilter" class="hidden">
 	<div id="filterModal" class="container">
 		<h2>Filter Options</h2>
 		<button id="closeFilter" class="button">X</button>
 		<div class="panel expanded" data-container-id="filterModal">
 			<div class="filter-modal-section">
-				<label for="affiliationSearch" class="filter-modal-label">Search Groups</label>
-				<input type="text" class="filter-search" id="affiliationSearch" placeholder="Search groups..." autocomplete="off">
+				<div class="filter-modal-label">Time Filter</div>
+				<form method="POST" action="/?arg=<?php echo intval($arg); ?>" class="filter-time-form">
+					<input type="hidden" name="buttonClicked" value="setTimeFilter">
+					<div class="filter-time-row">
+						<select name="timeDirection" class="filter-time-select">
+							<option value="before"<?php echo (!empty($filterTagData['time']) && $filterTagData['time']['direction'] === 'before') ? ' selected' : ''; ?>>Before</option>
+							<option value="after"<?php echo (!empty($filterTagData['time']) && $filterTagData['time']['direction'] === 'after') ? ' selected' : ''; ?>>After</option>
+						</select>
+						<input type="date" name="timeDate" class="filter-time-date" placeholder="Date" value="<?php echo htmlspecialchars($filterTagData['time']['date'] ?? ''); ?>" required>
+						<button type="submit" class="filter-add-btn">Apply</button>
+					</div>
+					<?php addCSRFtoken() ?>
+				</form>
+			</div>
+			<div class="filter-modal-section">
+				<label for="affiliationSearch" class="filter-modal-label">Search Public Groups</label>
+				<input type="text" class="filter-search" id="affiliationSearch" placeholder="Search Public Groups" autocomplete="off">
 				<ul id="affiliationResults" class="filter-results"></ul>
 			</div>
 		</div>
 	</div>
 </div>
-<?php endif; ?>
 	</body>
 </html>

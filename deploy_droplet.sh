@@ -24,6 +24,7 @@ SRC="/Users/Razzmatazz/vestigette-dev"
 PHP_FILES=(
     functions.php
     flesh_out.php
+    register.php
     find_similar.php
     search_affiliations.php
     About.php
@@ -54,6 +55,7 @@ STATIC_FILES=(
 INCLUDE_FILES=(
     Parsedown.php
     content_chrome.php
+    dbconnect.php
 )
 
 BOT_FILES=(

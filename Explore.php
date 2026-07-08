@@ -33,6 +33,18 @@ if ($res) {
     while (mysqli_more_results($db)) { mysqli_next_result($db); }
 }
 
+$activeGroupName = '';
+if ($profile) {
+    $realPID = intval($_SESSION['realProfile'] ?? $_SESSION['profile'] ?? 0);
+    if ($realPID > 0) {
+        $agRow = mysqli_fetch_row(mysqli_query($db,
+            "SELECT a.orgName FROM USER_PROFILE up
+             JOIN AFFILIATION a ON a.affiliationID = up.activeAffiliationID
+             WHERE up.profileID = $realPID
+             AND up.activeAffiliationID != " . ALL_PUBLIC_AFF_ID . " LIMIT 1"));
+        if ($agRow) $activeGroupName = $agRow[0];
+    }
+}
 mysqli_close($db);
 
 $entryPoints = [
@@ -87,7 +99,10 @@ $entryPoints = [
 <body class="content-page">
 
 <div id="mastHead" class="container">
-    <h1><a href="/?arg=<?php echo $arg; ?>">AGITATE</a></h1>
+    <h1><a href="/?arg=<?php echo $arg; ?>">AGITATE<span class="exclaim">!</span></a></h1>
+    <?php if ($profile && $activeGroupName !== ''): ?>
+    <a href="/Profile.php?arg=<?php echo intval($arg); ?>" class="group-badge" title="<?php echo htmlspecialchars($activeGroupName); ?>"><?php echo htmlspecialchars($activeGroupName); ?></a>
+    <?php endif; ?>
     <div>
         <a href="About.php?arg=<?php echo $arg; ?>">About</a>
         <a href="Explore.php?arg=<?php echo $arg; ?>" style="text-decoration:underline;">Explore</a>

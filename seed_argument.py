@@ -129,7 +129,7 @@ def main():
 
             verdict       = response.get('verdict', 'skip')
             phrasing_text = response.get('phrasing') if verdict == 'accept' else None
-            rebuttals     = response.get('rebuttals', []) if verdict == 'reject' else []
+            rebuttals     = (response.get('rebuttals', []) or [])[:2] if verdict == 'reject' else []
 
             # Display
             print(f'  {persona_name} — {verdict.upper()}', end='')
@@ -138,7 +138,10 @@ def main():
             elif verdict == 'reject' and rebuttals:
                 print()
                 for j, r in enumerate(rebuttals, 1):
-                    print(f'    rebuttal {j}: "{r}"')
+                    print(f'    rebuttal {j}: "{bot.item_text(r)}"')
+                    for k, sub in enumerate(bot.item_subs(r), 1):
+                        print(f'        sub {k}: "{sub}" (NOT submitted — no DB access here; '
+                              f'use process_seed_queue.py for sub-bullet submission)')
             else:
                 print()
 
@@ -182,7 +185,7 @@ def main():
                     flesh_csrf = bot.get_flesh_out_csrf(session, arg_id, 'Rebuttal')
                     time.sleep(0.3)
                     pinned = [
-                        {'type': 'new', 'text': r, 'weight': 1, 'reciprocate': False}
+                        {'type': 'new', 'text': bot.item_text(r), 'weight': 1, 'reciprocate': False}
                         for r in rebuttals
                     ]
                     session.post(

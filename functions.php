@@ -15,6 +15,8 @@
 			 SELECT $argID, $profileID, NULL, NULL, NULL, NOW()
 			 FROM USER_PROFILE u
 			 WHERE u.profileID = $profileID AND u.isAdmin = 0
+			   AND EXISTS (SELECT 1 FROM AFFILIATION a
+			               WHERE a.affiliationID = u.activeAffiliationID AND a.public = 1)
 			   AND NOT EXISTS (SELECT 1 FROM BOT_SEED_QUEUE q
 			                   WHERE q.argumentID = $argID
 			                     AND q.status IN ('pending','processing','done'))
@@ -62,6 +64,7 @@
 						$impliedAccepts .= "CALL assertOpinion(1,".$supportArgVal.",".$profileID.");";
 					}
 				}
+				$query .= "INSERT IGNORE INTO SCOPE_ENDORSEMENT (profileID, targArgID, affiliationID) VALUES(".$profileID.",".$argAtHand.",@active_aff_id);";
 				$query .= "CALL resolveOldWithNewEndorse(\"".$type."\",".$argAtHand.",".$profileID.");";
 				// Apply implied acceptance AFTER the inserts/resolve so each opinion
 				// flip's ENDORSEMENT updates run outside the insert trigger. Runs at
@@ -94,6 +97,7 @@
 						$impliedAccepts .= "CALL assertOpinion(1,".$supportArgVal.",".$profileID.");";
 					}
 				}
+				$query .= "INSERT IGNORE INTO SCOPE_ENDORSEMENT (profileID, targArgID, affiliationID) VALUES(".$profileID.",".$argAtHand.",@active_aff_id);";
 				$query .= "CALL resolveOldWithNewEndorse(\"".$type."\",".$argAtHand.",".$profileID.");";
 				// Apply implied acceptance AFTER the inserts/resolve so each opinion
 				// flip's ENDORSEMENT updates run outside the insert trigger. Runs at
@@ -125,6 +129,7 @@
 						$impliedAccepts .= "CALL assertOpinion(1,".$supportArgVal.",".$profileID.");";
 					}
 				}
+				$query .= "INSERT IGNORE INTO SCOPE_ENDORSEMENT (profileID, targArgID, affiliationID) VALUES(".$profileID.",".$argAtHand.",@active_aff_id);";
 				$query .= "CALL resolveOldWithNewEndorse(\"".$type."\",".$argAtHand.",".$profileID.");";
 				// Apply implied acceptance AFTER the inserts/resolve so each opinion
 				// flip's ENDORSEMENT updates run outside the insert trigger. Runs at
@@ -201,36 +206,38 @@
 				break;
 	            //TODO THIS IS NOT NEARLY DONE - YOU HAVE AN UNTESTED SQL STORED PROCEDURE
 	            //Make the button pass the arg ID
-	        case "useInstead": 
-	        	$existing = $_POST["useInstead"]; 
-	            $type = $_POST["type"]; 
+	        case "useInstead":
+	        	$existing = $_POST["useInstead"];
+	            $type = $_POST["type"];
 	            $argAtHand = intval($_SESSION['currentArg']);
 	            $profileID = intval($_SESSION['profile']);
 	            $query = "CALL useInstead(\"".$type."\",".$argAtHand.",".$existing.",".$profileID.");";
 
 				/*Execute queries */
 				if(mysqli_query($db, $query)){
+					mysqli_query($db, "INSERT IGNORE INTO SCOPE_ENDORSEMENT (profileID, targArgID, affiliationID) VALUES($profileID, $argAtHand, @active_aff_id)");
 					header('Location: /?arg='.$_SESSION['currentArg']);
 				}
-				else 
+				else
 					echo "Query Failed";
 	            break;
-			case "useInsteadAndReciprocate": 
-				$existing = $_POST["useInstead"]; 
-				$type = $_POST["type"]; 
+			case "useInsteadAndReciprocate":
+				$existing = $_POST["useInstead"];
+				$type = $_POST["type"];
 				$argAtHand = intval($_SESSION['currentArg']);
 				$profileID = intval($_SESSION['profile']);
 				$query = "CALL useInsteadAndReciprocate(\"".$type."\",".$argAtHand.",".$existing.",".$profileID.");";
 
 				/*Execute queries */
 				if(mysqli_query($db, $query)){
+					mysqli_query($db, "INSERT IGNORE INTO SCOPE_ENDORSEMENT (profileID, targArgID, affiliationID) VALUES($profileID, $argAtHand, @active_aff_id)");
 					header('Location: /?arg='.$_SESSION['currentArg']);
 				}
-				else 
+				else
 					echo "Query Failed";
 				break;
-	        case "becauseUseInstead": 
-	        	$existing = $_POST["becauseUseInstead"]; 
+	        case "becauseUseInstead":
+	        	$existing = $_POST["becauseUseInstead"];
 	            $type = "Because";
 	            $argAtHand = intval($_SESSION['currentArg']);
 	            $profileID = intval($_SESSION['profile']);
@@ -238,15 +245,16 @@
 
 				/*Execute queries */
 				if(mysqli_query($db, $query)){
+					mysqli_query($db, "INSERT IGNORE INTO SCOPE_ENDORSEMENT (profileID, targArgID, affiliationID) VALUES($profileID, $argAtHand, @active_aff_id)");
 					header('Location: /?arg='.$_SESSION['currentArg']);
 				}
-				else 
+				else
 					echo "Query Failed";
 	            break;
 			//TODO THIS IS NOT NEARLY DONE - YOU HAVE AN UNTESTED SQL STORED PROCEDURE
 			//Make the button pass the arg ID
-	        case "thereforeUseInstead": 
-	        	$existing = $_POST["thereforeUseInstead"]; 
+	        case "thereforeUseInstead":
+	        	$existing = $_POST["thereforeUseInstead"];
 	            $type = "Therefore";
 	            $argAtHand = intval($_SESSION['currentArg']);
 	            $profileID = intval($_SESSION['profile']);
@@ -254,16 +262,17 @@
 
 				/*Execute queries */
 				if(mysqli_query($db, $query)){
+					mysqli_query($db, "INSERT IGNORE INTO SCOPE_ENDORSEMENT (profileID, targArgID, affiliationID) VALUES($profileID, $argAtHand, @active_aff_id)");
 					header('Location: /?arg='.$_SESSION['currentArg']);
 				}
-				else 
+				else
 					echo "Query Failed";
-				
+
 	            break;
 			//TODO THIS IS NOT NEARLY DONE - YOU HAVE AN UNTESTED SQL STORED PROCEDURE
 			//Make the button pass the arg ID
-	        case "rebuttalUseInstead": 
-	        	$existing = $_POST["rebuttalUseInstead"]; 
+	        case "rebuttalUseInstead":
+	        	$existing = $_POST["rebuttalUseInstead"];
 	            $type = "Rebuttal";
 	            $argAtHand = intval($_SESSION['currentArg']);
 	            $profileID = intval($_SESSION['profile']);
@@ -271,9 +280,10 @@
 
 				/*Execute queries */
 				if(mysqli_query($db, $query)){
+					mysqli_query($db, "INSERT IGNORE INTO SCOPE_ENDORSEMENT (profileID, targArgID, affiliationID) VALUES($profileID, $argAtHand, @active_aff_id)");
 					header('Location: /?arg='.$_SESSION['currentArg']);
 				}
-				else 
+				else
 					echo "Query Failed";
 				
 	            
@@ -304,6 +314,7 @@
 					$weightVal = floatval($arrayOfWeighIns[$i+1]);
 					$query .= "INSERT INTO PHRASE_ENDORSE (argumentID, profileID, phrasingID, weight, active) VALUES(".$argAtHand.",".$profileID.",".$phrasingIDVal.",".$weightVal.",TRUE);";
 				}
+				$query .= "INSERT IGNORE INTO SCOPE_PHRASE_ENDORSE (profileID, argumentID, affiliationID) VALUES(".$profileID.",".$argAtHand.",@active_aff_id);";
 				$query .= "CALL updatePhrasingCache(".$argAtHand.");";
 				if(mysqli_multi_query($db, $query)){
 					header('Location: /?arg='.$_SESSION['currentArg']);
@@ -371,6 +382,7 @@
 	        		$weightVal = floatval($arrayOfWeighIns[$i + 1]);
 	        		$query .= "INSERT INTO EXPLICATION_ENDORSE (explicationID, argumentID, profileID, weight, active) VALUES(" . $explicationIDVal . "," . $argAtHand . "," . $profileID . "," . $weightVal . ",TRUE);";
 	        	}
+	        	$query .= "INSERT IGNORE INTO SCOPE_EXPLICATION_ENDORSE (profileID, argumentID, affiliationID) VALUES(" . $profileID . "," . $argAtHand . ",@active_aff_id);";
 	        	if (mysqli_multi_query($db, $query)) {
 	        		header('Location: /?arg=' . $_SESSION['currentArg']);
 	        	} else {
@@ -509,7 +521,21 @@
 			if (!isset($_SESSION['filters'])) $_SESSION['filters'] = ['opinions' => [], 'affiliations' => []];
 			$affID = intval($_POST['affiliationID'] ?? 0);
 			if ($affID > 0 && !in_array($affID, $_SESSION['filters']['affiliations'], true)) {
-				$_SESSION['filters']['affiliations'][] = $affID;
+				$affPubRow = mysqli_fetch_row(mysqli_query($db,
+					"SELECT public FROM AFFILIATION WHERE affiliationID = $affID LIMIT 1"
+				));
+				if ($affPubRow && intval($affPubRow[0]) === 1) {
+					$_SESSION['filters']['affiliations'][] = $affID;
+				} else {
+					// Private group — only allow via auto-apply (operating-as switch)
+					$realPID = intval($_SESSION['realProfile'] ?? $_SESSION['profile'] ?? 0);
+					$activeRow = mysqli_fetch_row(mysqli_query($db,
+						"SELECT activeAffiliationID FROM USER_PROFILE WHERE profileID = $realPID LIMIT 1"
+					));
+					if ($activeRow && intval($activeRow[0]) === $affID) {
+						$_SESSION['filters']['affiliations'][] = $affID;
+					}
+				}
 			}
 			header('Location: /?arg=' . intval($_SESSION['currentArg']));
 			exit;
@@ -521,13 +547,75 @@
 					$_SESSION['filters']['affiliations'],
 					fn($a) => $a !== $rAffID
 				));
+				if (isset($_SESSION['filters']['auto_aff_id']) &&
+					intval($_SESSION['filters']['auto_aff_id']) === $rAffID) {
+					unset($_SESSION['filters']['auto_aff_id']);
+				}
 			}
+			header('Location: /?arg=' . intval($_SESSION['currentArg']));
+			exit;
+
+		case "setTimeFilter":
+			if (!isset($_SESSION['filters'])) $_SESSION['filters'] = ['opinions' => [], 'affiliations' => []];
+			$tDir = (($_POST['timeDirection'] ?? 'before') === 'after') ? 'after' : 'before';
+			$tDate = $_POST['timeDate'] ?? '';
+			if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $tDate)) {
+				$_SESSION['filters']['time'] = ['direction' => $tDir, 'date' => $tDate];
+			}
+			header('Location: /?arg=' . intval($_SESSION['currentArg']));
+			exit;
+
+		case "clearTimeFilter":
+			if (isset($_SESSION['filters'])) unset($_SESSION['filters']['time']);
 			header('Location: /?arg=' . intval($_SESSION['currentArg']));
 			exit;
 
 		case "clearAllFilters":
 			unset($_SESSION['filters']);
 			header('Location: /?arg=' . intval($_SESSION['currentArg']));
+			exit;
+
+		case "switchGroup":
+			$newAffID      = intval($_POST['affiliationID'] ?? 0);
+			$realProfileID = intval($_SESSION['realProfile'] ?? $_SESSION['profile']);
+			if ($newAffID > 0 && $realProfileID > 0) {
+				$chk = $db->prepare(
+					"SELECT 1 FROM MEMBER WHERE affiliationID = ? AND profileID = ? LIMIT 1"
+				);
+				$chk->bind_param("ii", $newAffID, $realProfileID);
+				$chk->execute();
+				$isMember = (bool) $chk->get_result()->fetch_row();
+				$chk->close();
+				if ($isMember) {
+					$upd = $db->prepare(
+						"UPDATE USER_PROFILE SET activeAffiliationID = ? WHERE profileID = ?"
+					);
+					$upd->bind_param("ii", $newAffID, $realProfileID);
+					$upd->execute();
+					$upd->close();
+					// Auto-apply the new group as the filter view. All Users - Public is the
+					// universal default — switching back to it clears the group filter instead.
+					if (!isset($_SESSION['filters'])) {
+						$_SESSION['filters'] = ['opinions' => [], 'affiliations' => []];
+					}
+					$prevAutoAff = intval($_SESSION['filters']['auto_aff_id'] ?? 0);
+					if ($prevAutoAff > 0) {
+						$_SESSION['filters']['affiliations'] = array_values(array_filter(
+							$_SESSION['filters']['affiliations'] ?? [],
+							fn($a) => $a !== $prevAutoAff
+						));
+					}
+					if ($newAffID !== ALL_PUBLIC_AFF_ID) {
+						if (!in_array($newAffID, $_SESSION['filters']['affiliations'] ?? [], true)) {
+							$_SESSION['filters']['affiliations'][] = $newAffID;
+						}
+						$_SESSION['filters']['auto_aff_id'] = $newAffID;
+					} else {
+						unset($_SESSION['filters']['auto_aff_id']);
+					}
+				}
+			}
+			header('Location: /?arg=' . intval($_SESSION['currentArg'] ?? 75));
 			exit;
 
 	    }

@@ -26,7 +26,8 @@ if (!$_SESSION['isAdmin']) {
 
 $arg    = isset($_GET['arg']) ? intval($_GET['arg']) : 75;
 $saved  = isset($_GET['saved']);
-$merged = isset($_GET['merged']) ? intval($_GET['merged']) : null;
+$merged       = isset($_GET['merged']) ? intval($_GET['merged']) : null;
+$groupCreated = isset($_GET['groupCreated']) ? $_GET['groupCreated'] : null;
 $errors = [];
 $mergePreview = null;
 
@@ -56,19 +57,6 @@ if (isset($_POST['adminAction'])) {
 				                         pickerProfiles = VALUES(pickerProfiles)"
 			);
 			$stmt->bind_param("iiss", $realProfileID, $enabled, $type, $profilesStr);
-			$stmt->execute();
-			mysqli_close($db);
-			header("Location: /admin_tools.php?arg=$arg&saved=1");
-			exit;
-
-		case 'saveFilterSettings':
-			$filterOn = isset($_POST['filterEnabled']) ? 1 : 0;
-			$stmt = $db->prepare(
-				"INSERT INTO ADMIN_SETTINGS (profileID, filterEnabled)
-				 VALUES (?, ?)
-				 ON DUPLICATE KEY UPDATE filterEnabled = VALUES(filterEnabled)"
-			);
-			$stmt->bind_param("ii", $realProfileID, $filterOn);
 			$stmt->execute();
 			mysqli_close($db);
 			header("Location: /admin_tools.php?arg=$arg&saved=1");
@@ -119,6 +107,55 @@ if (isset($_POST['adminAction'])) {
 			$mergePreview = ['a' => $rowA, 'b' => $rowB];
 			break;
 
+		case 'createGroup':
+			$groupName  = trim($_POST['groupName']  ?? '');
+			$groupDesc  = trim($_POST['groupDesc']  ?? '');
+			$groupPublic = intval($_POST['groupPublic'] ?? 1) ? 1 : 0;
+			$memberCap  = min(200, max(1, intval($_POST['memberCapacity'] ?? 10)));
+			$captainEmail = trim($_POST['captainEmail'] ?? '');
+
+			if ($groupName === '')  { $errors[] = 'Group name is required.'; break; }
+			if (strlen($groupName) > 100) { $errors[] = 'Group name must be 100 characters or less.'; break; }
+			if ($captainEmail === '') { $errors[] = 'Captain email is required.'; break; }
+
+			$cStmt = $db->prepare("SELECT profileID FROM USER_PROFILE WHERE email = ? LIMIT 1");
+			$cStmt->bind_param("s", $captainEmail);
+			$cStmt->execute();
+			$captainRow = $cStmt->get_result()->fetch_assoc();
+			$cStmt->close();
+			if (!$captainRow) { $errors[] = 'No account found for email: ' . htmlspecialchars($captainEmail); break; }
+			$captainProfileID = intval($captainRow['profileID']);
+
+			$gStmt = $db->prepare(
+				"INSERT INTO AFFILIATION (orgName, public, description, adminID, createdBy, createdDate)
+				 VALUES (?, ?, ?, ?, ?, NOW())"
+			);
+			$gStmt->bind_param("sisii", $groupName, $groupPublic, $groupDesc, $realProfileID, $realProfileID);
+			$gStmt->execute();
+			$newAffID = intval($gStmt->insert_id);
+			$gStmt->close();
+
+			$mStmt = $db->prepare(
+				"INSERT INTO MEMBER (affiliationID, profileID, dateAdded, isCaptain) VALUES (?, ?, NOW(), 1)"
+			);
+			$mStmt->bind_param("ii", $newAffID, $captainProfileID);
+			$mStmt->execute();
+			$mStmt->close();
+
+			$iStmt = $db->prepare(
+				"INSERT INTO INVITATION (code, createdBy, affiliationID, usesTotal, usesRemaining, captainProfileID)
+				 VALUES (?, ?, ?, 1, 1, ?)"
+			);
+			for ($i = 0; $i < $memberCap; $i++) {
+				$code = bin2hex(random_bytes(16));
+				$iStmt->bind_param("siii", $code, $realProfileID, $newAffID, $captainProfileID);
+				$iStmt->execute();
+			}
+			$iStmt->close();
+			mysqli_close($db);
+			header("Location: /admin_tools.php?arg=$arg&groupCreated=" . urlencode($groupName));
+			exit;
+
 		case 'generateInvites':
 			$qty = min(20, max(1, intval($_POST['inviteQty'] ?? 1)));
 			$stmt = $db->prepare(
@@ -161,10 +198,9 @@ if (isset($_POST['adminAction'])) {
 // ---------- Load current settings ----------
 $invitesSaved = isset($_GET['invites']);
 $settRow        = mysqli_fetch_assoc(mysqli_query($db,
-	"SELECT pickerEnabled, pickerType, pickerProfiles, filterEnabled, demoMode FROM ADMIN_SETTINGS WHERE profileID=$realProfileID"));
+	"SELECT pickerEnabled, pickerType, pickerProfiles, demoMode FROM ADMIN_SETTINGS WHERE profileID=$realProfileID"));
 $pickerType     = $settRow ? ($settRow['pickerType'] ?? 'none') : 'none';
 $pickerProfiles = $settRow ? ($settRow['pickerProfiles'] ?? '') : '';
-$filterEnabled  = $settRow ? intval($settRow['filterEnabled'] ?? 0) : 0;
 $demoMode       = $settRow ? intval($settRow['demoMode'] ?? 0) : 0;
 
 $mergeArgA = intval($_POST['mergeArgA'] ?? 0) ?: '';
@@ -173,12 +209,15 @@ $mergeArgB = intval($_POST['mergeArgB'] ?? 0) ?: '';
 // Load invite codes
 $inviteResult = mysqli_query($db,
 	"SELECT i.inviteID, i.code, i.createdAt, i.expiresAt, i.usedAt,
-	        CONCAT(up.firstName, ' ', up.lastName) AS usedByName
+	        i.affiliationID,
+	        CONCAT(up.firstName, ' ', up.lastName) AS usedByName,
+	        a.orgName AS groupName
 	 FROM INVITATION i
 	 LEFT JOIN USER_PROFILE up ON up.profileID = i.usedBy
+	 LEFT JOIN AFFILIATION a ON a.affiliationID = i.affiliationID
 	 WHERE i.createdBy = $realProfileID
-	 ORDER BY i.createdAt DESC
-	 LIMIT 100");
+	 ORDER BY COALESCE(i.affiliationID, 0) DESC, i.createdAt DESC
+	 LIMIT 500");
 $invites = [];
 while ($row = mysqli_fetch_assoc($inviteResult)) { $invites[] = $row; }
 
@@ -255,6 +294,7 @@ mysqli_close($db);
 		.flag-card-body table { width: 100%; border-collapse: collapse; font-size: 0.82rem; margin: 0.4rem 0 0.6rem; }
 		.flag-card-body th, .flag-card-body td { text-align: left; padding: 0.3rem 0.5rem; border-bottom: 1px solid #eee; vertical-align: top; }
 		.flag-cat-tag { display: inline-block; background: #eee; border-radius: 3px; padding: 0.05rem 0.4rem; font-size: 0.78rem; white-space: nowrap; }
+		h3.sub-h3 { font-size: 0.9rem; font-weight: 600; margin: 1.1rem 0 0.2rem; color: #333; }
 	</style>
 </head>
 <body>
@@ -306,25 +346,6 @@ mysqli_close($db);
 
 	<div class="field">
 		<button type="submit">Save picker settings</button>
-	</div>
-</form>
-
-<hr class="divider">
-
-<!-- ── Filter Lens ──────────────────────────── -->
-<h2>Filter Lens</h2>
-<p class="desc">When enabled, all logged-in users see the Filter section. When disabled, only admins see it.</p>
-
-<form method="POST" action="/admin_tools.php?arg=<?php echo $arg; ?>">
-	<input type="hidden" name="adminAction" value="saveFilterSettings">
-
-	<div class="field">
-		<label><input type="checkbox" name="filterEnabled" value="1"
-			<?php if ($filterEnabled) echo 'checked'; ?>> Enable Filter section for all users</label>
-	</div>
-
-	<div class="field">
-		<button type="submit">Save filter settings</button>
 	</div>
 </form>
 
@@ -394,11 +415,50 @@ mysqli_close($db);
 
 <!-- ── Invite Codes ───────────────────────────── -->
 <h2>Invite Codes</h2>
-<p class="desc">Generate single-use invitation links. Each code expires 7 days after creation.</p>
+
+<?php if ($groupCreated): ?>
+<div class="notice">Group "<?php echo htmlspecialchars($groupCreated); ?>" created with invite codes.</div>
+<?php endif; ?>
 
 <?php if ($invitesSaved): ?>
-<div class="notice">Invite codes generated.</div>
+<div class="notice">Platform invite codes generated.</div>
 <?php endif; ?>
+
+<h3 class="sub-h3">Create a Group</h3>
+<p class="desc">Creates a group, designates a captain by email, and generates invite codes up to the member capacity.</p>
+
+<form method="POST" action="/admin_tools.php?arg=<?php echo $arg; ?>">
+	<input type="hidden" name="adminAction" value="createGroup">
+	<div class="field">
+		<label for="groupName">Group name</label>
+		<input type="text" id="groupName" name="groupName" placeholder="e.g. Socratic Debate Club" maxlength="100">
+	</div>
+	<div class="field">
+		<label for="groupDesc">Description</label>
+		<input type="text" id="groupDesc" name="groupDesc" placeholder="Optional" maxlength="500" style="width:400px;max-width:100%;">
+	</div>
+	<div class="field">
+		<label>Visibility</label>
+		<label><input type="radio" name="groupPublic" value="1" checked> Public — discoverable in group search</label>
+		<label><input type="radio" name="groupPublic" value="0"> Private — invite-only, not listed</label>
+	</div>
+	<div class="field">
+		<label for="memberCapacity">Member capacity — invite codes to generate (max 200)</label>
+		<input type="number" id="memberCapacity" name="memberCapacity" value="10" min="1" max="200">
+	</div>
+	<div class="field">
+		<label for="captainEmail">Captain email</label>
+		<input type="text" id="captainEmail" name="captainEmail" placeholder="captain@example.com">
+	</div>
+	<div class="field">
+		<button type="submit">Create group</button>
+	</div>
+</form>
+
+<hr class="divider">
+
+<h3 class="sub-h3">Platform Invites</h3>
+<p class="desc">Single-use links for registering a new account, not tied to any group. Each code expires 7 days after creation.</p>
 
 <form method="POST" action="/admin_tools.php?arg=<?php echo $arg; ?>">
 	<input type="hidden" name="adminAction" value="generateInvites">
@@ -415,6 +475,7 @@ mysqli_close($db);
 <table style="width:100%;border-collapse:collapse;font-size:0.85rem;margin-top:0.75rem;">
 	<thead>
 		<tr style="text-align:left;border-bottom:1px solid #ddd;">
+			<th style="padding:0.35rem 0.5rem;">Group</th>
 			<th style="padding:0.35rem 0.5rem;">Link</th>
 			<th style="padding:0.35rem 0.5rem;">Created</th>
 			<th style="padding:0.35rem 0.5rem;">Expires</th>
@@ -424,13 +485,15 @@ mysqli_close($db);
 	</thead>
 	<tbody>
 	<?php foreach ($invites as $inv):
-		$used    = $inv['usedAt'] !== null;
-		$expired = !$used && strtotime($inv['expiresAt']) < time();
-		$status  = $used ? '✓ Used by ' . htmlspecialchars($inv['usedByName']) : ($expired ? 'Expired' : 'Pending');
-		$rowColor = $used ? '#f6fff6' : ($expired ? '#fff6f6' : '#fff');
-		$link    = 'https://agitate-discourse.org/register.php?code=' . $inv['code'];
+		$used      = $inv['usedAt'] !== null;
+		$expired   = !$used && strtotime($inv['expiresAt']) < time();
+		$status    = $used ? '✓ Used by ' . htmlspecialchars($inv['usedByName']) : ($expired ? 'Expired' : 'Pending');
+		$rowColor  = $used ? '#f6fff6' : ($expired ? '#fff6f6' : '#fff');
+		$link      = 'https://agitate-discourse.org/register.php?code=' . $inv['code'];
+		$groupLabel = $inv['groupName'] ? htmlspecialchars($inv['groupName']) : '<span style="color:#aaa;">Platform</span>';
 	?>
 	<tr style="border-bottom:1px solid #eee;background:<?php echo $rowColor; ?>">
+		<td style="padding:0.35rem 0.5rem;white-space:nowrap;"><?php echo $groupLabel; ?></td>
 		<td style="padding:0.35rem 0.5rem;word-break:break-all;">
 			<?php if (!$used && !$expired): ?>
 				<a href="<?php echo $link; ?>" target="_blank"><?php echo $link; ?></a>

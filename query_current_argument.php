@@ -7,6 +7,16 @@ $filtered = 0;
 $activeFilters = isset($_SESSION['filters']) ? $_SESSION['filters'] : [];
 $hasOpinionFilters = !empty($activeFilters['opinions']);
 $hasAffiliationFilters = !empty($activeFilters['affiliations']);
+$hasTimeFilter = !empty($activeFilters['time']) && !empty($activeFilters['time']['date']);
+
+// Always initialize time-filter session vars to avoid stale values from prior requests
+if ($hasTimeFilter) {
+    $tDir = ($activeFilters['time']['direction'] === 'after') ? 2 : 1;
+    $tDate = preg_replace('/[^0-9\-]/', '', $activeFilters['time']['date']);
+    mysqli_query($db, "SET @vtime_dir = $tDir, @vtime_date = '$tDate'");
+} else {
+    mysqli_query($db, "SET @vtime_dir = 0, @vtime_date = NULL");
+}
 
 if ($hasOpinionFilters || $hasAffiliationFilters) {
   mysqli_query($db, "CREATE TEMPORARY TABLE IF NOT EXISTS FILTER_PROFILES (profileID INT UNSIGNED PRIMARY KEY)");
@@ -29,7 +39,15 @@ if ($hasOpinionFilters || $hasAffiliationFilters) {
   if ($hasAffiliationFilters) {
     $affIDs = array_map('intval', $activeFilters['affiliations']);
     $affList = implode(',', $affIDs);
-    $sets[] = "(SELECT DISTINCT profileID FROM MEMBER WHERE affiliationID IN ($affList))";
+    $sets[] = "(SELECT DISTINCT profileID FROM (
+        SELECT profileID FROM SCOPE_OPINION             WHERE affiliationID IN ($affList) AND argumentID = $argID
+        UNION
+        SELECT profileID FROM SCOPE_ENDORSEMENT         WHERE affiliationID IN ($affList) AND targArgID  = $argID
+        UNION
+        SELECT profileID FROM SCOPE_PHRASE_ENDORSE      WHERE affiliationID IN ($affList) AND argumentID = $argID
+        UNION
+        SELECT profileID FROM SCOPE_EXPLICATION_ENDORSE WHERE affiliationID IN ($affList) AND argumentID = $argID
+    ) sc)";
   }
 
   if (count($sets) === 1) {

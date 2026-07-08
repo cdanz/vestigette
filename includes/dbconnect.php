@@ -30,6 +30,9 @@
   mysqli_set_charset($db, "utf8mb4");
   mysqli_query($db, "SET SESSION sql_mode = 'STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION'");
 
+  // ALL_PUBLIC_AFF_ID: affiliationID for "All Users - Public" (the universal default group).
+  define('ALL_PUBLIC_AFF_ID', 12);
+
   //Be skeptical of this. Claude added on 09.05.2026
   $mysqli = $db; // Create $mysqli alias for compatibility with existing queries
 
@@ -47,4 +50,21 @@
       $_SESSION['email']   = $rm_row['email'];
     }
   }
+
+  // Set @active_aff_id from the logged-in user's stored active affiliation.
+  // Runs after rememberMe restore so cookie-authenticated sessions are covered.
+  $_aff_id = ALL_PUBLIC_AFF_ID;
+  if (isset($_SESSION['profile'])) {
+    $_aff_stmt = $db->prepare("SELECT activeAffiliationID FROM USER_PROFILE WHERE profileID = ?");
+    $_aff_stmt->bind_param("i", $_SESSION['profile']);
+    $_aff_stmt->execute();
+    $_aff_row = $_aff_stmt->get_result()->fetch_assoc();
+    $_aff_stmt->close();
+    if ($_aff_row && !empty($_aff_row['activeAffiliationID'])) {
+      $_aff_id = intval($_aff_row['activeAffiliationID']);
+    }
+    unset($_aff_stmt, $_aff_row);
+  }
+  mysqli_query($db, "SET @active_aff_id = " . $_aff_id);
+  unset($_aff_id);
 ?>

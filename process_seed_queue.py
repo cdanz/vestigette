@@ -181,6 +181,48 @@ def fetch_existing(db, arg_id: int, rel_type: str) -> list:
         return [r for r in cur.fetchall() if r['text'].strip()]
 
 
+def get_new_arg_id(db, phrasing_text: str, profile_id: int):
+    """
+    Recover the argumentID just created for phrasing_text by profile_id. Used after
+    submitting a new because/rebuttal heading (via flesh_out.php, which redirects
+    rather than returning JSON) so its sub-bullets can be attached as Because-children
+    of the heading. Mirrors flesh_out.php's own trim()+substr(...,0,300) so the text
+    matches exactly what was actually stored.
+    """
+    text = phrasing_text.strip()[:300]
+    with db.cursor() as cur:
+        cur.execute(
+            "SELECT argumentID FROM PHRASING WHERE phrasing = %s AND coinedBy = %s "
+            "ORDER BY createdDate DESC LIMIT 1",
+            (text, profile_id)
+        )
+        row = cur.fetchone()
+        return row['argumentID'] if row else None
+
+
+def submit_subs(db, session, bot, letter: str, heading_text: str, subs: list, rel_type: str = 'Because'):
+    """
+    Look up a newly-created heading's argID and submit its sub-bullets as Because-
+    children of it (the second hop in the heading + sub-bullet pattern). No-op if
+    there are no subs or the heading's argID can't be recovered. Returns True if subs
+    were submitted (for logging).
+    """
+    if not subs:
+        return False
+    profile_id = ord(letter.upper()) - ord('A') + 1
+    heading_id = get_new_arg_id(db, heading_text, profile_id)
+    if heading_id is None:
+        print(f'      ⚠ could not recover argID for new heading "{heading_text[:60]}..." '
+              f'— skipping {len(subs)} sub-bullet(s)')
+        return False
+    sub_csrf = bot.get_flesh_out_csrf(session, heading_id, rel_type)
+    time.sleep(0.3)
+    bot.submit_mixed(session, heading_id, sub_csrf, rel_type, subs, [])
+    time.sleep(0.4)
+    print(f'      +{len(subs)} sub-bullet(s) under heading {heading_id}')
+    return True
+
+
 def mark(db, queue_id: int, status: str, **kwargs):
     fields = ['status = %s', 'processedAt = NOW()']
     values = [status]
@@ -305,6 +347,17 @@ def process_queue():
             session = req_lib.Session()
             session.headers['User-Agent'] = 'VestigettePersonaBot/1.0'
 
+            # Pin activeAffiliationID = 12 (All Users - Public) before login so
+            # @active_aff_id is 12 on every subsequent PHP request, ensuring all
+            # SCOPE_ENDORSEMENT / SCOPE_PHRASE_ENDORSE / SCOPE_EXPLICATION_ENDORSE
+            # rows created by this bot are scoped to All Users - Public.
+            persona_id = ord(letter.upper()) - ord('A') + 1
+            with db.cursor() as cur:
+                cur.execute(
+                    "UPDATE USER_PROFILE SET activeAffiliationID = 12 WHERE profileID = %s",
+                    (persona_id,)
+                )
+
             if not bot.login(session, creds['email'], creds['password']):
                 print(f'    [{letter}] login failed — skipping')
                 continue
@@ -350,13 +403,17 @@ def process_queue():
                 phrasing_text = response.get('phrasing')
                 new_bec, end_bec = _clean('becauses', 'endorse_becauses', existing_becauses)
                 new_thr, end_thr = _clean('therefores', 'endorse_therefores', existing_therefores)
-                # Enforce the one-new-each cap for accept-side scaffolding
+                # Enforce caps: at most 1 new because (object w/ subs), 1 new therefore
+                # (plain string, no subs — therefores aren't in scope for sub-bullets)
                 new_bec = new_bec[:1]
                 new_thr = new_thr[:1]
                 rebuttals, endorse_ids = [], []
             elif verdict == 'reject':
                 phrasing_text = None
                 rebuttals, endorse_ids = _clean('rebuttals', 'endorse_rebuttals', existing_rebuttals)
+                # Cap lowered from the prior informal ~3 to 2 to offset the new
+                # sub-bullet layer's node growth.
+                rebuttals = rebuttals[:2]
                 new_bec = new_thr = end_bec = end_thr = []
             else:  # skip
                 phrasing_text = None
@@ -398,8 +455,13 @@ def process_queue():
             if new_bec or end_bec:
                 csrf_b = bot.get_flesh_out_csrf(session, arg_id, 'Because')
                 time.sleep(0.3)
-                bot.submit_mixed(session, arg_id, csrf_b, 'Because', new_bec, end_bec)
+                bec_texts = [bot.item_text(b) for b in new_bec]
+                bot.submit_mixed(session, arg_id, csrf_b, 'Because', bec_texts, end_bec)
                 time.sleep(0.4)
+                # Second hop: sub-bullets under the new because heading, if any
+                # (capped at 1 heading, so at most one lookup here).
+                for b in new_bec:
+                    submit_subs(db, session, bot, letter, bot.item_text(b), bot.item_subs(b))
             if new_thr or end_thr:
                 csrf_t = bot.get_flesh_out_csrf(session, arg_id, 'Therefore')
                 time.sleep(0.3)
@@ -410,8 +472,12 @@ def process_queue():
             if rebuttals or endorse_ids:
                 flesh_csrf = bot.get_flesh_out_csrf(session, arg_id, 'Rebuttal')
                 time.sleep(0.3)
-                bot.submit_mixed(session, arg_id, flesh_csrf, 'Rebuttal', rebuttals, endorse_ids)
+                reb_texts = [bot.item_text(r) for r in rebuttals]
+                bot.submit_mixed(session, arg_id, flesh_csrf, 'Rebuttal', reb_texts, endorse_ids)
                 time.sleep(0.4)
+                # Second hop: sub-bullets under each new rebuttal heading, if any.
+                for r in rebuttals:
+                    submit_subs(db, session, bot, letter, bot.item_text(r), bot.item_subs(r))
 
             ran.append(letter)
             time.sleep(sa.DELAY_BETWEEN_PERSONAS)

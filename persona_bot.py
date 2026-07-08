@@ -124,6 +124,17 @@ def login(session: requests.Session, email: str, password: str) -> bool:
     return '/?arg=' in resp.url or resp.url.rstrip('/') == BASE_URL
 
 
+def ensure_public_group(session: requests.Session, arg_id: int, csrf: str) -> None:
+    """Set the bot persona's active group to All Users - Public (affiliationID=12).
+    Called after login so @active_aff_id = 12 for all subsequent SCOPE inserts."""
+    session.post(
+        f'{BASE_URL}/?arg={arg_id}',
+        data={'buttonClicked': 'switchGroup', 'affiliationID': 12, 'csrfToken': csrf},
+        allow_redirects=True,
+        timeout=30,
+    )
+
+
 def extract_csrf(html: str) -> str:
     match = re.search(r'name="csrfToken"\s+value="([^"]+)"', html)
     if not match:
@@ -153,7 +164,7 @@ def get_arg_page(session: requests.Session, arg_id: int) -> tuple:
     html = resp.text
 
     phrasing_match = re.search(
-        r'class="rate_phrase".*?<p>(.*?)</p>', html, re.DOTALL
+        r'<p class="arg-phrasing">(.*?)</p>', html, re.DOTALL
     )
     if not phrasing_match:
         raise ValueError(f'Could not extract phrasing for arg {arg_id}')
@@ -426,11 +437,11 @@ Return ONLY valid JSON — no markdown fences, no commentary:
   "verdict": "accept" | "reject" | "skip",
   "reasoning": "2-3 sentences of gut reaction in your authentic voice (internal log, never published — be honest here even if contradictory, concessions welcome)",
   "phrasing": "string or null",
-  "becauses": ["string"],
+  "becauses": [{"text": "string", "subs": ["string", ...]}],
   "endorse_becauses": [<existing because id>, ...],
   "therefores": ["string"],
   "endorse_therefores": [<existing therefore id>, ...],
-  "rebuttals": ["string", ...],
+  "rebuttals": [{"text": "string", "subs": ["string", ...]}, ...],
   "endorse_rebuttals": [<existing rebuttal id>, ...]
 }
 
@@ -449,10 +460,41 @@ PHRASING — required when verdict is "accept", null otherwise:
 - ONE idea only. One. No compound thoughts.
 - FORBIDDEN words that split one phrasing into two arguments: \
 "but", "however", "although", "yet", "while", "even if", "except", "though"
+- ALSO FORBIDDEN: "X, not Y" / "X rather than Y" contrast framing. The "not Y" half is \
+usually a second, independently-arguable claim riding along disguised as a qualifier. \
+State only X as its own point.
+  WRONG: "Jon Ossoff is bankrolled by coastal elites, not Georgia's working class."
+  RIGHT: "Jon Ossoff is bankrolled by coastal elites."
+  (If "out of touch with the working class" is itself worth raising, it's a separate point.)
 - If you feel two things at once, identify which is your PRIMARY reaction and express ONLY that
 - 1-2 sentences, under 200 characters strongly preferred (hard limit: 300)
 - No "I think" / "I believe" / "As a..." openers
 - Must stand alone as a point another person could accept or reject
+
+HEADING + SUB-BULLETS — applies to "becauses" and "rebuttals" only (not "therefores"):
+Each because/rebuttal item is {"text": "...", "subs": ["...", ...]}. Think of "text" as a
+terse PowerPoint slide title and "subs" as the sub-bullets underneath it — but only when
+the point genuinely needs them.
+- DEFAULT: "subs": [] (empty). Most points are a single clean claim and need nothing under
+  them. Do not manufacture subs just to fill the field.
+- Only use subs when your point would otherwise force you to cram 2-3 separable reasons
+  into one phrasing (the kind of thing that tempts an em-dash list or "...because of A, B,
+  and C"). In that case, state the umbrella claim as "text" and put each separable reason
+  in "subs" as its own atomic claim — same rules as "text" (no but/contrast, one idea,
+  under 150 characters).
+- Cap: at most 2 subs per item. If you have more than 2 separable reasons, keep only your
+  two strongest and drop the rest — don't widen the list.
+
+  Example — heading "Pete Buttigieg was an ineffective Transportation Secretary" bundled
+  three reasons in one sentence (supply-chain crisis, airline meltdowns, East Palestine).
+  WRONG (old way — cramming reasons into the heading itself):
+    {"text": "Pete Buttigieg was an ineffective Transportation Secretary — slow on the
+    supply-chain crisis, airline meltdowns, and the East Palestine derailment.", "subs": []}
+  RIGHT:
+    {"text": "Pete Buttigieg was an ineffective Transportation Secretary.",
+     "subs": ["The Transportation Department was slow and weak on the supply-chain crisis.",
+              "The Transportation Department allowed a major meltdown with airlines."]}
+    (East Palestine dropped here under the 2-sub cap — keep the two strongest.)
 
 BECAUSE / THEREFORE — only when verdict is "accept" (empty arrays otherwise):
 These build out the reasoning around an argument you agree with. The direction matters:
@@ -470,15 +512,19 @@ These build out the reasoning around an argument you agree with. The direction m
   Getting the direction backwards creates a broken edge, so check: does my point
   EXPLAIN the argument (because) or does it FOLLOW FROM the argument (therefore)?
 
-- Provide AT MOST ONE new "because" and AT MOST ONE new "therefore" — your single
+- Provide AT MOST ONE new "because" (an object, see HEADING + SUB-BULLETS above) and
+  AT MOST ONE new "therefore" (a plain string — therefores don't get subs). Your single
   strongest one of each. It is fine to provide none if nothing strong comes to mind.
-- Each is atomic: one idea, no conjunctions, under 150 characters, stands alone.
+- Each "text" (because) / string (therefore) is atomic: one idea, no conjunctions,
+  under 150 characters, stands alone.
 - Same dedup rule as rebuttals: if EXISTING BECAUSES or EXISTING THEREFORES are
   provided and your point matches one, endorse its id instead of writing a duplicate.
   Put matched ids in "endorse_becauses" / "endorse_therefores" and leave that slot
   out of the new array.
 
 REBUTTALS — required when verdict is "reject", empty array otherwise:
+- Provide AT MOST 2 new rebuttals — your two strongest. Each is an object (see
+  HEADING + SUB-BULLETS above); most should have "subs": [].
 - For each rebuttal: identify the KERNEL of your disagreement — the specific claim
   you reject — and state that kernel directly as a standalone assertion.
 - The most common failure is the run-up concession: "X is true, but my real point
@@ -486,9 +532,17 @@ REBUTTALS — required when verdict is "reject", empty array otherwise:
   is just Y, stated as if X were never mentioned.
 
   WRONG: "Tesla did accelerate EV adoption, but that's a market win, not climate heroism."
-  RIGHT: "Commercializing a product category is a market achievement, not climate heroism."
+  RIGHT: "Commercializing a product category is a market achievement."
   WRONG: "He built great companies, but his motives were profit, not the planet."
   RIGHT: "Profit-driven innovation is not the same as climate leadership."
+
+- A second common failure is the tacked-on contrast: "X, not Y" or "X rather than Y."
+  The "not Y" half is usually a second, independently-arguable claim riding along with
+  the first — drop it, state only the kernel.
+
+  WRONG: "Jon Ossoff is bankrolled by coastal elites, not Georgia's working class."
+  RIGHT: "Jon Ossoff is bankrolled by coastal elites."
+  (A separate rebuttal can make the working-class point on its own, if it's worth raising.)
 
 - Each rebuttal must challenge the underlying CLAIM, not the vocabulary used to state
   it. Rebuttals about word choice ("that word is too strong", "that's loaded language")
@@ -592,11 +646,43 @@ def ask_claude(client, persona: dict, arg_phrasing: str, cluster_context: list,
             f'Claude returned invalid JSON: {exc}\n--- Raw ---\n{raw}'
         ) from exc
 
+# ── Heading + sub-bullet helpers ────────────────────────────────────────────────
+# "becauses" and "rebuttals" items are {"text": str, "subs": [str, ...]} under the
+# current schema; "therefores" items are plain strings (no subs). These helpers
+# accept either shape so callers don't need to know which schema version produced
+# a given response.
+
+def item_text(item) -> str:
+    """Return the heading text of a because/rebuttal item (dict or bare string)."""
+    return item.get('text', '') if isinstance(item, dict) else (item or '')
+
+
+def item_subs(item, max_subs: int = 2) -> list:
+    """Return up to max_subs non-empty sub-bullet strings for a because/rebuttal item."""
+    if not isinstance(item, dict):
+        return []
+    subs = item.get('subs') or []
+    return [s.strip() for s in subs if isinstance(s, str) and s.strip()][:max_subs]
+
+
 # ── Validation ────────────────────────────────────────────────────────────────
 
 _BUT_WORDS = re.compile(
     r'\b(but|however|although|yet|while|even if|except|though)\b', re.IGNORECASE
 )
+# "X, not Y" / "X rather than Y" — a contrast clause tacked onto an otherwise-atomic
+# claim, where the "not Y" half is usually a second, independently-arguable point.
+_CONTRAST_WORDS = re.compile(r',\s*not\b|\brather than\b', re.IGNORECASE)
+
+
+def _check_phrase(text: str, label: str, warnings: list) -> None:
+    """Run the but/contrast checks on a single phrase and append any warnings."""
+    m = _BUT_WORDS.search(text)
+    if m:
+        warnings.append(f'{label} contains "{m.group()}" — compound argument')
+    m = _CONTRAST_WORDS.search(text)
+    if m:
+        warnings.append(f'{label} contains "{m.group().strip()}" — contrast framing, likely a second compound claim')
 
 def validate_response(response: dict) -> list:
     warnings = []
@@ -609,16 +695,29 @@ def validate_response(response: dict) -> list:
     if phrasing:
         if len(phrasing) > 300:
             warnings.append(f'Phrasing is {len(phrasing)} chars (max 300) — server will reject it')
-        m = _BUT_WORDS.search(phrasing)
-        if m:
-            warnings.append(f'Phrasing contains "{m.group()}" — compound argument, needs splitting')
-    for label, key in (('Rebuttal', 'rebuttals'),
-                       ('Because', 'becauses'),
-                       ('Therefore', 'therefores')):
-        for i, r in enumerate(response.get(key, []) or []):
-            m = _BUT_WORDS.search(r)
-            if m:
-                warnings.append(f'{label} {i+1} contains "{m.group()}" — compound argument')
+        _check_phrase(phrasing, 'Phrasing', warnings)
+
+    # "rebuttals" and "becauses" are {"text", "subs"} objects; "therefores" stays
+    # a plain string list (no subs).
+    for label, key in (('Rebuttal', 'rebuttals'), ('Because', 'becauses')):
+        items = response.get(key, []) or []
+        if key == 'rebuttals' and len(items) > 2:
+            warnings.append(f'{len(items)} new rebuttals provided — cap is 2, extras will be dropped')
+        if key == 'becauses' and len(items) > 1:
+            warnings.append(f'{len(items)} new becauses provided — cap is 1, extras will be dropped')
+        for i, item in enumerate(items, 1):
+            text = item_text(item)
+            _check_phrase(text, f'{label} {i}', warnings)
+            for j, sub in enumerate(item_subs(item), 1):
+                _check_phrase(sub, f'{label} {i} sub {j}', warnings)
+            subs_raw = item.get('subs') if isinstance(item, dict) else None
+            if subs_raw and len(subs_raw) > 2:
+                warnings.append(f'{label} {i} has {len(subs_raw)} subs — cap is 2, extras will be dropped')
+
+    if len(response.get('therefores', []) or []) > 1:
+        warnings.append(f'{len(response["therefores"])} new therefores provided — cap is 1, extras will be dropped')
+    for i, r in enumerate(response.get('therefores', []) or [], 1):
+        _check_phrase(r, f'Therefore {i}', warnings)
     return warnings
 
 # ── Main ──────────────────────────────────────────────────────────────────────
@@ -686,6 +785,11 @@ def main():
         )
         sys.exit(0)
 
+    # Ensure bot operates under All Users - Public so SCOPE entries use affiliationID=12
+    ensure_public_group(session, arg_id, csrf_token)
+    # Re-fetch page to get a fresh CSRF after the group switch
+    arg_phrasing, csrf_token, _ = get_arg_page(session, arg_id)
+
     # ── Cluster context ────────────────────────────────────────────────────────
     sibling_ids, cluster_label = find_cluster_siblings(arg_id, clusters)
     cluster_context = []  # Phase 1: no phrasing lookup — associations will be empty
@@ -702,7 +806,7 @@ def main():
     verdict      = bot_response.get('verdict', 'skip')
     phrasing_text = bot_response.get('phrasing') if verdict == 'accept' else None
     reasoning    = bot_response.get('reasoning', '')
-    rebuttals    = bot_response.get('rebuttals', []) if verdict == 'reject' else []
+    rebuttals    = (bot_response.get('rebuttals', []) or [])[:2] if verdict == 'reject' else []
     associations = bot_response.get('associations', [])
 
     # ── Display ────────────────────────────────────────────────────────────────
@@ -712,7 +816,10 @@ def main():
     elif verdict == 'reject' and rebuttals:
         print()
         for i, r in enumerate(rebuttals, 1):
-            print(f'  rebuttal {i}: "{r}"')
+            print(f'  rebuttal {i}: "{item_text(r)}"')
+            for j, sub in enumerate(item_subs(r), 1):
+                print(f'      sub {j}: "{sub}" (NOT submitted — standalone CLI has no DB '
+                      f'access for sub-bullet argID lookup; run via process_seed_queue.py)')
     else:
         print()
     if reasoning:
@@ -771,7 +878,7 @@ def main():
         flesh_csrf = get_flesh_out_csrf(session, arg_id, 'Rebuttal')
         time.sleep(0.3)
         pinned = [
-            {'type': 'new', 'text': r, 'weight': 1, 'reciprocate': False}
+            {'type': 'new', 'text': item_text(r), 'weight': 1, 'reciprocate': False}
             for r in rebuttals
         ]
         resp = session.post(
