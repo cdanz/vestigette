@@ -1,14 +1,12 @@
 # Agitate — Project Hub
 
-_Discourse-mapping platform. Live (alpha) at **agitate-discourse.org**.
-Repo: **github.com/cdanz/vestigette**. Local working dir: `/Users/Razzmatazz/vestigette-dev`._
+_Discourse-mapping platform. Live (alpha) at **agitate-discourse.org**._
+_Repo: **github.com/cdanz/vestigette**. Local working dir: `/Users/Razzmatazz/vestigette-dev`._
 
-**This file is the entry point.** It gives orientation + the operational workflow, and
-links to focused docs you only need to open when relevant. It's a living document —
-keep it current and let **git history** be the version trail (don't create dated copies).
-
-> New session? Read this top-to-bottom first. Claude also auto-loads its own notes from
-> `~/.claude/projects/-Users-Razzmatazz-vestigette-dev/memory/MEMORY.md`.
+**This file is the entry point.** Read it top-to-bottom at the start of a new session.
+Claude also auto-loads its own notes from
+`~/.claude/projects/-Users-Razzmatazz-vestigette-dev/memory/MEMORY.md`.
+It's a living document — keep it current and let **git history** be the version trail.
 
 ---
 
@@ -28,170 +26,251 @@ and weigh in themselves.
   - **Therefore** — consequences that follow
   - **Rebuttal** — counters
 - **Explications** = external links that elaborate an argument (also weighted).
-- **Personas** (profileIDs **1–26**) = LLM/admin-driven "dialectic scaffolding" used to
-  seed poorly-populated, low-engagement arguments. The goal is to remove persona input
-  once an argument has enough genuine human engagement. **Admin** = profileID **28**
-  (`isAdmin`). A yellow robot badge marks any argument a persona holds an opinion on.
+- **Personas** (profileIDs **1–26**) = LLM/admin-driven bots used to seed
+  low-engagement arguments with dialectical scaffolding. Retire probabilistically as human
+  engagement grows. A yellow robot badge marks any argument a persona holds an opinion on.
+- **Admin** = profileID **28** (`isAdmin` flag in session).
 
-### The 100% invariant (important)
+### The 100% invariant (critical)
 For each `(profileID, targArgID, endorseType)`, the **active** endorsement weights sum to
 **100%**. Phrasing and explication endorsements follow the same per-user/per-arg rule.
-Anything touching `ENDORSEMENT` must preserve this (see the merge and rebalance logic).
+Anything touching `ENDORSEMENT` must preserve this.
 
 ---
 
-## Infrastructure & how to work  (read this before touching anything)
+## Infrastructure & operational workflow
 
-- **Production:** a DigitalOcean droplet `root@178.128.74.45` (= agitate-discourse.org).
-  Apache + PHP + MySQL. Web root `/var/www/html`, persona bot in `/var/www/bot`.
-- **Database:** `ssh root@178.128.74.45 "mysql vestigette ..."` — root connects via the
-  unix socket, **no password**. Use `-N -B` for terse output. **Batch your SSH** — rapid
-  repeated connections trip **fail2ban** and you'll get "Connection refused" for a while.
-- **No git on the server.** Deploy by scp via **`./deploy_droplet.sh {php|bot|all}`**
-  (batches scp + ssh into single connections and lints PHP afterward). New web files must
-  be added to `PHP_FILES` / `STATIC_FILES` in that script or they won't ship.
+- **Production:** DigitalOcean droplet `root@178.128.74.45` (= agitate-discourse.org).
+  Apache + PHP 8 + MySQL 8. Web root `/var/www/html`, bot scripts in `/var/www/bot`.
+- **Database access:**
+  - App connects via credentials in `/var/www/html/includes/config.local.php` on the
+    droplet (gitignored, manually placed — follows the `config.local.php` branch in
+    `dbconnect.php`).
+  - MySQL root for maintenance/backups:
+    `MYSQL_PWD=$(cat /root/.digitalocean_password) mysql -u root vestigette`
+  - Use `-N -B` flags for terse script output. **Batch SSH** — rapid repeated connections
+    trip **fail2ban** and produce "Connection refused" for several minutes.
+- **No git on the server.** Deploy via **`./deploy_droplet.sh {php|bot|all}`** — batches
+  scp + ssh into single connections and lints PHP after transfer. New web files must be
+  added to `PHP_FILES` (or `INCLUDE_FILES`) in that script or they won't ship.
 - **Stored procs / triggers** are deployed by piping SQL to `ssh "mysql vestigette"` as
-  root. This is **MySQL 8, not MariaDB** → use `DROP PROCEDURE IF EXISTS` + `CREATE`
-  (there is **no** `CREATE OR REPLACE PROCEDURE`). Canonical proc/trigger source lives in
-  the tracked `*_procedures.sql` files; some helpers historically lived only in the live
-  DB — when you touch one, bring it into a `*_procedures.sql` file.
-- **Git workflow:** work in `/Users/Razzmatazz/vestigette-dev`. Branch off `main`, make
-  focused commits, push, open a PR; **the owner merges**; then sync `main` and delete the
-  branch. Only commit/push when asked. End commit messages with the
-  `Co-Authored-By: Claude ...` trailer.
-- **Cache-busting:** `index.php` links CSS/JS with `?v=<filemtime>` so every deploy busts
-  the browser cache automatically.
-- **Secrets:** `.env` and `persona_credentials.json` are gitignored — never commit them.
-  The persona/test-account password is intentionally weak (`Pa$word`) for alpha accounts.
+  root. **MySQL 8, not MariaDB** → use `DROP PROCEDURE IF EXISTS` + `CREATE` (there is no
+  `CREATE OR REPLACE PROCEDURE`). Canonical proc/trigger source lives in the `db/`
+  `*_procedures.sql` files.
+- **Git workflow:** commit directly to `main`; push when a logical unit of work is done.
+  End commit messages with the `Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>`
+  trailer.
+- **Cache-busting:** `index.php` links CSS/JS with `?v=<filemtime>`.
+- **Secrets:** `.env` and `persona_credentials.json` (in `bots/`) are gitignored.
+- **DB backup:** full backup (structure + data + procedures + triggers) at
+  `db/backups/vestigette_backup_2026-07-08.sql` — gitignored, keep a copy off-machine.
+  To take a fresh backup: `MYSQL_PWD=$(cat /root/.digitalocean_password) mysqldump --user=root --routines --triggers --events --single-transaction --add-drop-table --add-drop-trigger --databases vestigette > /tmp/backup.sql` then scp it down.
 
 ---
 
-## Data model (run `SHOW TABLES` / `SHOW PROCEDURE STATUS` for the live, full list)
+## Repo structure
 
-Current key tables:
+```
+/                   PHP app files, CSS/JS, deploy scripts, top-level docs
+includes/           dbconnect.php, content_chrome.php, Parsedown.php
+db/                 Active stored-procedure SQL files (*_procedures.sql)
+db/seeds/           Historical one-time data-seed SQL (persona seeds, wiki, etc.)
+db/backups/         DB dumps — gitignored (contain user data)
+bots/               Bot scripts (active + archived), JSON data, seeding docs
+```
+
+---
+
+## Groups & scoped engagement (Phase 5 — live)
+
+This is the key architectural layer added in 2026. Understand it before touching
+engagement code.
+
+- **`AFFILIATION`** — groups. `public = 1` means open/visible; `public = 0` is private.
+  `affiliationID = 12` ("All Users - Public") is the universal default; constant
+  `ALL_PUBLIC_AFF_ID = 12` is defined in `dbconnect.php`.
+- **`MEMBER`** — group membership rows.
+- **`USER_PROFILE.activeAffiliationID`** — which group context the user is currently
+  "operating as." Defaults to 12. Changed via `switchGroup` action in `functions.php`.
+- **`@active_aff_id`** — MySQL session variable set by `dbconnect.php` on every request
+  from the user's `activeAffiliationID`. Every engagement action inserts a SCOPE row using
+  this value.
+- **`SCOPE_OPINION`, `SCOPE_ENDORSEMENT`, `SCOPE_PHRASE_ENDORSE`,
+  `SCOPE_EXPLICATION_ENDORSE`** — record which group context each action was taken under.
+  These are the data backing the filter's group-affiliation view.
+- **Operating-as vs. filter-view are separate:**
+  - *Operating-as* controls how actions are attributed (via SCOPE inserts).
+  - *Filter-view* controls what metrics you see (via `FILTER_PROFILES` temp table).
+  - `switchGroup` auto-applies the new group as a filter; switching back to All Users -
+    Public clears the group filter entirely. `$_SESSION['filters']['auto_aff_id']` tracks
+    the auto-applied affiliation so it can be cleanly removed.
+- **Bot personas always operate under affiliationID 12.** `process_seed_queue.py` pins
+  `activeAffiliationID = 12` in the DB before each bot run; `persona_bot.py` also calls
+  `switchGroup` to affiliationID 12 after login. `queueOpinionForSeeding` in `functions.php`
+  only fires when the triggering user's active affiliation is public (`AFFILIATION.public = 1`).
+
+---
+
+## Data model
+
+23 tables. Run `SHOW TABLES` / `SHOW PROCEDURE STATUS WHERE Db='vestigette'` for the live list.
 
 | Table | Role |
 |---|---|
-| `ARGUMENT` | the claim shell; caches `currentPhrasing` / `currentPhrasingID` |
-| `PHRASING` | alternate wordings of an argument |
-| `PHRASE_ENDORSE` | per-user weighted endorsement of phrasings |
-| `ENDORSEMENT` | weighted edges. PK `(targArgID, profileID, endorseType, supportingArgID, active)` |
-| `OPINION` | accept/reject. PK `(argumentID, profileID)`, `acceptance` |
-| `EXPLICATION` | external links; UNIQUE `(argumentID, profileID)` |
-| `EXPLICATION_ENDORSE` | weighted endorsement of explications |
+| `ARGUMENT` | Claim shell; caches `currentPhrasing` / `currentPhrasingID` |
+| `PHRASING` | Alternate wordings |
+| `PHRASE_ENDORSE` | Per-user phrasing weights |
+| `ENDORSEMENT` | Weighted edges. PK `(targArgID, profileID, endorseType, supportingArgID, active)` |
+| `OPINION` | Accept/reject. PK `(argumentID, profileID)`, col `acceptance` |
+| `EXPLICATION` | External links. UNIQUE `(argumentID, profileID)` |
+| `EXPLICATION_ENDORSE` | Weighted explication endorsements |
+| `AFFILIATION` | Groups. `public` flag; affiliationID 12 = "All Users - Public" |
+| `MEMBER` | Group membership |
+| `SCOPE_OPINION` | Group context for each OPINION action |
+| `SCOPE_ENDORSEMENT` | Group context for each ENDORSEMENT action |
+| `SCOPE_PHRASE_ENDORSE` | Group context for phrasing endorsements |
+| `SCOPE_EXPLICATION_ENDORSE` | Group context for explication endorsements |
+| `USER_PROFILE` | Accounts. Personas = profileID 1–26, admin = 28. `activeAffiliationID` col |
+| `ADMIN_SETTINGS` | Per-admin prefs: `pickerType` (`none`/`manual`/`auto`), `demoMode` |
+| `INVITATION` | Invite codes for registration. `usesRemaining` (NULL = unlimited), `expiresAt` (NULL = never) |
+| `REMEMBER_ME` | Persistent-login tokens (30-day) |
+| `BOT_SEED_QUEUE` | Persona-bot seeding queue |
 | `ARGUMENT_REDIRECT` | `oldArgumentID → newArgumentID` for merged arguments |
-| `ARGUMENT_FLAG` | user flags (one active per user/arg; resolved rows kept) |
-| `ADMIN_SETTINGS` | admin prefs incl. `pickerType` = `none`/`manual`/`auto` |
-| `BOT_SEED_QUEUE` | persona-bot seeding queue |
-| `USER_PROFILE` | accounts (personas = 1–26, admin = 28) |
-| `INVITATION`, `REMEMBER_ME` | invite codes; persistent-login tokens |
-| `PHRASING_ARCHIVE`, `PUT_FORTH_ARCHIVE` | legacy tables |
+| `ARGUMENT_FLAG` | User flags; one active per user/arg; resolved rows kept |
+| `CONTENT` | Blog/content storage |
+| `PHRASING_ARCHIVE`, `PUT_FORTH_ARCHIVE` | Legacy tables |
 
-> Older docs mention `PHRASING_NEW` / `PUT_FORTH_NEW` — those no longer exist (now
-> `PHRASING` + the `*_ARCHIVE` tables).
+**Trigger:** `impliedAssertion` (BEFORE INSERT on `ENDORSEMENT`) — records an implied
+acceptance of the supporting argument AND inserts a `SCOPE_OPINION` row. Must **not**
+modify `ENDORSEMENT` (trigger can't write the table that fired it).
 
-**Trigger:** `impliedAssertion` (BEFORE INSERT on `ENDORSEMENT`) records an implied
-acceptance of the supporting argument. It must **not** modify `ENDORSEMENT` (a trigger
-can't write the table that fired it).
-
-**Notable procedures:** `assertOpinion` (accept/reject + cascade; reject branch calls
-`rebalanceRecentRejections`), `getAssociated`, `getNeighborhood` / `getNeighborhoodAll`,
-`mergeArguments`, `flagArgument` / `unflagArgument` / `resolveArgumentFlags`,
-`prepareForNewEndorse` / `resolveOldWithNewEndorse`, `updatePhrasingCache`,
-`foldInAssertion`, `promoteExplication`. (35 total — list is in the DB.)
+**Procedures (38 total):** `assertOpinion` (accept/reject + cascade; reject calls
+`rebalanceRecentRejections`), `getDetail` / `getAssociated` / `getAltPhrasing` /
+`getExplication` (all take a `filtered` param — when 1, JOIN `FILTER_PROFILES` temp table),
+`getNeighborhood` / `getNeighborhoodAll`, `mergeArguments`, `flagArgument` /
+`unflagArgument` / `resolveArgumentFlags`, `prepareForNewEndorse` /
+`resolveOldWithNewEndorse`, `updatePhrasingCache`, `foldInAssertion`,
+`retirePersonaFromArgument`, `getTrending`, `getMostContested`, and others.
 
 ---
 
 ## Key code files
 
-- **`index.php`** — main page: argument header (phrasing, verdict %, "Argument ID" +
-  persona badge), Because/Therefore/Rebuttal sections, Find section, admin picker bar,
-  flag control. Loads its data, **closes `$db` early** (~line 159), then renders.
-  Desktop layout uses two sibling wrapper divs: `#left-col` (60% — Because/Argument/Therefore)
-  and `#right-col` (40% — mastHead/Rebuttal/Find). On mobile both use `display: contents`
-  so sections stack in natural order via `order` properties on `body { display:flex; flex-column }`.
-  `#argument` uses `flex: 0 0 auto` (sizes to content, never scrolls); `#because` /
-  `#therefore` share remaining height equally via `flex: 1 1 0`.
-- **`query_current_argument.php`** — fetches the current argument's data via procs.
-- **`functions.php`** — POST action handler (`buttonClicked` switch: accept/reject,
-  `weighBecause/Therefore/Rebuttal`, flag/unflag, etc.). Weighting a support also applies
-  **implied acceptance** at commit (overrides a prior rejection of that support).
-- **`flesh_out.php`** — the association-builder page (uses `getNeighborhood`).
-- **`admin_tools.php`** — admin-only: merge arguments, Profile Picker config, flagged-args
-  resolve, invite codes. Requires `isAdmin`.
-- **`find_similar.php`** — similarity search endpoint (full-text + SOUNDEX fallback).
-  Used by `flesh_out.php` to suggest existing arguments before a user adds a new one
-  (duplicate detection), and by `Explore.php` for the live search box.
-- **`neighborhood.php`** — lazy-load endpoint for the Find ▸ Neighborhood list.
-- **`includes/dbconnect.php`** — provides `$db` (mysqli).
+- **`index.php`** — main page. Argument header (phrasing, verdict %, Argument ID, persona
+  badge, filter badge), Because / Therefore / Rebuttal sections, Filter section, Find
+  section, admin picker bar, flag control, filter overlay modal. Loads data then closes
+  `$db` early before render. Desktop layout: `#left-col` (60%) and `#right-col` (40%);
+  mobile uses `display: contents` + `order` properties. Filter section is always rendered
+  for logged-in users (no feature flag).
+- **`query_current_argument.php`** — fetches current argument data via stored procs.
+  Builds `FILTER_PROFILES` temp table from `$_SESSION['filters']` before proc calls when
+  filters are active. Affiliation filter uses SCOPE table UNION (not MEMBER lookup).
+- **`functions.php`** — POST action handler (`buttonClicked` switch). Handles weighting,
+  flagging, filter actions (`addOpinionFilter`, `addAffiliationFilter`,
+  `removeOpinionFilter`, `removeAffiliationFilter`, `clearAllFilters`, `setTimeFilter`,
+  `clearTimeFilter`), `switchGroup`, group search. Inserts SCOPE rows on every engagement
+  action. `queueOpinionForSeeding` only triggers for public-affiliation users.
+- **`search_affiliations.php`** — AJAX endpoint for the Filter section's group search.
+  Returns public affiliations matching a query string.
+- **`flesh_out.php`** — association-builder page (uses `getNeighborhood`).
+- **`admin_tools.php`** — admin-only: merge arguments, Profile Picker config (`manual` /
+  `auto`), flagged-args resolve, invite-code management, demo mode toggle.
+- **`register.php`** — invite-code registration. Validates `INVITATION` (handles NULL
+  `expiresAt` and `usesRemaining`); decrements `usesRemaining` on success.
+- **`find_similar.php`** — full-text + SOUNDEX similarity search. Used by `flesh_out.php`
+  (duplicate detection) and `Explore.php` (live search).
+- **`neighborhood.php`** — lazy-load endpoint for Find ▸ Neighborhood list.
+- **`includes/dbconnect.php`** — provides `$db`; defines `ALL_PUBLIC_AFF_ID = 12`; sets
+  `@active_aff_id` session variable from `USER_PROFILE.activeAffiliationID` on every request.
 - **`style_vestigette.css`**, **`script_vestigette.js`** — front end. Palette includes
-  `--cddbYellow` (#d4a017), used for flagged state and the persona badge.
+  `--cddbYellow` (#d4a017) for flagged state and persona badge, `--cddbBlue` for filter badge.
+- **`bots/persona_bot.py`** — browser-session bot that navigates the web UI to cast
+  opinions and weights. Called by `process_seed_queue.py`.
+- **`bots/process_seed_queue.py`** — drains `BOT_SEED_QUEUE`; pins bot `activeAffiliationID
+  = 12` in DB before each run; invokes `persona_bot.py`.
+- **`bots/seed_argument.py`**, **`bots/seed_cluster.py`** — generate seeding SQL / manage
+  topic clusters.
+- **`db/*_procedures.sql`** — canonical source for all stored procedures and triggers.
 
 ---
 
-## Current feature set (built & live)
+## Current feature set
 
 - Weighted **Because / Therefore / Rebuttal**, **phrasing**, and **explication**
-  endorsement (100% per user, per type).
-- **Argument merge** (admin) — `mergeArguments` conserves weights (sums support
-  collisions, keep-wins on target collisions, renormalizes self-loops) and writes
+  endorsement (100% per user per type).
+- **Groups / scoped engagement** — users operate under a group context; all actions are
+  attributed via SCOPE tables. Filter view is independent of operating context.
+- **Filter section** (always-on for logged-in users) — filter the argument graph by who
+  accepts/rejects a specific argument, by group affiliation, and by time. Eye icon badge
+  with count appears in the Argument section when filters are active; clicking jumps to
+  the Filter section. Advanced overlay for time filters.
+- **Argument merge** (admin) — `mergeArguments` conserves weights and writes
   `ARGUMENT_REDIRECT` so old URLs resolve.
 - **Argument flagging** — users flag (offensive / phrasing-mismatch / duplicate-assoc /
   spam / incoherent / other); admin "Flagged Arguments" list resolves them.
 - **Find section** — Last Visited, Recent Assertions, Go to ID (← / → / Popular), and a
   lazy-loaded **Neighborhood** list (`getNeighborhoodAll`, hop-3 adaptive). Open subsection
-  persists across pages via `localStorage`.
+  persists via `localStorage`.
 - **Admin Profile Picker** — `manual` (designated IDs) or `auto` (personas with an opinion
-  on the current arg + you, by last-name initial); mutually exclusive via
-  `ADMIN_SETTINGS.pickerType`. On desktop the bar is `position: fixed` at the top;
-  `body:has(#adminPickerBar)` nudges `#left-col` / `#right-col` down by `2rem`.
-- **Donate button** — white heart icon + "Donate" label in the masthead on every page
-  (`index.php`, `About.php`, `Explore.php`, `Profile.php`, `login.php`). Hamburger (☰)
-  on mobile is on the **left** so it doesn't crowd the donate button on the right.
-- **AI-persona transparency badge** — yellow robot beside "Argument ID" when any persona
-  (1–26) holds an opinion on the argument.
-- **Persona seeding bot** — queue + cron: `BOT_SEED_QUEUE → process_seed_queue.py →
-  persona_bot.py` (in `/var/www/bot`). See `PERSONA_SEEDING_PROCESS.md`.
-- **Persona retirement** — `assertOpinion` now probabilistically retires personas as
-  human engagement grows (S-curve: probability = `(humanCount/100)²`; completes by ~100
-  human opinions). Procedure `retirePersonaFromArgument` in `persona_retirement_procedures.sql`.
-- **Trending / Most Contested** — `getTrending()` and `getMostContested()` procedures
-  (in `core_procedures.sql`) power the Explore page lists.
-- **Persistent login** — rememberMe cookie (30-day).
+  on the current arg + you, by last-name initial). On desktop the bar is `position: fixed`
+  at top; `body:has(#adminPickerBar)` nudges columns down `2rem`.
+- **Persona seeding bot** — `BOT_SEED_QUEUE → process_seed_queue.py → persona_bot.py`
+  (cron in `/var/www/bot`). Personas always operate under All Users - Public (affiliationID
+  12). Only triggered by real users with a public active affiliation.
+- **Persona retirement** — `assertOpinion` probabilistically retires personas as human
+  engagement grows (S-curve: `(humanCount/100)²`; completes by ~100 human opinions).
+- **Trending / Most Contested** — `getTrending` and `getMostContested` power Explore lists.
+- **Persistent login** — 30-day rememberMe cookie via `REMEMBER_ME` table.
+- **Invite-only registration** — `INVITATION` table; admin manages codes in admin_tools.
+- **OG preview metadata** — `og_image.php` generates share-card images.
+- **Demo mode** — admin toggle that suppresses iOS auto-zoom / scroll jumps for screen
+  recording. Site-wide while enabled.
+- **Donate button** — masthead on every page; mobile hamburger on left to avoid crowding.
+- **AI-persona transparency badge** — yellow robot beside Argument ID when a persona has
+  an opinion on the argument.
+- **Group badge** — masthead shows current active group name when not on All Users - Public.
 
 ---
 
 ## Gotchas
 
-- **MySQL ≠ MariaDB:** `DROP`+`CREATE` for procs; no `CREATE OR REPLACE PROCEDURE`.
-- **fail2ban:** don't hammer SSH; batch connections (the deploy script already does).
-- **Light panel vs dark header:** the expanded argument panel renders on a **light**
-  background while the argument header is **dark**. Style for the surface you're on
-  (e.g., the flag control uses dark colors because it sits on the light panel).
-- **Preserve the 100% invariant** on any `ENDORSEMENT` change.
-- **Trigger rule:** `impliedAssertion` can't touch `ENDORSEMENT`.
-- **`rebalanceRecentRejections`** loops must stay scoped per `endorseType` (an unscoped
-  condition once caused an infinite loop / hung requests).
+- **MySQL ≠ MariaDB:** `DROP PROCEDURE IF EXISTS` + `CREATE`; no `CREATE OR REPLACE`.
+- **fail2ban:** batch SSH connections — the deploy script already does, but ad-hoc commands
+  can still trigger it (wait a few minutes if you hit "Connection refused").
+- **ALL_PUBLIC_AFF_ID = 12** is the exception to almost every group rule. Private groups
+  can only enter the filter via `switchGroup` auto-apply, not via manual group search.
+- **`@active_aff_id`** must be set before any SCOPE insert. It's set by `dbconnect.php` on
+  every PHP request; the bot explicitly calls `switchGroup` to pin it to 12.
+- **100% invariant** — preserve it on any `ENDORSEMENT` change.
+- **`impliedAssertion` trigger** — can't touch `ENDORSEMENT`; also inserts `SCOPE_OPINION`.
+- **`rebalanceRecentRejections`** loops must stay scoped per `endorseType` (unscoped once
+  caused an infinite loop).
+- **Light panel vs dark header** — the expanded argument panel is light; the header is dark.
+  Style for the surface you're on.
+- **Bot personas** — profileIDs 1–26 must always have `activeAffiliationID = 12`. Both
+  `process_seed_queue.py` (DB update) and `persona_bot.py` (switchGroup POST) enforce this.
 
 ---
 
 ## Deeper references
 
-- **`PERSONA_SEEDING_PROCESS.md`** — persona seeding workflow (current).
-- **`DATA_CLEANUP_BACKLOG.md`** — known data-quality issues to clean (current).
-- **`core_procedures.sql`, `merge_procedures.sql`, `flag_procedures.sql`,
-  `neighborhood_procedures.sql`, `explication_procedures.sql`** — canonical proc/trigger
-  source.
-- **`deploy_droplet.sh`** — the deploy script (also the source of truth for which files
-  ship).
+- **`bots/PERSONA_SEEDING_PROCESS.md`** — persona seeding workflow.
+- **`DATA_CLEANUP_BACKLOG.md`** — known data-quality issues.
+- **`db/*_procedures.sql`** — canonical proc/trigger source (8 files).
+- **`db/seeds/`** — 84 historical seed SQL files (forensic reference, not re-run).
+- **`deploy_droplet.sh`** — source of truth for which files ship and how.
 
 ---
 
 ## Roadmap / parked
 
-- Phase out persona input on arguments that reach enough human engagement (the badge is
-  the transparency bridge until then).
-- Tutorial/demo experience; first-login weighting indicators; About / Explore / Profile
-  pages; bot transparency + blog; cost monitoring & scale-back rules; branding pass.
+- **Private groups** — schema approved (SCOPE tables already live; `AFFILIATION.public`
+  flag exists); captains, private-invite flows, and group management UI not yet built.
+- **Phase out persona input** per-argument as human engagement reaches threshold (retirement
+  logic exists; the badge is the transparency bridge until then).
+- **`useInstead` / `thereforeUseInstead` / `rebuttalUseInstead`** actions in `functions.php`
+  call a stored procedure that was marked TODO/untested; buttons are wired in JS but the
+  feature is incomplete.
+- Cost monitoring & scale-back rules; branding pass.
 
-_Last refreshed: 2026-06-16._
+_Last refreshed: 2026-07-08._
