@@ -407,7 +407,6 @@ function generateFindLines($results) {
 				because = <?php echo json_encode(isset($because) ? $because : null); ?>,
 				therefore = <?php echo json_encode(isset($therefore) ? $therefore : null); ?>,
 				rebuttal = <?php echo json_encode(isset($rebuttal) ? $rebuttal : null); ?>,
-				filterVisible = true,
 				demoMode = <?php echo $demoMode ? 'true' : 'false'; ?>,
 				csrfToken = <?php echo json_encode($csrfToken); ?>;
 		</script>
