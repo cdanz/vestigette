@@ -9,6 +9,7 @@ persona_credentials.json
 !*_procedures.sql
 !*_seed.sql
 dumps/
+db/backups/
 
 # Agent / session data
 .claude/
