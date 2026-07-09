@@ -53,7 +53,7 @@ Body in Markdown…
 ## To publish a page for the first time
 
 1. Finish the content; remove the stub blockquote; pin all anchor ids.
-2. **Constitution only:** audit every ⚠-marked clause against actual bot
+2. **AI Policy and Pledge only:** audit every clause against actual bot
    behavior (`bots/persona_bot.py`, `bots/process_seed_queue.py`, the
    `queueOpinionForSeeding` trigger in `functions.php`). Build or strike any
    clause the code doesn't honor — never publish a promise the cron job is
@@ -61,6 +61,6 @@ Body in Markdown…
 3. Flip `status:` to `published`, add an Amendment Log line ("Published."),
    commit, deploy.
 4. Publication automatically lights up: the page in blog footers, the platform
-   masthead links, and (for the constitution) the persona badge becoming a
-   link to `/constitution`.
+   masthead links, and (for the AI Policy and Pledge) the persona badge
+   becoming a link to `/ai-policy-pledge`.
 5. Announce with a short dated *post* on the blog that links to the page.

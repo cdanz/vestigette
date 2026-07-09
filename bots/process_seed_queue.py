@@ -37,6 +37,7 @@ SCRIPT_DIR   = Path(__file__).parent
 DELAY_MINUTES = 10
 MIN_PHRASING_LENGTH = 20
 MIN_PARENT_OPINIONS = 2   # distinct real humans needed on parent arg
+MAX_TARGET_HUMAN_OPINIONS = 3  # target arg with this many human opinions is humans' now — never seed it
 WEIGHT_FLOOR        = 10.0  # % floor for flesh_out-created arguments
 BOT_PERSONA_MAX     = 26    # profileIDs 1-26 are bot personas
 PERSONAS_PER_ARG    = 10    # how many random personas to run per argument
@@ -120,6 +121,23 @@ def check_entry(db, entry) -> tuple:
         )
         if cur.fetchone()['cnt'] > 0:
             return SKIP, 'already has bot opinions'
+
+    # Humans already carrying the debate — never add bot weight to an argument
+    # humans are actively contesting (AI Policy and Pledge, Article III.2).
+    # Engagement only grows during the queue delay window, so this is terminal.
+    with db.cursor() as cur:
+        cur.execute(
+            "SELECT COUNT(*) AS cnt FROM OPINION o "
+            "JOIN USER_PROFILE u ON u.profileID = o.profileID "
+            "WHERE o.argumentID = %s AND o.profileID > %s AND u.isAdmin = 0",
+            (arg_id, BOT_PERSONA_MAX)
+        )
+        cnt = cur.fetchone()['cnt']
+        if cnt >= MAX_TARGET_HUMAN_OPINIONS:
+            return SKIP, (
+                f'humans already engaged ({cnt} human opinions >= '
+                f'{MAX_TARGET_HUMAN_OPINIONS})'
+            )
 
     # Weight floor (flesh_out entries only)
     if parent_weight is not None and parent_weight < WEIGHT_FLOOR:

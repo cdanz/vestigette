@@ -29,7 +29,7 @@ time.*
 ## What our own AI personas see {#what-our-own-ai-personas-see}
 
 *TODO: how persona seeding uses (and doesn't use) user content; link to the
-[AI Policy and Pledge](/constitution).*
+[AI Policy and Pledge](/ai-policy-pledge).*
 
 ## Deletion and portability {#deletion-and-portability}
 

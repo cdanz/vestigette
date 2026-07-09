@@ -218,9 +218,9 @@ mysqli_close($db);
 
 // --- Standing pages (pages/*.md) — cross-links appear only once a page is published ---
 require_once("${_SERVER['DOCUMENT_ROOT']}/includes/content_chrome.php");
-$constitutionLive = content_page_is_published('constitution');
+$aiPolicyLive = content_page_is_published('ai-policy-pledge');
 $policyLinks = [];
-if ($constitutionLive)                            $policyLinks['/constitution'] = 'AI Policy';
+if ($aiPolicyLive)                                $policyLinks['/ai-policy-pledge'] = 'AI Policy';
 if (content_page_is_published('data-promise'))    $policyLinks['/data-promise'] = 'Data Promise';
 	
 
@@ -530,7 +530,7 @@ else {
 					<div class="arg-meta">
 						<span class="arg-id">Argument ID: <?php echo intval($arg); ?></span>
 <?php if ($hasPersonaOpinion):
-	// Once the Persona Constitution is published the badge links to the policy itself.
+	// Once the AI Policy and Pledge is published the badge links to the policy itself.
 	$personaBadgeSvg = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
 								<line x1="12" y1="2.6" x2="12" y2="5"/>
 								<circle cx="12" cy="2" r="1.05" fill="currentColor" stroke="none"/>
@@ -541,8 +541,8 @@ else {
 								<circle cx="14.5" cy="10.6" r="1.25" fill="currentColor" stroke="none"/>
 								<rect x="8.4" y="13.6" width="7.2" height="2.6" rx="1.3"/>
 							</svg>';
-	if ($constitutionLive) {
-		echo "\t\t\t\t\t\t<a class=\"persona-badge\" href=\"/constitution\" title=\"AI persona activity on this argument &mdash; read the policy\" aria-label=\"AI persona activity on this argument &mdash; read the policy\">{$personaBadgeSvg}</a>\n";
+	if ($aiPolicyLive) {
+		echo "\t\t\t\t\t\t<a class=\"persona-badge\" href=\"/ai-policy-pledge\" title=\"AI persona activity on this argument &mdash; read the policy\" aria-label=\"AI persona activity on this argument &mdash; read the policy\">{$personaBadgeSvg}</a>\n";
 	} else {
 		echo "\t\t\t\t\t\t<span class=\"persona-badge\" title=\"AI personas are active on this argument &mdash; its state is not yet fully human\" aria-label=\"AI personas active on this argument\">{$personaBadgeSvg}</span>\n";
 	}

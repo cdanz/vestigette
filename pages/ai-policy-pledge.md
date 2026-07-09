@@ -4,12 +4,6 @@ description: How Agitate uses AI — temporary Seed Users, mandatory badges, aut
 status: draft
 ---
 
-> **Draft note (remove before publishing).** Audited against the production
-> code on 2026-07-09. Three clauses still carry a ⚠ and need a decision —
-> see the audit notes in the session that placed this draft:
-> ⚠ I.2 ("completely free of AI"), ⚠ II.1 ("structurally thin"),
-> ⚠ III.2 (no code guard yet against seeding actively contested arguments).
-
 ## Preamble {#preamble}
 
 Agitate aims to be the most "human" platform for discourse there is. Agitate does, however, make use of AI tools. Here is how we reconcile that.
@@ -23,19 +17,19 @@ Beyond that, which is by design temporary, Agitate will resist AI usage as we pu
 ## Article I — What Seed Users are {#article-i-what-seed-users-are}
 
 1. Seed Users are 26 user profiles, driven by a large language model and operated at the direction of Agitate. Each one was given a persona to drive its engagement. The personas were tuned so that the full set of 26 users would be as close as possible to a representative sample of U.S. citizens. The goal is to have a ready supply of diverse responses that closely resemble what a representative sample of U.S. citizens might provide. We will publish the full roster and link to it once available.
-2. ⚠ Any Argument on Agitate that has active engagement by one of these personas is labeled with a robot head badge next to the Argument's ID. Arguments without a badge are free of active AI participation. (Where a Seed User once contributed and later retired, its contributions were removed — except any that real humans had actively endorsed; see Article V.)
+2. Any Argument on Agitate that has active engagement by one of these personas is labeled with a robot head badge next to the Argument's ID. Arguments without a badge are free of active AI participation. (Where a Seed User once contributed and later retired, its contributions were removed — except any that real humans had actively endorsed; see Article V.)
 3. Seed Users are not true Agitate users and hold no rights a human user holds. They are intended to be retired as soon as possible.
 
 ## Article II — When Seed Users act {#article-ii-when-seed-users-act}
 
-1. ⚠ Seed Users act only in response to real human activity. A human engaging with an argument may queue it to receive dialectic scaffolding; Seed Users never initiate, never campaign, and never select topics on their own.
+1. Seed Users act only in response to real human activity. A human engaging with an argument may queue it to receive dialectic scaffolding; Seed Users never initiate, never campaign, and never select topics on their own.
 2. Seed Users operate only in the public context (All Users – Public). They never act inside any group, public or private, and their activity is never attributed to any group.
 3. Persona activity is queue-driven and rate-limited by that queue; there is no always-on generation.
 
 ## Article III — What Seed Users never do {#article-iii-what-seed-users-never-do}
 
 1. They never respond to, address, argue with, or target a specific human user.
-2. ⚠ They never add weight to a debate that humans are actively contesting — their job is to scaffold empty structure, not to take sides in live disagreements.
+2. They never add weight to a debate that humans are actively contesting — their job is to scaffold empty structure, not to take sides in live disagreements. (Enforced in code: an argument that has accumulated three or more human opinions by the time its queue entry is processed is permanently ineligible for seeding.)
 3. They never conceal what they are. The badge (Article IV) cannot be turned off, bought off, or earned off.
 4. They never operate off-platform. No persona posts to Bluesky or anywhere else; anything speaking for Agitate elsewhere is a human representative of Agitate, which at the current moment is the single founder, Craig Danz.
 5. They are never used to inflate the appearance of adoption. Where participation counts appear on shared links and social-media cards, those counts are suppressed entirely until a human-participation threshold is met (currently 25 human opinions).

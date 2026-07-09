@@ -4,7 +4,7 @@
 //
 // Two content types:
 //   - Posts: dated writing, stored in the CONTENT table, listed on /blog.php.
-//   - Standing pages: undated, amendable policy documents (e.g. /constitution).
+//   - Standing pages: undated, amendable policy documents (e.g. /ai-policy-pledge).
 //     Source of truth is pages/<slug>.md in git — commit history is the
 //     verifiable twin of each page's Amendment Log. Never listed on /blog.php.
 

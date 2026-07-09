@@ -73,7 +73,7 @@ Anything touching `ENDORSEMENT` must preserve this.
 ```
 /                   PHP app files, CSS/JS, deploy scripts, top-level docs
 includes/           dbconnect.php, content_chrome.php, Parsedown.php
-pages/              Standing-page markdown (constitution, data-promise) — see pages/README.md
+pages/              Standing-page markdown (ai-policy-pledge, data-promise) — see pages/README.md
 db/                 Active stored-procedure SQL files (*_procedures.sql)
 db/seeds/           Historical one-time data-seed SQL (persona seeds, wiki, etc.)
 db/backups/         DB dumps — gitignored (contain user data)
@@ -191,7 +191,7 @@ modify `ENDORSEMENT` (trigger can't write the table that fired it).
     `vestigette-htaccess.conf` AllowOverride enabled on the droplet). Front matter
     `title/description/status`; drafts admin-only; "Last amended" comes from the
     page's Amendment Log; anchor ids pinned with `{#id}`. Publication auto-enables
-    cross-links (blog footer, masthead nav, persona badge → `/constitution`).
+    cross-links (blog footer, masthead nav, persona badge → `/ai-policy-pledge`).
     **URLs and anchor ids are permanent once published; every edit gets an
     Amendment Log line.** See `pages/README.md` for the amend/publish workflow.
   - `robots.txt` (deployed to web root) blocks AI-training crawlers; the Data
