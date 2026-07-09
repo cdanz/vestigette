@@ -1,7 +1,7 @@
 ---
 title: Agitate AI Policy and Pledge
 description: How Agitate uses AI — temporary Seed Users, mandatory badges, automatic retirement, and a pledge that your words are never used to train AI.
-status: draft
+status: published
 ---
 
 ## Preamble {#preamble}
