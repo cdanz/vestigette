@@ -280,3 +280,38 @@ GROUP BY phrasing HAVING COUNT(*) > 1;
 *Document established: May 28, 2026, after completion of phrasing
 standardization pass (1,376 rewrites, 49 deletes, 39 endorsement
 repoints across 6 batches).*
+
+
+---
+
+## Addendum — July 2026 phrasing-polish pass findings
+
+Items discovered during the July 9, 2026 full-corpus phrasing review
+(see `PHRASING_TRIAGE.md`). Not yet resolved.
+
+### New junk/meta content candidates
+| ID | Type | Content | Suggested action |
+|---|---|---|---|
+| arg 1048 (phr 1099) | meta | "There is an SQL failure - proportions of endorsements get miscalculated…" (bug report stored as argument) | delete with children |
+| arg 1136 (phr 1188) | meta | demo-video UX description stored as argument | review/delete |
+| phr 1528 @ arg 1471 | junk | "FDT" (non-content abbreviation) | delete phrasing |
+| phr 1735 | meta | "Codename: vindaloo vNow" | review/delete |
+| phr 1140, phr 738 | stale | reference old "Vestigette" name/URL and pronunciation | rewrite for Agitate branding |
+
+### Possible argument-level duplicates (verify before merge)
+| argumentIDs | Shared claim |
+|---|---|
+| 436, 438 | road wear scales with fourth power of axle weight |
+
+### Structural anomalies
+- **arg 413** carries stray bicycle-related edges (431/432/453) — endorsement cross-contamination; audit.
+- **args 1738–1745** (intersex counterexamples) currently rebut arg 142 directly; once arg **2366**
+  ("There are only two biological sexes.", coined July 2026) accrues engagement, they more precisely
+  rebut 2366 and could be re-pointed.
+
+### Pre-existing 100% invariant violations (predate July 2026 pass; June bot-run artifacts)
+Active endorsement weights not summing to 100 for:
+(393,2,Because) (393,21,Because) (393,23,Because) (393,1,Because) (393,25,Therefore)
+(630,22,Because) (630,9,Because) (631,15,Because) (1150,14,Therefore) (1152,15,Therefore)
+Likely caused by persona retirement/rebalance edge cases on Agitate-meta args. Needs a
+re-normalization script or investigation of `retirePersonaFromArgument`.
