@@ -16,7 +16,7 @@ Beyond that, which is by design temporary, Agitate will resist AI usage as we pu
 
 ## Article I — What Seed Users are {#article-i-what-seed-users-are}
 
-1. Seed Users are 26 user profiles, driven by a large language model and operated at the direction of Agitate. Each one was given a persona to drive its engagement. The personas were tuned so that the full set of 26 users would be as close as possible to a representative sample of U.S. citizens. The goal is to have a ready supply of diverse responses that closely resemble what a representative sample of U.S. citizens might provide. We will publish the full roster and link to it once available.
+1. Seed Users are 26 user profiles, driven by a large language model and operated at the direction of Agitate. Each one was given a persona to drive its engagement. The personas were tuned so that the full set of 26 users would be as close as possible to a representative sample of U.S. citizens. The goal is to have a ready supply of diverse responses that closely resemble what a representative sample of U.S. citizens might provide. The full roster, with a detailed profile of every persona, is published at the [Seed User Roster](/seed-user-roster).
 2. Any Argument on Agitate that has active engagement by one of these personas is labeled with a robot head badge next to the Argument's ID. Arguments without a badge are free of active AI participation. (Where a Seed User once contributed and later retired, its contributions were removed — except any that real humans had actively endorsed; see Article V.)
 3. Seed Users are not true Agitate users and hold no rights a human user holds. They are intended to be retired as soon as possible.
 
@@ -65,4 +65,5 @@ Beyond that, which is by design temporary, Agitate will resist AI usage as we pu
 
 ## Amendment Log {#amendment-log}
 
+- **2026-07-09** — Article I.1: the promised Seed User Roster is now published and linked.
 - **2026-07-09** — AI Policy and Pledge published.
