@@ -2,11 +2,20 @@
 session_start();
 include("${_SERVER['DOCUMENT_ROOT']}/includes/dbconnect.php");
 
-if (!isset($_SESSION['currentArg'])) {
-    $_SESSION['currentArg'] = isset($_GET['arg']) ? intval($_GET['arg']) : 75;
+// Arriving with ?arg= always retargets the session — engagement intercepts
+// (accept/reject/flag while logged out) depend on landing back on the same argument.
+if (isset($_GET['arg']) && intval($_GET['arg']) > 0) {
+    $_SESSION['currentArg'] = intval($_GET['arg']);
+} elseif (!isset($_SESSION['currentArg'])) {
+    $_SESSION['currentArg'] = 75;
 }
 $arg     = $_SESSION['currentArg'];
 $profile = $_SESSION['profile'] ?? null;
+
+// Engagement intent carried from the argument page (accept / reject / flag)
+$intentVerbs = ['accept' => 'accept', 'reject' => 'reject', 'flag' => 'flag'];
+$intent = $_GET['intent'] ?? $_POST['intent'] ?? '';
+if (!isset($intentVerbs[$intent])) $intent = '';
 
 if (isset($_POST['email']) && isset($_POST['password'])) {
     $email = trim($_POST['email']);
@@ -33,11 +42,23 @@ if (isset($_POST['email']) && isset($_POST['password'])) {
         }
 
         mysqli_close($db);
-        header('Location: /?arg=' . $arg);
+        // Resume the action they were trying to take before the login wall
+        header('Location: /?arg=' . $arg . ($intent !== '' ? '&resume=' . $intent : ''));
         exit;
     } else {
         $fmsg = "Invalid email or password.";
     }
+}
+
+// Argument context for the intent banner
+$intentPhrasing = '';
+if ($intent !== '' && !$profile) {
+    $pStmt = $db->prepare("SELECT currentPhrasing FROM ARGUMENT WHERE argumentID = ?");
+    $pStmt->bind_param("i", $arg);
+    $pStmt->execute();
+    $pRow = $pStmt->get_result()->fetch_assoc();
+    $pStmt->close();
+    if ($pRow) $intentPhrasing = $pRow['currentPhrasing'];
 }
 
 $activeGroupName = '';
@@ -89,18 +110,37 @@ mysqli_close($db);
     <a href="#" class="opennav" onclick="openNav()">&equiv;</a>
 </div>
 
-<main class="about-main">
+<main class="about-main login-main">
 
-    <div class="accordion container about-section">
+<?php if ($profile): ?>
+
+    <div class="container about-section login-card">
         <h2>Login</h2>
         <div class="panel expanded">
-            <?php if (isset($profile)): ?>
-                <p>Logged in as <strong><?php echo htmlspecialchars($_SESSION['email']); ?></strong>. <a href="/logout.php?arg=<?php echo $arg; ?>">Log out</a></p>
-            <?php else: ?>
+            <p>Logged in as <strong><?php echo htmlspecialchars($_SESSION['email']); ?></strong>. <a href="/logout.php?arg=<?php echo $arg; ?>">Log out</a></p>
+        </div>
+    </div>
+
+<?php else: ?>
+
+    <?php if ($intent !== '' && $intentPhrasing !== ''): ?>
+    <div class="intent-banner intent-<?php echo $intent; ?>">
+        <p class="intent-lead">To <strong><?php echo $intentVerbs[$intent]; ?></strong> an argument, you need an account:</p>
+        <blockquote class="intent-phrasing"><?php echo htmlspecialchars($intentPhrasing); ?></blockquote>
+        <p class="intent-followup">Log in or get an invite below &mdash; you'll land right back on this argument.</p>
+    </div>
+    <?php endif; ?>
+
+    <div class="login-grid">
+
+        <div class="container about-section login-card">
+            <h2>Log In</h2>
+            <div class="panel expanded">
                 <?php if (isset($fmsg)): ?>
                     <p class="login-error"><?php echo htmlspecialchars($fmsg); ?></p>
                 <?php endif; ?>
-                <form class="login-form" method="POST">
+                <form class="login-form" method="POST" action="/login.php">
+                    <?php if ($intent !== ''): ?><input type="hidden" name="intent" value="<?php echo htmlspecialchars($intent); ?>"><?php endif; ?>
                     <input type="email" placeholder="Email address" name="email" autocomplete="email" required>
                     <input type="password" placeholder="Password" name="password" autocomplete="current-password" required>
                     <label class="login-remember">
@@ -109,22 +149,39 @@ mysqli_close($db);
                     </label>
                     <button type="submit">Login</button>
                 </form>
-            <?php endif; ?>
+            </div>
         </div>
+
+        <div class="container about-section login-card">
+            <h2>New Here?</h2>
+            <div class="panel expanded">
+                <p>Agitate is in invite-only alpha while we keep every profile <a href="/ai-policy-pledge">one real human</a>.</p>
+
+                <form class="invite-code-form" method="GET" action="/register.php">
+                    <input type="hidden" name="arg" value="<?php echo $arg; ?>">
+                    <label for="inviteCode">Have an invite code?</label>
+                    <div class="invite-code-row">
+                        <input type="text" id="inviteCode" name="code" placeholder="Paste your code" autocomplete="off" required>
+                        <button type="submit">Continue</button>
+                    </div>
+                </form>
+
+                <div class="join-divider"><span>no code yet?</span></div>
+
+                <a class="bluesky-follow" href="https://bsky.app/profile/agitate-discourse.org" target="_blank" rel="noopener">&#x1F98B; Get an invite on Bluesky</a>
+                <p class="bluesky-context">Follow <strong>@agitate-discourse.org</strong> and reply to the pinned post &mdash; or DM &mdash; with an argument you'd weigh in on. A human reads every request and sends codes, usually within a day.</p>
+            </div>
+        </div>
+
     </div>
 
-    <div class="accordion container about-section">
-        <h2>New Users</h2>
-        <div class="panel">
-            <p>Agitate is currently in alpha. New accounts require an invitation code. If you have one, <a href="/register.php?arg=<?php echo $arg; ?>">create your account here</a>.</p>
-        </div>
-    </div>
+<?php endif; ?>
 
     <div class="accordion container about-section">
         <h2>Privacy Policy</h2>
         <div class="panel">
             <p>Agitate is nonprofit and expects to remain that way. No user data will be sold nor will your behavior be monetized in any way. It is a core part of the Agitate ethos that there is no bias built into what the system serves you.</p>
-            <p>Agitate uses demographic data minimally. Initially just location and age are used as conditions for filtering results. That list may grow but Agitate is not eager to define groups — it would prefer to let users define those for themselves.</p>
+            <p>Agitate uses demographic data minimally. Initially just location and age are used as conditions for filtering results. That list may grow but Agitate is not eager to define groups &mdash; it would prefer to let users define those for themselves.</p>
         </div>
     </div>
 

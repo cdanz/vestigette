@@ -1092,7 +1092,37 @@ Initialize after DOM content is loaded.
 */
 document.addEventListener('DOMContentLoaded', function() {
 	init();
+	resumeIntentPulse();
 });
+
+/*
+Post-login intent resume: /?arg=N&resume=accept|reject|flag pulses the control
+the user was reaching for when they hit the login wall, then strips the param
+so a refresh doesn't re-pulse.
+*/
+function resumeIntentPulse() {
+	let params = new URLSearchParams(window.location.search);
+	let resume = params.get('resume');
+	if (!resume) return;
+
+	let selectors = {
+		accept: '.opinion .button.accept',
+		reject: '.opinion .button.reject',
+		flag:   '.flag-row .flagBtn'
+	};
+	let el = selectors[resume] ? document.querySelector(selectors[resume]) : null;
+	if (el) {
+		el.scrollIntoView({ block: 'center' });
+		el.classList.add('resume-pulse');
+		el.addEventListener('animationend', function() {
+			el.classList.remove('resume-pulse');
+		}, { once: true });
+	}
+
+	params.delete('resume');
+	let qs = params.toString();
+	history.replaceState(null, '', window.location.pathname + (qs ? '?' + qs : '') + window.location.hash);
+}
 
 window.addEventListener("orientationchange", function() {
 	resize('orientationchange');
