@@ -143,7 +143,7 @@ mysqli_close($db);
         <h2>Contribute</h2>
         <div class="panel expanded">
             <p>Agitate is in active alpha development and self-funded. The graph is live and growing. The most valuable thing you can do right now is use it honestly and bring others into the conversation.</p>
-            <a class="bluesky-follow" href="https://bsky.app/profile/agitate-discourse.bsky.social" target="_blank" rel="noopener">🦋 Follow @agitate-discourse on Bluesky</a>
+            <a class="bluesky-follow" href="https://bsky.app/profile/agitate-discourse.org" target="_blank" rel="noopener">🦋 Follow @agitate-discourse.org on Bluesky</a>
             <p class="bluesky-context">Arguments worth arguing about — follow for updates, debate, and a direct line to the people building this. Feedback, bug reports, and questions are all welcome there.</p>
             <p>Software development guidance, legal assistance, and financial support are also accepted gratefully.</p>
         </div>
