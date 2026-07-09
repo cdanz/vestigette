@@ -157,7 +157,7 @@ function content_header($title, $meta = []) {
 		* { box-sizing: border-box; }
 		body { margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; color:var(--ink); background:var(--bg); line-height:1.62; }
 		a { color: var(--blue); }
-		@import url('https://fonts.googleapis.com/css2?family=Anton&display=swap');
+		@font-face { font-family:'Anton'; font-style:normal; font-weight:400; font-display:swap; src:url('/fonts/anton.woff2') format('woff2'); }
 		.masthead { background:#0e0e0e; padding:0.6rem 1rem; }
 		.masthead a { font-family:'Anton',Impact,'Arial Black',Arial,sans-serif; color:#fff; text-decoration:none; font-weight:normal; font-size:1.5rem;
 			text-shadow:0.4em 0em 0.05em #af1a17, 0em -0.4em 0.05em #2d58a8, 0em 0.4em 0.05em #10a020; }

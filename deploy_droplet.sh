@@ -76,8 +76,9 @@ deploy_php() {
     for f in "${PHP_FILES[@]}";    do php_paths+=("$SRC/$f"); done
     for f in "${STATIC_FILES[@]}"; do static_paths+=("$SRC/$f"); done
     # One scp connection for everything (-r also syncs pages/ — the
-    # standing-page markdown sources rendered by page.php)
-    scp -r "${php_paths[@]}" "${static_paths[@]}" "$SRC/pages" "$DROPLET:$WEB_ROOT/"
+    # standing-page markdown sources rendered by page.php — and fonts/,
+    # the self-hosted webfonts)
+    scp -r "${php_paths[@]}" "${static_paths[@]}" "$SRC/pages" "$SRC/fonts" "$DROPLET:$WEB_ROOT/"
 
     # includes/ files (separate destination dir)
     if [ ${#INCLUDE_FILES[@]} -gt 0 ]; then

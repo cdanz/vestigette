@@ -1,4 +1,12 @@
-@import url('https://fonts.googleapis.com/css2?family=Anton&display=swap');
+/* Anton is self-hosted (fonts/anton.woff2, SIL OFL) — no third-party font CDN,
+   per the Data Promise: the browser talks to agitate-discourse.org only. */
+@font-face {
+	font-family: 'Anton';
+	font-style: normal;
+	font-weight: 400;
+	font-display: swap;
+	src: url('/fonts/anton.woff2') format('woff2');
+}
 
 /* Color palette */
 :root{ 

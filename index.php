@@ -432,14 +432,6 @@ function generateFindLines($results) {
 				demoMode = <?php echo $demoMode ? 'true' : 'false'; ?>,
 				csrfToken = <?php echo json_encode($csrfToken); ?>;
 		</script>
-		<!-- Global site tag (gtag.js) - Google Analytics -->
-		<script async src="https://www.googletagmanager.com/gtag/js?id=G-38LM87XMGN"></script>
-		<script>
-			window.dataLayer = window.dataLayer || [];
-			function gtag(){dataLayer.push(arguments);}
-			gtag('js', new Date());
-			gtag('config', 'G-38LM87XMGN');
-		</script>
 	</head>
 	<body<?php if ($demoMode) echo ' class="demo-mode"'; ?>>
 
@@ -583,9 +575,11 @@ if (isset($_SESSION['profile'])) {
 		<button type=\"submit\" class=\"button accept accept$accept\" name=\"buttonClicked\" value=\"accept\" aria-label=\"Accept\">$svgCheck</button>
 		<button type=\"submit\" class=\"button reject reject$reject\" name=\"buttonClicked\" value=\"reject\" aria-label=\"Reject\">$svgX</button>";
 } else {
-	echo "<form method=\"GET\" class=\"buttons\" action=\"login.php?arg=" . $_SESSION['currentArg'] . "\" accept-charset=\"utf-8\">
-	<button type=\"submit\" class=\"button accept acceptOpen\" name=\"buttonClicked\" aria-label=\"Accept\">$svgCheck</button>
-	<button type=\"submit\" class=\"button reject rejectOpen\" name=\"buttonClicked\" aria-label=\"Reject\">$svgX</button>";
+	// GET form data replaces the action's query string, so arg rides as a hidden input
+	echo "<form method=\"GET\" class=\"buttons\" action=\"login.php\" accept-charset=\"utf-8\">
+	<input type=\"hidden\" name=\"arg\" value=\"" . intval($_SESSION['currentArg']) . "\">
+	<button type=\"submit\" class=\"button accept acceptOpen\" name=\"intent\" value=\"accept\" aria-label=\"Accept\">$svgCheck</button>
+	<button type=\"submit\" class=\"button reject rejectOpen\" name=\"intent\" value=\"reject\" aria-label=\"Reject\">$svgX</button>";
 }
 addCSRFtoken();
 echo "\n</form>";
@@ -674,7 +668,7 @@ $carouselCount = count($carouselLinks);
 					<button type="button" class="flagBtn<?php echo $userFlag ? ' flagged' : ''; ?>" aria-label="<?php echo $userFlag ? 'You flagged this argument — edit or remove your flag' : 'Flag this argument'; ?>" title="<?php echo $userFlag ? 'You flagged this argument' : 'Flag this argument'; ?>"><svg class="flag-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="13" height="13" aria-hidden="true"><path d="M6 2a1 1 0 0 0-1 1v18a1 1 0 0 0 2 0v-6.6l11.3.001a.6.6 0 0 0 .5-.93L16 9l2.8-4.47a.6.6 0 0 0-.5-.93H7V3a1 1 0 0 0-1-1z"/></svg></button>
 					<span class="flag-label"><?php echo $userFlag ? 'Flagged' : 'Flag'; ?></span>
 <?php else: ?>
-					<a class="flagBtn" href="/login.php?arg=<?php echo intval($arg); ?>" title="Log in to flag this argument" aria-label="Log in to flag this argument"><svg class="flag-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="13" height="13" aria-hidden="true"><path d="M6 2a1 1 0 0 0-1 1v18a1 1 0 0 0 2 0v-6.6l11.3.001a.6.6 0 0 0 .5-.93L16 9l2.8-4.47a.6.6 0 0 0-.5-.93H7V3a1 1 0 0 0-1-1z"/></svg></a>
+					<a class="flagBtn" href="/login.php?arg=<?php echo intval($arg); ?>&intent=flag" title="Log in to flag this argument" aria-label="Log in to flag this argument"><svg class="flag-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="13" height="13" aria-hidden="true"><path d="M6 2a1 1 0 0 0-1 1v18a1 1 0 0 0 2 0v-6.6l11.3.001a.6.6 0 0 0 .5-.93L16 9l2.8-4.47a.6.6 0 0 0-.5-.93H7V3a1 1 0 0 0-1-1z"/></svg></a>
 					<span class="flag-label">Flag</span>
 <?php endif; ?>
 				</div>
