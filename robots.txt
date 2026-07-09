@@ -1,0 +1,81 @@
+# agitate-discourse.org — robots.txt
+#
+# AI-training crawlers are disallowed site-wide. Users' arguments and opinions
+# are not offered up as model-training data; the Data Promise
+# (https://agitate-discourse.org/data-promise) cites this file as evidence.
+# Ordinary search-engine crawling remains welcome (see the final block).
+
+# --- OpenAI (training) ---
+User-agent: GPTBot
+Disallow: /
+
+# --- Anthropic (training) ---
+User-agent: ClaudeBot
+Disallow: /
+
+User-agent: anthropic-ai
+Disallow: /
+
+User-agent: Claude-Web
+Disallow: /
+
+# --- Google generative-AI training (does not affect Google Search) ---
+User-agent: Google-Extended
+Disallow: /
+
+# --- Common Crawl (primary corpus for many model trainers) ---
+User-agent: CCBot
+Disallow: /
+
+# --- Meta (training) ---
+User-agent: meta-externalagent
+Disallow: /
+
+User-agent: FacebookBot
+Disallow: /
+
+# --- Apple Intelligence training (does not affect Siri/Spotlight indexing) ---
+User-agent: Applebot-Extended
+Disallow: /
+
+# --- ByteDance / TikTok ---
+User-agent: Bytespider
+Disallow: /
+
+# --- Cohere ---
+User-agent: cohere-ai
+Disallow: /
+
+User-agent: cohere-training-data-crawler
+Disallow: /
+
+# --- Perplexity ---
+User-agent: PerplexityBot
+Disallow: /
+
+User-agent: Perplexity-User
+Disallow: /
+
+# --- Data brokers / scraping corpora resold for training ---
+User-agent: Omgilibot
+Disallow: /
+
+User-agent: Omgili
+Disallow: /
+
+User-agent: Diffbot
+Disallow: /
+
+User-agent: ImagesiftBot
+Disallow: /
+
+User-agent: Timpibot
+Disallow: /
+
+# --- Allen Institute for AI ---
+User-agent: AI2Bot
+Disallow: /
+
+# --- Everyone else (ordinary search engines etc.): crawl freely ---
+User-agent: *
+Disallow:

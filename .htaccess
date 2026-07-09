@@ -1,0 +1,14 @@
+# agitate-discourse.org — rewrite rules.
+# Requires AllowOverride for /var/www/html (enabled via
+# /etc/apache2/conf-available/vestigette-htaccess.conf on the droplet).
+
+RewriteEngine On
+
+# Standing pages: /<slug> serves page.php?slug=<slug> whenever pages/<slug>.md
+# exists. These URLs are printed on badges and third-party posts — they are
+# PERMANENT. If a page is ever renamed, leave a 301 here forever, e.g.:
+#   RewriteRule ^old-name/?$ /new-name [R=301,L]
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{DOCUMENT_ROOT}/pages/$1.md -f
+RewriteRule ^([a-z0-9-]+)/?$ page.php?slug=$1 [L,QSA]

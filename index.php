@@ -215,6 +215,13 @@ if ($arg) {
 	$hasPersonaOpinion = $ppRow && intval($ppRow[0]) === 1;
 }
 mysqli_close($db);
+
+// --- Standing pages (pages/*.md) — cross-links appear only once a page is published ---
+require_once("${_SERVER['DOCUMENT_ROOT']}/includes/content_chrome.php");
+$constitutionLive = content_page_is_published('constitution');
+$policyLinks = [];
+if ($constitutionLive)                            $policyLinks['/constitution'] = 'Constitution';
+if (content_page_is_published('data-promise'))    $policyLinks['/data-promise'] = 'Data Promise';
 	
 
 function addCSRFtoken() {
@@ -522,9 +529,9 @@ else {
 					</div>
 					<div class="arg-meta">
 						<span class="arg-id">Argument ID: <?php echo intval($arg); ?></span>
-<?php if ($hasPersonaOpinion): ?>
-						<span class="persona-badge" title="AI personas are active on this argument &mdash; its state is not yet fully human" aria-label="AI personas active on this argument">
-							<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+<?php if ($hasPersonaOpinion):
+	// Once the Persona Constitution is published the badge links to the policy itself.
+	$personaBadgeSvg = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
 								<line x1="12" y1="2.6" x2="12" y2="5"/>
 								<circle cx="12" cy="2" r="1.05" fill="currentColor" stroke="none"/>
 								<rect x="4.5" y="5" width="15" height="13" rx="3"/>
@@ -533,9 +540,13 @@ else {
 								<circle cx="9.5" cy="10.6" r="1.25" fill="currentColor" stroke="none"/>
 								<circle cx="14.5" cy="10.6" r="1.25" fill="currentColor" stroke="none"/>
 								<rect x="8.4" y="13.6" width="7.2" height="2.6" rx="1.3"/>
-							</svg>
-						</span>
-<?php endif; ?>
+							</svg>';
+	if ($constitutionLive) {
+		echo "\t\t\t\t\t\t<a class=\"persona-badge\" href=\"/constitution\" title=\"AI persona activity on this argument &mdash; read the policy\" aria-label=\"AI persona activity on this argument &mdash; read the policy\">{$personaBadgeSvg}</a>\n";
+	} else {
+		echo "\t\t\t\t\t\t<span class=\"persona-badge\" title=\"AI personas are active on this argument &mdash; its state is not yet fully human\" aria-label=\"AI personas active on this argument\">{$personaBadgeSvg}</span>\n";
+	}
+endif; ?>
 <?php
 $filterCount = 0;
 if ($hasOpinionFilters)    $filterCount += count($activeFilters['opinions']);
@@ -734,6 +745,9 @@ $canWeightTherefore = isset($opinion) && ($opinion > 0);
 				<a href="About.php?arg=<?php echo $_SESSION['currentArg'];?>">About</a>
 				<a href="Explore.php?arg=<?php echo $_SESSION['currentArg'];?>">Explore</a>
 				<a href="Profile.php?arg=<?php echo $_SESSION['currentArg'];?>">Profile</a>
+				<?php foreach ($policyLinks as $plHref => $plLabel): ?>
+				<a href="<?php echo htmlspecialchars($plHref); ?>"><?php echo htmlspecialchars($plLabel); ?></a>
+				<?php endforeach; ?>
 				<?php if ($isAdmin): ?>
 				<a href="/admin_tools.php?arg=<?php echo $_SESSION['currentArg']; ?>">Admin</a>
 				<?php endif; ?>

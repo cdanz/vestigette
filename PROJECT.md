@@ -73,6 +73,7 @@ Anything touching `ENDORSEMENT` must preserve this.
 ```
 /                   PHP app files, CSS/JS, deploy scripts, top-level docs
 includes/           dbconnect.php, content_chrome.php, Parsedown.php
+pages/              Standing-page markdown (constitution, data-promise) — see pages/README.md
 db/                 Active stored-procedure SQL files (*_procedures.sql)
 db/seeds/           Historical one-time data-seed SQL (persona seeds, wiki, etc.)
 db/backups/         DB dumps — gitignored (contain user data)
@@ -182,6 +183,19 @@ modify `ENDORSEMENT` (trigger can't write the table that fired it).
 - **`neighborhood.php`** — lazy-load endpoint for Find ▸ Neighborhood list.
 - **`includes/dbconnect.php`** — provides `$db`; defines `ALL_PUBLIC_AFF_ID = 12`; sets
   `@active_aff_id` session variable from `USER_PROFILE.activeAffiliationID` on every request.
+- **Blog & standing pages** — two content types (posts argue; pages promise):
+  - *Posts* (dated writing): `CONTENT` table → listed at `blog.php`, read at
+    `post.php?slug=…`, authored in `admin_content.php`.
+  - *Standing pages* (undated, amendable policy docs): `pages/*.md` in git →
+    rendered by `page.php` at `/{slug}` (`.htaccess` rewrite; needs the
+    `vestigette-htaccess.conf` AllowOverride enabled on the droplet). Front matter
+    `title/description/status`; drafts admin-only; "Last amended" comes from the
+    page's Amendment Log; anchor ids pinned with `{#id}`. Publication auto-enables
+    cross-links (blog footer, masthead nav, persona badge → `/constitution`).
+    **URLs and anchor ids are permanent once published; every edit gets an
+    Amendment Log line.** See `pages/README.md` for the amend/publish workflow.
+  - `robots.txt` (deployed to web root) blocks AI-training crawlers; the Data
+    Promise page cites it as evidence. Keep the crawler list current.
 - **`style_vestigette.css`**, **`script_vestigette.js`** — front end. Palette includes
   `--cddbYellow` (#d4a017) for flagged state and persona badge, `--cddbBlue` for filter badge.
 - **`bots/persona_bot.py`** — browser-session bot that navigates the web UI to cast

@@ -40,6 +40,7 @@ PHP_FILES=(
     donate_success.php
     blog.php
     post.php
+    page.php
     admin_content.php
     upload_image.php
     og_image.php
@@ -49,6 +50,8 @@ PHP_FILES=(
 STATIC_FILES=(
     style_vestigette.css
     script_vestigette.js
+    robots.txt
+    .htaccess
 )
 
 # Files under includes/ — synced to $WEB_ROOT/includes/ (not the flat web root).
@@ -72,8 +75,9 @@ deploy_php() {
     local php_paths=() static_paths=()
     for f in "${PHP_FILES[@]}";    do php_paths+=("$SRC/$f"); done
     for f in "${STATIC_FILES[@]}"; do static_paths+=("$SRC/$f"); done
-    # One scp connection for everything
-    scp "${php_paths[@]}" "${static_paths[@]}" "$DROPLET:$WEB_ROOT/"
+    # One scp connection for everything (-r also syncs pages/ — the
+    # standing-page markdown sources rendered by page.php)
+    scp -r "${php_paths[@]}" "${static_paths[@]}" "$SRC/pages" "$DROPLET:$WEB_ROOT/"
 
     # includes/ files (separate destination dir)
     if [ ${#INCLUDE_FILES[@]} -gt 0 ]; then
