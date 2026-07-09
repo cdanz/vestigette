@@ -220,7 +220,7 @@ mysqli_close($db);
 require_once("${_SERVER['DOCUMENT_ROOT']}/includes/content_chrome.php");
 $constitutionLive = content_page_is_published('constitution');
 $policyLinks = [];
-if ($constitutionLive)                            $policyLinks['/constitution'] = 'Constitution';
+if ($constitutionLive)                            $policyLinks['/constitution'] = 'AI Policy';
 if (content_page_is_published('data-promise'))    $policyLinks['/data-promise'] = 'Data Promise';
 	
 
