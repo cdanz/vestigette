@@ -15,7 +15,7 @@ $registered  = false;
 if ($code !== '') {
 	$stmt = $db->prepare(
 		"SELECT inviteID, createdBy, affiliationID FROM INVITATION
-		 WHERE code = ? AND usedBy IS NULL
+		 WHERE code = ?
 		   AND (expiresAt IS NULL OR expiresAt > NOW())
 		   AND (usesRemaining IS NULL OR usesRemaining > 0)"
 	);
@@ -88,10 +88,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $inviteRow) {
 			$upd2->close();
 		}
 
-		// Mark invitation as used, decrement usesRemaining for group codes
+		// Decrement usesRemaining for limited codes (NULL = unlimited); stamp
+		// usedBy/usedAt only on the use that exhausts the code, so multi-use
+		// codes stay valid. usedBy is assigned before usesRemaining, so its
+		// CASE sees the pre-decrement value (MySQL applies SET left to right).
 		$upd = $db->prepare(
 			"UPDATE INVITATION
-			 SET usedBy = ?, usedAt = NOW(),
+			 SET usedBy = CASE WHEN usesTotal = 1 OR usesRemaining = 1 THEN ? ELSE usedBy END,
+			     usedAt = CASE WHEN usesTotal = 1 OR usesRemaining = 1 THEN NOW() ELSE usedAt END,
 			     usesRemaining = CASE WHEN usesRemaining IS NOT NULL THEN GREATEST(0, usesRemaining - 1) ELSE NULL END
 			 WHERE inviteID = ?"
 		);
