@@ -1,7 +1,7 @@
 ---
 title: Data Promise
 description: Agitate's binding commitments on your data — what we collect (exhaustively), what your browser talks to (only us), and what we will never do (sell, advertise, or train AI on your words).
-status: draft
+status: published
 ---
 
 What you believe, and why, is among the most sensitive data there is. Agitate
