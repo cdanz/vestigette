@@ -188,7 +188,7 @@ $copyIcon = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="n
     <div class="accordion container about-section">
         <h2>Your Profile</h2>
         <div class="panel expanded">
-            <p>Agitate is anonymous. There are no public profiles, no follower counts, and nothing tied to your name. Your voice on Agitate is equal to everyone else's — no louder, no quieter.</p>
+            <p>Agitate is anonymous. There are no public profiles, no follower counts, and nothing tied to your name. Your voice on Agitate is equal to everyone else's — no louder, no quieter. What little we keep, and what we will never do with it, is spelled out in the <a href="/data-promise">Data Promise</a>.</p>
             <p><a href="/login.php?arg=<?php echo $arg; ?>">Log in</a> to see your participation summary, recent activity, and where your positions diverge most from the rest of the graph.</p>
         </div>
     </div>
@@ -320,6 +320,14 @@ $copyIcon = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="n
         </div>
     </div>
     <?php endif; ?>
+
+    <!-- ── Your Data ─────────────────────────────────────────────────────────── -->
+    <div class="accordion container about-section">
+        <h2>Your Data</h2>
+        <div class="panel expanded">
+            <p>Everything on this page — and everything else Agitate keeps about you — is listed, exhaustively, in the <a href="/data-promise">Data Promise</a>. Your opinions are shown to other users only in aggregate, never sold, never advertised against, and never used to train AI. You can get a copy of it all, or have it deleted, just by asking.</p>
+        </div>
+    </div>
 
     <!-- ── Most Heterodox ────────────────────────────────────────────────────── -->
     <div class="accordion container about-section">

@@ -111,7 +111,7 @@ Deleted data also ages out of our backups, which are retained for at most 90
 days.
 
 To make either request, contact
-[@agitate-discourse.bsky.social](https://bsky.app/profile/agitate-discourse.bsky.social)
+[@agitate-discourse.org](https://bsky.app/profile/agitate-discourse.org)
 on Bluesky.
 
 ## Security, honestly {#security-honestly}
@@ -140,4 +140,5 @@ notice; they become looser only with a dated amendment explaining why.
 
 ## Amendment Log {#amendment-log}
 
+- **2026-07-09** — Contact updated to the @agitate-discourse.org Bluesky handle (same account, new name).
 - **2026-07-09** — Data Promise published.

@@ -216,12 +216,9 @@ if ($arg) {
 }
 mysqli_close($db);
 
-// --- Standing pages (pages/*.md) — cross-links appear only once a page is published ---
+// --- Standing pages (pages/*.md) — the persona badge links to the AI policy once published ---
 require_once("${_SERVER['DOCUMENT_ROOT']}/includes/content_chrome.php");
 $aiPolicyLive = content_page_is_published('ai-policy-pledge');
-$policyLinks = [];
-if ($aiPolicyLive)                                $policyLinks['/ai-policy-pledge'] = 'AI Policy';
-if (content_page_is_published('data-promise'))    $policyLinks['/data-promise'] = 'Data Promise';
 	
 
 function addCSRFtoken() {
@@ -739,9 +736,6 @@ $canWeightTherefore = isset($opinion) && ($opinion > 0);
 				<a href="About.php?arg=<?php echo $_SESSION['currentArg'];?>">About</a>
 				<a href="Explore.php?arg=<?php echo $_SESSION['currentArg'];?>">Explore</a>
 				<a href="Profile.php?arg=<?php echo $_SESSION['currentArg'];?>">Profile</a>
-				<?php foreach ($policyLinks as $plHref => $plLabel): ?>
-				<a href="<?php echo htmlspecialchars($plHref); ?>"><?php echo htmlspecialchars($plLabel); ?></a>
-				<?php endforeach; ?>
 				<?php if ($isAdmin): ?>
 				<a href="/admin_tools.php?arg=<?php echo $_SESSION['currentArg']; ?>">Admin</a>
 				<?php endif; ?>

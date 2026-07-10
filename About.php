@@ -126,8 +126,9 @@ mysqli_close($db);
     <div class="accordion container about-section">
         <h2>AI Transparency</h2>
         <div class="panel expanded">
-            <p>Arguments in the early stages of human engagement may display a <span class="about-robot-badge">&#x1F916; robot badge</span>. This indicates that AI personas contributed to the argument's initial scaffolding — seeding Because, Therefore, and Rebuttal connections so new users encounter a populated graph rather than an empty room.</p>
-            <p>These contributions are temporary by design. As genuine human engagement grows on an argument, AI persona input phases out automatically. When the badge disappears, the argument is fully human-driven. The badge exists to be honest about when that transition is still in progress.</p>
+            <p>Arguments in the early stages of human engagement may display a <span class="about-robot-badge">&#x1F916; robot badge</span>. This indicates that AI "Seed Users" contributed to the argument's initial scaffolding — seeding Because, Therefore, and Rebuttal connections so new users encounter a populated graph rather than an empty room. Clicking the badge takes you to the policy that governs them.</p>
+            <p>These contributions are temporary by design. As genuine human engagement grows on an argument, Seed User input phases out automatically. When the badge disappears, the argument is fully human-driven. The badge exists to be honest about when that transition is still in progress.</p>
+            <p>None of this runs on trust alone. The <a href="/ai-policy-pledge">AI Policy and Pledge</a> is the binding document — what Seed Users are, when they may act, what they may never do, and how they retire — and it is never edited silently. The <a href="/seed-user-roster">Seed User Roster</a> describes all 26 personas in full detail, because nothing about them needs to be hidden.</p>
         </div>
     </div>
 
@@ -135,14 +136,15 @@ mysqli_close($db);
         <h2>Privacy</h2>
         <div class="panel expanded">
             <p>Agitate has no public profiles, no follower counts, and no social graph. Your positions are recorded to your account for continuity of your own experience, but they are not displayed as a public identity and are not associated with your name.</p>
-            <p>There is no feed designed to hold your attention, no mechanism for content to go viral, and no advertising. What you see is a function of the argument graph — not of who you are or what keeps you engaged longest.</p>
+            <p>There is no feed designed to hold your attention, no mechanism for content to go viral, and no advertising. There are no trackers either — loading Agitate, your browser talks to agitate-discourse.org and no one else. What you see is a function of the argument graph — not of who you are or what keeps you engaged longest.</p>
+            <p>These are not just design choices; they are commitments. The <a href="/data-promise">Data Promise</a> lists everything we collect, everything we will never do with it — never sold, never advertised against, never used to train AI — and how to have your data handed over or deleted just by asking.</p>
         </div>
     </div>
 
     <div class="accordion container about-section">
         <h2>Contribute</h2>
         <div class="panel expanded">
-            <p>Agitate is in active alpha development and self-funded. The graph is live and growing. The most valuable thing you can do right now is use it honestly and bring others into the conversation.</p>
+            <p>Agitate is in active alpha development, run on a non-profit basis and funded by donations — no ads, no investors, no monetizing your attention. The graph is live and growing. The most valuable thing you can do right now is use it honestly and bring others into the conversation.</p>
             <a class="bluesky-follow" href="https://bsky.app/profile/agitate-discourse.org" target="_blank" rel="noopener">🦋 Follow @agitate-discourse.org on Bluesky</a>
             <p class="bluesky-context">Arguments worth arguing about — follow for updates, debate, and a direct line to the people building this. Feedback, bug reports, and questions are all welcome there.</p>
             <p>Software development guidance, legal assistance, and financial support are also accepted gratefully.</p>
