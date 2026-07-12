@@ -62,7 +62,7 @@ function hubMetrics($db, $argID) {
 			 WHERE e.targArgID = $argID AND e.endorseType = 'Therefore' AND e.active = 1
 			 GROUP BY e.supportingArgID, a.currentPhrasing
 			 ORDER BY ops DESC, e.supportingArgID ASC
-			 LIMIT 3");
+			 LIMIT 5");
 		while ($tRes && ($tRow = mysqli_fetch_row($tRes))) {
 			$h['top'][] = [
 				'argID'    => (int) $tRow[0],

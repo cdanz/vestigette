@@ -107,10 +107,25 @@ function ogRenderCard($d) {
                      $cGrey, $font, $idText);
     }
 
-    // ── Title: markdown-stripped phrasing, auto-fit in y 120–300 ──────────
+    // Hub mode (includes/hub_metrics.php): the argument at hand is context,
+    // not content — its phrasing renders as a small grey kicker, the verdict
+    // strip is dropped, and the Therefore positions take the headline space.
+    $isHub = !empty($d['hub']['fires']) && count($d['hub']['top']) >= 3;
+
+    // ── Title: markdown-stripped phrasing ──────────────────────────────────
     $title = ogTruncate(ogStripMarkdown($d['phrasing'] !== null
-        ? $d['phrasing'] : 'Join the debate on Agitate'), 96);
+        ? $d['phrasing'] : 'Join the debate on Agitate'), $isHub ? 120 : 96);
     $maxW = $W - 2 * $mX;
+
+    if ($isHub) {
+        // De-emphasized kicker: two lines max, grey, regular weight
+        $kSz = 20; $ky = 140;
+        foreach (ogClampLines(ogWrap($kSz, $font, $title, $maxW), 2) as $line) {
+            imagettftext($img, $kSz, 0, $mX, (int) $ky, $cGrey, $font, $line);
+            $ky += 30;
+        }
+    } else {
+    // Auto-fit headline in y 120–300
     $topY = 120; $botY = 300; $availH = $botY - $topY;
 
     $chosen = null;
@@ -131,8 +146,11 @@ function ogRenderCard($d) {
         imagettftext($img, $sz, 0, $mX, (int) $y, $cWhite, $fontBold, $line);
         $y += $lineH;
     }
+    } // end non-hub headline
 
-    // ── Verdict strip: accept/reject split bar, y ~330–392 ────────────────
+    // ── Verdict strip: accept/reject split bar, y ~330–392 (non-hub only —
+    //    a hub's own verdict is near-consensus framing, not the story) ──────
+    if (!$isHub) {
     $barY0 = 358; $barY1 = 390; $labelY = 344; $barW = $W - 2 * $mX;
     $showProof = defined('SOCIAL_PROOF_MIN_HUMANS')
         ? $d['humans'] >= SOCIAL_PROOF_MIN_HUMANS : false;
@@ -163,32 +181,37 @@ function ogRenderCard($d) {
         imagettftext($img, 20, 0, (int) (($W - ogTextW(20, $font, $noneText)) / 2),
                      $barY0 + 22, $cGrey, $font, $noneText);
     }
+    } // end non-hub verdict strip
 
     // ── Panels ─────────────────────────────────────────────────────────────
-    // Hub mode (see includes/hub_metrics.php): when engagement lives on the
-    // Therefore fan-out rather than the dialectic, one full-width panel lists
-    // the top positions. Otherwise: strongest Because / strongest Rebuttal.
-    $pY0 = 416; $pY1 = 552; $pGap = 30;
-    $isHub = !empty($d['hub']['fires']) && count($d['hub']['top']) >= 3;
-
+    // Hub mode: the Therefore positions are the headline — a tall full-width
+    // ballot panel (top 5 by engagement, numbered) in the space the headline
+    // and verdict strip vacated. Otherwise: strongest Because / Rebuttal.
     if ($isHub) {
+        $pY0 = 196; $pY1 = 552;
         $hX = $mX; $hW = $W - 2 * $mX; $pad = 20;
         imagefilledrectangle($img, $hX, $pY0, $hX + $hW, $pY1, $cPanel);
         imagefilledrectangle($img, $hX, $pY0, $hX + 5,   $pY1, $cGreen);
         imagettftext($img, 15, 0, $hX + $pad, $pY0 + 32, $cGreen, $fontBold, 'THEREFORE');
-        if ($d['hub']['kids'] > 3) {
-            $moreText = '+ ' . ($d['hub']['kids'] - 3) . ' more positions on the map';
+        $shown = count($d['hub']['top']);
+        if ($d['hub']['kids'] > $shown) {
+            $moreN = $d['hub']['kids'] - $shown;
+            $moreText = '+ ' . $moreN . ' more position' . ($moreN === 1 ? '' : 's') . ' on the map';
             imagettftext($img, 15, 0, $hX + $hW - $pad - ogTextW(15, $font, $moreText),
                          $pY0 + 32, $cGrey, $font, $moreText);
         }
-        $bodySz = 19; $ly = $pY0 + 66;
+        $rowSz = 24; $ly = $pY0 + 89; $rank = 1;
         foreach ($d['hub']['top'] as $t) {
-            $lines = ogClampLines(ogWrap($bodySz, $font,
-                ogStripMarkdown($t['phrasing']), $hW - 2 * $pad - 5), 1);
-            imagettftext($img, $bodySz, 0, $hX + $pad, (int) $ly, $cWhite, $font, $lines[0]);
-            $ly += 31;
+            imagettftext($img, $rowSz, 0, $hX + $pad + 4, (int) $ly,
+                         $cGreen, $fontBold, (string) $rank);
+            $lines = ogClampLines(ogWrap($rowSz, $fontBold,
+                ogStripMarkdown($t['phrasing']), $hW - 2 * $pad - 54), 1);
+            imagettftext($img, $rowSz, 0, $hX + $pad + 50, (int) $ly,
+                         $cWhite, $fontBold, $lines[0]);
+            $ly += 54; $rank++;
         }
     } else {
+        $pY0 = 416; $pY1 = 552; $pGap = 30;
         $pW = (int) (($W - 2 * $mX - $pGap) / 2);
         ogPanel($img, $mX,               $pY0, $pW, $pY1 - $pY0, 'BECAUSE', $cBlue,
                 $d['because'],  'No supporting case yet — make the first argument for it.',
