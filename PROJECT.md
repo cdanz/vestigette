@@ -239,7 +239,12 @@ modify `ENDORSEMENT` (trigger can't write the table that fired it).
 - **OG share cards** — `og_image.php` renders a dialectic card (verdict bar + strongest
   Because/Rebuttal). Headcounts/percentages gated behind `SOCIAL_PROOF_MIN_HUMANS` (25
   human opinions; personas excluded). `index.php` versions the og:image URL by a content
-  hash so platforms re-scrape when the card's inputs change.
+  hash so platforms re-scrape when the card's inputs change. **Hub mode**
+  (`includes/hub_metrics.php`): when opinions concentrate on an argument's Therefore
+  fan-out (T≥25; dialectic dormant: D<25 or T≥8D; ≥4 effective engaged children; T≥2×own
+  opinions), the card swaps the two panels for a full-width Therefore panel listing the
+  top 3 positions by engagement ("Which do you back?"). Fires on e.g. arg 1963 (2028
+  candidates).
 - **Demo mode** — admin toggle that suppresses iOS auto-zoom / scroll jumps for screen
   recording. Site-wide while enabled.
 - **Donate button** — masthead on every page; mobile hamburger on left to avoid crowding.
