@@ -267,6 +267,10 @@ modify `ENDORSEMENT` (trigger can't write the table that fired it).
 - **`impliedAssertion` trigger** — can't touch `ENDORSEMENT`; also inserts `SCOPE_OPINION`.
 - **`rebalanceRecentRejections`** loops must stay scoped per `endorseType` (unscoped once
   caused an infinite loop).
+- **OG card cache is in Apache's PrivateTmp** — `og_image.php` caches PNGs under
+  `sys_get_temp_dir()`, which for Apache (systemd `PrivateTmp=true`) is
+  `/tmp/systemd-private-*-apache2.service-*/tmp/agitate_og/`, NOT `/tmp/agitate_og`.
+  Clear it there when verifying card changes (TTL 3600s otherwise).
 - **Light panel vs dark header** — the expanded argument panel is light; the header is dark.
   Style for the surface you're on.
 - **Bot personas** — profileIDs 1–26 must always have `activeAffiliationID = 12`. Both
