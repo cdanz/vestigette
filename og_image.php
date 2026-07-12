@@ -1,8 +1,9 @@
 <?php
 // og_image.php — dynamic Open Graph / Twitter share image for an argument.
 // Dialectic card, 1200×630 PNG: the assertion text, an accept/reject verdict
-// strip, and the strongest Because / strongest Rebuttal panels. Cached in the
-// system temp dir with a short TTL.
+// strip, and the strongest Because / strongest Rebuttal panels — or, for hub
+// arguments (includes/hub_metrics.php), a full-width panel listing the top
+// Therefore positions. Cached in the system temp dir with a short TTL.
 //
 // Social-proof gate: percentages render only when the argument has at least
 // SOCIAL_PROOF_MIN_HUMANS human opinions (personas = profileID 1–26, admin =
@@ -163,19 +164,44 @@ function ogRenderCard($d) {
                      $barY0 + 22, $cGrey, $font, $noneText);
     }
 
-    // ── Panels: strongest Because (blue) / strongest Rebuttal (red) ───────
+    // ── Panels ─────────────────────────────────────────────────────────────
+    // Hub mode (see includes/hub_metrics.php): when engagement lives on the
+    // Therefore fan-out rather than the dialectic, one full-width panel lists
+    // the top positions. Otherwise: strongest Because / strongest Rebuttal.
     $pY0 = 416; $pY1 = 552; $pGap = 30;
-    $pW  = (int) (($W - 2 * $mX - $pGap) / 2);
-    ogPanel($img, $mX,               $pY0, $pW, $pY1 - $pY0, 'BECAUSE', $cBlue,
-            $d['because'],  'No supporting case yet — make the first argument for it.',
-            $cPanel, $cWhite, $cGrey, $font, $fontBold);
-    ogPanel($img, $mX + $pW + $pGap, $pY0, $pW, $pY1 - $pY0, 'REBUTTAL', $cRed,
-            $d['rebuttal'], 'No rebuttals yet — make the first case against.',
-            $cPanel, $cWhite, $cGrey, $font, $fontBold);
+    $isHub = !empty($d['hub']['fires']) && count($d['hub']['top']) >= 3;
+
+    if ($isHub) {
+        $hX = $mX; $hW = $W - 2 * $mX; $pad = 20;
+        imagefilledrectangle($img, $hX, $pY0, $hX + $hW, $pY1, $cPanel);
+        imagefilledrectangle($img, $hX, $pY0, $hX + 5,   $pY1, $cGreen);
+        imagettftext($img, 15, 0, $hX + $pad, $pY0 + 32, $cGreen, $fontBold, 'THEREFORE');
+        if ($d['hub']['kids'] > 3) {
+            $moreText = '+ ' . ($d['hub']['kids'] - 3) . ' more positions on the map';
+            imagettftext($img, 15, 0, $hX + $hW - $pad - ogTextW(15, $font, $moreText),
+                         $pY0 + 32, $cGrey, $font, $moreText);
+        }
+        $bodySz = 19; $ly = $pY0 + 66;
+        foreach ($d['hub']['top'] as $t) {
+            $lines = ogClampLines(ogWrap($bodySz, $font,
+                ogStripMarkdown($t['phrasing']), $hW - 2 * $pad - 5), 1);
+            imagettftext($img, $bodySz, 0, $hX + $pad, (int) $ly, $cWhite, $font, $lines[0]);
+            $ly += 31;
+        }
+    } else {
+        $pW = (int) (($W - 2 * $mX - $pGap) / 2);
+        ogPanel($img, $mX,               $pY0, $pW, $pY1 - $pY0, 'BECAUSE', $cBlue,
+                $d['because'],  'No supporting case yet — make the first argument for it.',
+                $cPanel, $cWhite, $cGrey, $font, $fontBold);
+        ogPanel($img, $mX + $pW + $pGap, $pY0, $pW, $pY1 - $pY0, 'REBUTTAL', $cRed,
+                $d['rebuttal'], 'No rebuttals yet — make the first case against.',
+                $cPanel, $cWhite, $cGrey, $font, $fontBold);
+    }
 
     // ── Footer: CTA + domain ───────────────────────────────────────────────
     $footY = 604;
-    imagettftext($img, 23, 0, $mX, $footY, $cYellow, $fontBold, 'Where do you stand?');
+    imagettftext($img, 23, 0, $mX, $footY, $cYellow, $fontBold,
+                 $isHub ? 'Which do you back?' : 'Where do you stand?');
     $domain = 'agitate-discourse.org';
     imagettftext($img, 19, 0, $W - $mX - ogTextW(19, $font, $domain), $footY,
                  $cGrey, $font, $domain);
@@ -287,7 +313,9 @@ if (PHP_SAPI !== 'cli') {
     }
 
     include("{$_SERVER['DOCUMENT_ROOT']}/includes/dbconnect.php");
+    require_once("{$_SERVER['DOCUMENT_ROOT']}/includes/hub_metrics.php");
     $data = ogFetchData($db, $argID);
+    $data['hub'] = hubMetrics($db, $argID);
     mysqli_close($db);
 
     $img = ogRenderCard($data);

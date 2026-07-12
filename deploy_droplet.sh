@@ -59,6 +59,7 @@ INCLUDE_FILES=(
     Parsedown.php
     content_chrome.php
     dbconnect.php
+    hub_metrics.php
 )
 
 BOT_FILES=(

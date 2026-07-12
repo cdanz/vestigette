@@ -214,6 +214,11 @@ if ($arg) {
 		               WHERE argumentID = " . intval($arg) . " AND profileID BETWEEN 1 AND 26)"));
 	$hasPersonaOpinion = $ppRow && intval($ppRow[0]) === 1;
 }
+
+// --- Hub detection for the share card (see includes/hub_metrics.php) ---
+require_once("${_SERVER['DOCUMENT_ROOT']}/includes/hub_metrics.php");
+$hubShare = hubMetrics($db, intval($_SESSION['currentArg']));
+
 mysqli_close($db);
 
 // --- Standing pages (pages/*.md) — the persona badge links to the AI policy once published ---
@@ -379,13 +384,18 @@ function generateFindLines($results) {
 		}
 		$shareURL   = 'https://agitate-discourse.org/?arg=' . $shareArgID;
 		// Version param: Bluesky/Twitter cache cards per-URL, so bust it when
-		// the card's inputs move (verdict, top Because/Rebuttal, phrasing).
+		// the card's inputs move (verdict, top Because/Rebuttal, phrasing,
+		// hub mode and its top Therefore positions).
 		$shareVer = substr(md5(implode('|', array(
 			isset($rate) ? $rate : '',
 			isset($assertions) ? $assertions : '',
 			isset($because[0]) ? $because[0][0] . ':' . $because[0][1] : '',
 			isset($rebuttal[0]) ? $rebuttal[0][0] . ':' . $rebuttal[0][1] : '',
 			$shareTitle,
+			!empty($hubShare['fires'])
+				? 'hub:' . $hubShare['kids'] . ':' . implode(',', array_map(
+					function ($t) { return $t['argID'] . '.' . $t['ops']; }, $hubShare['top']))
+				: '',
 		))), 0, 10);
 		$shareImage = 'https://agitate-discourse.org/og_image.php?arg=' . $shareArgID . '&v=' . $shareVer;
 		$e = function ($s) { return htmlspecialchars($s, ENT_QUOTES, 'UTF-8'); };
