@@ -91,7 +91,46 @@ if (isset($_SESSION['profile'])) {
 		$pickerType = $settRow ? ($settRow['pickerType'] ?? 'none') : 'none';
 		$adminPickerEnabled = ($pickerType !== 'none');
 
-		if ($pickerType === 'manual') {
+		if ($pickerType === 'all') {
+			// All 26 seed personas sorted by ideology score (ASC), then lastName (ASC) for ties.
+			// band: 0=far-left(≤-7)  1=left(-4to-6)  2=center-left(-3to-1)  3=center(0)
+			//       4=center-right(+1to+3)  5=right(+4to+6)  6=far-right(≥+7)
+			$allPersonasSorted = [
+				['profileID' => 17, 'label' => 'Quinn',    'band' => 0], // −10
+				['profileID' =>  4, 'label' => 'Diana',    'band' => 0], // −9
+				['profileID' =>  9, 'label' => 'Irene',    'band' => 0], // −8
+				['profileID' => 16, 'label' => 'Patricia', 'band' => 0], // −8
+				['profileID' => 25, 'label' => 'Yvonne',   'band' => 0], // −8
+				['profileID' =>  2, 'label' => 'Brianna',  'band' => 0], // −7
+				['profileID' => 19, 'label' => 'Sandra',   'band' => 0], // −7
+				['profileID' => 11, 'label' => 'Karen',    'band' => 1], // −6
+				['profileID' =>  8, 'label' => 'Harold',   'band' => 1], // −5
+				['profileID' =>  7, 'label' => 'Gloria',   'band' => 1], // −4
+				['profileID' => 15, 'label' => 'Olivia',   'band' => 2], // −3
+				['profileID' => 22, 'label' => 'Victor',   'band' => 2], // −2
+				['profileID' => 26, 'label' => 'Zachary',  'band' => 3], //   0
+				['profileID' => 12, 'label' => 'Leonard',  'band' => 4], // +1
+				['profileID' => 14, 'label' => 'Nathan',   'band' => 4], // +2
+				['profileID' => 20, 'label' => 'Thomas',   'band' => 5], // +4
+				['profileID' =>  3, 'label' => 'Carlos',   'band' => 5], // +6
+				['profileID' =>  6, 'label' => 'Frank',    'band' => 5], // +6
+				['profileID' =>  1, 'label' => 'Alfred',   'band' => 6], // +7
+				['profileID' => 13, 'label' => 'Maria',    'band' => 6], // +7
+				['profileID' => 23, 'label' => 'Wendy',    'band' => 6], // +7
+				['profileID' => 24, 'label' => 'Xavier',   'band' => 6], // +7
+				['profileID' =>  5, 'label' => 'Eleanor',  'band' => 6], // +9
+				['profileID' => 10, 'label' => 'James',    'band' => 6], // +9
+				['profileID' => 18, 'label' => 'Robert',   'band' => 6], // +9
+				['profileID' => 21, 'label' => 'Ursula',   'band' => 6], // +9
+			];
+			// Prepend the admin's own profile (always allowed to return to self)
+			$meRow = mysqli_fetch_assoc(mysqli_query($db,
+				"SELECT firstName FROM USER_PROFILE WHERE profileID=$realProfileID"));
+			$meLabel = $meRow ? htmlspecialchars($meRow['firstName']) : 'Me';
+			array_unshift($allPersonasSorted, ['profileID' => $realProfileID, 'label' => $meLabel, 'band' => null]);
+			$adminPickerData = $allPersonasSorted;
+
+		} elseif ($pickerType === 'manual') {
 			// Manual list: the admin's own profile + the specific IDs designated.
 			$pickerIDs = [$realProfileID];
 			if ($settRow && $settRow['pickerProfiles']) {
@@ -473,7 +512,7 @@ function generateFindLines($results) {
 	<form method="POST" id="adminPickerForm" action="/?arg=<?php echo $_SESSION['currentArg']; ?>">
 		<input type="hidden" name="buttonClicked" value="adminSwitchProfile">
 		<?php foreach ($adminPickerData as $p): ?>
-		<label class="admin-picker-option">
+		<label class="admin-picker-option<?php echo isset($p['band']) ? ' picker-band-' . intval($p['band']) : ''; ?>">
 			<input type="radio" name="pickerProfile" value="<?php echo intval($p['profileID']); ?>"
 				<?php if (intval($_SESSION['profile']) === intval($p['profileID'])) echo 'checked'; ?>
 				onchange="this.form.submit()">

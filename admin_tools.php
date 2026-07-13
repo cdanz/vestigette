@@ -331,10 +331,12 @@ mysqli_close($db);
 	<div class="field">
 		<label><input type="radio" name="pickerType" value="none"
 			<?php if ($pickerType === 'none') echo 'checked'; ?>> Off</label>
-		<label><input type="radio" name="pickerType" value="manual"
-			<?php if ($pickerType === 'manual') echo 'checked'; ?>> Manual list — the specific profiles you list below</label>
+		<label><input type="radio" name="pickerType" value="all"
+			<?php if ($pickerType === 'all') echo 'checked'; ?>> All personas — all 26 seed users arranged left-to-right by ideology, color-coded</label>
 		<label><input type="radio" name="pickerType" value="auto"
 			<?php if ($pickerType === 'auto') echo 'checked'; ?>> Personas with an opinion — every persona (IDs 1&ndash;26) that has an opinion on the argument being viewed, plus you</label>
+		<label><input type="radio" name="pickerType" value="manual"
+			<?php if ($pickerType === 'manual') echo 'checked'; ?>> Manual list — the specific profiles you list below</label>
 	</div>
 
 	<div class="field">

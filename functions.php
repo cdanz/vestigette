@@ -479,7 +479,7 @@
 					$allowed = ($settRow && $settRow['pickerProfiles'])
 						? array_map('intval', explode(',', $settRow['pickerProfiles'])) : [];
 					$ok = in_array($switchTo, $allowed, true);
-				} elseif ($pickerType === 'auto') {
+				} elseif ($pickerType === 'auto' || $pickerType === 'all') {
 					// Personas (IDs 1-26) only; never switch to a real (non-persona) user.
 					$ok = ($switchTo >= 1 && $switchTo <= 26);
 				}

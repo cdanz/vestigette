@@ -5273,6 +5273,29 @@ input:checked + .toggle:before {
 	accent-color: #7b91ff;
 	cursor: pointer;
 }
+/* Ideology-band pills (All Personas mode) */
+.admin-picker-option[class*="picker-band-"] {
+	border-radius: 3px;
+	font-weight: 600;
+	gap: 0;
+	padding: 0.1rem 0.45rem;
+}
+.admin-picker-option[class*="picker-band-"] input[type="radio"] {
+	display: none; /* hide radio dot; label click submits */
+}
+/* Selected state: white outline */
+.admin-picker-option[class*="picker-band-"]:has(input:checked) {
+	outline: 2px solid #fff;
+	outline-offset: 1px;
+}
+/* Band colors: blue gradient left → red gradient right */
+.picker-band-0 { background: #1e3a8a; color: #fff; }             /* far-left  ≤ −7 */
+.picker-band-1 { background: #2563eb; color: #fff; }             /* left      −4 to −6 */
+.picker-band-2 { background: #93c5fd; color: #1e3a8a; }          /* ctr-left  −3 to −1 */
+.picker-band-3 { background: #6b7280; color: #fff; }             /* center    0 */
+.picker-band-4 { background: #fca5a5; color: #7f1d1d; }          /* ctr-right +1 to +3 */
+.picker-band-5 { background: #ef4444; color: #fff; }             /* right     +4 to +6 */
+.picker-band-6 { background: #7f1d1d; color: #fff; }             /* far-right ≥ +7 */
 .admin-bar-tools-link {
 	color: #7b91ff;
 	font-size: 0.72rem;
