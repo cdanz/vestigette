@@ -522,6 +522,16 @@ function generateFindLines($results) {
 	</form>
 	<a class="admin-bar-tools-link" href="/admin_tools.php?arg=<?php echo $_SESSION['currentArg']; ?>">⚙ Tools</a>
 </div>
+<script>
+(function() {
+	function syncPickerBarHeight() {
+		var bar = document.getElementById('adminPickerBar');
+		if (bar) document.documentElement.style.setProperty('--picker-bar-h', bar.offsetHeight + 'px');
+	}
+	requestAnimationFrame(syncPickerBarHeight);
+	window.addEventListener('resize', syncPickerBarHeight);
+})();
+</script>
 <?php endif; ?>
 
 <?php if (!empty($_SESSION['formError'])): ?>

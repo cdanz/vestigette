@@ -5079,8 +5079,8 @@ input:checked + .toggle:before {
 	}
 	body:has(#adminPickerBar) #left-col,
 	body:has(#adminPickerBar) #right-col {
-		height: calc(100vh - 2rem);
-		margin-top: 2rem;
+		height: calc(100vh - var(--picker-bar-h, 2rem));
+		margin-top: var(--picker-bar-h, 2rem);
 	}
 	h1 {
 		font-size: 3rem;
