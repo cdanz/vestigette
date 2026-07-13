@@ -319,6 +319,17 @@ $baseURL      = '/';
     </div><!-- .flesh-list -->
 
     <div class="flesh-footer">
+        <div class="flesh-footer-left">
+            <button type="button" class="button flesh-reset hidden" id="flesh-reset"
+                    onclick="fleshReset()" title="Reset">&#x21BA;</button>
+            <button type="button" class="button flesh-myweights hidden" id="flesh-myweights"
+                    onclick="fleshLoadMyWeights()" title="Load my previous weights">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="18" height="18" aria-hidden="true">
+                    <circle cx="12" cy="8" r="4"/>
+                    <path d="M4 20c0-3.866 3.582-7 8-7s8 3.134 8 7" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+            </button>
+        </div>
         <form method="POST"
               action="/flesh_out.php?arg=<?php echo $argIDEsc; ?>&amp;type=<?php echo urlencode($type); ?>"
               id="flesh-form"
@@ -354,6 +365,9 @@ var fleshPool        = [];   // [{id: 'new-0'|'ex-123', clicks: N}]
 var fleshTotalClicks = 0;
 var fleshNewCounter  = 0;    // index of the next new-arg slot to create
 var showRecipCol     = <?php echo $showRecipCol ? 'true' : 'false'; ?>;
+var fleshStoredWeights = {}; // argID → past-endorsement pct, loaded from sessionStorage context
+var fleshArgID       = <?php echo $argIDEsc; ?>;
+var fleshType        = '<?php echo $typeLabel; ?>';
 
 // ── Core weight helpers ───────────────────────────────────────────────────────
 
@@ -392,6 +406,11 @@ function fleshUpdateAll() {
     // but be safe)
 
     document.getElementById('flesh-submit').disabled = (fleshPool.length === 0);
+
+    var resetBtn = document.getElementById('flesh-reset');
+    var myWtsBtn = document.getElementById('flesh-myweights');
+    if (resetBtn) resetBtn.classList.toggle('hidden', fleshPool.length === 0);
+    if (myWtsBtn) myWtsBtn.classList.toggle('hidden', Object.keys(fleshStoredWeights).length === 0);
 
     var pinnedLabel = document.querySelector('.pinned-label');
     var availLabel  = document.getElementById('available-label');
@@ -736,6 +755,97 @@ function fleshUseSuggestion(n, argID, phrasing) {
     }
     fleshBumpExisting(argID);
 }
+
+// ── Reset / load-my-weights ───────────────────────────────────────────────────
+
+function fleshReset() {
+    var listEl = document.querySelector('.flesh-list');
+    fleshPool.filter(function(item) { return item.id.indexOf('ex-') === 0; })
+        .forEach(function(item) {
+            var argID = parseInt(item.id.replace('ex-', ''), 10);
+            var row = document.getElementById('flesh-ex-' + argID);
+            if (!row) return;
+            row.className = row.className
+                .replace(/pct\d+_\d+/g, '').replace(/half\d/g, '').replace(/\s+/g, ' ').trim();
+            row.classList.add('pct0_0', 'half1');
+            var span = row.querySelector('.inLinePct');
+            if (span) span.textContent = '';
+            listEl.appendChild(row);
+        });
+    fleshPool = [];
+    fleshTotalClicks = 0;
+    fleshUpdateAll();
+}
+
+function fleshLoadMyWeights() {
+    var keys = Object.keys(fleshStoredWeights);
+    if (!keys.length) return;
+    fleshReset();
+    var pinnedZone = document.getElementById('pinned-zone');
+    keys.map(function(k) { return {argID: parseInt(k, 10), pct: fleshStoredWeights[k]}; })
+        .sort(function(a, b) { return b.pct - a.pct; })
+        .forEach(function(s) {
+            var row = document.getElementById('flesh-ex-' + s.argID);
+            if (!row) return;
+            var clicks = Math.max(1, Math.round(s.pct));
+            pinnedZone.appendChild(row);
+            fleshPool.push({id: 'ex-' + s.argID, clicks: clicks});
+            fleshTotalClicks += clicks;
+        });
+    fleshUpdateAll();
+}
+
+// ── Apply context from index page "More to Say" button ────────────────────────
+(function() {
+    try {
+        var raw = sessionStorage.getItem('fleshOutContext');
+        if (!raw) return;
+        var ctx = JSON.parse(raw);
+        if (ctx.argID !== fleshArgID || ctx.type !== fleshType) return;
+        sessionStorage.removeItem('fleshOutContext');
+
+        // Populate stored weights map (used by "Load my weights" button)
+        (ctx.stored || []).forEach(function(s) { fleshStoredWeights[s.argID] = s.pct; });
+
+        // Sort available rows: manual-weighted args first (desc clicks),
+        // then stored-weighted args (desc pct), then unweighted
+        var listEl = document.querySelector('.flesh-list');
+        var rows = Array.from(listEl.querySelectorAll(':scope > .flesh-row[data-arg-id]'));
+        var manualMap = {};
+        (ctx.manual || []).forEach(function(m) { manualMap[m.argID] = m.clicks; });
+        rows.sort(function(a, b) {
+            var aID = parseInt(a.dataset.argId, 10);
+            var bID = parseInt(b.dataset.argId, 10);
+            var aC = manualMap[aID] || 0, bC = manualMap[bID] || 0;
+            if (aC && !bC) return -1;
+            if (!aC && bC) return 1;
+            if (aC && bC) return bC - aC;
+            return (fleshStoredWeights[bID] || 0) - (fleshStoredWeights[aID] || 0);
+        });
+        rows.forEach(function(row) { listEl.appendChild(row); });
+
+        // Auto-pin: use manual weights if present, otherwise use stored weights
+        var pinnedZone = document.getElementById('pinned-zone');
+        var toPinArr;
+        if (ctx.manual && ctx.manual.length > 0) {
+            toPinArr = ctx.manual.slice().sort(function(a, b) { return b.clicks - a.clicks; });
+        } else {
+            toPinArr = (ctx.stored || []).slice()
+                .sort(function(a, b) { return b.pct - a.pct; })
+                .map(function(s) { return {argID: s.argID, clicks: Math.max(1, Math.round(s.pct))}; });
+        }
+
+        toPinArr.forEach(function(m) {
+            var row = document.getElementById('flesh-ex-' + m.argID);
+            if (!row) return;
+            pinnedZone.appendChild(row);
+            fleshPool.push({id: 'ex-' + m.argID, clicks: m.clicks});
+            fleshTotalClicks += m.clicks;
+        });
+
+        fleshUpdateAll();
+    } catch (e) {}
+})();
 
 function fleshAwaitSuggestion(n) {
     var row = document.getElementById('flesh-new-' + n);

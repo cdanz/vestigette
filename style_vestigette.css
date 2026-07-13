@@ -1032,10 +1032,15 @@ body.flesh-out-page #flesh-out {
 	display: flex;
 	flex-flow: row nowrap;
 	gap: 0.5rem;
-	justify-content: center;
+	justify-content: space-between;
 	padding: 0.5rem;
 }
 .flesh-footer form { display: inline; }
+.flesh-footer-left {
+	align-items: center;
+	display: flex;
+	gap: 0.5rem;
+}
 /* Circle colours keyed to type */
 #flesh-out.flesh-because  { --flesh-color: var(--because); }
 #flesh-out.flesh-therefore { --flesh-color: var(--therefore); }
@@ -1086,6 +1091,24 @@ body.flesh-out-page .flesh-footer button {
 body.flesh-out-page .flesh-footer button:hover:not(:disabled) {
 	background-color: var(--cddbWhite);
 	color: var(--flesh-color);
+}
+/* Left-side footer buttons mirror the index page reset/myWeights style */
+body.flesh-out-page #flesh-reset {
+	align-items: center;
+	display: flex;
+	font-size: 1.5rem;
+	font-weight: 300;
+	justify-content: center;
+	line-height: 1;
+	padding: 0;
+	width: 2rem;
+}
+body.flesh-out-page #flesh-myweights {
+	align-items: center;
+	display: flex;
+	justify-content: center;
+	padding: 0.15rem 0.3rem;
+	width: 2.2rem;
 }
 body.flesh-out-page .flesh-reciprocate .toggle {
 	background-color: var(--cddbGrey);

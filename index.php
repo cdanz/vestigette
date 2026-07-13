@@ -438,6 +438,31 @@ function generateFindLines($results) {
 				rebuttal = <?php echo json_encode(isset($rebuttal) ? $rebuttal : null); ?>,
 				demoMode = <?php echo $demoMode ? 'true' : 'false'; ?>,
 				csrfToken = <?php echo json_encode($csrfToken); ?>;
+
+			function captureFleshContext(type, evt) {
+				var state = sectionState[type];
+				var manual = [], totalClicks = 0;
+				if (state && state.totalClicks > 0) {
+					manual = state.clickArr.map(function(t) { return {argID: t[0], clicks: t[1]}; });
+					totalClicks = state.totalClicks;
+				}
+				var section = document.getElementById(type);
+				var stored = [];
+				if (section) {
+					section.querySelectorAll('.lineItem[data-arg-id]').forEach(function(el) {
+						var id = parseInt(el.dataset.argId, 10);
+						var w  = parseFloat(el.dataset.userWeight);
+						if (id && w > 0) stored.push({argID: id, pct: w});
+					});
+				}
+				sessionStorage.setItem('fleshOutContext', JSON.stringify({
+					argID: arg,
+					type:  type.charAt(0).toUpperCase() + type.slice(1),
+					manual: manual,
+					totalClicks: totalClicks,
+					stored: stored
+				}));
+			}
 		</script>
 	</head>
 	<body<?php if ($demoMode) echo ' class="demo-mode"'; ?>>
@@ -513,7 +538,7 @@ else {
 ?>
 <?php if ((isset($opinion)) && ($opinion > 0)): ?>
 				<div class="bulk-add-bar">
-					<a href="/flesh_out.php?arg=<?php echo $arg; ?>&type=Because" class="button bulk-add-btn">+ More to Say</a>
+					<a href="/flesh_out.php?arg=<?php echo $arg; ?>&type=Because" class="button bulk-add-btn" onclick="captureFleshContext('because',event)">+ More to Say</a>
 				</div>
 <?php endif; ?>
 			</div>
@@ -727,7 +752,7 @@ $canWeightTherefore = isset($opinion) && ($opinion > 0);
 ?>
 <?php if ((isset($opinion)) && ($opinion > 0)): ?>
 				<div class="bulk-add-bar">
-					<a href="/flesh_out.php?arg=<?php echo $arg; ?>&type=Therefore" class="button bulk-add-btn">+ More to Say</a>
+					<a href="/flesh_out.php?arg=<?php echo $arg; ?>&type=Therefore" class="button bulk-add-btn" onclick="captureFleshContext('therefore',event)">+ More to Say</a>
 				</div>
 <?php endif; ?>
 			</div>
@@ -804,7 +829,7 @@ else {
 ?>
 <?php if ((isset($opinion)) && ($opinion < 0)): ?>
 				<div class="bulk-add-bar">
-					<a href="/flesh_out.php?arg=<?php echo $arg; ?>&type=Rebuttal" class="button bulk-add-btn">+ More to Say</a>
+					<a href="/flesh_out.php?arg=<?php echo $arg; ?>&type=Rebuttal" class="button bulk-add-btn" onclick="captureFleshContext('rebuttal',event)">+ More to Say</a>
 				</div>
 <?php endif; ?>
 			</div>
