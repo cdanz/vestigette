@@ -14,7 +14,7 @@ account appears on every page.
 | Slot | Voice | Primary | Bench |
 |---|---|---|---|
 | Absolute hater | contempt, personal | **Robert Ramirez (18)** MAGA | James Jennings (10) |
-| Thoughtful conservative | fiscal/experience/coalition critique | **Eleanor Evans (5)** R | Alfred Anderson (1), Maria Martinez (13), Frank Fletcher (6) |
+| Thoughtful conservative | fiscal/experience/coalition critique | **Frank Fletcher (6)** R, culture-war-averse | Alfred Anderson (1); Eleanor Evans (5) when the candidate's record makes abortion/faith the natural conservative lens; Maria Martinez (13) for anti-socialism angles |
 | Centrist | electability, polarization | **Leonard Larson (12)** Ind | Nathan Nguyen (14), Victor Vasquez (22), Olivia O'Brien (15) |
 | Strategic progressive (aligned but wary) | risk, timing, wasted value | **Sandra Sullivan (19)** D | Harold Hughes (8), Karen Kim (11), Yvonne Young (25) |
 | Disillusioned left ("not committed enough") | party loyalty, systemic critique | **Zachary Zeller (26)** apolitical/disillusioned | Quinn Quigley (17)* |
@@ -32,6 +32,19 @@ account appears on every page.
 disqualifies them from carrying rebuttals there — rebuttal weights require a
 reject opinion. **Always run the persona-opinion precheck** (below) before
 casting; never flip an existing accept to reject, pick a bench persona instead.
+
+**Casting principle (carried over from the first pass):** the tables above are
+defaults, not law. The first-pass initiative (see memory: project-2028-candidate-seeding)
+established that biographical fit beats slot assignment — Xavier's Hmong
+anti-communism on AOC, Wendy's crime lens on Moore, Robert's tariff populism on
+Rand Paul. Override the default whenever a persona's actual backstory
+(`personas_all_26.json`, incl. `ideology_score` -10..+9) gives a sharper voice.
+
+**This is a second pass.** Every candidate arg under 1963 already carries 1-2
+first-pass opponents with heading+sub-bullet rebuttal/because sets. Before
+drafting, pull the candidacy arg's existing edges: extend personas already in a
+slot (like Sandra on 1968) instead of duplicating their angle, and let existing
+attack args be reused across the new perspectives.
 
 ## Argument structure rules (per persona)
 
