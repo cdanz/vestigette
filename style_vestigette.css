@@ -4994,6 +4994,7 @@ input:checked + .toggle:before {
 		align-items: center;
 		background-color: transparent;
 		border: none;
+		display: block;
 		height: auto;
 		margin-top: 0.7rem;
 		position: initial;
@@ -5039,9 +5040,9 @@ input:checked + .toggle:before {
 	#argument  { flex: 0 0 auto; }
 	#because,
 	#therefore { flex: 1 1 0; min-height: 0; overflow: hidden; }
-	/* Right column: fixed masthead, fixed rebuttal, find/filter size to content */
-	#mastHead  { flex: 0 0 15vh; }
-	#rebuttal  { flex: 0 0 50vh; }
+	/* Right column: masthead sizes to content, rebuttal fills remaining space */
+	#mastHead  { flex: 0 0 auto; }
+	#rebuttal  { flex: 1 1 0; min-height: 0; overflow: hidden; }
 	#find      { flex: 0 1 auto; min-height: 0; overflow: hidden; }
 	#find:not(.desktop-expanded) { flex: 0 0 auto; overflow: hidden; }
 	#filter    { flex: 0 0 auto; }
