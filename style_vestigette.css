@@ -5704,7 +5704,7 @@ body.admin-page {
 		max-height: none;
 		min-height: 5.5rem;
 		order: unset;
-		overflow: hidden;
+		overflow: visible;
 		padding: 0.75rem 2rem;
 		width: 100%;
 	}
@@ -5728,6 +5728,7 @@ body.admin-page {
 		display: flex;
 		flex-flow: row nowrap;
 		height: auto;
+		margin-top: 0;
 		overflow: visible;
 		position: static;
 		top: auto;
