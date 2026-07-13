@@ -24,3 +24,4 @@ db/backups/
 
 # Logs
 *.log
+bots/candidate_seeding/corpus_snapshot.tsv
