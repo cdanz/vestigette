@@ -37,7 +37,7 @@ if (isset($_POST['adminAction'])) {
 
 		case 'savePickerSettings':
 			$type = $_POST['pickerType'] ?? 'none';
-			if (!in_array($type, ['none', 'manual', 'auto'], true)) $type = 'none';
+			if (!in_array($type, ['none', 'all', 'manual', 'auto'], true)) $type = 'none';
 			$enabled = ($type !== 'none') ? 1 : 0;
 			$raw     = trim($_POST['pickerProfiles'] ?? '');
 			$ids     = [];
