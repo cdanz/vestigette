@@ -1,0 +1,28 @@
+{
+  "candidate": "Jon Ossoff",
+  "candidacyArgID": 1969,
+  "_note": "James's populist set (2046-2049) and Yvonne's left set (2066-2068) exist; two gap slots only, no hater. Nathan adopts James's 2048/2049 and enriches 2048 with registry 2433. Harold coins the premature-runs generic and adopts Yvonne's 2066.",
+  "personas": [
+    {
+      "personaID": 14,
+      "slot": "centrist",
+      "setOpinion": -1,
+      "rebuttals": [
+        { "argID": 2049, "weight": 40 },
+        { "text": "Jon Ossoff is a one-term senator with no landmark legislation bearing his name.", "weight": 35 },
+        { "argID": 2048, "weight": 25,
+          "because": [ { "argID": 2433 } ] }
+      ]
+    },
+    {
+      "personaID": 8,
+      "slot": "strategic_progressive",
+      "setOpinion": -1,
+      "rebuttals": [
+        { "text": "Jon Ossoff's Georgia Senate seat is too valuable to risk on a presidential run.", "weight": 35 },
+        { "text": "Premature presidential runs burn rising talent and cost the party twice.", "weight": 35, "id": "premature" },
+        { "argID": 2066, "weight": 30 }
+      ]
+    }
+  ]
+}

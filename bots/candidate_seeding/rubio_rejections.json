@@ -1,0 +1,54 @@
+{
+  "candidate": "Marco Rubio",
+  "candidacyArgID": 1979,
+  "_note": "First rejection sets on 1979 (only admin's 2355 existed). Brianna coins the shared Gang of Eight fact (g8fact); Nathan coins the conviction-reversal generic (conviction) reused by Vance and Newsom runs. Carlos accepts 1979 so strategic-conservative slot omitted.",
+  "personas": [
+    {
+      "personaID": 4,
+      "slot": "absolute_hater",
+      "setOpinion": -1,
+      "rebuttals": [
+        { "argID": 2355, "weight": 30 },
+        { "text": "Little Marco folded to the man who humiliated him and called it patriotism.", "weight": 25 },
+        { "text": "Marco Rubio short-circuits into canned talking points the moment he's under pressure.", "weight": 25 },
+        { "text": "Marco Rubio has spent thirty years running for the next office instead of doing the current one.", "weight": 20 }
+      ]
+    },
+    {
+      "personaID": 2,
+      "slot": "thoughtful_liberal",
+      "setOpinion": -1,
+      "rebuttals": [
+        { "text": "Marco Rubio abandoned his own immigration reform the moment it cost him with the base.", "weight": 40,
+          "because": [
+            { "text": "Marco Rubio co-authored the 2013 Gang of Eight immigration bill and then walked away from it.", "id": "g8fact" }
+          ] },
+        { "text": "Marco Rubio has opposed the ACA for a decade without ever producing an alternative.", "weight": 35 },
+        { "text": "Marco Rubio's foreign policy is reflexive hawkishness with no theory of ending wars.", "weight": 25 }
+      ]
+    },
+    {
+      "personaID": 14,
+      "slot": "centrist",
+      "setOpinion": -1,
+      "rebuttals": [
+        { "text": "A candidate who reverses core positions under pressure cannot be trusted with the presidency.", "weight": 40, "id": "conviction",
+          "because": [ { "ref": "g8fact" } ] },
+        { "text": "Marco Rubio already ran a national campaign and his own party rejected him.", "weight": 35 },
+        { "text": "Marco Rubio is a legislator with no executive record.", "weight": 25,
+          "because": [ { "argID": 2433 } ] }
+      ]
+    },
+    {
+      "personaID": 18,
+      "slot": "not_maga_enough",
+      "setOpinion": -1,
+      "rebuttals": [
+        { "text": "Marco Rubio wrote the amnesty bill the base spent a decade fighting.", "weight": 40,
+          "because": [ { "ref": "g8fact" } ] },
+        { "text": "Marco Rubio called Trump a con artist, then begged to serve him.", "weight": 35 },
+        { "text": "Marco Rubio is the foreign-policy establishment wearing a populist costume.", "weight": 25 }
+      ]
+    }
+  ]
+}

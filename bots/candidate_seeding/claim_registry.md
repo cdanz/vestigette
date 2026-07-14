@@ -26,6 +26,20 @@ specs. Add every newly-coined generic claim here with its argID.
 | 2464 | polled near zero with Black voters in 2020 (shared: Leonard 12, Sandra 19) | Buttigieg |
 | 2062 | campaigns bankrolled by corporate/Wall St donors (shared: Yvonne 25, Zachary 26) | Buttigieg |
 
+## Generic — coined in the five-candidate batch, 2026-07-14
+| argID | Claim | Applies to |
+|---|---|---|
+| 2481 | A candidate who reverses core positions under pressure cannot be trusted with the presidency. | any flip-flop/triangulation critique (live on Rubio, Vance, Newsom) |
+| 2490 | Tariffs are taxes paid by American consumers, whoever claims otherwise. | any protectionist candidate |
+| 2500 | Governing a one-party state is no test of building a national coalition. | any deep-blue/deep-red governor (live on Newsom, Pritzker) |
+| 2515 | Premature presidential runs burn rising talent and cost the party twice. | any young/rising candidate |
+
+## Shared candidate facts coined 2026-07-14 (multi-persona nodes)
+| argID | Claim | Candidate |
+|---|---|---|
+| 2478 | co-authored 2013 Gang of Eight bill, then walked away (shared: Brianna 2, Nathan 14, Robert 18) | Rubio |
+| 2488 | called Trump "America's Hitler," then kissed the ring (shared: Diana 4, Leonard 12) | Vance |
+
 ## Generic — coined in the AOC pilot, 2026-07-13 (reuse from here on)
 | argID | Claim | Applies to |
 |---|---|---|
