@@ -94,6 +94,10 @@ attack args be reused across the new perspectives.
   in chains.)
 - 3–5 **rebuttal headings** on the candidacy arg, weights summing 100.
   Weights express the persona's emphasis (hater = flat 20s; analysts vary).
+- **No premise+application compounds.** "2028 needs an economic messenger,
+  and X's brand is culture war" is two claims: the general premise becomes a
+  (often registry-worthy) Because under the candidate-specific heading.
+  Caught twice in the July 2026 QA pass (fixed as 2503←2555, 2554←2556).
 - Each heading ≤ 1 short sentence, fully atomic. Bundled reasons split into
   **Because children** (2–3 max, equal weights) per the granularity rule:
   terse heading as the direct rebuttal, reasons one jump down.
@@ -125,6 +129,9 @@ attack args be reused across the new perspectives.
 ## Per-candidate workflow
 
 1. Refresh `corpus_snapshot.tsv` (one SSH, see command in gen_rejections.py docstring — swap the SELECT for the snapshot query below).
+   Then `python3 preflight.py <spec>.json` → run over SSH → ANY output row = stop
+   (opinion conflicts and unlisted existing edges; the "already": true rule is
+   mandatory for every active edge already in a persona's target pool).
 2. Claude drafts the spec JSON (all perspectives, atomized, deduped, registry
    reuses wired in). No external chat round-trip needed.
 3. Craig redlines the spec — this is the editorial checkpoint; personas speak
@@ -142,6 +149,18 @@ attack args be reused across the new perspectives.
 
 Snapshot query:
 `SELECT p.phrasingID, p.argumentID, p.coinedBy, p.phrasing FROM PHRASING p ORDER BY p.phrasingID;`
+
+## QA pass (run after each large batch)
+
+1. Mechanical: global opinion↔endorsement consistency (active Rebuttal ⇒
+   rejector; Because/Therefore ⇒ acceptor), invariant sums, phrasing-cache
+   NULLs, reciprocal-edge presence for coiner-owned children. (July 2026 run:
+   pipeline clean; backfilled reciprocals for the pre-pipeline foldInAssertion
+   cohort 2363–2408; pre-existing inconsistencies on old args logged in
+   DATA_CLEANUP_BACKLOG.)
+2. Semantic: read the full candidate-era arg list (one query) for cross-side
+   and cross-candidate duplicates. Cross-SIDE dups become one node with two
+   phrasings via mergeArguments (e.g., Slotkin's CIA fact 2327/2330).
 
 ## Notes
 

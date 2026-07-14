@@ -33,12 +33,15 @@ specs. Add every newly-coined generic claim here with its argID.
 | 2490 | Tariffs are taxes paid by American consumers, whoever claims otherwise. | any protectionist candidate |
 | 2500 | Governing a one-party state is no test of building a national coalition. | any deep-blue/deep-red governor (live on Newsom, Pritzker) |
 | 2515 | Premature presidential runs burn rising talent and cost the party twice. | any young/rising candidate |
+| 2555 | 2028 will be decided on economic issues. | any culture-war-coded candidate, either side |
+| 2556 | The Democrats' 2028 map runs through the South. | southern candidates |
 
 ## Shared candidate facts coined 2026-07-14 (multi-persona nodes)
 | argID | Claim | Candidate |
 |---|---|---|
 | 2478 | co-authored 2013 Gang of Eight bill, then walked away (shared: Brianna 2, Nathan 14, Robert 18) | Rubio |
 | 2488 | called Trump "America's Hitler," then kissed the ring (shared: Diana 4, Leonard 12) | Vance |
+| 2327 | fifteen years CIA/Pentagon (two phrasings, opposite valences: Olivia 15 accepts-via, James 10 rebuts-via; 2330 merged in) | Slotkin |
 
 ## Generic — coined in the AOC pilot, 2026-07-13 (reuse from here on)
 | argID | Claim | Applies to |
