@@ -63,6 +63,7 @@ def main(path):
     w("START TRANSACTION;")
     w(f"-- Candidate: {spec.get('candidate','?')} (arg {cand})")
     var_n = 0
+    refs = {}  # "id" label -> @var of a node coined earlier in this run
 
     for p in spec["personas"]:
         pid = p["personaID"]
@@ -85,6 +86,11 @@ def main(path):
             """Recursively wire Because children (and their children) under parent_expr."""
             nonlocal var_n
             for k in kids:
+                if "ref" in k:
+                    rv = refs[k["ref"]]
+                    w(f"INSERT INTO ENDORSEMENT (targArgID, profileID, endorseType, supportingArgID, weight, active)"
+                      f" VALUES ({parent_expr}, {pid}, 'Because', {rv}, 1, 1);")
+                    continue
                 if "argID" in k:
                     w(f"INSERT INTO ENDORSEMENT (targArgID, profileID, endorseType, supportingArgID, weight, active)"
                       f" VALUES ({parent_expr}, {pid}, 'Because', {k['argID']}, 1, 1);")
@@ -94,11 +100,14 @@ def main(path):
                         emit_because(str(k["argID"]), k["because"])
                 else:
                     w(f"CALL foldAndReciprocate('{esc(k['text'])}', 'Because', {parent_expr}, {pid});")
-                    if k.get("because"):
+                    if k.get("because") or k.get("id"):
                         var_n += 1
                         cv = f"@c{var_n}"
                         w(f"SET {cv} = (SELECT MAX(argumentID) FROM ARGUMENT WHERE createdBy = {pid});")
-                        emit_because(cv, k["because"])
+                        if k.get("id"):
+                            refs[k["id"]] = cv
+                        if k.get("because"):
+                            emit_because(cv, k["because"])
             share = round(100.0 / len(kids), 5)
             w(f"UPDATE ENDORSEMENT SET weight = {share} WHERE targArgID = {parent_expr}"
               f" AND profileID = {pid} AND endorseType = 'Because' AND active = 1;")
@@ -124,6 +133,8 @@ def main(path):
             w(f"-- new rebuttal heading: {r['text'][:70]}")
             w(f"CALL foldAndReciprocate('{esc(r['text'])}', 'Rebuttal', {cand}, {pid});")
             w(f"SET {hv} = (SELECT MAX(argumentID) FROM ARGUMENT WHERE createdBy = {pid});")
+            if r.get("id"):
+                refs[r["id"]] = hv
             norm.append((hv, wt))
             if r.get("because"):
                 emit_because(hv, r["because"])

@@ -22,6 +22,9 @@ specs. Add every newly-coined generic claim here with its argID.
 | 2422 | democratic-socialist platform echoes government control Hmong refugees fled | AOC |
 | 2429 | marquee policy proposals would drive up the deficit | AOC |
 | 2022–2026 | Buttigieg experience/record attack set | Buttigieg |
+| 2016 | never won statewide, faded in 2020 (shared heading: Alfred 1, Leonard 12, Sandra 19) | Buttigieg |
+| 2464 | polled near zero with Black voters in 2020 (shared: Leonard 12, Sandra 19) | Buttigieg |
+| 2062 | campaigns bankrolled by corporate/Wall St donors (shared: Yvonne 25, Zachary 26) | Buttigieg |
 
 ## Generic — coined in the AOC pilot, 2026-07-13 (reuse from here on)
 | argID | Claim | Applies to |
