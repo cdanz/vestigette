@@ -1,0 +1,37 @@
+{
+ "candidate": "raimondo2_rejections",
+ "candidacyArgID": 2002,
+ "edgeType": "Rebuttal",
+ "personas": [
+  {
+   "personaID": 18,
+   "slot": "absolute_hater",
+   "rebuttals": [
+    {
+     "text": "Gina Raimondo is the queen of the Davos Democrats.",
+     "weight": 55
+    },
+    {
+     "text": "Nobody outside a Commerce Department press release wants President Raimondo.",
+     "weight": 45
+    }
+   ],
+   "setOpinion": -1
+  },
+  {
+   "personaID": 26,
+   "slot": "disillusioned_left",
+   "rebuttals": [
+    {
+     "text": "Gina Raimondo cut Rhode Island workers' pensions and called it courage.",
+     "weight": 55
+    },
+    {
+     "argID": 2319,
+     "weight": 45
+    }
+   ],
+   "setOpinion": -1
+  }
+ ]
+}

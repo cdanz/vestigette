@@ -1,0 +1,26 @@
+{
+ "candidate": "bovino_acceptors",
+ "candidacyArgID": 1983,
+ "edgeType": "Because",
+ "personas": [
+  {
+   "personaID": 18,
+   "slot": "casual",
+   "rebuttals": [
+    {
+     "argID": 2348,
+     "weight": 40
+    },
+    {
+     "argID": 2349,
+     "weight": 35
+    },
+    {
+     "argID": 1963,
+     "weight": 25
+    }
+   ],
+   "setOpinion": 1
+  }
+ ]
+}

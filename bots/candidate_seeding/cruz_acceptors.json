@@ -1,0 +1,46 @@
+{
+ "candidate": "cruz_acceptors",
+ "candidacyArgID": 1973,
+ "edgeType": "Because",
+ "personas": [
+  {
+   "personaID": 23,
+   "slot": "strategic",
+   "rebuttals": [
+    {
+     "text": "No Republican fights harder for the base's priorities than Ted Cruz.",
+     "weight": 55,
+     "because": [
+      {
+       "argID": 2137
+      }
+     ]
+    },
+    {
+     "text": "Ted Cruz has won statewide in Texas three times.",
+     "weight": 45
+    }
+   ],
+   "setOpinion": 1
+  },
+  {
+   "personaID": 10,
+   "slot": "casual",
+   "rebuttals": [
+    {
+     "argID": 2139,
+     "weight": 40
+    },
+    {
+     "argID": 2137,
+     "weight": 35
+    },
+    {
+     "argID": 1963,
+     "weight": 25
+    }
+   ],
+   "setOpinion": 1
+  }
+ ]
+}

@@ -1,0 +1,47 @@
+{
+ "candidate": "scott2_rejections",
+ "candidacyArgID": 1980,
+ "edgeType": "Rebuttal",
+ "personas": [
+  {
+   "personaID": 2,
+   "slot": "thoughtful_liberal",
+   "rebuttals": [
+    {
+     "text": "Rick Scott ran the hospital chain fined a record 1.7 billion dollars for Medicare fraud.",
+     "weight": 40
+    },
+    {
+     "text": "Rick Scott's own plan proposed sunsetting Social Security and Medicare.",
+     "weight": 35,
+     "id": "sunset"
+    },
+    {
+     "text": "Rick Scott is the richest man in the Senate and votes like it.",
+     "weight": 25
+    }
+   ],
+   "setOpinion": -1
+  },
+  {
+   "personaID": 22,
+   "slot": "centrist",
+   "rebuttals": [
+    {
+     "text": "Rick Scott's agenda handed Democrats their 2022 attack ads.",
+     "weight": 50,
+     "because": [
+      {
+       "ref": "sunset"
+      }
+     ]
+    },
+    {
+     "text": "Rick Scott's own Senate colleagues rejected him overwhelmingly for leader.",
+     "weight": 50
+    }
+   ],
+   "setOpinion": -1
+  }
+ ]
+}

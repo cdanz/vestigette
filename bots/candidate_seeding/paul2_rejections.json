@@ -1,0 +1,46 @@
+{
+ "candidate": "paul2_rejections",
+ "candidacyArgID": 1978,
+ "edgeType": "Rebuttal",
+ "personas": [
+  {
+   "personaID": 2,
+   "slot": "thoughtful_liberal",
+   "rebuttals": [
+    {
+     "text": "Rand Paul single-handedly delayed 9/11 first-responder funding.",
+     "weight": 40
+    },
+    {
+     "text": "Rand Paul questioned the Civil Rights Act's reach over private businesses.",
+     "weight": 35
+    },
+    {
+     "text": "Rand Paul's isolationism would abandon allies mid-war.",
+     "weight": 25,
+     "because": [
+      {
+       "argID": 2115
+      }
+     ]
+    }
+   ],
+   "setOpinion": -1
+  },
+  {
+   "personaID": 22,
+   "slot": "centrist",
+   "rebuttals": [
+    {
+     "text": "Rand Paul's 2016 campaign proved the libertarian lane tops out in single digits.",
+     "weight": 55
+    },
+    {
+     "text": "A movement that rejects coalition-building cannot win a coalition election.",
+     "weight": 45
+    }
+   ],
+   "setOpinion": -1
+  }
+ ]
+}

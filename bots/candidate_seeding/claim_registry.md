@@ -29,7 +29,7 @@ specs. Add every newly-coined generic claim here with its argID.
 ## Generic — coined in the five-candidate batch, 2026-07-14
 | argID | Claim | Applies to |
 |---|---|---|
-| 2481 | A candidate who reverses core positions under pressure cannot be trusted with the presidency. | any flip-flop/triangulation critique (live on Rubio, Vance, Newsom) |
+| 2481 | A candidate who reverses core positions under pressure cannot be trusted with the presidency. | any flip-flop/triangulation critique (live on Rubio, Vance, Newsom, Kamala, Cruz) |
 | 2490 | Tariffs are taxes paid by American consumers, whoever claims otherwise. | any protectionist candidate |
 | 2500 | Governing a one-party state is no test of building a national coalition. | any deep-blue/deep-red governor (live on Newsom, Pritzker) |
 | 2515 | Premature presidential runs burn rising talent and cost the party twice. | any young/rising candidate |

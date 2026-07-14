@@ -1,0 +1,42 @@
+{
+ "candidate": "kemp2_rejections",
+ "candidacyArgID": 1976,
+ "edgeType": "Rebuttal",
+ "personas": [
+  {
+   "personaID": 10,
+   "slot": "maga_purity",
+   "rebuttals": [
+    {
+     "argID": 2192,
+     "weight": 55,
+     "putForth": "Kemp rubber-stamped the steal when Trump needed him."
+    },
+    {
+     "text": "Brian Kemp is the establishment's favorite Republican, which tells you everything.",
+     "weight": 45
+    }
+   ],
+   "setOpinion": -1
+  },
+  {
+   "personaID": 2,
+   "slot": "thoughtful_liberal",
+   "rebuttals": [
+    {
+     "text": "Brian Kemp ran his own 2018 election as sitting Secretary of State.",
+     "weight": 40
+    },
+    {
+     "argID": 1357,
+     "weight": 35
+    },
+    {
+     "text": "Brian Kemp's Georgia refused Medicaid expansion while rural hospitals closed.",
+     "weight": 25
+    }
+   ],
+   "setOpinion": -1
+  }
+ ]
+}

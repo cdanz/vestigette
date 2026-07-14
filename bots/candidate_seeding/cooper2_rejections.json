@@ -1,0 +1,22 @@
+{
+ "candidate": "cooper2_rejections",
+ "candidacyArgID": 1995,
+ "edgeType": "Rebuttal",
+ "personas": [
+  {
+   "personaID": 25,
+   "slot": "left_delivery",
+   "rebuttals": [
+    {
+     "text": "Roy Cooper governed as caretaker while North Carolina's minimum wage stayed at 7.25 an hour.",
+     "weight": 55
+    },
+    {
+     "text": "Roy Cooper's caution built no bench and no movement in North Carolina.",
+     "weight": 45
+    }
+   ],
+   "setOpinion": -1
+  }
+ ]
+}

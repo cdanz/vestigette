@@ -1,0 +1,26 @@
+{
+ "candidate": "paul_acceptors",
+ "candidacyArgID": 1978,
+ "edgeType": "Because",
+ "personas": [
+  {
+   "personaID": 1,
+   "slot": "casual",
+   "rebuttals": [
+    {
+     "argID": 2112,
+     "weight": 40
+    },
+    {
+     "argID": 2111,
+     "weight": 30
+    },
+    {
+     "argID": 1963,
+     "weight": 30,
+     "already": true
+    }
+   ]
+  }
+ ]
+}

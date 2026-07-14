@@ -1,0 +1,80 @@
+{
+ "candidate": "desantis2_rejections",
+ "candidacyArgID": 1974,
+ "edgeType": "Rebuttal",
+ "personas": [
+  {
+   "personaID": 4,
+   "slot": "absolute_hater",
+   "rebuttals": [
+    {
+     "text": "Ron DeSantis picked a fight with a cartoon mouse and lost.",
+     "weight": 35
+    },
+    {
+     "text": "Ron DeSantis has the charisma of a wet napkin.",
+     "weight": 35
+    },
+    {
+     "text": "Ron DeSantis practiced smiling for the debates and it showed.",
+     "weight": 30
+    }
+   ],
+   "setOpinion": -1
+  },
+  {
+   "personaID": 2,
+   "slot": "thoughtful_liberal",
+   "rebuttals": [
+    {
+     "text": "Ron DeSantis used state power to punish a private company for its speech.",
+     "weight": 40,
+     "because": [
+      {
+       "text": "Ron DeSantis stripped Disney's special district after it criticized the Parental Rights law."
+      }
+     ]
+    },
+    {
+     "text": "Florida schools pulled thousands of books under DeSantis-era laws.",
+     "weight": 35
+    },
+    {
+     "text": "Ron DeSantis flew asylum seekers to Martha's Vineyard as a political stunt.",
+     "weight": 25
+    }
+   ],
+   "setOpinion": -1
+  },
+  {
+   "personaID": 14,
+   "slot": "centrist",
+   "rebuttals": [
+    {
+     "text": "Ron DeSantis spent 160 million dollars to lose to Trump by thirty points.",
+     "weight": 55
+    },
+    {
+     "text": "A candidate who wilts one-on-one cannot survive a general election.",
+     "weight": 45
+    }
+   ],
+   "setOpinion": -1
+  },
+  {
+   "personaID": 18,
+   "slot": "not_maga_enough",
+   "rebuttals": [
+    {
+     "text": "Ron DeSantis knifed the man who made him.",
+     "weight": 60
+    },
+    {
+     "text": "The base already chose Trump over DeSantis once.",
+     "weight": 40
+    }
+   ],
+   "setOpinion": -1
+  }
+ ]
+}

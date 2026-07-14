@@ -1,0 +1,26 @@
+{
+ "candidate": "scott_acceptors",
+ "candidacyArgID": 1980,
+ "edgeType": "Because",
+ "personas": [
+  {
+   "personaID": 10,
+   "slot": "casual",
+   "rebuttals": [
+    {
+     "argID": 2283,
+     "weight": 40
+    },
+    {
+     "argID": 2282,
+     "weight": 35
+    },
+    {
+     "argID": 1963,
+     "weight": 25
+    }
+   ],
+   "setOpinion": 1
+  }
+ ]
+}

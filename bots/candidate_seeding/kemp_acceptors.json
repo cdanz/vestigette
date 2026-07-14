@@ -1,0 +1,45 @@
+{
+ "candidate": "kemp_acceptors",
+ "candidacyArgID": 1976,
+ "edgeType": "Because",
+ "personas": [
+  {
+   "personaID": 3,
+   "slot": "strategic",
+   "rebuttals": [
+    {
+     "text": "Brian Kemp proved a Republican can beat both Trump's primary muscle and a national Democratic star.",
+     "weight": 55,
+     "because": [
+      {
+       "argID": 2194
+      }
+     ]
+    },
+    {
+     "text": "Brian Kemp is the GOP's strongest general-election profile in a must-win state.",
+     "weight": 45
+    }
+   ]
+  },
+  {
+   "personaID": 1,
+   "slot": "casual",
+   "rebuttals": [
+    {
+     "argID": 2193,
+     "weight": 40
+    },
+    {
+     "argID": 2192,
+     "weight": 35
+    },
+    {
+     "argID": 1963,
+     "weight": 25,
+     "already": true
+    }
+   ]
+  }
+ ]
+}

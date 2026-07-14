@@ -1,0 +1,64 @@
+{
+ "candidate": "cooper_acceptors",
+ "candidacyArgID": 1995,
+ "edgeType": "Because",
+ "personas": [
+  {
+   "personaID": 19,
+   "slot": "policy_aligned",
+   "rebuttals": [
+    {
+     "text": "Roy Cooper delivered Medicaid expansion through a hostile Republican legislature.",
+     "weight": 40,
+     "because": [
+      {
+       "argID": 2211
+      }
+     ]
+    },
+    {
+     "text": "Roy Cooper vetoed every abortion ban that reached his desk.",
+     "weight": 25
+    },
+    {
+     "text": "Roy Cooper made teacher pay his flagship fight.",
+     "weight": 20
+    },
+    {
+     "argID": 1963,
+     "weight": 15,
+     "already": true
+    }
+   ]
+  },
+  {
+   "personaID": 15,
+   "slot": "strategic",
+   "rebuttals": [
+    {
+     "text": "Roy Cooper won four statewide races in a state Trump carried twice.",
+     "weight": 60
+    },
+    {
+     "text": "Roy Cooper is living proof Democrats can hold the New South.",
+     "weight": 40
+    }
+   ],
+   "setOpinion": 1
+  },
+  {
+   "personaID": 20,
+   "slot": "casual",
+   "rebuttals": [
+    {
+     "argID": 2210,
+     "weight": 45
+    },
+    {
+     "argID": 1963,
+     "weight": 55
+    }
+   ]
+  }
+ ]
+}
