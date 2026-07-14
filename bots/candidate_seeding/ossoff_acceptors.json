@@ -1,0 +1,54 @@
+{
+ "candidate": "Ossoff accept",
+ "candidacyArgID": 1969,
+ "edgeType": "Because",
+ "personas": [
+  {
+   "personaID": 2,
+   "slot": "policy_aligned",
+   "rebuttals": [
+    {
+     "argID": 2008,
+     "weight": 30
+    },
+    {
+     "argID": 2069,
+     "weight": 25
+    },
+    {
+     "text": "Jon Ossoff has been a consistent vote for voting rights and healthcare access.",
+     "weight": 25
+    },
+    {
+     "argID": 1963,
+     "weight": 20,
+     "already": true
+    }
+   ]
+  },
+  {
+   "personaID": 16,
+   "slot": "strategic",
+   "rebuttals": [
+    {
+     "text": "Jon Ossoff proved Georgia is winnable and knows how to do it again.",
+     "weight": 45,
+     "because": [
+      {
+       "text": "Jon Ossoff and Raphael Warnock flipped both Georgia Senate seats in 2021."
+      }
+     ]
+    },
+    {
+     "text": "The 2028 map runs through the South, and Jon Ossoff is the Democrats' proof point.",
+     "weight": 35
+    },
+    {
+     "argID": 1963,
+     "weight": 20
+    }
+   ],
+   "setOpinion": 1
+  }
+ ]
+}

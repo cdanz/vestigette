@@ -1,0 +1,53 @@
+{
+ "candidate": "Rubio accept",
+ "candidacyArgID": 1979,
+ "edgeType": "Because",
+ "personas": [
+  {
+   "personaID": 1,
+   "slot": "strategic",
+   "rebuttals": [
+    {
+     "text": "Marco Rubio is the Republicans' safest general-election nominee.",
+     "weight": 35,
+     "because": [
+      {
+       "text": "Marco Rubio consistently outpolls other Republicans with Latino voters."
+      }
+     ]
+    },
+    {
+     "text": "Marco Rubio has won three statewide races in Florida.",
+     "weight": 25
+    },
+    {
+     "argID": 2036,
+     "weight": 20
+    },
+    {
+     "argID": 1963,
+     "weight": 20,
+     "already": true
+    }
+   ]
+  },
+  {
+   "personaID": 3,
+   "slot": "casual",
+   "rebuttals": [
+    {
+     "argID": 2036,
+     "weight": 40
+    },
+    {
+     "argID": 2034,
+     "weight": 30
+    },
+    {
+     "argID": 1963,
+     "weight": 30
+    }
+   ]
+  }
+ ]
+}

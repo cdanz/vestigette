@@ -1,0 +1,74 @@
+{
+ "candidate": "Newsom accept",
+ "candidacyArgID": 2001,
+ "edgeType": "Because",
+ "personas": [
+  {
+   "personaID": 19,
+   "slot": "policy_aligned",
+   "rebuttals": [
+    {
+     "text": "Gavin Newsom has the strongest worker-protection record of any governor.",
+     "weight": 40,
+     "because": [
+      {
+       "text": "California raised its fast-food minimum wage to twenty dollars an hour under Newsom."
+      }
+     ]
+    },
+    {
+     "text": "Gavin Newsom made California an abortion-rights haven.",
+     "weight": 25
+    },
+    {
+     "text": "Gavin Newsom governs the world's fifth-largest economy.",
+     "weight": 20
+    },
+    {
+     "argID": 1963,
+     "weight": 15,
+     "already": true
+    }
+   ]
+  },
+  {
+   "personaID": 7,
+   "slot": "strategic",
+   "rebuttals": [
+    {
+     "text": "Gavin Newsom is the most battle-tested candidate Democrats can field.",
+     "weight": 40,
+     "because": [
+      {
+       "text": "Gavin Newsom crushed the 2021 recall attempt by twenty-four points."
+      }
+     ]
+    },
+    {
+     "text": "Gavin Newsom takes the fight onto Fox News itself.",
+     "weight": 35
+    },
+    {
+     "argID": 2263,
+     "weight": 25
+    }
+   ],
+   "setOpinion": 1
+  },
+  {
+   "personaID": 17,
+   "slot": "casual",
+   "rebuttals": [
+    {
+     "argID": 2262,
+     "weight": 45
+    },
+    {
+     "argID": 1963,
+     "weight": 55,
+     "already": true
+    }
+   ]
+  }
+ ]
+}

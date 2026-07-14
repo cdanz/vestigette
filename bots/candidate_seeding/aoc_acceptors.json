@@ -1,0 +1,67 @@
+{
+ "candidate": "AOC accept",
+ "candidacyArgID": 1968,
+ "edgeType": "Because",
+ "personas": [
+  {
+   "personaID": 4,
+   "slot": "super_fan",
+   "rebuttals": [
+    {
+     "argID": 1992,
+     "weight": 40,
+     "already": true
+    },
+    {
+     "text": "AOC is the most gifted political communicator of her generation.",
+     "weight": 35
+    },
+    {
+     "text": "AOC packs arenas even in red states.",
+     "weight": 25
+    }
+   ]
+  },
+  {
+   "personaID": 9,
+   "slot": "strategic",
+   "rebuttals": [
+    {
+     "text": "AOC is the only Democrat who can turn out the voters the party keeps losing.",
+     "weight": 50,
+     "because": [
+      {
+       "text": "AOC raises more small-dollar money than any member of the House."
+      }
+     ]
+    },
+    {
+     "text": "AOC's coalition is the future of the Democratic electorate.",
+     "weight": 30
+    },
+    {
+     "argID": 2415,
+     "weight": 20
+    }
+   ]
+  },
+  {
+   "personaID": 16,
+   "slot": "casual",
+   "rebuttals": [
+    {
+     "argID": 1990,
+     "weight": 40
+    },
+    {
+     "argID": 1992,
+     "weight": 30
+    },
+    {
+     "argID": 1963,
+     "weight": 30
+    }
+   ]
+  }
+ ]
+}

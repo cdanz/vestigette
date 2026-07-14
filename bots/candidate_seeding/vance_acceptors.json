@@ -1,0 +1,64 @@
+{
+ "candidate": "Vance accept",
+ "candidacyArgID": 1981,
+ "edgeType": "Because",
+ "personas": [
+  {
+   "personaID": 18,
+   "slot": "super_fan",
+   "rebuttals": [
+    {
+     "text": "JD Vance is the only one who talks about people like us like we exist.",
+     "weight": 35
+    },
+    {
+     "text": "JD Vance takes the fight to the media and never apologizes.",
+     "weight": 35
+    },
+    {
+     "text": "JD Vance is Trump's true heir.",
+     "weight": 30
+    }
+   ],
+   "setOpinion": 1
+  },
+  {
+   "personaID": 23,
+   "slot": "strategic",
+   "rebuttals": [
+    {
+     "text": "JD Vance locks in the Trump coalition without the Trump chaos.",
+     "weight": 40
+    },
+    {
+     "text": "No other Republican matches JD Vance's base enthusiasm.",
+     "weight": 35
+    },
+    {
+     "argID": 2181,
+     "weight": 25
+    }
+   ],
+   "setOpinion": 1
+  },
+  {
+   "personaID": 1,
+   "slot": "casual",
+   "rebuttals": [
+    {
+     "argID": 2180,
+     "weight": 35
+    },
+    {
+     "argID": 2182,
+     "weight": 30
+    },
+    {
+     "argID": 1963,
+     "weight": 35,
+     "already": true
+    }
+   ]
+  }
+ ]
+}

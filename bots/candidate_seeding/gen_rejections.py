@@ -116,6 +116,12 @@ def main(path):
 
         norm = []  # (supporting_expr, weight) for the rebuttal-level normalization
         for r, wt in zip(rebs, weights):
+            if "ref" in r:
+                rv = refs[r["ref"]]
+                w(f"INSERT INTO ENDORSEMENT (targArgID, profileID, endorseType, supportingArgID, weight, active)"
+                  f" VALUES ({cand}, {pid}, '{etype}', {rv}, 1, 1);")
+                norm.append((rv, wt))
+                continue
             if "argID" in r:
                 if r.get("already"):
                     w(f"-- persona already endorses arg {r['argID']}: reweight only")
