@@ -1,0 +1,51 @@
+{
+ "candidate": "slotkin_acceptors",
+ "candidacyArgID": 2004,
+ "edgeType": "Because",
+ "personas": [
+  {
+   "personaID": 11,
+   "slot": "strategic",
+   "rebuttals": [
+    {
+     "text": "Elissa Slotkin wins the exact voters Democrats keep losing.",
+     "weight": 55,
+     "because": [
+      {
+       "argID": 2328
+      }
+     ]
+    },
+    {
+     "text": "Elissa Slotkin is the party's most credible national-security messenger.",
+     "weight": 45,
+     "because": [
+      {
+       "argID": 2327
+      }
+     ]
+    }
+   ],
+   "setOpinion": 1
+  },
+  {
+   "personaID": 14,
+   "slot": "casual",
+   "rebuttals": [
+    {
+     "argID": 2327,
+     "weight": 40
+    },
+    {
+     "argID": 2329,
+     "weight": 35
+    },
+    {
+     "argID": 1963,
+     "weight": 25
+    }
+   ],
+   "setOpinion": 1
+  }
+ ]
+}

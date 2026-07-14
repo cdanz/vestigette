@@ -1,0 +1,64 @@
+{
+ "candidate": "booker2_rejections",
+ "candidacyArgID": 1994,
+ "edgeType": "Rebuttal",
+ "personas": [
+  {
+   "personaID": 10,
+   "slot": "absolute_hater",
+   "rebuttals": [
+    {
+     "text": "Cory Booker declared \"I am Spartacus\" over documents that were already cleared.",
+     "weight": 35
+    },
+    {
+     "text": "Cory Booker performs emotion like an actor who studied sincerity.",
+     "weight": 35
+    },
+    {
+     "text": "Cory Booker is the Senate's best-known empty suit.",
+     "weight": 30
+    }
+   ],
+   "setOpinion": -1
+  },
+  {
+   "personaID": 8,
+   "slot": "strategic_progressive",
+   "rebuttals": [
+    {
+     "argID": 2143,
+     "weight": 40
+    },
+    {
+     "text": "Cory Booker's 2020 presidential campaign never broke three percent.",
+     "weight": 35
+    },
+    {
+     "argID": 2154,
+     "weight": 25
+    }
+   ],
+   "setOpinion": -1
+  },
+  {
+   "personaID": 26,
+   "slot": "disillusioned_left",
+   "rebuttals": [
+    {
+     "argID": 2144,
+     "weight": 35
+    },
+    {
+     "text": "Cory Booker voted against the 2017 drug-importation amendment his pharma donors opposed.",
+     "weight": 35
+    },
+    {
+     "text": "Cory Booker's love-and-unity politics asks nothing of power.",
+     "weight": 30
+    }
+   ],
+   "setOpinion": -1
+  }
+ ]
+}

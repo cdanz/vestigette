@@ -1,0 +1,64 @@
+{
+ "candidate": "moore2_rejections",
+ "candidacyArgID": 2000,
+ "edgeType": "Rebuttal",
+ "personas": [
+  {
+   "personaID": 18,
+   "slot": "absolute_hater",
+   "rebuttals": [
+    {
+     "text": "Wes Moore let people believe he earned medals he didn't.",
+     "weight": 35
+    },
+    {
+     "text": "Wes Moore is a motivational speaker playing governor.",
+     "weight": 35
+    },
+    {
+     "text": "Wes Moore is Oprah's candidate, not Maryland's.",
+     "weight": 30
+    }
+   ],
+   "setOpinion": -1
+  },
+  {
+   "personaID": 6,
+   "slot": "thoughtful_conservative",
+   "rebuttals": [
+    {
+     "text": "Maryland's budget went from surplus to a multi-billion-dollar deficit under Wes Moore.",
+     "weight": 45
+    },
+    {
+     "text": "Wes Moore governs by announcement; the follow-through is thin.",
+     "weight": 30
+    },
+    {
+     "argID": 2308,
+     "weight": 25
+    }
+   ],
+   "setOpinion": -1
+  },
+  {
+   "personaID": 8,
+   "slot": "strategic_progressive",
+   "rebuttals": [
+    {
+     "argID": 2188,
+     "weight": 40
+    },
+    {
+     "argID": 2515,
+     "weight": 35
+    },
+    {
+     "text": "Wes Moore has one term of governing against a lifetime of being introduced as the future.",
+     "weight": 25
+    }
+   ],
+   "setOpinion": -1
+  }
+ ]
+}

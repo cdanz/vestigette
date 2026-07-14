@@ -1,0 +1,50 @@
+{
+ "candidate": "gallego2_rejections",
+ "candidacyArgID": 1997,
+ "edgeType": "Rebuttal",
+ "personas": [
+  {
+   "personaID": 22,
+   "slot": "centrist",
+   "rebuttals": [
+    {
+     "text": "Ruben Gallego's House record and his Senate persona are two different politicians.",
+     "weight": 60,
+     "because": [
+      {
+       "argID": 2240
+      },
+      {
+       "argID": 2239
+      }
+     ]
+    },
+    {
+     "text": "A reinvention that recent won't survive a national opposition-research file.",
+     "weight": 40
+    }
+   ],
+   "setOpinion": -1
+  },
+  {
+   "personaID": 26,
+   "slot": "disillusioned_left",
+   "rebuttals": [
+    {
+     "text": "Ruben Gallego shed his progressive positions the moment statewide ambition required it.",
+     "weight": 55,
+     "because": [
+      {
+       "argID": 2240
+      }
+     ]
+    },
+    {
+     "text": "Ruben Gallego proves the party rewards repositioning over conviction.",
+     "weight": 45
+    }
+   ],
+   "setOpinion": -1
+  }
+ ]
+}

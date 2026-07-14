@@ -1,0 +1,42 @@
+{
+ "candidate": "moore_acceptors",
+ "candidacyArgID": 2000,
+ "edgeType": "Because",
+ "personas": [
+  {
+   "personaID": 16,
+   "slot": "strategic",
+   "rebuttals": [
+    {
+     "text": "Wes Moore electrifies the Black voters Democrats keep taking for granted.",
+     "weight": 55,
+     "because": [
+      {
+       "argID": 2305
+      }
+     ]
+    },
+    {
+     "text": "Wes Moore is the party's best natural orator since Obama.",
+     "weight": 45
+    }
+   ],
+   "setOpinion": 1
+  },
+  {
+   "personaID": 17,
+   "slot": "casual",
+   "rebuttals": [
+    {
+     "argID": 1963,
+     "weight": 60,
+     "already": true
+    },
+    {
+     "argID": 2304,
+     "weight": 40
+    }
+   ]
+  }
+ ]
+}

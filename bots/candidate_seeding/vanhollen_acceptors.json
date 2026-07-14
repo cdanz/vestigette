@@ -1,0 +1,50 @@
+{
+ "candidate": "vanhollen_acceptors",
+ "candidacyArgID": 1971,
+ "edgeType": "Because",
+ "personas": [
+  {
+   "personaID": 2,
+   "slot": "policy_aligned",
+   "rebuttals": [
+    {
+     "text": "Chris Van Hollen is the Senate's most consistent voice for a humane foreign policy.",
+     "weight": 40,
+     "id": "humane",
+     "because": [
+      {
+       "argID": 2277
+      },
+      {
+       "argID": 2276
+      }
+     ]
+    },
+    {
+     "text": "Chris Van Hollen does constituent-level justice work most senators delegate.",
+     "weight": 30
+    },
+    {
+     "text": "Chris Van Hollen has carried the child-tax-credit fight for a decade.",
+     "weight": 30
+    }
+   ],
+   "setOpinion": 1
+  },
+  {
+   "personaID": 7,
+   "slot": "casual",
+   "rebuttals": [
+    {
+     "argID": 1963,
+     "weight": 55
+    },
+    {
+     "ref": "humane",
+     "weight": 45
+    }
+   ],
+   "setOpinion": 1
+  }
+ ]
+}

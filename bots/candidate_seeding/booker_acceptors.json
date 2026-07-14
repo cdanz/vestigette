@@ -1,0 +1,49 @@
+{
+ "candidate": "booker_acceptors",
+ "candidacyArgID": 1994,
+ "edgeType": "Because",
+ "personas": [
+  {
+   "personaID": 2,
+   "slot": "policy_aligned",
+   "rebuttals": [
+    {
+     "text": "Cory Booker's baby-bonds proposal is the boldest wealth-gap policy in the party.",
+     "weight": 35
+    },
+    {
+     "text": "Cory Booker has lived in Newark's Central Ward his entire career.",
+     "weight": 30
+    },
+    {
+     "argID": 2151,
+     "weight": 20
+    },
+    {
+     "argID": 1963,
+     "weight": 15,
+     "already": true
+    }
+   ]
+  },
+  {
+   "personaID": 7,
+   "slot": "casual",
+   "rebuttals": [
+    {
+     "argID": 2152,
+     "weight": 40
+    },
+    {
+     "argID": 2153,
+     "weight": 35
+    },
+    {
+     "argID": 1963,
+     "weight": 25
+    }
+   ],
+   "setOpinion": 1
+  }
+ ]
+}
