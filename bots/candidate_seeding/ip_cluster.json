@@ -1,0 +1,575 @@
+{
+ "cluster": "israel-palestine-lanes",
+ "blocks": [
+  {
+   "targetArgID": 1627,
+   "edgeType": "Because",
+   "personas": [
+    {
+     "personaID": 21,
+     "slot": "maximalist",
+     "rebuttals": [
+      {
+       "argID": 1636,
+       "weight": 40
+      },
+      {
+       "argID": 1638,
+       "weight": 30
+      },
+      {
+       "text": "God gave the land of Israel to the Jewish people.",
+       "weight": 30
+      }
+     ],
+     "setOpinion": 1
+    },
+    {
+     "personaID": 19,
+     "slot": "diaspora_critic",
+     "rebuttals": [
+      {
+       "argID": 1636,
+       "weight": 60
+      },
+      {
+       "argID": 1651,
+       "weight": 40
+      }
+     ],
+     "setOpinion": 1
+    }
+   ]
+  },
+  {
+   "targetArgID": 535,
+   "edgeType": "Rebuttal",
+   "personas": [
+    {
+     "personaID": 21,
+     "slot": "maximalist",
+     "rebuttals": [
+      {
+       "argID": 534,
+       "weight": 55
+      },
+      {
+       "text": "Arab citizens of Israel vote and serve in the Knesset.",
+       "weight": 45
+      }
+     ],
+     "setOpinion": -1
+    }
+   ]
+  },
+  {
+   "targetArgID": 533,
+   "edgeType": "Rebuttal",
+   "personas": [
+    {
+     "personaID": 6,
+     "slot": "apologist",
+     "rebuttals": [
+      {
+       "argID": 534,
+       "weight": 60
+      },
+      {
+       "argID": 537,
+       "weight": 40
+      }
+     ],
+     "setOpinion": -1
+    }
+   ]
+  },
+  {
+   "targetArgID": 1648,
+   "edgeType": "Rebuttal",
+   "personas": [
+    {
+     "personaID": 21,
+     "slot": "maximalist",
+     "rebuttals": [
+      {
+       "text": "There are no innocent civilians in Gaza.",
+       "weight": 55
+      },
+      {
+       "argID": 538,
+       "weight": 45,
+       "putForth": "Gaza elected Hamas and owns Hamas's war."
+      }
+     ],
+     "setOpinion": -1
+    }
+   ]
+  },
+  {
+   "targetArgID": 1648,
+   "edgeType": "Because",
+   "personas": [
+    {
+     "personaID": 19,
+     "slot": "diaspora_critic",
+     "rebuttals": [
+      {
+       "text": "The occupation betrays the Jewish ethical tradition survival was meant to protect.",
+       "weight": 55
+      },
+      {
+       "text": "Jews know what it means to be a stateless people at a state's mercy.",
+       "weight": 45
+      }
+     ],
+     "setOpinion": 1
+    }
+   ]
+  },
+  {
+   "targetArgID": 1648,
+   "edgeType": "Therefore",
+   "personas": [
+    {
+     "personaID": 19,
+     "slot": "diaspora_critic",
+     "rebuttals": [
+      {
+       "text": "The United States should condition military aid to Israel on its conduct.",
+       "weight": 100
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "targetArgID": 1639,
+   "edgeType": "Because",
+   "personas": [
+    {
+     "personaID": 21,
+     "slot": "maximalist",
+     "rebuttals": [
+      {
+       "text": "Anti-Zionism is antisemitism.",
+       "weight": 100
+      }
+     ],
+     "setOpinion": 1
+    }
+   ]
+  },
+  {
+   "targetArgID": 1642,
+   "edgeType": "Because",
+   "personas": [
+    {
+     "personaID": 19,
+     "slot": "diaspora_critic",
+     "rebuttals": [
+      {
+       "text": "The Netanyahu government does not speak for Israel or for Jews.",
+       "weight": 100
+      }
+     ],
+     "setOpinion": 1
+    }
+   ]
+  },
+  {
+   "targetArgID": 1640,
+   "edgeType": "Because",
+   "personas": [
+    {
+     "personaID": 19,
+     "slot": "diaspora_critic",
+     "rebuttals": [
+      {
+       "text": "Antisemitic incidents surge worldwide whenever the conflict escalates.",
+       "weight": 100
+      }
+     ],
+     "setOpinion": 1
+    }
+   ]
+  },
+  {
+   "targetArgID": 1649,
+   "edgeType": "Rebuttal",
+   "personas": [
+    {
+     "personaID": 21,
+     "slot": "maximalist",
+     "rebuttals": [
+      {
+       "text": "A ceasefire before Hamas is destroyed guarantees the next October 7th.",
+       "weight": 100
+      }
+     ],
+     "setOpinion": -1
+    },
+    {
+     "personaID": 22,
+     "slot": "pox",
+     "rebuttals": [
+      {
+       "text": "Ceasefires in this conflict only schedule the next war.",
+       "weight": 100
+      }
+     ],
+     "setOpinion": -1
+    }
+   ]
+  },
+  {
+   "targetArgID": 1649,
+   "edgeType": "Because",
+   "personas": [
+    {
+     "personaID": 7,
+     "slot": "peace_builder",
+     "rebuttals": [
+      {
+       "text": "Hostage releases have only ever come through negotiated pauses.",
+       "weight": 100
+      }
+     ],
+     "setOpinion": 1
+    },
+    {
+     "personaID": 2,
+     "slot": "clear_eyed_anti_israel",
+     "rebuttals": [
+      {
+       "text": "Gaza faces famine-level humanitarian catastrophe.",
+       "weight": 100
+      }
+     ],
+     "setOpinion": 1
+    }
+   ]
+  },
+  {
+   "targetArgID": 1626,
+   "edgeType": "Therefore",
+   "personas": [
+    {
+     "personaID": 1,
+     "slot": "clear_eyed_anti_palestine",
+     "rebuttals": [
+      {
+       "argID": 534,
+       "weight": 25,
+       "already": true
+      },
+      {
+       "argID": 1651,
+       "weight": 40,
+       "already": true
+      },
+      {
+       "text": "Hamas must release every hostage unconditionally.",
+       "weight": 35
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "targetArgID": 1650,
+   "edgeType": "Rebuttal",
+   "personas": [
+    {
+     "personaID": 1,
+     "slot": "clear_eyed_anti_palestine",
+     "rebuttals": [
+      {
+       "argID": 1620,
+       "weight": 20,
+       "already": true
+      },
+      {
+       "argID": 1625,
+       "weight": 30,
+       "already": true
+      },
+      {
+       "argID": 1627,
+       "weight": 25,
+       "already": true
+      },
+      {
+       "text": "A UN ceasefire that leaves Hamas armed is not peace.",
+       "weight": 25
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "targetArgID": 1644,
+   "edgeType": "Because",
+   "personas": [
+    {
+     "personaID": 6,
+     "slot": "apologist",
+     "rebuttals": [
+      {
+       "text": "Israel is the only functioning democracy in the Middle East.",
+       "weight": 100
+      }
+     ],
+     "setOpinion": 1
+    }
+   ]
+  },
+  {
+   "targetArgID": 1631,
+   "edgeType": "Rebuttal",
+   "personas": [
+    {
+     "personaID": 6,
+     "slot": "apologist",
+     "rebuttals": [
+      {
+       "argID": 1658,
+       "weight": 55
+      },
+      {
+       "text": "Wartime tragedy is not a policy of extermination.",
+       "weight": 45
+      }
+     ],
+     "setOpinion": -1
+    }
+   ]
+  },
+  {
+   "targetArgID": 2006,
+   "edgeType": "Rebuttal",
+   "personas": [
+    {
+     "personaID": 7,
+     "slot": "peace_builder",
+     "rebuttals": [
+      {
+       "text": "A two-state solution remains the only realistic path to lasting peace.",
+       "weight": 100,
+       "id": "twostate",
+       "because": [
+        {
+         "text": "Neither people will accept minority status in the other's state."
+        },
+        {
+         "text": "Israeli and Palestinian civil-society groups keep building coexistence under fire."
+        }
+       ]
+      }
+     ],
+     "setOpinion": -1
+    },
+    {
+     "personaID": 22,
+     "slot": "pox",
+     "rebuttals": [
+      {
+       "text": "No constitution can make mortal enemies share a government.",
+       "weight": 100
+      }
+     ],
+     "setOpinion": -1
+    }
+   ]
+  },
+  {
+   "targetRef": "twostate",
+   "edgeType": "Rebuttal",
+   "personas": [
+    {
+     "personaID": 22,
+     "slot": "pox",
+     "rebuttals": [
+      {
+       "text": "This conflict is a century-old blood feud, not a solvable policy problem.",
+       "weight": 100,
+       "id": "bloodfeud"
+      }
+     ],
+     "setOpinion": -1
+    }
+   ]
+  },
+  {
+   "targetRef": "bloodfeud",
+   "edgeType": "Rebuttal",
+   "personas": [
+    {
+     "personaID": 7,
+     "slot": "peace_builder",
+     "rebuttals": [
+      {
+       "text": "Northern Ireland's peace was also called impossible.",
+       "weight": 100
+      }
+     ],
+     "setOpinion": -1
+    }
+   ]
+  },
+  {
+   "targetArgID": 1619,
+   "edgeType": "Because",
+   "personas": [
+    {
+     "personaID": 2,
+     "slot": "clear_eyed_anti_israel",
+     "rebuttals": [
+      {
+       "text": "Israeli settlement expansion in the West Bank makes a Palestinian state impossible.",
+       "weight": 100,
+       "because": [
+        {
+         "text": "The settler population has more than tripled since the Oslo Accords."
+        }
+       ]
+      }
+     ],
+     "setOpinion": 1
+    }
+   ]
+  },
+  {
+   "targetArgID": 1622,
+   "edgeType": "Rebuttal",
+   "personas": [
+    {
+     "personaID": 2,
+     "slot": "clear_eyed_anti_israel",
+     "rebuttals": [
+      {
+       "text": "The occupying power bears responsibility the occupied cannot.",
+       "weight": 40
+      },
+      {
+       "argID": 1623,
+       "weight": 30
+      },
+      {
+       "argID": 1624,
+       "weight": 30
+      }
+     ],
+     "setOpinion": -1
+    }
+   ]
+  },
+  {
+   "targetArgID": 1625,
+   "edgeType": "Rebuttal",
+   "personas": [
+    {
+     "personaID": 2,
+     "slot": "clear_eyed_anti_israel",
+     "rebuttals": [
+      {
+       "text": "Self-defense does not license the destruction of a civilian population.",
+       "weight": 100,
+       "because": [
+        {
+         "text": "Palestinian deaths outnumber Israeli deaths by more than an order of magnitude."
+        }
+       ]
+      }
+     ],
+     "setOpinion": -1
+    }
+   ]
+  },
+  {
+   "targetArgID": 536,
+   "edgeType": "Because",
+   "personas": [
+    {
+     "personaID": 4,
+     "slot": "fully_anti_israel",
+     "rebuttals": [
+      {
+       "argID": 533,
+       "weight": 30,
+       "already": true
+      },
+      {
+       "text": "Israel's conduct of the war in Gaza constitutes genocide.",
+       "weight": 30,
+       "id": "genocide",
+       "because": [
+        {
+         "text": "The ICJ found the genocide case plausible enough to order provisional measures."
+        }
+       ]
+      },
+      {
+       "argID": 1617,
+       "weight": 20
+      },
+      {
+       "argID": 535,
+       "weight": 20
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "targetArgID": 1624,
+   "edgeType": "Because",
+   "personas": [
+    {
+     "personaID": 4,
+     "slot": "fully_anti_israel",
+     "rebuttals": [
+      {
+       "text": "October 7th did not happen in a vacuum.",
+       "weight": 100
+      }
+     ],
+     "setOpinion": 1
+    }
+   ]
+  },
+  {
+   "targetArgID": 1655,
+   "edgeType": "Because",
+   "personas": [
+    {
+     "personaID": 4,
+     "slot": "fully_anti_israel",
+     "rebuttals": [
+      {
+       "text": "Armed resistance to military occupation is recognized under international law.",
+       "weight": 100
+      }
+     ],
+     "setOpinion": 1
+    }
+   ]
+  },
+  {
+   "targetArgID": 1620,
+   "edgeType": "Rebuttal",
+   "personas": [
+    {
+     "personaID": 4,
+     "slot": "fully_anti_israel",
+     "rebuttals": [
+      {
+       "text": "The terrorist label is how empires describe resistance.",
+       "weight": 100
+      }
+     ],
+     "setOpinion": -1
+    }
+   ]
+  }
+ ]
+}
