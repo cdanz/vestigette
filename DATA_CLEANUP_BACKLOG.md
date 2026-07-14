@@ -315,3 +315,9 @@ Active endorsement weights not summing to 100 for:
 (630,22,Because) (630,9,Because) (631,15,Because) (1150,14,Therefore) (1152,15,Therefore)
 Likely caused by persona retirement/rebalance edge cases on Agitate-meta args. Needs a
 re-normalization script or investigation of `retirePersonaFromArgument`.
+
+### Pre-existing opinion↔endorsement inconsistencies (found July 2026 QA pass; predate candidate seeding)
+Active endorsements whose holder lacks the required opinion direction on the target:
+- Rebuttal without reject: (4,100) (18,105) (19,574) (24,527)
+- Because without accept: (2,379) (2,574) (19,1967) (28,48) (28,1994) (28,2000)
+- Args 2411/2412 have no ACTIVE phrase-endorse rows (coined while coiner rejects 1968); phrasing cache is set and correct — cosmetic only.
