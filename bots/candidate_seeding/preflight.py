@@ -19,12 +19,17 @@ Usage:
 import json, sys
 
 spec = json.load(open(sys.argv[1]))
-cand = spec["candidacyArgID"]
-etype = spec.get("edgeType", "Rebuttal")
-want = 0 if etype == "Rebuttal" else 1  # required opinion direction on the candidacy arg
+if "blocks" in spec:
+    blocks = [b for b in spec["blocks"] if "targetArgID" in b]  # targetRef blocks can't be prechecked (target not yet coined)
+else:
+    blocks = [{"targetArgID": spec["candidacyArgID"], "edgeType": spec.get("edgeType", "Rebuttal"), "personas": spec["personas"]}]
 
 print("SET NAMES utf8mb4;")
-for p in spec["personas"]:
+for b in blocks:
+  cand = b["targetArgID"]
+  etype = b.get("edgeType", "Rebuttal")
+  want = 0 if etype == "Rebuttal" else 1
+  for p in b["personas"]:
     pid = p["personaID"]
     print(f"SELECT 'OPINION CONFLICT persona {pid}' AS problem, acceptance FROM OPINION"
           f" WHERE argumentID={cand} AND profileID={pid} AND acceptance={1 - want};")

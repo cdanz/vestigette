@@ -33,10 +33,12 @@ def texts_of(node):
         yield from texts_of(k)
 
 spec = json.load(open(sys.argv[1]))
+blocks = spec["blocks"] if "blocks" in spec else [{"personas": spec["personas"]}]
 seen = []
-for p in spec["personas"]:
-    for r in p["rebuttals"]:
-        seen.extend(texts_of(r))
+for b in blocks:
+    for p in b["personas"]:
+        for r in p["rebuttals"]:
+            seen.extend(texts_of(r))
 
 print("SET NAMES utf8mb4;")
 for t in seen:

@@ -55,18 +55,38 @@ def esc(s):
 
 def main(path):
     spec = json.load(open(path))
-    cand = spec["candidacyArgID"]
-    etype = spec.get("edgeType", "Rebuttal")  # "Because" for acceptor specs
     out = []
     w = out.append
     w("SET NAMES utf8mb4;")
     w("SET @active_aff_id = 12;")
     w("START TRANSACTION;")
-    w(f"-- Candidate: {spec.get('candidate','?')} (arg {cand})")
     var_n = 0
     refs = {}  # "id" label -> @var of a node coined earlier in this run
 
-    for p in spec["personas"]:
+    # Multi-target cluster spec: {"blocks": [{"targetArgID"|"targetRef", "edgeType", "personas": [...]}]}
+    # Classic single-target spec (candidacyArgID at top level) is wrapped into one block.
+    if "blocks" in spec:
+        blocks = spec["blocks"]
+        w(f"-- Cluster: {spec.get('cluster', spec.get('candidate','?'))}")
+    else:
+        blocks = [{"targetArgID": spec["candidacyArgID"],
+                   "edgeType": spec.get("edgeType", "Rebuttal"),
+                   "personas": spec["personas"]}]
+        w(f"-- Candidate: {spec.get('candidate','?')} (arg {spec['candidacyArgID']})")
+
+    for block in blocks:
+        cand = refs[block["targetRef"]] if "targetRef" in block else block["targetArgID"]
+        etype = block.get("edgeType", "Rebuttal")
+        w(f"\n-- ===== target {cand} ({etype}) =====")
+        vb = [var_n]
+        process_block(block, cand, etype, out, w, refs, vb)
+        var_n = vb[0]
+    finish(out, w)
+
+def process_block(spec_block, cand, etype, out, w, refs, var_box):
+    var_n = var_box[0]
+
+    for p in spec_block["personas"]:
         pid = p["personaID"]
         rebs = p["rebuttals"]
         # weight validation
@@ -151,6 +171,9 @@ def main(path):
             w(f"UPDATE ENDORSEMENT SET weight = {wt} WHERE targArgID = {cand} AND profileID = {pid}"
               f" AND endorseType = '{etype}' AND supportingArgID = {expr} AND active = 1;")
 
+    var_box[0] = var_n
+
+def finish(out, w):
     w("\nCOMMIT;")
     w("-- ===== verification =====")
     w(f"SELECT a.argumentID, a.createdBy, LEFT(a.currentPhrasing, 80) FROM ARGUMENT a"
