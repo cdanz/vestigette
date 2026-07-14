@@ -1,0 +1,75 @@
+{
+ "candidate": "beshear acceptors",
+ "candidacyArgID": 1964,
+ "edgeType": "Because",
+ "personas": [
+  {
+   "personaID": 12,
+   "slot": "strategic",
+   "rebuttals": [
+    {
+     "text": "Andy Beshear wins voters no other Democrat reaches.",
+     "weight": 45,
+     "because": [
+      {
+       "text": "Andy Beshear won twice in a state Trump carried by 26 points.",
+       "id": "kypoints"
+      }
+     ]
+    },
+    {
+     "text": "Andy Beshear's approval consistently ranks among the nation's highest governors.",
+     "weight": 30
+    },
+    {
+     "text": "A proven crossover winner is worth more than an exciting loser.",
+     "weight": 25
+    }
+   ],
+   "setOpinion": 1
+  },
+  {
+   "personaID": 15,
+   "slot": "policy_aligned",
+   "rebuttals": [
+    {
+     "text": "Andy Beshear's brand is competent, compassionate crisis response.",
+     "weight": 35,
+     "id": "crisis",
+     "because": [
+      {
+       "text": "Andy Beshear led Kentucky through tornadoes and floods with widely praised responses."
+      }
+     ]
+    },
+    {
+     "text": "Andy Beshear's health-care record delivered for rural Kentucky.",
+     "weight": 35
+    },
+    {
+     "argID": 2079,
+     "weight": 30
+    }
+   ],
+   "setOpinion": 1
+  },
+  {
+   "personaID": 7,
+   "slot": "casual",
+   "rebuttals": [
+    {
+     "argID": 1963,
+     "weight": 40
+    },
+    {
+     "ref": "kypoints",
+     "weight": 35
+    },
+    {
+     "ref": "crisis",
+     "weight": 25
+    }
+   ]
+  }
+ ]
+}

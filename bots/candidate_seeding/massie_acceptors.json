@@ -1,0 +1,45 @@
+{
+ "candidate": "massie acceptors",
+ "candidacyArgID": 1977,
+ "edgeType": "Because",
+ "personas": [
+  {
+   "personaID": 1,
+   "slot": "casual",
+   "rebuttals": [
+    {
+     "argID": 2093,
+     "weight": 40
+    },
+    {
+     "argID": 2095,
+     "weight": 25
+    },
+    {
+     "argID": 1963,
+     "weight": 35,
+     "already": true
+    }
+   ]
+  },
+  {
+   "personaID": 10,
+   "slot": "casual",
+   "rebuttals": [
+    {
+     "argID": 2095,
+     "weight": 35
+    },
+    {
+     "argID": 2098,
+     "weight": 30
+    },
+    {
+     "argID": 1963,
+     "weight": 35,
+     "already": true
+    }
+   ]
+  }
+ ]
+}

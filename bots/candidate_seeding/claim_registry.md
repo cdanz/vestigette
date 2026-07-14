@@ -35,6 +35,9 @@ specs. Add every newly-coined generic claim here with its argID.
 | 2515 | Premature presidential runs burn rising talent and cost the party twice. | any young/rising candidate |
 | 2555 | 2028 will be decided on economic issues. | any culture-war-coded candidate, either side |
 | 2556 | The Democrats' 2028 map runs through the South. | southern candidates |
+| 2606 | A proven crossover winner is worth more than an exciting loser. | any electability-first accept case |
+| 2594 | A single-issue national profile cannot carry a presidential campaign. | any single-issue candidate |
+| 2570 | A House member with no coalition cannot win a national election. | any House-member candidate |
 
 ## Shared candidate facts coined 2026-07-14 (multi-persona nodes)
 | argID | Claim | Candidate |

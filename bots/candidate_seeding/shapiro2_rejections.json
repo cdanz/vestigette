@@ -1,0 +1,26 @@
+{
+ "candidate": "shapiro2 rejections",
+ "candidacyArgID": 2003,
+ "edgeType": "Rebuttal",
+ "personas": [
+  {
+   "personaID": 26,
+   "slot": "disillusioned_left",
+   "rebuttals": [
+    {
+     "argID": 2187,
+     "weight": 40
+    },
+    {
+     "text": "Josh Shapiro flirted with private-school vouchers at public education's expense.",
+     "weight": 35
+    },
+    {
+     "text": "Josh Shapiro punches left to prove his moderation.",
+     "weight": 25
+    }
+   ],
+   "setOpinion": -1
+  }
+ ]
+}

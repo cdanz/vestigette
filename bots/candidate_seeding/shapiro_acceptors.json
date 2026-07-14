@@ -1,0 +1,50 @@
+{
+ "candidate": "shapiro acceptors",
+ "candidacyArgID": 2003,
+ "edgeType": "Because",
+ "personas": [
+  {
+   "personaID": 19,
+   "slot": "policy_aligned",
+   "rebuttals": [
+    {
+     "text": "Josh Shapiro governs with visible, deadline-beating competence.",
+     "weight": 40,
+     "because": [
+      {
+       "text": "Josh Shapiro reopened collapsed I-95 in twelve days."
+      }
+     ]
+    },
+    {
+     "text": "Josh Shapiro defended Pennsylvania's 2020 election results against dozens of lawsuits as Attorney General.",
+     "weight": 25
+    },
+    {
+     "argID": 2292,
+     "weight": 20
+    },
+    {
+     "argID": 1963,
+     "weight": 15,
+     "already": true
+    }
+   ]
+  },
+  {
+   "personaID": 17,
+   "slot": "casual",
+   "rebuttals": [
+    {
+     "argID": 1963,
+     "weight": 55,
+     "already": true
+    },
+    {
+     "argID": 2291,
+     "weight": 45
+    }
+   ]
+  }
+ ]
+}
