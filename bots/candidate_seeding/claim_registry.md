@@ -23,14 +23,14 @@ specs. Add every newly-coined generic claim here with its argID.
 | 2429 | marquee policy proposals would drive up the deficit | AOC |
 | 2022–2026 | Buttigieg experience/record attack set | Buttigieg |
 
-## Pending (coined by the AOC pilot spec — fill in argIDs after it runs)
+## Generic — coined in the AOC pilot, 2026-07-13 (reuse from here on)
 | argID | Claim | Applies to |
 |---|---|---|
-| _ | Legislating and executive governing are fundamentally different skill sets. | any legislator candidate |
-| _ | Winning a general election requires persuading voters who do not already agree with you. | any polarizing candidate |
-| _ | Governing requires compromise. | any purist candidate |
-| _ | Coalition-building becomes impossible when disagreement is treated as moral corruption. | moralizing candidates |
-| _ | The national media flattens progressive positions into caricature. | any progressive |
-| _ | A failed left presidential bid validates the centrist claim that the left cannot win. | any progressive |
-| _ | Electoral politics is structurally incapable of producing transformative change. | disillusioned-left slot |
-| _ | Social democracy redistributes within capitalism rather than challenging its fundamental logic. | disillusioned-left slot |
+| 2433 | Legislating and executive governing are fundamentally different skill sets. | any legislator candidate |
+| 2439 | Winning a general election requires persuading voters who do not already agree with you. | any polarizing candidate |
+| 2443 | Governing requires compromise. | any purist candidate |
+| 2435 | Coalition-building becomes impossible when disagreement is treated as moral corruption. | moralizing candidates |
+| 2446 | The national media flattens progressive positions into caricature. | any progressive |
+| 2448 | A failed left presidential bid validates the centrist claim that the left cannot win. | any progressive |
+| 2454 | Electoral politics is structurally incapable of producing transformative change. | disillusioned-left slot |
+| 2456 | Social democracy redistributes within capitalism rather than challenging its fundamental logic. | disillusioned-left slot |
