@@ -66,11 +66,28 @@ attack args be reused across the new perspectives.
   terse heading as the direct rebuttal, reasons one jump down.
 - New Because children get reciprocal Therefore edges automatically
   (`foldAndReciprocate`); reused existing args get a plain endorsement only.
-- **Reuse before coining.** Grep `corpus_snapshot.tsv` and check
-  `claim_registry.md` first. Candidate-specific facts (votes, record) get new
-  args; generic claims ("no executive experience" logic, "socialism at scale")
-  are registry items shared across candidates and across personas — sharing
-  supporting args across personas is exactly what makes the graph converge.
+- **Reuse before coining — duplicates are the cardinal failure.** The
+  scaffolding must model exactly the discipline arg 1150 asks of humans
+  ("Arguments on Agitate should not be duplicated"). Three layers of defense:
+  1. **Semantic (primary, at drafting):** read the candidacy arg's FULL
+     existing neighborhood (every persona's rebuttals + children) and annotate
+     every draft claim in the redline spec with its **nearest existing arg**
+     and the relationship: `none | duplicate | upstream | downstream`.
+     Lesson case: "AOC has never run anything" (2424) vs "AOC has no executive
+     experience" — same claim, zero shared keywords; only a semantic read
+     catches it. (Resolved by mergeArguments(2424, 2432), redirect written.)
+  2. **Lexical backstop:** `python3 check_dupes.py <spec>.json` emits a
+     full-text ranking of every new text against all existing phrasings
+     (same FULLTEXT index find_similar.php uses); review before generating.
+  3. **Registry:** `claim_registry.md` for generic cross-candidate claims.
+- **A duplicate is not coined — it is adopted, optionally with a new
+  phrasing.** Spec: `{"argID": N, "putForth": "persona's own wording", ...}`
+  endorses the existing node and adds the persona's tonally-matched wording as
+  an alternative phrasing (`newPutForth`), letting phrasing weights compete —
+  the platform's native answer to "same claim, different voice." Candidate-
+  specific facts (votes, record) get new args; generic claims are registry
+  items shared across candidates and personas — that sharing is what makes
+  the graph converge.
 
 ## Per-candidate workflow
 

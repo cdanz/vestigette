@@ -29,6 +29,7 @@ Spec schema (see aoc_rejections.json for a worked example):
                         "because": [ {"text": "Chains nest: evidence under mechanism under outcome."} ]},
                        {"argID": 1591} ] },
         { "argID": 2429, "weight": 15,     # adopt an existing arg (any persona's) as your heading...
+          "putForth": "Optional: persona's own alternative phrasing of the adopted arg.",
           "because": [ {"text": "...and hang your own reasoning beneath it."} ] },
         { "argID": 2411, "weight": 10, "already": true }  # persona ALREADY endorses this: reweight only, no insert
       ]
@@ -87,6 +88,8 @@ def main(path):
                 if "argID" in k:
                     w(f"INSERT INTO ENDORSEMENT (targArgID, profileID, endorseType, supportingArgID, weight, active)"
                       f" VALUES ({parent_expr}, {pid}, 'Because', {k['argID']}, 1, 1);")
+                    if k.get("putForth"):
+                        w(f"CALL newPutForth({k['argID']}, {pid}, '{esc(k['putForth'])}');")
                     if k.get("because"):
                         emit_because(str(k["argID"]), k["because"])
                 else:
@@ -111,6 +114,8 @@ def main(path):
                     w(f"INSERT INTO ENDORSEMENT (targArgID, profileID, endorseType, supportingArgID, weight, active)"
                       f" VALUES ({cand}, {pid}, 'Rebuttal', {r['argID']}, 1, 1);")
                 norm.append((str(r["argID"]), wt))
+                if r.get("putForth"):
+                    w(f"CALL newPutForth({r['argID']}, {pid}, '{esc(r['putForth'])}');")
                 if r.get("because"):
                     emit_because(str(r["argID"]), r["because"])
                 continue
