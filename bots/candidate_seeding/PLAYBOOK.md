@@ -48,6 +48,17 @@ attack args be reused across the new perspectives.
 
 ## Argument structure rules (per persona)
 
+- **Chain, don't star.** Before adding a heading, scan the candidacy arg's
+  existing rebuttals (every persona's — the nodes are shared) for the
+  outcome-level version of the claim. If your claim sits *upstream* of an
+  existing one (a mechanism or reason for it), adopt the existing node as your
+  heading and hang your claim beneath it as a Because — e.g. Frank adopted
+  Carlos's "would drive up the deficit" (2429) and chained "no credible
+  financing mechanism" (2430) ← "costs tens of trillions" (2431) under it.
+  The ideal shape is outcome ← mechanism ← evidence; flat spokes on the
+  candidacy arg should be reserved for genuinely parallel claims. (Exception:
+  the absolute-hater slot staying flat is characterful — haters don't reason
+  in chains.)
 - 3–5 **rebuttal headings** on the candidacy arg, weights summing 100.
   Weights express the persona's emphasis (hater = flat 20s; analysts vary).
 - Each heading ≤ 1 short sentence, fully atomic. Bundled reasons split into

@@ -25,8 +25,11 @@ Spec schema (see aoc_rejections.json for a worked example):
       "setOpinion": -1,                    # emit assertOpinion(-1, cand, pid); omit if opinion already correct
       "rebuttals": [
         { "text": "New heading arg.", "weight": 25,
-          "because": [ {"text": "New child arg."}, {"argID": 1591} ] },
-        { "argID": 2429, "weight": 15 },   # reuse an existing arg as a rebuttal
+          "because": [ {"text": "New child arg.",
+                        "because": [ {"text": "Chains nest: evidence under mechanism under outcome."} ]},
+                       {"argID": 1591} ] },
+        { "argID": 2429, "weight": 15,     # adopt an existing arg (any persona's) as your heading...
+          "because": [ {"text": "...and hang your own reasoning beneath it."} ] },
         { "argID": 2411, "weight": 10, "already": true }  # persona ALREADY endorses this: reweight only, no insert
       ]
     }
@@ -77,16 +80,39 @@ def main(path):
             w(f"CALL assertOpinion({p['setOpinion']}, {cand}, {pid});")
         w(f"INSERT IGNORE INTO SCOPE_ENDORSEMENT (profileID, targArgID, affiliationID) VALUES ({pid}, {cand}, 12);")
 
+        def emit_because(parent_expr, kids):
+            """Recursively wire Because children (and their children) under parent_expr."""
+            nonlocal var_n
+            for k in kids:
+                if "argID" in k:
+                    w(f"INSERT INTO ENDORSEMENT (targArgID, profileID, endorseType, supportingArgID, weight, active)"
+                      f" VALUES ({parent_expr}, {pid}, 'Because', {k['argID']}, 1, 1);")
+                    if k.get("because"):
+                        emit_because(str(k["argID"]), k["because"])
+                else:
+                    w(f"CALL foldAndReciprocate('{esc(k['text'])}', 'Because', {parent_expr}, {pid});")
+                    if k.get("because"):
+                        var_n += 1
+                        cv = f"@c{var_n}"
+                        w(f"SET {cv} = (SELECT MAX(argumentID) FROM ARGUMENT WHERE createdBy = {pid});")
+                        emit_because(cv, k["because"])
+            share = round(100.0 / len(kids), 5)
+            w(f"UPDATE ENDORSEMENT SET weight = {share} WHERE targArgID = {parent_expr}"
+              f" AND profileID = {pid} AND endorseType = 'Because' AND active = 1;")
+            w(f"INSERT IGNORE INTO SCOPE_ENDORSEMENT (profileID, targArgID, affiliationID) VALUES ({pid}, {parent_expr}, 12);")
+
         norm = []  # (supporting_expr, weight) for the rebuttal-level normalization
         for r, wt in zip(rebs, weights):
             if "argID" in r:
                 if r.get("already"):
                     w(f"-- persona already endorses arg {r['argID']}: reweight only")
                 else:
-                    w(f"-- reuse existing arg {r['argID']} as rebuttal")
+                    w(f"-- adopt existing arg {r['argID']} as rebuttal heading")
                     w(f"INSERT INTO ENDORSEMENT (targArgID, profileID, endorseType, supportingArgID, weight, active)"
                       f" VALUES ({cand}, {pid}, 'Rebuttal', {r['argID']}, 1, 1);")
                 norm.append((str(r["argID"]), wt))
+                if r.get("because"):
+                    emit_because(str(r["argID"]), r["because"])
                 continue
             var_n += 1
             hv = f"@h{var_n}"
@@ -94,18 +120,8 @@ def main(path):
             w(f"CALL foldAndReciprocate('{esc(r['text'])}', 'Rebuttal', {cand}, {pid});")
             w(f"SET {hv} = (SELECT MAX(argumentID) FROM ARGUMENT WHERE createdBy = {pid});")
             norm.append((hv, wt))
-            kids = r.get("because", [])
-            for k in kids:
-                if "argID" in k:
-                    w(f"INSERT INTO ENDORSEMENT (targArgID, profileID, endorseType, supportingArgID, weight, active)"
-                      f" VALUES ({hv}, {pid}, 'Because', {k['argID']}, 1, 1);")
-                else:
-                    w(f"CALL foldAndReciprocate('{esc(k['text'])}', 'Because', {hv}, {pid});")
-            if kids:
-                share = round(100.0 / len(kids), 5)
-                w(f"UPDATE ENDORSEMENT SET weight = {share} WHERE targArgID = {hv}"
-                  f" AND profileID = {pid} AND endorseType = 'Because' AND active = 1;")
-                w(f"INSERT IGNORE INTO SCOPE_ENDORSEMENT (profileID, targArgID, affiliationID) VALUES ({pid}, {hv}, 12);")
+            if r.get("because"):
+                emit_because(hv, r["because"])
 
         w(f"-- normalize persona {pid}'s rebuttal weights on {cand}")
         for expr, wt in norm:
