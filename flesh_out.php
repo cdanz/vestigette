@@ -756,6 +756,31 @@ function fleshUseSuggestion(n, argID, phrasing) {
     fleshBumpExisting(argID);
 }
 
+// ── Stored-weight → minimum integer clicks (mirrors index page pctToClicks) ──
+// Finds the smallest integer click counts that preserve weight proportions so
+// that adding one new item produces a fair starting share rather than ~1%.
+// e.g. [100%] → [1 click], [70%,30%] → [7,3], [50%,50%] → [1,1].
+function pctToFleshClicks(storedArr) {
+    if (!storedArr.length) return [];
+    var pcts = storedArr.map(function(s) { return s.pct; });
+    var min = Math.min.apply(null, pcts);
+    var splitBy = 1, commonMultiplier, isMultiple, number, whole, leftover;
+    do {
+        commonMultiplier = min / splitBy;
+        isMultiple = true;
+        for (var i = 0; i < pcts.length; i++) {
+            number = pcts[i] / commonMultiplier;
+            whole  = Math.round(number);
+            leftover = Math.abs(number - whole);
+            if (leftover > 0.0001) { isMultiple = false; break; }
+        }
+        splitBy++;
+    } while (!isMultiple && splitBy < 1000);
+    return storedArr.map(function(s) {
+        return {argID: s.argID, clicks: Math.max(1, Math.round(s.pct / commonMultiplier))};
+    });
+}
+
 // ── Reset / load-my-weights ───────────────────────────────────────────────────
 
 function fleshReset() {
@@ -782,16 +807,15 @@ function fleshLoadMyWeights() {
     if (!keys.length) return;
     fleshReset();
     var pinnedZone = document.getElementById('pinned-zone');
-    keys.map(function(k) { return {argID: parseInt(k, 10), pct: fleshStoredWeights[k]}; })
-        .sort(function(a, b) { return b.pct - a.pct; })
-        .forEach(function(s) {
-            var row = document.getElementById('flesh-ex-' + s.argID);
-            if (!row) return;
-            var clicks = Math.max(1, Math.round(s.pct));
-            pinnedZone.appendChild(row);
-            fleshPool.push({id: 'ex-' + s.argID, clicks: clicks});
-            fleshTotalClicks += clicks;
-        });
+    var storedArr = keys.map(function(k) { return {argID: parseInt(k, 10), pct: fleshStoredWeights[k]}; })
+        .sort(function(a, b) { return b.pct - a.pct; });
+    pctToFleshClicks(storedArr).forEach(function(item) {
+        var row = document.getElementById('flesh-ex-' + item.argID);
+        if (!row) return;
+        pinnedZone.appendChild(row);
+        fleshPool.push({id: 'ex-' + item.argID, clicks: item.clicks});
+        fleshTotalClicks += item.clicks;
+    });
     fleshUpdateAll();
 }
 
@@ -830,9 +854,9 @@ function fleshLoadMyWeights() {
         if (ctx.manual && ctx.manual.length > 0) {
             toPinArr = ctx.manual.slice().sort(function(a, b) { return b.clicks - a.clicks; });
         } else {
-            toPinArr = (ctx.stored || []).slice()
-                .sort(function(a, b) { return b.pct - a.pct; })
-                .map(function(s) { return {argID: s.argID, clicks: Math.max(1, Math.round(s.pct))}; });
+            toPinArr = pctToFleshClicks(
+                (ctx.stored || []).slice().sort(function(a, b) { return b.pct - a.pct; })
+            );
         }
 
         toPinArr.forEach(function(m) {
