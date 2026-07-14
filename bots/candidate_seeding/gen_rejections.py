@@ -18,7 +18,7 @@ Spec schema (see aoc_rejections.json for a worked example):
 {
   "candidate": "AOC",                  # label only
   "candidacyArgID": 1968,
-  "personas": [
+  "personas": [   # acceptor specs: add top-level "edgeType": "Because"; "rebuttals" then means "headings"
     {
       "personaID": 5,
       "slot": "thoughtful_conservative",   # label only
@@ -56,6 +56,7 @@ def esc(s):
 def main(path):
     spec = json.load(open(path))
     cand = spec["candidacyArgID"]
+    etype = spec.get("edgeType", "Rebuttal")  # "Because" for acceptor specs
     out = []
     w = out.append
     w("SET NAMES utf8mb4;")
@@ -121,7 +122,7 @@ def main(path):
                 else:
                     w(f"-- adopt existing arg {r['argID']} as rebuttal heading")
                     w(f"INSERT INTO ENDORSEMENT (targArgID, profileID, endorseType, supportingArgID, weight, active)"
-                      f" VALUES ({cand}, {pid}, 'Rebuttal', {r['argID']}, 1, 1);")
+                      f" VALUES ({cand}, {pid}, '{etype}', {r['argID']}, 1, 1);")
                 norm.append((str(r["argID"]), wt))
                 if r.get("putForth"):
                     w(f"CALL newPutForth({r['argID']}, {pid}, '{esc(r['putForth'])}');")
@@ -131,7 +132,7 @@ def main(path):
             var_n += 1
             hv = f"@h{var_n}"
             w(f"-- new rebuttal heading: {r['text'][:70]}")
-            w(f"CALL foldAndReciprocate('{esc(r['text'])}', 'Rebuttal', {cand}, {pid});")
+            w(f"CALL foldAndReciprocate('{esc(r['text'])}', '{etype}', {cand}, {pid});")
             w(f"SET {hv} = (SELECT MAX(argumentID) FROM ARGUMENT WHERE createdBy = {pid});")
             if r.get("id"):
                 refs[r["id"]] = hv
@@ -142,7 +143,7 @@ def main(path):
         w(f"-- normalize persona {pid}'s rebuttal weights on {cand}")
         for expr, wt in norm:
             w(f"UPDATE ENDORSEMENT SET weight = {wt} WHERE targArgID = {cand} AND profileID = {pid}"
-              f" AND endorseType = 'Rebuttal' AND supportingArgID = {expr} AND active = 1;")
+              f" AND endorseType = '{etype}' AND supportingArgID = {expr} AND active = 1;")
 
     w("\nCOMMIT;")
     w("-- ===== verification =====")

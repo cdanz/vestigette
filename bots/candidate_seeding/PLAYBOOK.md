@@ -1,8 +1,41 @@
-# Candidate Rejection Seeding — Playbook
+# Candidate Rejection & Acceptance Seeding — Playbook
 
-Repeatable process for building each candidate's rejection-side discourse
-(acceptor-side playbook to follow once this is tuned). Established July 2026
-off the manually-built AOC page (arg 1968).
+Repeatable process for building each candidate's rejection-side and
+acceptance-side discourse. Established July 2026 off the manually-built AOC
+page (arg 1968).
+
+## Acceptor side (added 2026-07-14)
+
+**Because edges only.** Candidacy-level Therefores ("has my vote", "donate")
+are exclusive cross-candidate commitments — left entirely to real users.
+(foldAndReciprocate still auto-adds the valid reciprocal Therefore from each
+new heading/child back to its parent.)
+
+**Four acceptor lanes** (mirrors of the rejection slots):
+| Lane | Mirror | Character |
+|---|---|---|
+| Super fan | absolute hater | affect-driven, flat weights, shallow (fans don't chain). **Hard uniqueness both ways:** a persona super-fans at most ONE candidate ever, and a candidate gets at most one super fan. Ledger below. Most candidates get none. |
+| Policy-aligned | thoughtful critic | deepest chains; domain headings + record facts |
+| Strategic | centrist-electability | candidate-as-instrument: turnout, coalition math, money |
+| Casual | (none) | **adopts only, never coins** — light weights across existing nodes incl. cluster root 1963; the many bare "1963 @ 100%" acceptors are proto-casuals to upgrade |
+
+Rejected lanes (Craig, 2026-07-14): single-issue (emerges naturally in weights),
+identity-representation (left to humans), crossover (reserve for a uniquely
+cross-aligned candidate someday).
+
+**Structure: high-level first.** Level-1 headings on the candidacy arg stay
+domain-level ("X would deliver on climate"); specific record facts chain
+beneath them. **Salience lives in weights, not nodes** — "climate is urgent"
+is not a Because of "X is good on climate"; it is why that heading gets 40
+instead of 15. Adopt existing nodes freely, including admin's and even
+rejection-side FACT nodes where the fact is valence-neutral (e.g., a McKinsey
+career or an eliminated-cash-bail record can support opposite conclusions —
+that tension is the platform working).
+
+**Super-fan ledger:** Diana Delgado (4) → AOC. Robert Ramirez (18) → JD Vance.
+
+## Rejection side
+
 
 ## The five rejection perspectives and their persona casts
 
