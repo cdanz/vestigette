@@ -495,6 +495,8 @@ function fleshUnpinExisting(argID) {
 
 // ── New-arg handlers ──────────────────────────────────────────────────────────
 
+var similarAwaiting = {}; // n → true while a fleshAwaitSuggestion poll is already running
+
 function fleshBumpNew(n) {
     var id   = 'new-' + n;
     var item = fleshPool.find(function(x) { return x.id === id; });
@@ -502,6 +504,10 @@ function fleshBumpNew(n) {
     if (!item) {
         // Suggestion already showing for this row — don't stack another
         if (document.getElementById('similar-' + n)) return;
+        // Already waiting on the similarity check for this row — rapid
+        // re-clicks while the request is in flight used to start a second
+        // poll, which could pin the row (and add its follow-up empty row) twice
+        if (similarAwaiting[n]) return;
 
         var row  = document.getElementById('flesh-new-' + n);
         var text = row ? row.querySelector('.new-arg-text').value.trim() : '';
@@ -522,6 +528,11 @@ function fleshBumpNew(n) {
 
 function fleshDoPinNew(n) {
     var id = 'new-' + n;
+    // Defensive: never double-pin the same row (e.g. if a stray duplicate
+    // call slips through) — a second push would silently double-count its
+    // clicks in fleshTotalClicks while fleshPool.find() only ever surfaces
+    // the first entry, making the row's own weight look stuck.
+    if (fleshPool.some(function(x) { return x.id === id; })) return;
     fleshPool.push({id: id, clicks: 1});
     fleshNewCounter++;
     fleshAddNewRow(fleshNewCounter, document.getElementById('flesh-new-' + n));
@@ -874,11 +885,13 @@ function fleshLoadMyWeights() {
 function fleshAwaitSuggestion(n) {
     var row = document.getElementById('flesh-new-' + n);
     if (row) row.classList.add('similar-loading');
+    similarAwaiting[n] = true;
     var checks = 0;
     var poll = setInterval(function() {
         checks++;
         if (similarCache[n] !== null || checks > 40) {
             clearInterval(poll);
+            delete similarAwaiting[n];
             if (row) row.classList.remove('similar-loading');
             if (similarCache[n] && similarCache[n].length > 0) {
                 fleshShowSuggestion(n, similarCache[n]);
