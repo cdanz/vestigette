@@ -31,10 +31,10 @@ for b in blocks:
   want = 0 if etype == "Rebuttal" else 1
   for p in b["personas"]:
     pid = p["personaID"]
-    print(f"SELECT 'OPINION CONFLICT persona {pid}' AS problem, acceptance FROM OPINION"
+    print(f"SELECT 'OPINION CONFLICT persona {pid} target {cand}' AS problem, acceptance FROM OPINION"
           f" WHERE argumentID={cand} AND profileID={pid} AND acceptance={1 - want};")
     listed = [str(r["argID"]) for r in p["rebuttals"] if r.get("already")]
     listed_sql = ",".join(listed) if listed else "0"
-    print(f"SELECT 'UNLISTED EDGE persona {pid}' AS problem, supportingArgID, weight FROM ENDORSEMENT"
+    print(f"SELECT 'UNLISTED EDGE persona {pid} target {cand} ({etype})' AS problem, supportingArgID, weight FROM ENDORSEMENT"
           f" WHERE targArgID={cand} AND profileID={pid} AND endorseType='{etype}' AND active=1"
           f" AND supportingArgID NOT IN ({listed_sql});")

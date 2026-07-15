@@ -129,9 +129,13 @@ attack args be reused across the new perspectives.
 ## Per-candidate workflow
 
 1. Refresh `corpus_snapshot.tsv` (one SSH, see command in gen_rejections.py docstring — swap the SELECT for the snapshot query below).
-   Then `python3 preflight.py <spec>.json` → run over SSH → ANY output row = stop
-   (opinion conflicts and unlisted existing edges; the "already": true rule is
-   mandatory for every active edge already in a persona's target pool).
+   Then `python3 preflight.py <spec>.json` → run over SSH → ANY output row = stop.
+   **HARD GATE — lesson of 2026-07-15:** never generate or apply while preflight
+   has output, and read the TARGET in each finding (the same persona can have
+   pools on several targets in one spec; a fix applied to the wrong block
+   corrupted two pools in the climate run and required manual repair). The
+   "already": true rule is mandatory for every active edge already in a
+   persona's (target, edgeType) pool.
 2. Claude drafts the spec JSON (all perspectives, atomized, deduped, registry
    reuses wired in). No external chat round-trip needed.
 3. Craig redlines the spec — this is the editorial checkpoint; personas speak

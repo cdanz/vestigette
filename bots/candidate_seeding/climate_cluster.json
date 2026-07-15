@@ -1,0 +1,311 @@
+{
+ "cluster": "climate-lanes",
+ "blocks": [
+  {
+   "targetArgID": 321,
+   "edgeType": "Rebuttal",
+   "personas": [
+    {
+     "personaID": 10,
+     "slot": "denialist",
+     "rebuttals": [
+      {
+       "argID": 1275,
+       "weight": 35,
+       "already": true
+      },
+      {
+       "argID": 1276,
+       "weight": 40,
+       "already": true
+      },
+      {
+       "text": "Scientists who question the consensus lose their funding and their careers.",
+       "weight": 25
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "targetArgID": 230,
+   "edgeType": "Because",
+   "personas": [
+    {
+     "personaID": 10,
+     "slot": "denialist",
+     "rebuttals": [
+      {
+       "text": "The people preaching climate sacrifice fly private jets to the conference.",
+       "weight": 55
+      },
+      {
+       "text": "The war on coal killed towns like mine, and the climate didn't notice.",
+       "weight": 45
+      }
+     ],
+     "setOpinion": 1
+    }
+   ]
+  },
+  {
+   "targetArgID": 230,
+   "edgeType": "Rebuttal",
+   "personas": [
+    {
+     "personaID": 9,
+     "slot": "consensus_urgency",
+     "rebuttals": [
+      {
+       "text": "Every national science academy on Earth endorses the consensus.",
+       "weight": 100
+      }
+     ],
+     "setOpinion": -1
+    }
+   ]
+  },
+  {
+   "targetArgID": 529,
+   "edgeType": "Because",
+   "personas": [
+    {
+     "personaID": 7,
+     "slot": "lukewarmer",
+     "rebuttals": [
+      {
+       "text": "Climate-related deaths per capita have fallen dramatically over the past century.",
+       "weight": 100
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "targetArgID": 527,
+   "edgeType": "Because",
+   "personas": [
+    {
+     "personaID": 7,
+     "slot": "lukewarmer",
+     "rebuttals": [
+      {
+       "text": "Poverty today kills more people than warming tomorrow.",
+       "weight": 100
+      }
+     ]
+    },
+    {
+     "personaID": 3,
+     "slot": "energy_realist",
+     "rebuttals": [
+      {
+       "text": "Energy costs are a regressive tax on working families.",
+       "weight": 100
+      }
+     ],
+     "setOpinion": 1
+    }
+   ]
+  },
+  {
+   "targetArgID": 530,
+   "edgeType": "Because",
+   "personas": [
+    {
+     "personaID": 20,
+     "slot": "innovation_optimist",
+     "rebuttals": [
+      {
+       "text": "Innovation, not mandates, is what actually cuts emissions.",
+       "weight": 40,
+       "because": [
+        {
+         "text": "Cheap fracked gas did more to cut U.S. power emissions than any climate law."
+        }
+       ]
+      },
+      {
+       "argID": 321,
+       "weight": 35,
+       "already": true
+      },
+      {
+       "argID": 414,
+       "weight": 25,
+       "already": true
+      }
+     ],
+     "setOpinion": 1
+    }
+   ]
+  },
+  {
+   "targetArgID": 478,
+   "edgeType": "Because",
+   "personas": [
+    {
+     "personaID": 20,
+     "slot": "innovation_optimist",
+     "rebuttals": [
+      {
+       "argID": 1034,
+       "weight": 100
+      }
+     ],
+     "setOpinion": 1
+    }
+   ]
+  },
+  {
+   "targetArgID": 415,
+   "edgeType": "Therefore",
+   "personas": [
+    {
+     "personaID": 3,
+     "slot": "energy_realist",
+     "rebuttals": [
+      {
+       "text": "Blackouts kill the public mandate for the energy transition.",
+       "weight": 100
+      }
+     ],
+     "setOpinion": 1
+    }
+   ]
+  },
+  {
+   "targetArgID": 123,
+   "edgeType": "Because",
+   "personas": [
+    {
+     "personaID": 9,
+     "slot": "consensus_urgency",
+     "rebuttals": [
+      {
+       "argID": 1300,
+       "weight": 25
+      },
+      {
+       "text": "Carbon pricing is the single most effective climate policy lever available.",
+       "weight": 25
+      },
+      {
+       "argID": 321,
+       "weight": 20,
+       "already": true
+      },
+      {
+       "argID": 863,
+       "weight": 15,
+       "already": true
+      },
+      {
+       "argID": 1296,
+       "weight": 15
+      }
+     ],
+     "setOpinion": 1
+    },
+    {
+     "personaID": 25,
+     "slot": "climate_justice",
+     "rebuttals": [
+      {
+       "text": "The communities that did least to cause warming are drowning first.",
+       "weight": 30,
+       "because": [
+        {
+         "text": "Roughly one hundred companies account for the large majority of industrial emissions."
+        }
+       ]
+      },
+      {
+       "text": "A just transition means coal workers land on their feet, not on the scrap heap.",
+       "weight": 25,
+       "because": [
+        {
+         "argID": 2086
+        }
+       ]
+      },
+      {
+       "argID": 321,
+       "weight": 25,
+       "already": true
+      },
+      {
+       "argID": 863,
+       "weight": 20,
+       "already": true
+      }
+     ],
+     "setOpinion": 1
+    },
+    {
+     "personaID": 26,
+     "slot": "doomer",
+     "rebuttals": [
+      {
+       "argID": 1299,
+       "weight": 30
+      },
+      {
+       "argID": 893,
+       "weight": 25
+      },
+      {
+       "argID": 321,
+       "weight": 25,
+       "already": true
+      },
+      {
+       "argID": 863,
+       "weight": 20,
+       "already": true
+      }
+     ],
+     "setOpinion": 1
+    }
+   ]
+  },
+  {
+   "targetArgID": 1299,
+   "edgeType": "Therefore",
+   "personas": [
+    {
+     "personaID": 26,
+     "slot": "doomer",
+     "rebuttals": [
+      {
+       "text": "Incrementalism at this point is denial with better manners.",
+       "weight": 50
+      },
+      {
+       "text": "The system that caused the crisis cannot be the system that repairs it.",
+       "weight": 50
+      }
+     ],
+     "setOpinion": 1
+    }
+   ]
+  },
+  {
+   "targetArgID": 730,
+   "edgeType": "Rebuttal",
+   "personas": [
+    {
+     "personaID": 26,
+     "slot": "doomer",
+     "rebuttals": [
+      {
+       "text": "Techno-optimism is how we avoid grieving what is already lost.",
+       "weight": 100
+      }
+     ],
+     "setOpinion": -1
+    }
+   ]
+  }
+ ]
+}
