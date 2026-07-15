@@ -1,0 +1,274 @@
+{
+ "cluster": "trans-premise-sex-gender",
+ "_profiles": "23 Wendy low-info skeptic, 62 Nick 'did-my-research' skeptic, 36 Rick informed-scientist skeptic, 17 Quinn low-info defender, 9 Irene informed defender, 48 Joe gender/sex expert",
+ "blocks": [
+  {
+   "targetArgID": 1425,
+   "edgeType": "Rebuttal",
+   "personas": [
+    {
+     "personaID": 23,
+     "slot": "lowinfo_skeptic",
+     "rebuttals": [
+      {
+       "text": "A man who believes he is a woman is not mentally well.",
+       "weight": 50
+      },
+      {
+       "text": "You cannot feel your way into being the opposite sex.",
+       "weight": 50
+      }
+     ],
+     "setOpinion": -1
+    },
+    {
+     "personaID": 62,
+     "slot": "research_skeptic",
+     "rebuttals": [
+      {
+       "text": "The clinical consensus on trans identity was driven by activism, not new evidence.",
+       "weight": 40,
+       "because": [
+        {
+         "text": "Professional medical bodies face organized pressure to affirm rather than question."
+        }
+       ]
+      },
+      {
+       "text": "Rapid-onset gender dysphoria spreads among teenagers through peer and online networks.",
+       "weight": 30
+      },
+      {
+       "text": "Most children who experience gender dysphoria desist by adulthood when not affirmed.",
+       "weight": 30
+      }
+     ],
+     "setOpinion": -1
+    },
+    {
+     "personaID": 36,
+     "slot": "scientist_skeptic",
+     "rebuttals": [
+      {
+       "text": "Gender dysphoria is a diagnosable condition in the DSM-5 and ICD-11.",
+       "weight": 55,
+       "id": "dsm5"
+      },
+      {
+       "text": "Affirmation-only care forecloses investigation of the underlying causes of distress.",
+       "weight": 45
+      }
+     ],
+     "setOpinion": -1
+    }
+   ]
+  },
+  {
+   "targetArgID": 1425,
+   "edgeType": "Because",
+   "personas": [
+    {
+     "personaID": 48,
+     "slot": "gender_expert",
+     "rebuttals": [
+      {
+       "text": "Every major medical association endorses gender-affirming care as the standard of care.",
+       "weight": 40,
+       "because": [
+        {
+         "text": "The APA, AMA, WPATH, and Endocrine Society all classify it as evidence-based."
+        }
+       ]
+      },
+      {
+       "text": "The DSM-5 removed transgender identity itself as a disorder; only the distress of dysphoria is diagnosable.",
+       "weight": 35
+      },
+      {
+       "text": "Gender identity has measurable neurobiological correlates independent of upbringing.",
+       "weight": 25
+      }
+     ],
+     "setOpinion": 1
+    },
+    {
+     "personaID": 9,
+     "slot": "informed_defender",
+     "rebuttals": [
+      {
+       "text": "Interrogating a settled clinical consensus as if it were open is rhetoric, not inquiry.",
+       "weight": 30,
+       "because": [
+        {
+         "text": "The skeptical case reliably arrives at a predetermined policy conclusion."
+        }
+       ]
+      },
+      {
+       "text": "The sex-science argument is a motte-and-bailey: defend that sex is real to smuggle in that trans women are men.",
+       "weight": 25
+      },
+      {
+       "argID": 795,
+       "weight": 25,
+       "already": true
+      },
+      {
+       "argID": 801,
+       "weight": 20,
+       "already": true
+      }
+     ]
+    },
+    {
+     "personaID": 17,
+     "slot": "lowinfo_defender",
+     "rebuttals": [
+      {
+       "text": "Trans people understand their own identity better than strangers do.",
+       "weight": 30
+      },
+      {
+       "text": "This is cruelty dressed up as concern for the vulnerable.",
+       "weight": 25
+      },
+      {
+       "argID": 795,
+       "weight": 25,
+       "already": true
+      },
+      {
+       "argID": 801,
+       "weight": 20,
+       "already": true
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "targetArgID": 1709,
+   "edgeType": "Rebuttal",
+   "personas": [
+    {
+     "personaID": 36,
+     "slot": "scientist_skeptic",
+     "rebuttals": [
+      {
+       "text": "Gender dysphoria and body dysmorphic disorder both center on distress about one's own body.",
+       "weight": 100
+      }
+     ],
+     "setOpinion": -1
+    }
+   ]
+  },
+  {
+   "targetArgID": 1709,
+   "edgeType": "Because",
+   "personas": [
+    {
+     "personaID": 48,
+     "slot": "gender_expert",
+     "rebuttals": [
+      {
+       "text": "Body dysmorphic disorder is a perceived defect in appearance; gender dysphoria is incongruence between identity and sex characteristics.",
+       "weight": 55,
+       "because": [
+        {
+         "text": "The two carry distinct diagnostic criteria and distinct treatments."
+        }
+       ]
+      },
+      {
+       "text": "Treating body dysmorphia reduces the fixation; for gender dysphoria the evidenced treatment is transition.",
+       "weight": 45
+      }
+     ],
+     "setOpinion": 1
+    }
+   ]
+  },
+  {
+   "targetArgID": 2366,
+   "edgeType": "Because",
+   "personas": [
+    {
+     "personaID": 36,
+     "slot": "scientist_skeptic",
+     "rebuttals": [
+      {
+       "text": "Biological sex is defined by gamete type: organisms are built to produce either small or large gametes.",
+       "weight": 40,
+       "id": "gamete",
+       "because": [
+        {
+         "text": "No sexually reproducing species produces a viable third gamete type."
+        }
+       ]
+      },
+      {
+       "text": "The gamete-based definition of sex holds across the sexually reproducing tree of life.",
+       "weight": 30
+      },
+      {
+       "text": "Intersex conditions are disorders of sexual development within the two sexes, not additional sexes.",
+       "weight": 30
+      }
+     ],
+     "setOpinion": 1
+    }
+   ]
+  },
+  {
+   "targetArgID": 2366,
+   "edgeType": "Rebuttal",
+   "personas": [
+    {
+     "personaID": 48,
+     "slot": "gender_expert",
+     "rebuttals": [
+      {
+       "text": "Anisogamy is a species-level reproductive strategy, not a rule for classifying individuals.",
+       "weight": 40,
+       "because": [
+        {
+         "text": "Prepubescent, infertile, and post-menopausal people have a sex while producing no gametes at all."
+        }
+       ]
+      },
+      {
+       "text": "Biological sex is a cluster of traits \u2014 chromosomes, gonads, hormones, and anatomy \u2014 that usually align but can dissociate.",
+       "weight": 35,
+       "because": [
+        {
+         "text": "These traits come apart in numerous well-documented conditions of sexual development."
+        }
+       ]
+      },
+      {
+       "text": "A robust sex binary describes populations; it does not fix any individual's gender or social role.",
+       "weight": 25
+      }
+     ],
+     "setOpinion": -1
+    },
+    {
+     "personaID": 9,
+     "slot": "informed_defender",
+     "rebuttals": [
+      {
+       "text": "A definition of sex that has to carve out exceptions is not the clean binary it claims to be.",
+       "weight": 50
+      },
+      {
+       "text": "Isogamous species reproduce sexually with no difference in gamete size at all.",
+       "weight": 50
+      }
+     ],
+     "setOpinion": -1
+    }
+   ]
+  }
+ ]
+}
