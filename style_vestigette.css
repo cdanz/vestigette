@@ -6063,6 +6063,87 @@ body.content-page {
 		grid-template-columns: 1fr;
 	}
 }
+/* ── Register page ────────────────────────────────────────────────────────── */
+/* Plain-flow blocks inside the card — undo the .container div row-nowrap flex.
+   The panel is a flex column with align-items:flex-start, so span it explicitly. */
+.container .reg-pledge,
+.container .reg-errors,
+.container .reg-form .field {
+	display: block;
+}
+.reg-pledge,
+.reg-errors,
+.reg-form {
+	box-sizing: border-box;
+	width: 100%;
+}
+.reg-main {
+	max-width: 480px;
+}
+.reg-pledge {
+	background-color: rgba(16, 160, 32, 0.07);
+	border: 1px solid var(--cddbGrey);
+	border-left: 0.35rem solid var(--cddbGreen);
+	border-radius: 0.25rem;
+	font-size: 0.875rem;
+	line-height: 1.5;
+	margin-bottom: 1.25rem;
+	padding: 0.6rem 0.8rem;
+}
+.reg-errors {
+	background-color: rgba(175, 26, 23, 0.08);
+	border: 1px solid var(--cddbRed);
+	border-radius: 0.25rem;
+	font-size: 0.875rem;
+	margin-bottom: 1rem;
+	padding: 0.5rem 0.75rem;
+}
+.reg-errors p {
+	margin: 0.2rem 0;
+}
+.reg-form .field {
+	margin-bottom: 1rem;
+}
+.reg-form label {
+	color: var(--cddbGrey);
+	display: block;
+	font-size: 0.8rem;
+	margin-bottom: 0.3rem;
+}
+.reg-form input[type="text"],
+.reg-form input[type="email"],
+.reg-form input[type="password"] {
+	border: 1px solid var(--cddbGrey);
+	border-radius: 0.25rem;
+	box-sizing: border-box;
+	font-size: 0.95rem;
+	padding: 0.45rem 0.6rem;
+	width: 100%;
+}
+.reg-form input:focus {
+	outline: 2px solid var(--cddbBlue);
+	outline-offset: 1px;
+}
+/* Two-up name fields that stack when the card gets narrow */
+.container .reg-name-row {
+	display: flex;
+	flex-flow: row wrap;
+	gap: 0 0.75rem;
+}
+.reg-name-row .field {
+	flex: 1 1 8rem;
+}
+.reg-form button[type="submit"] {
+	background-color: var(--cddbBlack);
+	border-color: var(--cddbBlack);
+	border-radius: 0.25rem;
+	border-width: 0.15rem;
+	color: var(--cddbWhite);
+	font-size: 0.9rem;
+	height: auto;
+	padding: 0.4rem 1.5rem;
+}
+
 /* Post-login resume pulse — highlights the control the user was reaching for */
 .resume-pulse {
 	animation: resumePulse 1.1s ease-out 3;

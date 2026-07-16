@@ -124,12 +124,18 @@ mysqli_close($db);
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<title>Agitate - Create Account</title>
+	<title>Agitate – Create Account</title>
 	<meta charset="utf-8"/>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 	<link rel="stylesheet" href="style_vestigette.css?v=<?php echo filemtime($_SERVER['DOCUMENT_ROOT'].'/style_vestigette.css'); ?>" />
+	<script src="script_vestigette.js?v=<?php echo filemtime($_SERVER['DOCUMENT_ROOT'].'/script_vestigette.js'); ?>"></script>
+	<script>
+		let arg     = <?php echo intval($_SESSION['currentArg']); ?>,
+		    profile = undefined,
+		    opinion = undefined, because = null, therefore = null, rebuttal = null;
+	</script>
 </head>
-<body>
+<body class="content-page">
 
 <div id="mastHead" class="container">
 	<h1><a href="/?arg=<?php echo $_SESSION['currentArg']; ?>">AGITATE<span class="exclaim">!</span></a></h1>
@@ -142,55 +148,13 @@ mysqli_close($db);
 	<a href="#" class="opennav" onclick="openNav()">&equiv;</a>
 </div>
 
-<style>
-	.reg-form { max-width: 420px; }
-	.reg-form .field { margin-bottom: 1rem; }
-	.reg-form label { display: block; font-size: 0.8rem; margin-bottom: 0.3rem; opacity: 0.75; }
-	.reg-form input[type="text"],
-	.reg-form input[type="email"],
-	.reg-form input[type="password"] {
-		background: transparent;
-		border: 1px solid var(--cddbWhite);
-		border-radius: 3px;
-		box-sizing: border-box;
-		color: inherit;
-		font-size: 0.95rem;
-		padding: 0.45rem 0.6rem;
-		width: 100%;
-	}
-	.reg-form input:focus { outline: 2px solid var(--cddbWhite); outline-offset: 1px; }
-	.reg-name-row { display: flex; gap: 0.75rem; }
-	.reg-name-row .field { flex: 1; }
-	.reg-errors { background: rgba(255,80,80,0.15); border: 1px solid rgba(255,80,80,0.5); border-radius: 3px; font-size: 0.875rem; margin-bottom: 1rem; padding: 0.5rem 0.75rem; }
-	.reg-errors p { margin: 0.2rem 0; }
-	.reg-pledge {
-		border: 1px solid rgba(255,255,255,0.35);
-		border-left: 4px solid var(--cddbGreen);
-		border-radius: 3px;
-		font-size: 0.875rem;
-		line-height: 1.5;
-		margin-bottom: 1.25rem;
-		max-width: 420px;
-		padding: 0.6rem 0.8rem;
-	}
-	.reg-pledge a { text-decoration: underline; }
-	#argument .panel .reg-form button[type="submit"] {
-		border-bottom-left-radius: 0;
-		border-bottom-right-radius: 0;
-		border-top-left-radius: 0;
-		border-top-right-radius: 0;
-		font-size: 0.95rem;
-		font-weight: bold;
-		margin-top: 0.5rem;
-		padding: 0.4rem 1.25rem;
-	}
-</style>
+<main class="about-main reg-main">
 
-<div id="argument" class="accordion container">
-	<h2>Create Your Account</h2>
+<div class="container about-section login-card">
+	<h2><?php echo $inviteRow ? 'Create Your Account' : 'Invitation Needed'; ?></h2>
 	<div class="panel expanded">
 
-		<?php if ($dataPromiseLive): ?>
+		<?php if ($dataPromiseLive && $inviteRow): ?>
 		<div class="reg-pledge">
 			<strong>The Data Promise.</strong> Creating an account binds <em>us</em>, not you:
 			your data is never sold, never advertised against, and never used to train AI.
@@ -250,10 +214,13 @@ mysqli_close($db);
 		</form>
 		<?php else: ?>
 			<p>Please use the invitation link you were sent. If you believe this is an error, contact the person who invited you.</p>
+			<p>Have a code? Enter it on the <a href="/login.php?arg=<?php echo $_SESSION['currentArg']; ?>">login page</a> &mdash; it also explains how to get an invite if you don't have one yet.</p>
 		<?php endif; ?>
 
 	</div>
 </div>
+
+</main>
 
 </body>
 </html>
