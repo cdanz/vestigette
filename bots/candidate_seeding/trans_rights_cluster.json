@@ -1,0 +1,324 @@
+{
+ "cluster": "trans-rights-outcomes",
+ "blocks": [
+  {
+   "targetArgID": 1427,
+   "edgeType": "Rebuttal",
+   "personas": [
+    {
+     "personaID": 15,
+     "slot": "evidence_moderate",
+     "rebuttals": [
+      {
+       "text": "Medical transition for minors should wait for adulthood, given the uncertain evidence.",
+       "weight": 100,
+       "id": "minorsanchor",
+       "because": [
+        {
+         "text": "Puberty blockers and cross-sex hormones for minors rest on a weak long-term evidence base."
+        }
+       ]
+      }
+     ],
+     "setOpinion": -1
+    }
+   ]
+  },
+  {
+   "targetRef": "minorsanchor",
+   "edgeType": "Because",
+   "personas": [
+    {
+     "personaID": 5,
+     "slot": "evangelical_restrictive",
+     "rebuttals": [
+      {
+       "text": "A child cannot meaningfully consent to irreversible changes to their body.",
+       "weight": 100
+      }
+     ],
+     "setOpinion": 1
+    },
+    {
+     "personaID": 21,
+     "slot": "religious_parental",
+     "rebuttals": [
+      {
+       "text": "Detransitioners show the harm of affirming a child's distress too quickly.",
+       "weight": 100
+      }
+     ],
+     "setOpinion": 1
+    }
+   ]
+  },
+  {
+   "targetRef": "minorsanchor",
+   "edgeType": "Rebuttal",
+   "personas": [
+    {
+     "personaID": 2,
+     "slot": "bodily_autonomy",
+     "rebuttals": [
+      {
+       "text": "Puberty blockers are reversible and buy a child time rather than forcing a decision.",
+       "weight": 50
+      },
+      {
+       "argID": 1428,
+       "weight": 50
+      }
+     ],
+     "setOpinion": -1
+    },
+    {
+     "personaID": 9,
+     "slot": "evidence_defender",
+     "rebuttals": [
+      {
+       "text": "Major medical associations endorse gender-affirming care for minors under careful guidelines.",
+       "weight": 55
+      },
+      {
+       "text": "Denying care to trans youth sharply raises their risk of suicide and self-harm.",
+       "weight": 45
+      }
+     ],
+     "setOpinion": -1
+    }
+   ]
+  },
+  {
+   "targetArgID": 2230,
+   "edgeType": "Rebuttal",
+   "personas": [
+    {
+     "personaID": 2,
+     "slot": "bodily_autonomy",
+     "rebuttals": [
+      {
+       "text": "A blanket ban overrides the judgment of the doctors and parents who know the child.",
+       "weight": 100
+      }
+     ],
+     "setOpinion": -1
+    }
+   ]
+  },
+  {
+   "targetArgID": 1425,
+   "edgeType": "Therefore",
+   "personas": [
+    {
+     "personaID": 19,
+     "slot": "civil_liberties",
+     "rebuttals": [
+      {
+       "text": "Legal recognition of a person's gender should follow their gender identity, not their birth sex.",
+       "weight": 100,
+       "id": "legalanchor"
+      }
+     ],
+     "setOpinion": 1
+    }
+   ]
+  },
+  {
+   "targetRef": "legalanchor",
+   "edgeType": "Because",
+   "personas": [
+    {
+     "personaID": 19,
+     "slot": "civil_liberties",
+     "rebuttals": [
+      {
+       "text": "Trans people need identity documents that match who they are to move through daily life safely.",
+       "weight": 50
+      },
+      {
+       "argID": 1425,
+       "weight": 50,
+       "already": true
+      }
+     ]
+    },
+    {
+     "personaID": 4,
+     "slot": "full_advocate",
+     "rebuttals": [
+      {
+       "text": "Denying legal recognition exposes trans people to discrimination and violence.",
+       "weight": 100
+      }
+     ],
+     "setOpinion": 1
+    }
+   ]
+  },
+  {
+   "targetRef": "legalanchor",
+   "edgeType": "Rebuttal",
+   "personas": [
+    {
+     "personaID": 21,
+     "slot": "religious_parental",
+     "rebuttals": [
+      {
+       "text": "The law needs a consistent biological definition of sex to function.",
+       "weight": 100
+      }
+     ],
+     "setOpinion": -1
+    },
+    {
+     "personaID": 15,
+     "slot": "evidence_moderate",
+     "rebuttals": [
+      {
+       "text": "Sex-based protections in law require a sex-based category to be coherent.",
+       "weight": 100
+      }
+     ],
+     "setOpinion": -1
+    },
+    {
+     "personaID": 10,
+     "slot": "populist_restrictive",
+     "rebuttals": [
+      {
+       "text": "People should use the restroom and locker room matching their birth sex.",
+       "weight": 100,
+       "id": "facilities",
+       "because": [
+        {
+         "text": "Self-identification with no safeguards invites abuse of single-sex spaces."
+        }
+       ]
+      }
+     ],
+     "setOpinion": -1
+    }
+   ]
+  },
+  {
+   "targetRef": "facilities",
+   "edgeType": "Rebuttal",
+   "personas": [
+    {
+     "personaID": 4,
+     "slot": "full_advocate",
+     "rebuttals": [
+      {
+       "text": "Trans people using facilities that match their gender harms no one.",
+       "weight": 55
+      },
+      {
+       "text": "Bathroom bans cannot be enforced without policing everyone's body.",
+       "weight": 45
+      }
+     ],
+     "setOpinion": -1
+    }
+   ]
+  },
+  {
+   "targetArgID": 1429,
+   "edgeType": "Therefore",
+   "personas": [
+    {
+     "personaID": 2,
+     "slot": "bodily_autonomy",
+     "rebuttals": [
+      {
+       "text": "Public schools should include LGBTQ+ people and topics in age-appropriate curricula.",
+       "weight": 55,
+       "id": "curricanchor"
+      },
+      {
+       "argID": 1428,
+       "weight": 45,
+       "already": true
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "targetRef": "curricanchor",
+   "edgeType": "Because",
+   "personas": [
+    {
+     "personaID": 17,
+     "slot": "full_advocate",
+     "rebuttals": [
+      {
+       "text": "Inclusive curricula measurably reduce bullying and isolation for LGBTQ+ students.",
+       "weight": 100
+      }
+     ],
+     "setOpinion": 1
+    }
+   ]
+  },
+  {
+   "targetRef": "curricanchor",
+   "edgeType": "Rebuttal",
+   "personas": [
+    {
+     "personaID": 21,
+     "slot": "religious_parental",
+     "rebuttals": [
+      {
+       "text": "Parents, not schools, should decide when their children learn about gender identity.",
+       "weight": 60,
+       "id": "parentalrights",
+       "because": [
+        {
+         "text": "Schools should not help a child socially transition without telling the parents."
+        }
+       ]
+      },
+      {
+       "argID": 2228,
+       "weight": 40
+      }
+     ],
+     "setOpinion": -1
+    },
+    {
+     "personaID": 13,
+     "slot": "religious_restrictive",
+     "rebuttals": [
+      {
+       "text": "Instruction on gender identity does not belong in early-elementary grades.",
+       "weight": 100
+      }
+     ],
+     "setOpinion": -1
+    }
+   ]
+  },
+  {
+   "targetArgID": 797,
+   "edgeType": "Rebuttal",
+   "personas": [
+    {
+     "personaID": 15,
+     "slot": "evidence_moderate",
+     "rebuttals": [
+      {
+       "text": "Fairness in girls' sports is a genuinely hard case, not a settled culture-war talking point.",
+       "weight": 100,
+       "because": [
+        {
+         "text": "Male puberty confers physical advantages that can persist after transition."
+        }
+       ]
+      }
+     ],
+     "setOpinion": -1
+    }
+   ]
+  }
+ ]
+}

@@ -166,6 +166,25 @@ Snapshot query:
    and cross-candidate duplicates. Cross-SIDE dups become one node with two
    phrasings via mergeArguments (e.g., Slotkin's CIA fact 2327/2330).
 
+
+
+## Cluster gotcha: coining an anchor via Therefore/Because (targetRef pattern)
+
+`foldAndReciprocate` on a **Because or Therefore** edge auto-creates the
+reciprocal (Therefore→Because and vice-versa) AND accepts the new node. Two
+consequences when you coin a spine anchor this way and then build sub-blocks
+on it via `targetRef`:
+1. The PARENT is now already a Because/Therefore of your anchor. Any later
+   same-persona sub-block that re-adopts the parent → **duplicate-key crash**
+   (hit 2026-07-15, legal/curric anchors). List the parent as `"already": true`
+   in that sub-block instead — and remember the generator equal-splits Because
+   children, reweighting ALL active ones, so an unlisted auto-reciprocal
+   silently breaks the sum.
+2. The coining persona must hold the right OPINION on the anchor's PARENT
+   (Therefore/Because require accept). Set it explicitly; preflight can't see
+   targetRef blocks. **Prefer coining anchors as Rebuttal edges where
+   semantically valid — Rebuttal has NO reciprocal and needs no parent-accept.**
+
 ## Notes
 
 - Personas always operate under All Users - Public: every script sets
