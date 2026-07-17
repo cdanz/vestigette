@@ -1769,6 +1769,96 @@ body.flesh-out-page .flesh-reciprocate input:focus + .toggle {
 	background-color: var(--cddbBlack);
 	color: var(--cddbWhite);
 }
+/* Find header search button — sits to the right of the "Find" label; its own
+   click region only opens the search overlay and must not toggle the
+   accordion expand/collapse behind it */
+#find > h2 {
+	align-items: center;
+	display: flex;
+	justify-content: space-between;
+	width: 100%;
+}
+.find-search-btn {
+	align-items: center;
+	background-color: transparent;
+	border: none;
+	border-radius: 50%;
+	color: inherit;
+	cursor: pointer;
+	display: flex;
+	flex: 0 0 auto;
+	height: 1.9rem;
+	justify-content: center;
+	padding: 0;
+	width: 1.9rem;
+}
+.find-search-btn:hover {
+	background-color: rgba(255,255,255,0.15);
+}
+/* Search overlay (mirrors the Filter Options overlay) */
+#overlaySearch {
+	background-color: rgba(0,0,0,0.65);
+	height: 100%;
+	left: 0;
+	position: fixed;
+	top: 0;
+	width: 100%;
+	z-index: 2;
+}
+#searchModal.container {
+	background-color: var(--cddbGrey);
+	border: 8px solid var(--cddbGrey);
+	box-sizing: border-box;
+	display: flex;
+	flex-flow: column nowrap;
+	align-items: stretch;
+	justify-content: flex-start;
+	left: 50%;
+	max-height: 80vh;
+	max-width: 500px;
+	overflow: auto;
+	position: absolute;
+	top: 3rem;
+	transform: translateX(-50%);
+	width: 90%;
+	z-index: 3;
+}
+#searchModal > h2 {
+	padding-right: 3rem;
+}
+#searchModal #closeSearch {
+	position: absolute;
+	top: 0.3rem;
+	right: 0.4rem;
+	z-index: 4;
+	width: 1.7rem;
+	height: 1.7rem;
+	padding: 0;
+	border-radius: 50%;
+	border-width: 0.12rem;
+	border-color: var(--cddbWhite);
+	background-color: transparent;
+	color: var(--cddbWhite);
+	font-size: 0.8rem;
+	line-height: 1;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+#searchModal #closeSearch:hover {
+	background-color: var(--cddbWhite);
+	color: var(--cddbBlack);
+}
+#searchModal .panel.expanded {
+	display: flex;
+	flex-flow: column nowrap;
+	align-items: stretch;
+	width: 100%;
+	gap: 0.5rem;
+	padding: 0.25rem 0.5rem 0.75rem;
+	box-sizing: border-box;
+	max-height: none;
+}
 /* Filter Options overlay */
 #overlayFilter {
 	background-color: rgba(0,0,0,0.65);

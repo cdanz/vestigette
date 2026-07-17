@@ -885,7 +885,12 @@ else {
 		</div>
 
 		<div id="find" class="accordion container">
-			<h2>Find</h2>
+			<h2><span>Find</span><button type="button" id="openSearchOverlay" class="find-search-btn" title="Search arguments" aria-label="Search arguments">
+					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+						<circle cx="10" cy="10" r="7" fill="none" stroke="currentColor" stroke-width="2.5"/>
+						<line x1="15.3" y1="15.3" x2="21" y2="21" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+					</svg>
+				</button></h2>
 			<div class="panel" data-container-id="filter">
 				<div class="find">
 					<div class="find-section">
@@ -1190,6 +1195,17 @@ if ((isset($opinion)) && ($opinion > 0)) {
 				<input type="text" class="filter-search" id="affiliationSearch" placeholder="Search Public Groups" autocomplete="off">
 				<ul id="affiliationResults" class="filter-results"></ul>
 			</div>
+		</div>
+	</div>
+</div>
+
+<div id="overlaySearch" class="hidden">
+	<div id="searchModal" class="container">
+		<h2>Search</h2>
+		<button id="closeSearch" class="button">X</button>
+		<div class="panel expanded">
+			<input type="search" class="explore-search-input" id="indexSearchInput" placeholder="Search arguments…" autocomplete="off">
+			<ul class="explore-list" id="indexSearchResults"></ul>
 		</div>
 	</div>
 </div>

@@ -726,6 +726,76 @@ function init() {
 		});
 	})();
 
+	// ── Find header search button + overlay (open / close) ──────────────────
+	(function() {
+		var openBtn = document.getElementById('openSearchOverlay');
+		var overlay = document.getElementById('overlaySearch');
+		var closeBtn = document.getElementById('closeSearch');
+		if (!openBtn || !overlay) return;
+
+		openBtn.addEventListener('click', function(e) {
+			// Only act as a search button — the header's own click area still
+			// handles accordion expand/collapse (and the desktop Find/Filter
+			// toggle), so this click must never bubble up into either.
+			e.preventDefault();
+			e.stopPropagation();
+			overlay.classList.remove('hidden');
+			var input = overlay.querySelector('#indexSearchInput');
+			if (input) setTimeout(function() { input.focus(); }, 100);
+		});
+
+		if (closeBtn) {
+			closeBtn.addEventListener('click', function() {
+				overlay.classList.add('hidden');
+			});
+		}
+
+		overlay.addEventListener('click', function(e) {
+			if (e.target === overlay) overlay.classList.add('hidden');
+		});
+	})();
+
+	// ── Index page site-wide search (AJAX, inside overlay) ──────────────────
+	(function() {
+		var searchInput = document.getElementById('indexSearchInput');
+		var resultsList = document.getElementById('indexSearchResults');
+		if (!searchInput || !resultsList) return;
+
+		var debounceTimer = null;
+
+		searchInput.addEventListener('input', function() {
+			clearTimeout(debounceTimer);
+			var q = searchInput.value.trim();
+			if (q.length < 3) { resultsList.innerHTML = ''; return; }
+			debounceTimer = setTimeout(function() {
+				var fd = new FormData();
+				fd.append('q', q);
+				fd.append('mode', 'explore');
+				fetch('/find_similar.php', { method: 'POST', body: fd })
+					.then(function(r) { return r.json(); })
+					.then(function(matches) {
+						resultsList.innerHTML = '';
+						if (!matches.length) {
+							var li = document.createElement('li');
+							li.className = 'explore-search-empty';
+							li.textContent = 'No matches found.';
+							resultsList.appendChild(li);
+							return;
+						}
+						matches.forEach(function(m) {
+							var li = document.createElement('li');
+							li.className = 'explore-item';
+							var a = document.createElement('a');
+							a.href = '/?arg=' + m.argID;
+							a.textContent = m.phrasing || '(untitled)';
+							li.appendChild(a);
+							resultsList.appendChild(li);
+						});
+					});
+			}, 300);
+		});
+	})();
+
 	// ── Affiliation search (AJAX, inside overlay) ───────────────────────────
 	(function() {
 		var searchInput = document.getElementById('affiliationSearch');
