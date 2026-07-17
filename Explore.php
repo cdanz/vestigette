@@ -122,7 +122,7 @@ $entryPoints = [
     <!-- ── Common Entry Points ─────────────────────────────────────────────── -->
     <div class="accordion container explore-section">
         <h2>Common Entry Points</h2>
-        <div class="panel expanded">
+        <div class="panel">
             <ul class="explore-entry-grid">
             <?php foreach ($entryPoints as $entry): ?>
                 <li><a href="<?php echo $entry[1]; ?>"><?php echo $entry[0]; ?></a></li>
@@ -134,7 +134,7 @@ $entryPoints = [
     <!-- ── Trending ────────────────────────────────────────────────────── -->
         <div class="accordion container explore-section">
             <h2>Trending</h2>
-            <div class="panel expanded">
+            <div class="panel">
                 <?php if (empty($trending)): ?>
                     <p style="color:var(--cddbGrey);font-size:0.9rem;">No recent activity yet.</p>
                 <?php else: ?>
@@ -154,7 +154,7 @@ $entryPoints = [
         <!-- ── Most Contested ──────────────────────────────────────────────── -->
         <div class="accordion container explore-section">
             <h2>Most Contested</h2>
-            <div class="panel expanded">
+            <div class="panel">
                 <?php if (empty($contested)): ?>
                     <p style="color:var(--cddbGrey);font-size:0.9rem;">Not enough votes yet.</p>
                 <?php else: ?>
@@ -179,7 +179,7 @@ $entryPoints = [
     <!-- ── Search ──────────────────────────────────────────────────────────── -->
     <div class="accordion container explore-section">
         <h2>Search</h2>
-        <div class="panel expanded">
+        <div class="panel">
             <input type="search" class="explore-search-input" placeholder="Search arguments…" autocomplete="off" oninput="exploreSearch(this.value)">
             <ul class="explore-list" id="explore-search-results"></ul>
         </div>
@@ -188,7 +188,7 @@ $entryPoints = [
     <!-- ── Jump to Argument ID ─────────────────────────────────────────────── -->
     <div class="accordion container explore-section">
         <h2>Go to Argument</h2>
-        <div class="panel expanded">
+        <div class="panel">
             <form class="explore-jump" method="POST">
                 <input type="text" name="jumpTo" placeholder="Argument ID" inputmode="numeric" pattern="[0-9]*">
                 <button type="submit" name="buttonClicked" value="jumpTo">Go</button>
