@@ -2057,6 +2057,77 @@ h2,
 .edit .wrapper:hover {
 	cursor: pointer;
 }
+
+/* ── New ring weight buttons (index weighting UI) ──────────────────────────
+   A single conic-gradient ring driven by one --pct custom property, with the
+   percentage inside the ring. Charge (add) brightens + glows with hold speed;
+   drain (reduce) greys the ring toward a shared neutral; a ▲/▼ badge is the
+   colorblind-safe direction signal, and the arguments that gain weight during a
+   reduce pulse. Scoped to body.weigh-page so flesh_out / add_more keep the
+   legacy two-arc rendering untouched. */
+body.weigh-page { --drain: #8a9099; --ringTrack: var(--percentage_bg); }
+body.weigh-page #because     { --section: var(--because); }
+body.weigh-page #therefore   { --section: var(--therefore); }
+body.weigh-page #rebuttal    { --section: var(--rebuttal); }
+body.weigh-page #phrasing,
+body.weigh-page #explication { --section: var(--cddbBlack); }
+
+body.weigh-page .wrapper {
+	overflow: visible;
+	transition: box-shadow .12s ease;
+}
+body.weigh-page .wrapper::before {
+	content: "";
+	position: absolute; inset: 0;
+	border-radius: 50%;
+	background: conic-gradient(var(--section, var(--cddbBlack)) calc(var(--pct,0) * 1%), var(--ringTrack) 0);
+	-webkit-mask: radial-gradient(circle at center, transparent 58%, #000 59%);
+	        mask: radial-gradient(circle at center, transparent 58%, #000 59%);
+	transition: background .05s linear, filter .12s ease;
+}
+body.weigh-page .wrapper .val {
+	position: absolute; inset: 0;
+	display: flex; align-items: center; justify-content: center;
+	font-size: 0.72rem; font-weight: 700; line-height: 1;
+	font-variant-numeric: tabular-nums;
+	color: var(--cddbBlack);
+	pointer-events: none;
+}
+body.weigh-page .wrapper .glyph {
+	position: absolute; top: -0.4rem; left: 50%;
+	transform: translateX(-50%) scale(.5);
+	min-width: 1.1rem; height: 1.1rem; padding: 0 0.25rem;
+	display: flex; align-items: center; justify-content: center;
+	border-radius: 0.55rem;
+	font-size: 0.7rem; font-weight: 800; line-height: 1;
+	color: #fff; background: var(--section, var(--cddbBlack));
+	box-shadow: 0 1px 3px rgba(0,0,0,.35);
+	opacity: 0; transition: opacity .1s ease, transform .1s ease;
+	pointer-events: none; z-index: 3;
+}
+/* Charge — the held ring intensifies and glows; glow strength = hold speed */
+body.weigh-page .lineItem.active:not(.reducing) .wrapper::before { filter: saturate(1.3) brightness(1.15); }
+body.weigh-page .lineItem.active:not(.reducing) .wrapper {
+	box-shadow: 0 0 calc(4px + var(--glow,0) * 16px) calc(var(--glow,0) * 2px)
+	            color-mix(in srgb, var(--section) 65%, transparent);
+}
+/* Drain — color bleeds toward the shared neutral */
+body.weigh-page .lineItem.reducing .wrapper::before {
+	background: conic-gradient(color-mix(in srgb, var(--section) 42%, var(--drain)) calc(var(--pct,0) * 1%), var(--ringTrack) 0);
+	filter: saturate(.55);
+}
+body.weigh-page .lineItem.active .wrapper .glyph { opacity: 1; transform: translateX(-50%) scale(1); }
+body.weigh-page .lineItem.reducing .wrapper .glyph { background: var(--drain); }
+/* Beneficiaries of a reduce pulse as weight flows into them */
+@keyframes weigh-recv-pulse {
+	0%,100% { box-shadow: 0 0 0 0 transparent; }
+	50%     { box-shadow: 0 0 12px 1px color-mix(in srgb, var(--section) 55%, transparent); }
+}
+body.weigh-page .lineItem.receiving .wrapper { animation: weigh-recv-pulse .55s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) {
+	body.weigh-page .lineItem.receiving .wrapper { animation: none; }
+}
+
 .pointBtn {
 	/* No GPU layer promotion: translateZ(0)/backface-visibility here created a
 	   separate compositing layer per arc — fine for the few arcs in a modal, but

@@ -282,12 +282,12 @@ function generateTypeLines($type, $typeArray) {
 				$half = "half2";
 			}
 			$pct = strval(number_format($line[1], 1, '_', ''));
-			echo "			<li class=\"lineItem ${half} pct${pct}\" data-arg-id=\"${line[0]}\" data-aggregate-weight=\"" . strval(number_format($line[1], 2, '.', '')) . "\" data-user-weight=\"" . ((isset($line[3])) ? strval(number_format($line[3], 2, '.', '')) : "0.00") . "\">
+			echo "			<li class=\"lineItem ${half} pct${pct}\" data-arg-id=\"${line[0]}\" data-aggregate-weight=\"" . strval(number_format($line[1], 2, '.', '')) . "\" data-user-weight=\"" . ((isset($line[3])) ? strval(number_format($line[3], 2, '.', '')) : "0.00") . "\" style=\"--pct:" . strval(number_format($line[1], 2, '.', '')) . "\">
 				<div class=\"wrapper\"" . ((isset($onClick)) ? $onClick : "") . ">
-					<div class=\"pointBtn arc1\"></div>
-					<div class=\"pointBtn arc2\"></div>
+					<span class=\"glyph\"></span>
+					<span class=\"val\">" . round($line[1]) . "%</span>
 				</div>
-				<p class=\"assocArg\"><span class=\"inLinePct\">" . strval(number_format($line[1], 2, '.', '')) . "% - </span><a href=\"${baseURL}?arg=${line[0]}\">".htmlspecialchars($line[2])."</a></p>
+				<p class=\"assocArg\"><a href=\"${baseURL}?arg=${line[0]}\">".htmlspecialchars($line[2])."</a></p>
 			</li>";
 		}
 		echo "</ul>\n";
@@ -329,12 +329,12 @@ function generatePhrasingLines($alts) {
             $isUserChoice = (isset($userPhrasingID) && ($userPhrasingID == $line[3]));
             $userLabel = $isUserChoice ? " <span style=\"color: var(--cddbGrey);font-size: 0.75rem;\">(your preference)</span>" : "";
 
-            echo "            <li class=\"lineItem ${half} pct${pct}\" data-phrasing-id=\"${line[3]}\" data-aggregate-weight=\"" . strval(number_format($percentage, 2, '.', '')) . "\" data-user-weight=\"" . strval(number_format($userWeight, 2, '.', '')) . "\">
+            echo "            <li class=\"lineItem ${half} pct${pct}\" data-phrasing-id=\"${line[3]}\" data-aggregate-weight=\"" . strval(number_format($percentage, 2, '.', '')) . "\" data-user-weight=\"" . strval(number_format($userWeight, 2, '.', '')) . "\" style=\"--pct:" . strval(number_format($percentage, 2, '.', '')) . "\">
                 <div class=\"wrapper\">
-                    <div class=\"pointBtn arc1\"></div>
-                    <div class=\"pointBtn arc2\"></div>
+                    <span class=\"glyph\"></span>
+                    <span class=\"val\">" . round($percentage) . "%</span>
                 </div>
-                <p class=\"assocArg\"><span class=\"inLinePct\">" . strval(number_format($percentage, 2, '.', '')) . "% - </span>" . htmlspecialchars($line[2]) . $userLabel . "</p>
+                <p class=\"assocArg\">" . htmlspecialchars($line[2]) . $userLabel . "</p>
             </li>";
         }
         echo "</ul>\n";
@@ -358,12 +358,12 @@ function generateLinkLines($links) {
 			$userWeight = 0;
 			$label = ($line[7] !== NULL && $line[7] !== '') ? htmlspecialchars($line[7]) : htmlspecialchars($line[3]);
 
-			echo "			<li class=\"lineItem ${half} pct${pct}\" data-explication-id=\"${line[2]}\" data-aggregate-weight=\"" . strval(number_format($percentage, 2, '.', '')) . "\" data-user-weight=\"" . strval(number_format($userWeight, 2, '.', '')) . "\">
+			echo "			<li class=\"lineItem ${half} pct${pct}\" data-explication-id=\"${line[2]}\" data-aggregate-weight=\"" . strval(number_format($percentage, 2, '.', '')) . "\" data-user-weight=\"" . strval(number_format($userWeight, 2, '.', '')) . "\" style=\"--pct:" . strval(number_format($percentage, 2, '.', '')) . "\">
 				<div class=\"wrapper\">
-					<div class=\"pointBtn arc1\"></div>
-					<div class=\"pointBtn arc2\"></div>
+					<span class=\"glyph\"></span>
+					<span class=\"val\">" . round($percentage) . "%</span>
 				</div>
-				<p class=\"assocArg\"><span class=\"inLinePct\">" . strval(number_format($percentage, 2, '.', '')) . "% - </span><a href=\"${line[3]}\" target=\"_blank\">${label}</a></p>
+				<p class=\"assocArg\"><a href=\"${line[3]}\" target=\"_blank\">${label}</a></p>
 			</li>";
 		}
 		echo "</ul>\n";
@@ -504,7 +504,7 @@ function generateFindLines($results) {
 			}
 		</script>
 	</head>
-	<body<?php if ($demoMode) echo ' class="demo-mode"'; ?>>
+	<body class="weigh-page<?php if ($demoMode) echo ' demo-mode'; ?>">
 
 <?php if ($isAdmin && $adminPickerEnabled && !empty($adminPickerData)): ?>
 <div id="adminPickerBar">

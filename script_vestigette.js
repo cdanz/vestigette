@@ -90,7 +90,7 @@ Return pctX_Y from element's classList.
 */
 function getExistingPct(element) {
 	let pctmatch = element.className.match(pctRE);
-	return pctmatch[0];
+	return pctmatch ? pctmatch[0] : null;
 }
 
 
@@ -180,16 +180,27 @@ function setInlinePct(el, value) {
 /*
 For a given element el, set all of its wrapper children to neutral.
 */
+// Paint one line item from a percentage: fill the ring (--pct + the % inside),
+// and keep the legacy arc classes / inline % updated so non-ring pages still
+// render from the same call.
+function paintLine(el, pct) {
+	el.style.setProperty('--pct', pct.toFixed(2));
+	let val = el.querySelector('.val');
+	if (val) val.textContent = Math.round(pct) + '%';
+	let m = el.className.match(pctRE);
+	if (m) el.classList.remove(m[0]);
+	el.classList.remove('half1', 'half2');
+	el.classList.add(pct <= 50 ? 'half1' : 'half2', getPctClass(pct));
+	let ip = el.querySelector('.inLinePct');
+	if (ip) ip.innerHTML = pct.toFixed(2) + '% - ';
+}
+
 function neutralizeSection(id) {
 	let x = document.querySelectorAll(`#${id} .lineItem`);
 	let i;
 	let limit = x.length;
 	for (i = 0; i < limit; i++) {
-		if (x[i].classList.contains("half2")) {
-			x[i].classList.replace("half2", "half1");
-		}
-		x[i].classList.replace(getExistingPct(x[i]), 'pct0_0');
-		setInlinePct(x[i], 0);
+		paintLine(x[i], 0);
 	}
 	if (id === 'phrasing') {
 		phrasingClickArr.length = 0;
@@ -245,57 +256,97 @@ setInterval):
 Tunables below are expressed in human terms (increments/sec, seconds) so the
 feel can be adjusted without touching the loop.
 */
-const HOLD = {
-	INITIAL_DELAY: 300, // ms the press must be held before auto-repeat starts
-	RATE_MIN: 6,        // increments/sec at the very start of the ramp
-	RATE_MAX: 48,       // increments/sec the ramp accelerates up to (the cap)
-	RAMP_MID: 0.9,      // seconds into the ramp where speed is halfway (S-curve midpoint)
-	RAMP_STEEP: 5       // logistic steepness — higher is a sharper slow→fast transition
+const JOY = {
+	INITIAL_DELAY: 250, // ms held before the ramp engages (tap vs hold)
+	DOWN_FLIP: 40,      // px of downward pull to flip into reduce (strong up bias)
+	DOWN_RELEASE: 20,   // px back up to return to add (< DOWN_FLIP → hysteresis)
+	UP_RANGE: 120,      // px of upward pull for full add speed
+	DOWN_RANGE: 120,    // px of downward pull (past the flip) for full reduce speed
+	RATE_MIN: 6,        // increments/sec at the gentle end
+	RATE_MAX: 48,       // increments/sec cap
+	FLOOR: 0.12         // fraction of range you still get holding at the start point
 };
-let holdDelayTimer = null; // setTimeout handle for the tap-vs-hold threshold
-let holdRAF        = null; // requestAnimationFrame handle for the ramp loop
-let holdActive     = false;
+let joy = null; // active hold context, or null
 
-// Instantaneous auto-repeat speed (increments/sec) at tSec into the ramp.
-function holdRate(tSec) {
-	let L = 1 / (1 + Math.exp(-HOLD.RAMP_STEEP * (tSec - HOLD.RAMP_MID)));
-	return HOLD.RATE_MIN + (HOLD.RATE_MAX - HOLD.RATE_MIN) * L;
+function joyClamp(v, lo, hi) { return v < lo ? lo : v > hi ? hi : v; }
+// Instantaneous speed (increments/sec) from joystick position + time-in-direction.
+function joyRate(dir, dyUp, tInDir) {
+	let pos = dir > 0
+		? joyClamp(dyUp / JOY.UP_RANGE, 0, 1)
+		: joyClamp((-dyUp - JOY.DOWN_FLIP) / JOY.DOWN_RANGE, 0, 1);
+	let L = 1 / (1 + Math.exp(-5 * (tInDir - 0.6)));
+	let throttle = joyClamp((JOY.FLOOR + (1 - JOY.FLOOR) * pos) * (0.35 + 0.65 * L), 0, 1);
+	return JOY.RATE_MIN + (JOY.RATE_MAX - JOY.RATE_MIN) * throttle;
 }
+function joyBuzz() { if (navigator.vibrate) { try { navigator.vibrate(20); } catch (e) {} } }
 
-// Begin a hold on `action` (a zero-arg increment closure). Safe to call again;
-// it cancels any prior hold first. The first increment is the caller's job, so
-// a quick tap that releases before INITIAL_DELAY yields exactly one increment.
-function startHold(action) {
+// Begin a hold. cfg: { ring, line, originY, up, down, canReduce, receiving }.
+// The caller fires the first `up()` itself, so a quick tap yields one increment.
+function startHold(cfg) {
 	stopHold();
-	holdActive = true;
-	holdDelayTimer = setTimeout(function() {
-		let rampStart = performance.now();
-		let last = rampStart;
-		let acc  = 0; // accumulated fractional increments not yet applied
-		function frame(now) {
-			if (!holdActive) return;
-			let dt = (now - last) / 1000;
-			last = now;
-			acc += holdRate((now - rampStart) / 1000) * dt;
-			while (acc >= 1) { action(); acc -= 1; }
-			holdRAF = requestAnimationFrame(frame);
-		}
-		holdRAF = requestAnimationFrame(frame);
-	}, HOLD.INITIAL_DELAY);
+	joy = { cfg: cfg, dir: 1, acc: 0, originY: cfg.originY, curY: cfg.originY,
+	        dirStart: 0, last: 0, delayTimer: null, raf: null };
+	cfg.line.classList.add('active');
+	cfg.ring.style.setProperty('--glow', '0');
+	let g0 = cfg.ring.querySelector('.glyph'); if (g0) g0.textContent = '▲';
+	joy.delayTimer = setTimeout(function() {
+		joy.dirStart = performance.now();
+		joy.last = performance.now();
+		joy.raf = requestAnimationFrame(joyLoop);
+	}, JOY.INITIAL_DELAY);
 }
-
+function joyLoop(now) {
+	if (!joy) return;
+	let cfg = joy.cfg;
+	let dt = (now - joy.last) / 1000; joy.last = now;
+	let dyUp = joy.originY - joy.curY; // + = pulled up
+	if (cfg.canReduce && cfg.canReduce()) {
+		if (joy.dir > 0 && dyUp <= -JOY.DOWN_FLIP) { joy.dir = -1; joy.dirStart = now; joy.acc = 0; joyBuzz(); }
+		else if (joy.dir < 0 && dyUp >= -JOY.DOWN_RELEASE) { joy.dir = 1; joy.dirStart = now; joy.acc = 0; joyBuzz(); }
+	} else if (joy.dir < 0) {
+		joy.dir = 1; joy.dirStart = now; joy.acc = 0; // nothing left to reduce → back to add
+	}
+	let r = joyRate(joy.dir, dyUp, (now - joy.dirStart) / 1000);
+	joy.acc += r * dt;
+	while (joy.acc >= 1) { (joy.dir > 0 ? cfg.up : cfg.down)(); joy.acc -= 1; }
+	let down = joy.dir < 0;
+	cfg.line.classList.toggle('reducing', down);
+	cfg.ring.style.setProperty('--glow', down ? '0' : joyClamp(r / JOY.RATE_MAX, 0, 1).toFixed(3));
+	let g = cfg.ring.querySelector('.glyph'); if (g) g.textContent = down ? '▼' : '▲';
+	if (cfg.receiving) cfg.receiving(down);
+	joy.raf = requestAnimationFrame(joyLoop);
+}
 function stopHold() {
-	holdActive = false;
-	if (holdDelayTimer) { clearTimeout(holdDelayTimer); holdDelayTimer = null; }
-	if (holdRAF) { cancelAnimationFrame(holdRAF); holdRAF = null; }
+	if (!joy) return;
+	if (joy.delayTimer) clearTimeout(joy.delayTimer);
+	if (joy.raf) cancelAnimationFrame(joy.raf);
+	joy.cfg.line.classList.remove('active', 'reducing');
+	joy.cfg.ring.style.removeProperty('--glow');
+	if (joy.cfg.receiving) joy.cfg.receiving(false);
+	joy = null;
 }
 
-// Any pointer release / cancel anywhere ends the active hold.
-['pointerup', 'pointercancel'].forEach(function(ev) {
-	document.addEventListener(ev, stopHold);
-});
-// Guard against a hold surviving a tab switch or window blur mid-press.
+// Track the finger anywhere (pointer capture keeps events flowing), suppress
+// native scroll for the whole hold, and end on release/cancel/blur.
+document.addEventListener('pointermove', function(e) { if (joy && e.isPrimary) joy.curY = e.clientY; });
+document.addEventListener('touchmove', function(e) { if (joy) e.preventDefault(); }, { passive: false });
+['pointerup', 'pointercancel'].forEach(function(ev) { document.addEventListener(ev, stopHold); });
 window.addEventListener('blur', stopHold);
+
+// Beneficiaries of a reduce = the OTHER items in this section that carry weight.
+function countOthersWeighted(clickArr, id) {
+	let n = 0;
+	for (let j = 0; j < clickArr.length; j++) if (clickArr[j][0] != id && clickArr[j][1] > 0) n++;
+	return n;
+}
+function setReceivingList(containerId, dataAttr, activeId, clickArr, on) {
+	document.querySelectorAll('#' + containerId + ' .lineItem').forEach(function(el) {
+		let elId = el.dataset[dataAttr];
+		let weighted = false;
+		for (let j = 0; j < clickArr.length; j++) if (clickArr[j][0] == elId && clickArr[j][1] > 0) { weighted = true; break; }
+		el.classList.toggle('receiving', on && elId != activeId && weighted);
+	});
+}
 
 
 /*
@@ -322,79 +373,84 @@ function init() {
 		// hold: the press fires one increment immediately, then holding ramps up
 		// additional increments via startHold(). Using pointer events unifies
 		// mouse and touch and avoids the trailing synthetic-click double-count.
-		containers[i].addEventListener("pointerdown", function(evt) {
-			if (!evt.isPrimary) return;                                  // ignore secondary touches
-			if (evt.pointerType === 'mouse' && evt.button !== 0) return; // primary button only
-			if (DEBUG) console.log(`pointerdown: ${evt.target.nodeName} with classes ${evt.target.className} (via ${evt.currentTarget.nodeName}, ${evt.currentTarget.className})`);
-			let type = this.dataset.containerId;
-			if (type == undefined) return;
-			if (!evt.target.classList.contains('pointBtn')) return;
-			if (!inCircle(evt, evt.target)) return;
+			containers[i].addEventListener("pointerdown", function(evt) {
+				if (!evt.isPrimary) return;                                  // ignore secondary touches
+				if (evt.pointerType === 'mouse' && evt.button !== 0) return; // primary button only
+				let type = this.dataset.containerId;
+				if (type == undefined) return;
+				let ring = evt.target.closest('.wrapper');   // the ring is the whole hit target
+				if (!ring) return;
+				let line = ring.closest('.lineItem');
+				if (!line) return;
 
-			let action = null;
+				let up = null, down = null, canReduce = null, receiving = null;
 
-			if (type === 'phrasing') {
-				if (DEBUG) console.log(`in circle phrasing ${evt.target.parentNode.parentNode.dataset.phrasingId}`);
-				if (sectionState.phrasing.mode === 'idle') {
-					sectionState.phrasing.mode = 'editing';
-					document.getElementById('phrasing').classList.add('edit');
-					let endorseEl = document.querySelector('#phrasing .endorse');
-					let resetEl   = document.querySelector('#phrasing .reset');
-					if (endorseEl) endorseEl.classList.remove('hidden');
-					if (resetEl)   resetEl.classList.remove('hidden');
-					neutralizeSection('phrasing');
+				if (type === 'phrasing') {
+					if (sectionState.phrasing.mode === 'idle') {
+						sectionState.phrasing.mode = 'editing';
+						document.getElementById('phrasing').classList.add('edit');
+						let endorseEl = document.querySelector('#phrasing .endorse');
+						let resetEl   = document.querySelector('#phrasing .reset');
+						if (endorseEl) endorseEl.classList.remove('hidden');
+						if (resetEl)   resetEl.classList.remove('hidden');
+						neutralizeSection('phrasing');
+					}
+					let pid = line.dataset.phrasingId;
+					up = function() { bumpPhrasing(pid); };
+					down = function() { reducePhrasingOthers(pid); };
+					canReduce = function() { return countOthersWeighted(phrasingClickArr, pid) > 0; };
+					receiving = function(on) { setReceivingList('phrasing', 'phrasingId', pid, phrasingClickArr, on); };
+				} else if (type === 'explication') {
+					if (sectionState.explication.mode === 'idle') {
+						sectionState.explication.mode = 'editing';
+						document.getElementById('explication').classList.add('edit');
+						let endorseEl = document.querySelector('#explication .endorse');
+						let resetEl   = document.querySelector('#explication .reset');
+						if (endorseEl) endorseEl.classList.remove('hidden');
+						if (resetEl)   resetEl.classList.remove('hidden');
+						neutralizeSection('explication');
+					}
+					let eid = line.dataset.explicationId;
+					up = function() { bumpExplication(eid); };
+					down = function() { reduceExplicationOthers(eid); };
+					canReduce = function() { return countOthersWeighted(explicClickArr, eid) > 0; };
+					receiving = function(on) { setReceivingList('explication', 'explicationId', eid, explicClickArr, on); };
+				} else {
+					// because/therefore/rebuttal — require an unlocked section
+					let lockIcon = document.querySelector(`#${type} .section-lock`);
+					if (!lockIcon || !lockIcon.classList.contains('unlocked')) return;
+					let state = sectionState[type];
+					if (!state) return;
+					if (state.mode === 'idle') {
+						// First press in this section — enter edit mode
+						state.mode = 'editing';
+						document.getElementById(type).classList.add('edit');
+						let endorseEl = document.querySelector(`#${type} .endorse`);
+						let resetEl   = document.querySelector(`#${type} .reset`);
+						let myWtsEl   = document.querySelector(`#${type} .myWeights`);
+						if (endorseEl) endorseEl.classList.remove('hidden');
+						if (resetEl)   resetEl.classList.remove('hidden');
+						if (myWtsEl)   myWtsEl.classList.remove('hidden');
+						neutralizeSection(type);
+					}
+					let aid = line.dataset.argId;
+					up = function() { bump(type, aid); };
+					down = function() { reduceOthers(type, aid); };
+					canReduce = function() { return countOthersWeighted(state.clickArr, aid) > 0; };
+					receiving = function(on) { setReceivingList(type, 'argId', aid, state.clickArr, on); };
 				}
-				let pid = evt.target.parentNode.parentNode.dataset.phrasingId;
-				action = function() { bumpPhrasing(pid); };
-			} else if (type === 'explication') {
-				if (DEBUG) console.log(`in circle explication ${evt.target.parentNode.parentNode.dataset.explicationId}`);
-				if (sectionState.explication.mode === 'idle') {
-					sectionState.explication.mode = 'editing';
-					document.getElementById('explication').classList.add('edit');
-					let endorseEl = document.querySelector('#explication .endorse');
-					let resetEl   = document.querySelector('#explication .reset');
-					if (endorseEl) endorseEl.classList.remove('hidden');
-					if (resetEl)   resetEl.classList.remove('hidden');
-					neutralizeSection('explication');
-				}
-				let eid = evt.target.parentNode.parentNode.dataset.explicationId;
-				action = function() { bumpExplication(eid); };
-			} else {
-				// For because/therefore/rebuttal: check if section is unlocked
-				let lockIcon = document.querySelector(`#${type} .section-lock`);
-				if (!lockIcon || !lockIcon.classList.contains('unlocked')) return;
 
-				let state = sectionState[type];
-				if (state.mode === 'idle') {
-					// First press in this section — enter edit mode
-					state.mode = 'editing';
-					document.getElementById(type).classList.add('edit');
-					// Reveal endorse, reset, and myWeights buttons
-					let endorseEl = document.querySelector(`#${type} .endorse`);
-					let resetEl   = document.querySelector(`#${type} .reset`);
-					let myWtsEl   = document.querySelector(`#${type} .myWeights`);
-					if (endorseEl) endorseEl.classList.remove('hidden');
-					if (resetEl)   resetEl.classList.remove('hidden');
-					if (myWtsEl)   myWtsEl.classList.remove('hidden');
-					// Reset all circle weights to zero (fresh start from scratch)
-					neutralizeSection(type);
-				}
-				if (DEBUG) console.log(`in circle ${evt.target.parentNode.nextElementSibling.children[0].innerHTML}`);
-				let aid = evt.target.parentNode.parentNode.dataset.argId;
-				action = function() { bump(type, aid); };
-			}
+				if (!up) return;
 
-			if (!action) return;
+				// Own the whole hold: block selection/scroll and capture the pointer
+				// so finger drift up/down drives the joystick instead of scrolling.
+				evt.preventDefault();
+				try { ring.setPointerCapture(evt.pointerId); } catch (e) {}
 
-			// Keep the whole hold on this button: block text selection and (on
-			// touch) scroll, and capture the pointer so a little finger drift
-			// doesn't drop the stream. Release/cancel ends it via stopHold().
-			evt.preventDefault();
-			try { evt.target.setPointerCapture(evt.pointerId); } catch (e) {}
-
-			action();          // the press counts as one increment (tap = 1)
-			startHold(action); // holding past the threshold ramps up more
-		});
+				up(); // the press counts as one add (tap = +1)
+				startHold({ ring: ring, line: line, originY: evt.clientY,
+				            up: up, down: down, canReduce: canReduce, receiving: receiving });
+			});
 	}
 	// reset button — neutralize circles and clear click state
 	let resets = document.querySelectorAll(".reset");
@@ -992,13 +1048,7 @@ function loadUserWeights(id) {
 		let weight = parseFloat(args[i].dataset.userWeight);
 		if (DEBUG) console.log(`loadUserWeights: item ${i} weight=${weight}`);
 		if (weight > 0) {
-			let pct = getExistingPct(args[i]);
-			let newpct = getPctClass(weight);
-			if (DEBUG) console.log(`loadUserWeights: applying ${newpct}`);
-			args[i].classList.remove("half1", "half2", pct);
-			args[i].classList.add(weight <= 50 ? "half1" : "half2");
-			args[i].classList.add(newpct);
-			setInlinePct(args[i], weight);
+			paintLine(args[i], weight);
 		}
 	}
 
@@ -1074,75 +1124,70 @@ Uses per-section sectionState to prevent cross-section contamination.
 function bump(type, argID) {
 	let state = sectionState[type];
 	if (!state) return;
-
 	state.totalClicks++;
 	let ndx = state.clickArr.findIndex((tuple) => tuple[0] == argID);
-	if (ndx >= 0) {
-		state.clickArr[ndx][1] += 1;
-	} else {
-		state.clickArr.push([argID, 1]);
-	}
+	if (ndx >= 0) state.clickArr[ndx][1] += 1;
+	else state.clickArr.push([argID, 1]);
+	renderSection(type);
+}
 
-	let args = document.querySelectorAll(`#${type} .lineItem`);
-	let limit = args.length;
-	for (let i = 0; i < limit; i++) {
+// Reduce = raise every OTHER weighted argument, so the held one's share falls
+// while its own click count stays put. A no-op if nothing else carries weight.
+function reduceOthers(type, argID) {
+	let state = sectionState[type];
+	if (!state) return;
+	let raised = false;
+	for (let j = 0; j < state.clickArr.length; j++) {
+		if (state.clickArr[j][0] != argID && state.clickArr[j][1] > 0) {
+			state.clickArr[j][1] += 1;
+			state.totalClicks++;
+			raised = true;
+		}
+	}
+	if (raised) renderSection(type);
+}
+
+function renderSection(type) {
+	let state = sectionState[type];
+	if (!state) return;
+	document.querySelectorAll(`#${type} .lineItem`).forEach(function(el) {
 		let value = 0;
 		for (let j = 0; j < state.clickArr.length; j++) {
-			if (state.clickArr[j][0] == args[i].dataset.argId) {
-				value = state.clickArr[j][1];
-				break;
-			}
+			if (state.clickArr[j][0] == el.dataset.argId) { value = state.clickArr[j][1]; break; }
 		}
-		if (value > 0) {
-			let rate = (value / state.totalClicks) * 100;
-			let pct = getExistingPct(args[i]);
-			let newpct = getPctClass(rate);
-			args[i].classList.remove("half1", "half2", pct);
-			args[i].classList.add(rate <= 50 ? "half1" : "half2");
-			if (DEBUG) console.log(`bump: adding ${newpct}...`);
-			args[i].classList.add(newpct);
-			setInlinePct(args[i], rate);
-		}
-	}
-	if (DEBUG) console.log(`bump: sectionState[${type}].clickArr`, state.clickArr);
+		paintLine(el, state.totalClicks > 0 ? (value / state.totalClicks) * 100 : 0);
+	});
 	updateWeighInValue(type);
 }
 
 function bumpPhrasing(phrasingID) {
 	phrasingTotalClicks++;
 	let ndx = phrasingClickArr.findIndex((tuple) => tuple[0] == phrasingID);
-	if (ndx >= 0) {
-		phrasingClickArr[ndx][1] += 1;
-	} else {
-		phrasingClickArr.push([phrasingID, 1]);
-	}
+	if (ndx >= 0) phrasingClickArr[ndx][1] += 1;
+	else phrasingClickArr.push([phrasingID, 1]);
+	renderPhrasing();
+}
 
-	let args = document.querySelectorAll('#phrasing .lineItem');
-	let limit = args.length;
-	for (let i = 0; i < limit; i++) {
+function reducePhrasingOthers(phrasingID) {
+	let raised = false;
+	for (let j = 0; j < phrasingClickArr.length; j++) {
+		if (phrasingClickArr[j][0] != phrasingID && phrasingClickArr[j][1] > 0) {
+			phrasingClickArr[j][1] += 1;
+			phrasingTotalClicks++;
+			raised = true;
+		}
+	}
+	if (raised) renderPhrasing();
+}
+
+function renderPhrasing() {
+	document.querySelectorAll('#phrasing .lineItem').forEach(function(el) {
 		let value = 0;
 		for (let j = 0; j < phrasingClickArr.length; j++) {
-			if (phrasingClickArr[j][0] == args[i].dataset.phrasingId) {
-				value = phrasingClickArr[j][1];
-				break;
-			}
+			if (phrasingClickArr[j][0] == el.dataset.phrasingId) { value = phrasingClickArr[j][1]; break; }
 		}
-		if (value > 0) {
-			let rate = (value / phrasingTotalClicks) * 100;
-			let pct = getExistingPct(args[i]);
-			let newpct = getPctClass(rate);
-			args[i].classList.remove("half1", "half2", pct);
-			if (rate <= 50) {
-				args[i].classList.add("half1");
-			} else {
-				args[i].classList.add("half2");
-			}
-			if (DEBUG) console.log(`bumpPhrasing: adding ${newpct}...`);
-			args[i].classList.add(newpct);
-			setInlinePct(args[i], rate);
-		}
-	}
-	console.log(phrasingClickArr);
+		paintLine(el, phrasingTotalClicks > 0 ? (value / phrasingTotalClicks) * 100 : 0);
+	});
 	updatePhrasingWeighInValue();
 }
 
@@ -1158,38 +1203,31 @@ function updatePhrasingWeighInValue() {
 function bumpExplication(explicationID) {
 	explicTotalClicks++;
 	let ndx = explicClickArr.findIndex((tuple) => tuple[0] == explicationID);
-	if (ndx >= 0) {
-		explicClickArr[ndx][1] += 1;
-	} else {
-		explicClickArr.push([explicationID, 1]);
-	}
+	if (ndx >= 0) explicClickArr[ndx][1] += 1;
+	else explicClickArr.push([explicationID, 1]);
+	renderExplication();
+}
 
-	let args = document.querySelectorAll('#explication .lineItem');
-	let limit = args.length;
-	for (let i = 0; i < limit; i++) {
+function reduceExplicationOthers(explicationID) {
+	let raised = false;
+	for (let j = 0; j < explicClickArr.length; j++) {
+		if (explicClickArr[j][0] != explicationID && explicClickArr[j][1] > 0) {
+			explicClickArr[j][1] += 1;
+			explicTotalClicks++;
+			raised = true;
+		}
+	}
+	if (raised) renderExplication();
+}
+
+function renderExplication() {
+	document.querySelectorAll('#explication .lineItem').forEach(function(el) {
 		let value = 0;
 		for (let j = 0; j < explicClickArr.length; j++) {
-			if (explicClickArr[j][0] == args[i].dataset.explicationId) {
-				value = explicClickArr[j][1];
-				break;
-			}
+			if (explicClickArr[j][0] == el.dataset.explicationId) { value = explicClickArr[j][1]; break; }
 		}
-		if (value > 0) {
-			let rate = (value / explicTotalClicks) * 100;
-			let pct = getExistingPct(args[i]);
-			let newpct = getPctClass(rate);
-			args[i].classList.remove("half1", "half2", pct);
-			if (rate <= 50) {
-				args[i].classList.add("half1");
-			} else {
-				args[i].classList.add("half2");
-			}
-			if (DEBUG) console.log(`bumpExplication: adding ${newpct}...`);
-			args[i].classList.add(newpct);
-			setInlinePct(args[i], rate);
-		}
-	}
-	console.log(explicClickArr);
+		paintLine(el, explicTotalClicks > 0 ? (value / explicTotalClicks) * 100 : 0);
+	});
 	updateExplicationWeighInValue();
 }
 
