@@ -226,6 +226,79 @@ function updateWeighInValue(type) {
 
 
 /*
+─── Press-and-hold acceleration for weight circles ──────────────────────────
+A tap increments once (the caller fires the first increment itself). If the
+press is held past a short threshold, auto-repeat begins and accelerates along
+a logistic (S-curve): the count climbs gently at first — slow enough to stay
+predictable and let a user stop on a target number — then ramps up to a fast
+cap so pushing one argument to a high share (e.g. 99%) takes a couple of
+seconds of holding instead of a hundred taps.
+
+Why a logistic ramp driven by requestAnimationFrame (not a shrinking
+setInterval):
+  • A time-integrated rAF loop accumulates fractional increments per frame, so
+    the *speed* is smooth and frame-rate independent — no visible stepping as
+    the interval would shorten.
+  • The S-curve mirrors the accepted feel of OS key-repeat and stepper
+    controls: a deliberate initial delay (tap vs. hold), an easy-to-arrest slow
+    zone, a quick acceleration through the middle, and a useful terminal speed.
+Tunables below are expressed in human terms (increments/sec, seconds) so the
+feel can be adjusted without touching the loop.
+*/
+const HOLD = {
+	INITIAL_DELAY: 300, // ms the press must be held before auto-repeat starts
+	RATE_MIN: 6,        // increments/sec at the very start of the ramp
+	RATE_MAX: 48,       // increments/sec the ramp accelerates up to (the cap)
+	RAMP_MID: 0.9,      // seconds into the ramp where speed is halfway (S-curve midpoint)
+	RAMP_STEEP: 5       // logistic steepness — higher is a sharper slow→fast transition
+};
+let holdDelayTimer = null; // setTimeout handle for the tap-vs-hold threshold
+let holdRAF        = null; // requestAnimationFrame handle for the ramp loop
+let holdActive     = false;
+
+// Instantaneous auto-repeat speed (increments/sec) at tSec into the ramp.
+function holdRate(tSec) {
+	let L = 1 / (1 + Math.exp(-HOLD.RAMP_STEEP * (tSec - HOLD.RAMP_MID)));
+	return HOLD.RATE_MIN + (HOLD.RATE_MAX - HOLD.RATE_MIN) * L;
+}
+
+// Begin a hold on `action` (a zero-arg increment closure). Safe to call again;
+// it cancels any prior hold first. The first increment is the caller's job, so
+// a quick tap that releases before INITIAL_DELAY yields exactly one increment.
+function startHold(action) {
+	stopHold();
+	holdActive = true;
+	holdDelayTimer = setTimeout(function() {
+		let rampStart = performance.now();
+		let last = rampStart;
+		let acc  = 0; // accumulated fractional increments not yet applied
+		function frame(now) {
+			if (!holdActive) return;
+			let dt = (now - last) / 1000;
+			last = now;
+			acc += holdRate((now - rampStart) / 1000) * dt;
+			while (acc >= 1) { action(); acc -= 1; }
+			holdRAF = requestAnimationFrame(frame);
+		}
+		holdRAF = requestAnimationFrame(frame);
+	}, HOLD.INITIAL_DELAY);
+}
+
+function stopHold() {
+	holdActive = false;
+	if (holdDelayTimer) { clearTimeout(holdDelayTimer); holdDelayTimer = null; }
+	if (holdRAF) { cancelAnimationFrame(holdRAF); holdRAF = null; }
+}
+
+// Any pointer release / cancel anywhere ends the active hold.
+['pointerup', 'pointercancel'].forEach(function(ev) {
+	document.addEventListener(ev, stopHold);
+});
+// Guard against a hold surviving a tab switch or window blur mid-press.
+window.addEventListener('blur', stopHold);
+
+
+/*
 Set up accordion and assign click handlers.
 */
 function init() {
@@ -245,12 +318,20 @@ function init() {
 	let containers = document.querySelectorAll(".container .panel");
 	limit = containers.length;
 	for (i = 0; i < limit; i++) {
-		containers[i].addEventListener("click", function(evt) {
-			if (DEBUG) console.log(`click: ${evt.target.nodeName} with classes ${evt.target.className} (via ${evt.currentTarget.nodeName}, ${evt.currentTarget.className})`);
+		// pointerdown (not click) so we can distinguish a tap from a press-and-
+		// hold: the press fires one increment immediately, then holding ramps up
+		// additional increments via startHold(). Using pointer events unifies
+		// mouse and touch and avoids the trailing synthetic-click double-count.
+		containers[i].addEventListener("pointerdown", function(evt) {
+			if (!evt.isPrimary) return;                                  // ignore secondary touches
+			if (evt.pointerType === 'mouse' && evt.button !== 0) return; // primary button only
+			if (DEBUG) console.log(`pointerdown: ${evt.target.nodeName} with classes ${evt.target.className} (via ${evt.currentTarget.nodeName}, ${evt.currentTarget.className})`);
 			let type = this.dataset.containerId;
 			if (type == undefined) return;
 			if (!evt.target.classList.contains('pointBtn')) return;
 			if (!inCircle(evt, evt.target)) return;
+
+			let action = null;
 
 			if (type === 'phrasing') {
 				if (DEBUG) console.log(`in circle phrasing ${evt.target.parentNode.parentNode.dataset.phrasingId}`);
@@ -263,10 +344,9 @@ function init() {
 					if (resetEl)   resetEl.classList.remove('hidden');
 					neutralizeSection('phrasing');
 				}
-				bumpPhrasing(evt.target.parentNode.parentNode.dataset.phrasingId);
-				return;
-			}
-			if (type === 'explication') {
+				let pid = evt.target.parentNode.parentNode.dataset.phrasingId;
+				action = function() { bumpPhrasing(pid); };
+			} else if (type === 'explication') {
 				if (DEBUG) console.log(`in circle explication ${evt.target.parentNode.parentNode.dataset.explicationId}`);
 				if (sectionState.explication.mode === 'idle') {
 					sectionState.explication.mode = 'editing';
@@ -277,32 +357,43 @@ function init() {
 					if (resetEl)   resetEl.classList.remove('hidden');
 					neutralizeSection('explication');
 				}
-				bumpExplication(evt.target.parentNode.parentNode.dataset.explicationId);
-				return;
+				let eid = evt.target.parentNode.parentNode.dataset.explicationId;
+				action = function() { bumpExplication(eid); };
+			} else {
+				// For because/therefore/rebuttal: check if section is unlocked
+				let lockIcon = document.querySelector(`#${type} .section-lock`);
+				if (!lockIcon || !lockIcon.classList.contains('unlocked')) return;
+
+				let state = sectionState[type];
+				if (state.mode === 'idle') {
+					// First press in this section — enter edit mode
+					state.mode = 'editing';
+					document.getElementById(type).classList.add('edit');
+					// Reveal endorse, reset, and myWeights buttons
+					let endorseEl = document.querySelector(`#${type} .endorse`);
+					let resetEl   = document.querySelector(`#${type} .reset`);
+					let myWtsEl   = document.querySelector(`#${type} .myWeights`);
+					if (endorseEl) endorseEl.classList.remove('hidden');
+					if (resetEl)   resetEl.classList.remove('hidden');
+					if (myWtsEl)   myWtsEl.classList.remove('hidden');
+					// Reset all circle weights to zero (fresh start from scratch)
+					neutralizeSection(type);
+				}
+				if (DEBUG) console.log(`in circle ${evt.target.parentNode.nextElementSibling.children[0].innerHTML}`);
+				let aid = evt.target.parentNode.parentNode.dataset.argId;
+				action = function() { bump(type, aid); };
 			}
 
-			// For because/therefore/rebuttal: check if section is unlocked
-			let lockIcon = document.querySelector(`#${type} .section-lock`);
-			if (!lockIcon || !lockIcon.classList.contains('unlocked')) return;
+			if (!action) return;
 
-			let state = sectionState[type];
-			if (state.mode === 'idle') {
-				// First click in this section — enter edit mode
-				state.mode = 'editing';
-				document.getElementById(type).classList.add('edit');
-				// Reveal endorse, reset, and myWeights buttons
-				let endorseEl = document.querySelector(`#${type} .endorse`);
-				let resetEl   = document.querySelector(`#${type} .reset`);
-				let myWtsEl   = document.querySelector(`#${type} .myWeights`);
-				if (endorseEl) endorseEl.classList.remove('hidden');
-				if (resetEl)   resetEl.classList.remove('hidden');
-				if (myWtsEl)   myWtsEl.classList.remove('hidden');
-				// Reset all circle weights to zero (fresh start from scratch)
-				neutralizeSection(type);
-			}
+			// Keep the whole hold on this button: block text selection and (on
+			// touch) scroll, and capture the pointer so a little finger drift
+			// doesn't drop the stream. Release/cancel ends it via stopHold().
+			evt.preventDefault();
+			try { evt.target.setPointerCapture(evt.pointerId); } catch (e) {}
 
-			if (DEBUG) console.log(`in circle ${evt.target.parentNode.nextElementSibling.children[0].innerHTML}`);
-			bump(type, evt.target.parentNode.parentNode.dataset.argId);
+			action();          // the press counts as one increment (tap = 1)
+			startHold(action); // holding past the threshold ramps up more
 		});
 	}
 	// reset button — neutralize circles and clear click state
