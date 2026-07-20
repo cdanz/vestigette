@@ -24,12 +24,198 @@ if (!$_SESSION['isAdmin']) {
 	exit;
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// User removal ("excommunication")
+//
+// Deleting a user must never destroy content other people are relying on. So:
+//   • Purely personal participation (opinions, endorsements, flags, the various
+//     *_ENDORSE and SCOPE_* rows, memberships, login tokens, admin settings,
+//     invites they generated) is hard-deleted.
+//   • Arguments they authored are KEPT if any other user has engaged with them
+//     (opinion, endorsement, an alternate phrasing, explication, phrase-endorse,
+//     or flag); only truly untouched arguments are hard-deleted.
+//   • Phrasings they coined that sit on a surviving argument are KEPT — this is
+//     the case where they wrote the live phrasing and later acceptors never
+//     supplied an alternative; the words must not vanish.
+// Kept content is reassigned to a reserved, login-impossible "[deleted user]"
+// sentinel so the NOT-NULL author foreign keys (ARGUMENT.createdBy,
+// PHRASING_ARCHIVE.coinedBy) stay valid. Finally the USER_PROFILE row itself is
+// deleted, which blocks any future login.
+// ─────────────────────────────────────────────────────────────────────────────
+
+// The reserved profile that owns anonymized content. Created on first use.
+// securityCode is NULL, so password_verify() can never succeed against it.
+define('DELETED_USER_EMAIL', 'deleted-user@agitate.local');
+
+function agitate_get_sentinel_id(mysqli $db): int {
+	$email = DELETED_USER_EMAIL;
+	$stmt = $db->prepare("SELECT profileID FROM USER_PROFILE WHERE email = ? LIMIT 1");
+	$stmt->bind_param("s", $email);
+	$stmt->execute();
+	$row = $stmt->get_result()->fetch_assoc();
+	$stmt->close();
+	if ($row) return intval($row['profileID']);
+
+	$fn = '[deleted'; $ln = 'user]'; $aff = ALL_PUBLIC_AFF_ID;
+	$ins = $db->prepare(
+		"INSERT INTO USER_PROFILE (firstName, lastName, email, securityCode, activeAffiliationID)
+		 VALUES (?, ?, ?, NULL, ?)"
+	);
+	$ins->bind_param("sssi", $fn, $ln, $email, $aff);
+	$ins->execute();
+	$id = intval($ins->insert_id);
+	$ins->close();
+	return $id;
+}
+
+// Resolve an admin-entered identifier (numeric profileID or email) to a profile
+// row, or null. Never resolves the sentinel.
+function agitate_resolve_user(mysqli $db, string $query): ?array {
+	$query = trim($query);
+	if ($query === '') return null;
+	if (ctype_digit($query)) {
+		$stmt = $db->prepare("SELECT profileID, firstName, lastName, email, isAdmin FROM USER_PROFILE WHERE profileID = ?");
+		$id = intval($query);
+		$stmt->bind_param("i", $id);
+	} else {
+		$stmt = $db->prepare("SELECT profileID, firstName, lastName, email, isAdmin FROM USER_PROFILE WHERE email = ?");
+		$stmt->bind_param("s", $query);
+	}
+	$stmt->execute();
+	$row = $stmt->get_result()->fetch_assoc();
+	$stmt->close();
+	if (!$row) return null;
+	if ($row['email'] === DELETED_USER_EMAIL) return null;
+	return $row;
+}
+
+// Count what a deletion would touch, for the confirm screen. The "preserved"
+// count uses the same load-bearing test the deletion itself applies.
+function agitate_preview_user_deletion(mysqli $db, int $T): array {
+	$q = function (string $sql) use ($db): int {
+		$r = mysqli_fetch_row(mysqli_query($db, $sql));
+		return $r ? intval($r[0]) : 0;
+	};
+	$authored  = $q("SELECT COUNT(*) FROM ARGUMENT WHERE createdBy = $T");
+	$preserved = $q(
+		"SELECT COUNT(*) FROM ARGUMENT a WHERE a.createdBy = $T AND (
+		    EXISTS(SELECT 1 FROM OPINION o        WHERE o.argumentID=a.argumentID AND o.profileID<>$T)
+		 OR EXISTS(SELECT 1 FROM ENDORSEMENT e    WHERE (e.targArgID=a.argumentID OR e.supportingArgID=a.argumentID) AND e.profileID<>$T)
+		 OR EXISTS(SELECT 1 FROM PHRASING p       WHERE p.argumentID=a.argumentID AND (p.coinedBy IS NULL OR p.coinedBy<>$T))
+		 OR EXISTS(SELECT 1 FROM EXPLICATION x    WHERE x.argumentID=a.argumentID AND x.profileID<>$T)
+		 OR EXISTS(SELECT 1 FROM PHRASE_ENDORSE pe WHERE pe.argumentID=a.argumentID AND pe.profileID<>$T)
+		 OR EXISTS(SELECT 1 FROM ARGUMENT_FLAG f  WHERE f.argumentID=a.argumentID AND f.profileID<>$T)
+		)");
+	return [
+		'authored'     => $authored,
+		'preserved'    => $preserved,
+		'deletedArgs'  => $authored - $preserved,
+		'phrasings'    => $q("SELECT COUNT(*) FROM PHRASING WHERE coinedBy = $T"),
+		'opinions'     => $q("SELECT COUNT(*) FROM OPINION WHERE profileID = $T"),
+		'endorsements' => $q("SELECT COUNT(*) FROM ENDORSEMENT WHERE profileID = $T"),
+		'flags'        => $q("SELECT COUNT(*) FROM ARGUMENT_FLAG WHERE profileID = $T"),
+		'explications' => $q("SELECT COUNT(*) FROM EXPLICATION WHERE profileID = $T"),
+		'groupsAdmin'  => $q("SELECT COUNT(*) FROM AFFILIATION WHERE adminID = $T"),
+	];
+}
+
+// Execute the full removal in one transaction. Returns [deletedArgs, keptArgs].
+function agitate_delete_user(mysqli $db, int $T, int $S): array {
+	// Force exception-on-error for the duration so any failed statement aborts
+	// the whole transaction rather than silently continuing (prod runs with
+	// mysqli reporting off).
+	mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+	mysqli_begin_transaction($db);
+	try {
+		// A. Sweep T's personal participation (T as participant, not author).
+		mysqli_query($db, "DELETE FROM OPINION            WHERE profileID = $T");
+		mysqli_query($db, "DELETE FROM ENDORSEMENT        WHERE profileID = $T");
+		mysqli_query($db, "DELETE FROM PHRASE_ENDORSE     WHERE profileID = $T");
+		mysqli_query($db, "DELETE FROM EXPLICATION_ENDORSE WHERE profileID = $T");
+		// Endorsements (by anyone) of the explications T authored, then those explications.
+		mysqli_query($db, "DELETE FROM EXPLICATION_ENDORSE WHERE explicationID IN (SELECT explicationID FROM EXPLICATION WHERE profileID = $T)");
+		mysqli_query($db, "DELETE FROM EXPLICATION        WHERE profileID = $T");
+		mysqli_query($db, "DELETE FROM ARGUMENT_FLAG      WHERE profileID = $T");
+		mysqli_query($db, "UPDATE ARGUMENT_FLAG SET resolvedBy = NULL WHERE resolvedBy = $T");
+		mysqli_query($db, "DELETE FROM SCOPE_OPINION            WHERE profileID = $T");
+		mysqli_query($db, "DELETE FROM SCOPE_ENDORSEMENT        WHERE profileID = $T");
+		mysqli_query($db, "DELETE FROM SCOPE_EXPLICATION_ENDORSE WHERE profileID = $T");
+		mysqli_query($db, "DELETE FROM SCOPE_PHRASE_ENDORSE     WHERE profileID = $T");
+		mysqli_query($db, "DELETE FROM MEMBER        WHERE profileID = $T");
+		mysqli_query($db, "DELETE FROM REMEMBER_ME   WHERE profileID = $T");
+		mysqli_query($db, "DELETE FROM ADMIN_SETTINGS WHERE profileID = $T");
+
+		// B. Decide the fate of T's authored arguments. T's own participation is
+		//    already gone, so any remaining footprint below belongs to others.
+		$res = mysqli_query($db,
+			"SELECT a.argumentID,
+			  (EXISTS(SELECT 1 FROM OPINION o        WHERE o.argumentID=a.argumentID)
+			OR EXISTS(SELECT 1 FROM ENDORSEMENT e    WHERE e.targArgID=a.argumentID OR e.supportingArgID=a.argumentID)
+			OR EXISTS(SELECT 1 FROM PHRASING p       WHERE p.argumentID=a.argumentID AND (p.coinedBy IS NULL OR p.coinedBy<>$T))
+			OR EXISTS(SELECT 1 FROM EXPLICATION x    WHERE x.argumentID=a.argumentID)
+			OR EXISTS(SELECT 1 FROM PHRASE_ENDORSE pe WHERE pe.argumentID=a.argumentID)
+			OR EXISTS(SELECT 1 FROM ARGUMENT_FLAG f  WHERE f.argumentID=a.argumentID)) AS loadBearing
+			 FROM ARGUMENT a WHERE a.createdBy = $T");
+		$toDelete = []; $keptCount = 0;
+		while ($r = mysqli_fetch_assoc($res)) {
+			if (intval($r['loadBearing'])) $keptCount++;
+			else $toDelete[] = intval($r['argumentID']);
+		}
+
+		// Hard-delete each orphaned argument, children first (FK-safe order).
+		foreach ($toDelete as $aid) {
+			mysqli_query($db, "DELETE FROM PHRASE_ENDORSE       WHERE argumentID = $aid");
+			mysqli_query($db, "DELETE FROM EXPLICATION_ENDORSE  WHERE argumentID = $aid");
+			mysqli_query($db, "DELETE FROM EXPLICATION          WHERE argumentID = $aid");
+			mysqli_query($db, "DELETE FROM OPINION              WHERE argumentID = $aid");
+			mysqli_query($db, "DELETE FROM ENDORSEMENT          WHERE targArgID = $aid OR supportingArgID = $aid");
+			mysqli_query($db, "DELETE FROM ARGUMENT_FLAG        WHERE argumentID = $aid");
+			mysqli_query($db, "DELETE FROM SCOPE_OPINION            WHERE argumentID = $aid");
+			mysqli_query($db, "DELETE FROM SCOPE_ENDORSEMENT        WHERE targArgID = $aid");
+			mysqli_query($db, "DELETE FROM SCOPE_EXPLICATION_ENDORSE WHERE argumentID = $aid");
+			mysqli_query($db, "DELETE FROM SCOPE_PHRASE_ENDORSE     WHERE argumentID = $aid");
+			mysqli_query($db, "UPDATE ARGUMENT SET currentPhrasingID = NULL WHERE argumentID = $aid");
+			mysqli_query($db, "DELETE FROM PHRASING          WHERE argumentID = $aid");
+			mysqli_query($db, "DELETE FROM PHRASING_ARCHIVE  WHERE argumentID = $aid");
+			mysqli_query($db, "DELETE FROM PUT_FORTH_ARCHIVE WHERE argumentID = $aid");
+			mysqli_query($db, "DELETE FROM ARGUMENT          WHERE argumentID = $aid");
+		}
+
+		// C. Preserve remaining authored content by reassigning it to the sentinel.
+		mysqli_query($db, "UPDATE ARGUMENT         SET createdBy = $S WHERE createdBy = $T");
+		mysqli_query($db, "UPDATE PHRASING         SET coinedBy  = $S WHERE coinedBy  = $T");
+		mysqli_query($db, "UPDATE PHRASING_ARCHIVE SET coinedBy  = $S WHERE coinedBy  = $T");
+
+		// D. Any group ownership passes to the sentinel (flagged to the admin).
+		mysqli_query($db, "UPDATE AFFILIATION SET adminID   = $S WHERE adminID   = $T");
+		mysqli_query($db, "UPDATE AFFILIATION SET createdBy = $S WHERE createdBy = $T");
+
+		// E. Invitations: unlink T as consumer/captain; drop the ones T created.
+		mysqli_query($db, "UPDATE INVITATION SET usedBy = NULL           WHERE usedBy = $T");
+		mysqli_query($db, "UPDATE INVITATION SET captainProfileID = NULL WHERE captainProfileID = $T");
+		mysqli_query($db, "DELETE FROM INVITATION WHERE createdBy = $T");
+
+		// F. Remove the profile — blocks all future login.
+		mysqli_query($db, "DELETE FROM USER_PROFILE WHERE profileID = $T");
+
+		mysqli_commit($db);
+	} catch (\Throwable $ex) {
+		mysqli_rollback($db);
+		mysqli_report(MYSQLI_REPORT_OFF);
+		throw $ex;
+	}
+	mysqli_report(MYSQLI_REPORT_OFF);
+	return ['deletedArgs' => count($toDelete), 'keptArgs' => $keptCount];
+}
+
 $arg    = isset($_GET['arg']) ? intval($_GET['arg']) : 75;
 $saved  = isset($_GET['saved']);
 $merged       = isset($_GET['merged']) ? intval($_GET['merged']) : null;
 $groupCreated = isset($_GET['groupCreated']) ? $_GET['groupCreated'] : null;
 $errors = [];
 $mergePreview = null;
+$deletePreview = null;
+$userDeleted  = isset($_GET['userDeleted']);
 
 // ---------- Handle form submissions ----------
 if (isset($_POST['adminAction'])) {
@@ -192,6 +378,64 @@ if (isset($_POST['adminAction'])) {
 			mysqli_close($db);
 			header("Location: /admin_tools.php?arg=$arg&resolved=$flagArgID");
 			exit;
+
+		case 'previewDeleteUser':
+			$target = agitate_resolve_user($db, $_POST['deleteUserQuery'] ?? '');
+			if (!$target) {
+				$errors[] = 'No account found for that profile ID or email.';
+				break;
+			}
+			if (intval($target['profileID']) === $realProfileID) {
+				$errors[] = 'You cannot remove your own account here.';
+				break;
+			}
+			if (intval($target['isAdmin']) === 1) {
+				$errors[] = 'That account is an admin. Remove its admin flag in the database before deleting it.';
+				break;
+			}
+			$deletePreview = [
+				'target' => $target,
+				'counts' => agitate_preview_user_deletion($db, intval($target['profileID'])),
+			];
+			break;
+
+		case 'executeDeleteUser':
+			$targetID   = intval($_POST['deleteUserID'] ?? 0);
+			$confirmTxt = trim($_POST['confirmEmail'] ?? '');
+			$target = $targetID > 0 ? agitate_resolve_user($db, (string)$targetID) : null;
+
+			if (!$target) {
+				$errors[] = 'That account no longer exists.';
+				break;
+			}
+			if ($targetID === $realProfileID) {
+				$errors[] = 'You cannot remove your own account here.';
+				break;
+			}
+			if (intval($target['isAdmin']) === 1) {
+				$errors[] = 'That account is an admin. Remove its admin flag before deleting it.';
+				break;
+			}
+			if (strcasecmp($confirmTxt, $target['email']) !== 0) {
+				$errors[] = 'Confirmation text did not match the account email. Nothing was deleted.';
+				$deletePreview = ['target' => $target, 'counts' => agitate_preview_user_deletion($db, $targetID)];
+				break;
+			}
+
+			$sentinelID = agitate_get_sentinel_id($db);
+			try {
+				$res = agitate_delete_user($db, $targetID, $sentinelID);
+			} catch (\Throwable $ex) {
+				$errors[] = 'Deletion failed and was rolled back: ' . $ex->getMessage();
+				break;
+			}
+			$dName = trim(($target['firstName'] ?? '') . ' ' . ($target['lastName'] ?? ''));
+			mysqli_close($db);
+			header("Location: /admin_tools.php?arg=$arg&userDeleted=1"
+				. "&dName=" . urlencode($dName !== '' ? $dName : $target['email'])
+				. "&dArgs=" . intval($res['deletedArgs'])
+				. "&kArgs=" . intval($res['keptArgs']));
+			exit;
 	}
 }
 
@@ -295,6 +539,9 @@ mysqli_close($db);
 		.flag-card-body th, .flag-card-body td { text-align: left; padding: 0.3rem 0.5rem; border-bottom: 1px solid #eee; vertical-align: top; }
 		.flag-cat-tag { display: inline-block; background: #eee; border-radius: 3px; padding: 0.05rem 0.4rem; font-size: 0.78rem; white-space: nowrap; }
 		h3.sub-h3 { font-size: 0.9rem; font-weight: 600; margin: 1.1rem 0 0.2rem; color: #333; }
+		.danger-h2 { color: #af1a17; border-bottom-color: #f0b3b2; }
+		.danger-preview { border-color: #e0a0a0; background: #fdf4f4; }
+		.danger-btn { background: #af1a17; color: #fff; border: 1px solid #8f1512; border-radius: 3px; font-weight: 600; }
 	</style>
 </head>
 <body>
@@ -313,6 +560,16 @@ mysqli_close($db);
 
 <?php if ($merged): ?>
 <div class="notice">Merge complete. Argument #<?php echo $merged; ?> is now the consolidated record. <a href="/?arg=<?php echo $merged; ?>">View it →</a></div>
+<?php endif; ?>
+
+<?php if ($userDeleted): ?>
+<div class="notice">
+	Removed <strong><?php echo htmlspecialchars($_GET['dName'] ?? 'the account'); ?></strong>.
+	<?php $ka = intval($_GET['kArgs'] ?? 0); $da = intval($_GET['dArgs'] ?? 0); ?>
+	<?php echo $ka; ?> argument<?php echo $ka === 1 ? '' : 's'; ?> preserved and anonymized;
+	<?php echo $da; ?> untouched argument<?php echo $da === 1 ? '' : 's'; ?> deleted.
+	Their personal data and login are gone.
+</div>
 <?php endif; ?>
 
 <?php if (!empty($errors)): ?>
@@ -567,6 +824,60 @@ mysqli_close($db);
 	</div>
 </details>
 <?php endforeach; ?>
+<?php endif; ?>
+
+<hr class="divider">
+
+<!-- ── Remove a User ─────────────────────────── -->
+<h2 class="danger-h2">Remove a User</h2>
+<p class="desc">
+	Permanently removes an account and blocks any future login. Their opinions,
+	endorsements, flags, group memberships, and personal profile are deleted.
+	Arguments they wrote are <strong>kept and anonymized</strong> if anyone else has
+	engaged with them, and any phrasing they coined on a surviving argument is kept —
+	otherwise untouched arguments are deleted outright. This cannot be undone.
+</p>
+
+<form method="POST" action="/admin_tools.php?arg=<?php echo $arg; ?>">
+	<input type="hidden" name="adminAction" value="previewDeleteUser">
+	<div class="field">
+		<label for="deleteUserQuery">Profile ID or email</label>
+		<input type="text" id="deleteUserQuery" name="deleteUserQuery" placeholder="e.g. 87 or someone@example.com">
+	</div>
+	<div class="field">
+		<button type="submit">Preview removal</button>
+	</div>
+</form>
+
+<?php if ($deletePreview):
+	$t = $deletePreview['target']; $c = $deletePreview['counts'];
+	$tName = trim(($t['firstName'] ?? '') . ' ' . ($t['lastName'] ?? ''));
+?>
+<div class="merge-preview danger-preview">
+	<strong>About to remove — #<?php echo intval($t['profileID']); ?></strong>
+	<p><?php echo htmlspecialchars($tName !== '' ? $tName : '(no name)'); ?> &lt;<?php echo htmlspecialchars($t['email']); ?>&gt;</p>
+	<ul style="margin:0.5rem 0 0.75rem 1.1rem;font-size:0.875rem;">
+		<li><strong><?php echo $c['preserved']; ?></strong> authored argument<?php echo $c['preserved'] === 1 ? '' : 's'; ?> kept &amp; anonymized (others have engaged)</li>
+		<li><strong><?php echo $c['deletedArgs']; ?></strong> untouched argument<?php echo $c['deletedArgs'] === 1 ? '' : 's'; ?> deleted entirely</li>
+		<li><strong><?php echo $c['phrasings']; ?></strong> coined phrasing<?php echo $c['phrasings'] === 1 ? '' : 's'; ?> (kept where the argument survives)</li>
+		<li><strong><?php echo $c['opinions']; ?></strong> opinion<?php echo $c['opinions'] === 1 ? '' : 's'; ?>, <strong><?php echo $c['endorsements']; ?></strong> endorsement<?php echo $c['endorsements'] === 1 ? '' : 's'; ?>, <strong><?php echo $c['flags']; ?></strong> flag<?php echo $c['flags'] === 1 ? '' : 's'; ?>, <strong><?php echo $c['explications']; ?></strong> source<?php echo $c['explications'] === 1 ? '' : 's'; ?> removed</li>
+		<?php if ($c['groupsAdmin'] > 0): ?>
+		<li style="color:#af1a17;">⚠ Administers <strong><?php echo $c['groupsAdmin']; ?></strong> group<?php echo $c['groupsAdmin'] === 1 ? '' : 's'; ?> — ownership will pass to the "[deleted user]" placeholder. Reassign a real admin afterward.</li>
+		<?php endif; ?>
+	</ul>
+	<form method="POST" action="/admin_tools.php?arg=<?php echo $arg; ?>" style="margin:0;">
+		<input type="hidden" name="adminAction" value="executeDeleteUser">
+		<input type="hidden" name="deleteUserID" value="<?php echo intval($t['profileID']); ?>">
+		<div class="field">
+			<label for="confirmEmail">Type <strong><?php echo htmlspecialchars($t['email']); ?></strong> to confirm</label>
+			<input type="text" id="confirmEmail" name="confirmEmail" autocomplete="off" placeholder="<?php echo htmlspecialchars($t['email']); ?>">
+		</div>
+		<button type="submit" class="danger-btn"
+			onclick="return confirm('Permanently remove #<?php echo intval($t['profileID']); ?> (<?php echo htmlspecialchars($t['email']); ?>)? This cannot be undone.')">
+			Remove permanently
+		</button>
+	</form>
+</div>
 <?php endif; ?>
 
 </body>
