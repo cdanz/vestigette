@@ -1133,9 +1133,22 @@ function bump(type, argID) {
 
 // Reduce = raise every OTHER weighted argument, so the held one's share falls
 // while its own click count stays put. A no-op if nothing else carries weight.
+// Reduce an argument's share, two-phase:
+//   1. While it still has more than 1 click, take a click off it (and the total)
+//      — the cheap, direct way to shrink its share.
+//   2. Once it bottoms out at 1 click, switch to raising every OTHER weighted
+//      argument instead, so the denominator grows and its share keeps falling
+//      without ever dropping the argument below a single click.
 function reduceOthers(type, argID) {
 	let state = sectionState[type];
 	if (!state) return;
+	let ndx = state.clickArr.findIndex((tuple) => tuple[0] == argID);
+	if (ndx >= 0 && state.clickArr[ndx][1] > 1) {
+		state.clickArr[ndx][1] -= 1;
+		state.totalClicks -= 1;
+		renderSection(type);
+		return;
+	}
 	let raised = false;
 	for (let j = 0; j < state.clickArr.length; j++) {
 		if (state.clickArr[j][0] != argID && state.clickArr[j][1] > 0) {
@@ -1169,6 +1182,13 @@ function bumpPhrasing(phrasingID) {
 }
 
 function reducePhrasingOthers(phrasingID) {
+	let ndx = phrasingClickArr.findIndex((tuple) => tuple[0] == phrasingID);
+	if (ndx >= 0 && phrasingClickArr[ndx][1] > 1) {
+		phrasingClickArr[ndx][1] -= 1;
+		phrasingTotalClicks -= 1;
+		renderPhrasing();
+		return;
+	}
 	let raised = false;
 	for (let j = 0; j < phrasingClickArr.length; j++) {
 		if (phrasingClickArr[j][0] != phrasingID && phrasingClickArr[j][1] > 0) {
@@ -1209,6 +1229,13 @@ function bumpExplication(explicationID) {
 }
 
 function reduceExplicationOthers(explicationID) {
+	let ndx = explicClickArr.findIndex((tuple) => tuple[0] == explicationID);
+	if (ndx >= 0 && explicClickArr[ndx][1] > 1) {
+		explicClickArr[ndx][1] -= 1;
+		explicTotalClicks -= 1;
+		renderExplication();
+		return;
+	}
 	let raised = false;
 	for (let j = 0; j < explicClickArr.length; j++) {
 		if (explicClickArr[j][0] != explicationID && explicClickArr[j][1] > 0) {
