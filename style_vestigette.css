@@ -2108,11 +2108,10 @@ body.weigh-page .lineItem.active:not(.reducing) .wrapper.grow {
 @media (prefers-reduced-motion: reduce) {
 	body.weigh-page .wrapper { transition: box-shadow .12s ease; }
 }
-/* While a ring is held, let the enlarged circle escape the section's clip box
-   and paint in front of the header (which is otherwise hidden the top rows). */
-body.weigh-page .container.grabbing,
-body.weigh-page .container.grabbing .panel { overflow: visible; }
-body.weigh-page .container.grabbing .panel { position: relative; z-index: 30; }
+/* The held ring is lifted to position:fixed by JS (growLift) so it escapes the
+   scrollable panel's clip and paints in front of the header; a spacer holds its
+   place in the row so nothing reflows. */
+.grow-ph { flex: none; }
 /* Forgiving press/gesture target: extend the hit area beyond the visible ring
    into the row's existing dead space — the vertical margin and the gap before
    the text — so starting a hold/swipe never needs a precise landing. It's an

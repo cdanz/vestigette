@@ -290,15 +290,40 @@ function startHold(cfg) {
 	cfg.ring.style.setProperty('--glow', '0');
 	let g0 = cfg.ring.querySelector('.glyph'); if (g0) g0.textContent = '▲';
 	joy.delayTimer = setTimeout(function() {
-		cfg.ring.classList.add('grow'); // enlarge only on a real hold, not a tap
-		// Let the enlarged ring escape the section's clip box and paint in front
-		// of the header, instead of being hidden behind it for top-row items.
-		var c = cfg.line.closest('.container');
-		if (c) { c.classList.add('grabbing'); joy.container = c; }
+		// Lift the ring to fixed positioning FIRST (captures its pre-scale spot),
+		// so the enlarged circle escapes the scrollable panel's clip and paints in
+		// front of the section header instead of behind it. Then enlarge.
+		growLift(cfg.ring);
+		cfg.ring.classList.add('grow');
 		joy.dirStart = performance.now();
 		joy.last = performance.now();
 		joy.raf = requestAnimationFrame(joyLoop);
 	}, JOY.INITIAL_DELAY);
+}
+// Pin the ring in place with position:fixed so no ancestor overflow can clip the
+// enlarged circle; a spacer keeps the row from reflowing while it's lifted.
+function growLift(w) {
+	if (w._ph) return;
+	let r = w.getBoundingClientRect();
+	let cs = getComputedStyle(w);
+	let ph = document.createElement('span');
+	ph.className = 'grow-ph';
+	ph.style.cssText = 'display:block;width:' + r.width + 'px;height:' + r.height + 'px;margin:' + cs.margin + ';';
+	w.parentNode.insertBefore(ph, w);
+	w._ph = ph;
+	w.style.position = 'fixed';
+	w.style.margin = '0';
+	w.style.left = r.left + 'px';
+	w.style.top = r.top + 'px';
+	w.style.zIndex = '9999';
+}
+function growDrop(w) {
+	if (w._ph) { w._ph.remove(); w._ph = null; }
+	w.style.position = '';
+	w.style.margin = '';
+	w.style.left = '';
+	w.style.top = '';
+	w.style.zIndex = '';
 }
 function joyLoop(now) {
 	if (!joy) return;
@@ -328,7 +353,7 @@ function stopHold() {
 	joy.cfg.line.classList.remove('active', 'reducing');
 	joy.cfg.ring.classList.remove('grow');
 	joy.cfg.ring.style.removeProperty('--glow');
-	if (joy.container) joy.container.classList.remove('grabbing');
+	growDrop(joy.cfg.ring);
 	if (joy.cfg.receiving) joy.cfg.receiving(false);
 	joy = null;
 }
