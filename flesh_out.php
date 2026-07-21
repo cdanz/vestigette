@@ -231,7 +231,7 @@ $baseURL      = '/';
     <script language="javascript" src="script_vestigette.js?v=<?php echo filemtime($_SERVER['DOCUMENT_ROOT'].'/script_vestigette.js'); ?>"></script>
     <script>var demoMode = <?php echo $demoMode ? 'true' : 'false'; ?>;</script>
 </head>
-<body class="flesh-out-page<?php if ($demoMode) echo ' demo-mode'; ?>">
+<body class="flesh-out-page weigh-page<?php if ($demoMode) echo ' demo-mode'; ?>">
 
 <div id="mastHead" class="container">
     <h1><a href="/?arg=<?php echo $argIDEsc; ?>">AGITATE<span class="exclaim">!</span></a></h1>
@@ -263,14 +263,11 @@ $baseURL      = '/';
         <!-- ── New argument rows ──────────────────────────────── -->
         <div id="new-arg-zone">
             <div class="flesh-row lineItem pct0_0 half1" id="flesh-new-0">
-                <div class="wrapper"
-                     onclick="if(inCircle(event,this)) fleshBumpNew(0)"
-                     oncontextmenu="fleshUnpinNew(0);return false;">
-                    <div class="pointBtn arc1"></div>
-                    <div class="pointBtn arc2"></div>
+                <div class="wrapper">
+                    <span class="glyph"></span>
+                    <span class="val">0%</span>
                 </div>
                 <div class="flesh-text-col">
-                    <span class="inLinePct"></span>
                     <textarea class="new-arg-text" placeholder="Type a new argument…" rows="1"></textarea>
                 </div>
 <?php if ($showRecipCol): ?>
@@ -298,15 +295,11 @@ $baseURL      = '/';
         <div class="flesh-row lineItem pct0_0 half1"
              id="flesh-ex-<?php echo $item[0]; ?>"
              data-arg-id="<?php echo $item[0]; ?>">
-            <div class="wrapper"
-                 onclick="if(inCircle(event,this)) fleshBumpExisting(<?php echo $item[0]; ?>)"
-                 oncontextmenu="fleshUnpinExisting(<?php echo $item[0]; ?>);return false;">
-                <div class="pointBtn arc1"></div>
-                <div class="pointBtn arc2"></div>
+            <div class="wrapper">
+                <span class="glyph"></span>
+                <span class="val">0%</span>
             </div>
-            <p class="assocArg">
-                <span class="inLinePct"></span><?php echo htmlspecialchars($item[2]); ?>
-            </p>
+            <p class="assocArg"><?php echo htmlspecialchars($item[2]); ?></p>
 <?php if ($showRecipCol): ?>
             <label class="switch flesh-reciprocate" title="Reciprocate">
                 <input type="checkbox" class="reciprocate-toggle" checked>
@@ -387,19 +380,10 @@ function fleshUpdateAll() {
     fleshPool.forEach(function(item) {
         var el = document.getElementById('flesh-' + item.id);
         if (!el) return;
-        var pct  = fleshGetPct(item.id);
-        var half = pct > 50 ? 'half2' : 'half1';
-
-        // Remove old pct/half classes
-        el.className = el.className
-            .replace(/pct\d+_\d+/g, '')
-            .replace(/half\d/g, '')
-            .replace(/\s+/g, ' ')
-            .trim();
-        el.classList.add(fleshPctClass(pct), half);
-
-        var span = el.querySelector('.inLinePct');
-        if (span) span.textContent = pct.toFixed(1) + '% – ';
+        var pct = fleshGetPct(item.id);
+        el.style.setProperty('--pct', pct.toFixed(2));
+        var val = el.querySelector('.val');
+        if (val) val.textContent = Math.round(pct) + '%';
     });
 
     // Also zero out anything in the pool that's lost clicks (shouldn't happen
@@ -573,14 +557,11 @@ function fleshAddNewRow(n, beforeEl) {
     row.className = 'flesh-row lineItem pct0_0 half1';
     row.id        = 'flesh-new-' + n;
     row.innerHTML =
-        '<div class="wrapper"'
-        + ' onclick="if(inCircle(event,this)) fleshBumpNew(' + n + ')"'
-        + ' oncontextmenu="fleshUnpinNew(' + n + ');return false;">'
-        + '<div class="pointBtn arc1"></div>'
-        + '<div class="pointBtn arc2"></div>'
+        '<div class="wrapper">'
+        + '<span class="glyph"></span>'
+        + '<span class="val">0%</span>'
         + '</div>'
         + '<div class="flesh-text-col">'
-        + '<span class="inLinePct"></span>'
         + '<textarea class="new-arg-text" placeholder="Type a new argument…" rows="1"></textarea>'
         + '</div>'
         + recipHtml;
@@ -755,11 +736,9 @@ function fleshUseSuggestion(n, argID, phrasing) {
         exRow.id = 'flesh-ex-' + argID;
         exRow.setAttribute('data-arg-id', String(argID));
         exRow.innerHTML =
-            '<div class="wrapper"'
-            + ' onclick="if(inCircle(event,this)) fleshBumpExisting(' + argID + ')"'
-            + ' oncontextmenu="fleshUnpinExisting(' + argID + ');return false;">'
-            + '<div class="pointBtn arc1"></div><div class="pointBtn arc2"></div></div>'
-            + '<p class="assocArg"><span class="inLinePct"></span>'
+            '<div class="wrapper">'
+            + '<span class="glyph"></span><span class="val">0%</span></div>'
+            + '<p class="assocArg">'
             + '<a href="/?arg=' + argID + '">' + escapeHtml(phrasing) + '</a></p>'
             + recip;
         document.querySelector('.flesh-list').appendChild(exRow);
@@ -796,18 +775,15 @@ function pctToFleshClicks(storedArr) {
 
 function fleshReset() {
     var listEl = document.querySelector('.flesh-list');
-    fleshPool.filter(function(item) { return item.id.indexOf('ex-') === 0; })
-        .forEach(function(item) {
-            var argID = parseInt(item.id.replace('ex-', ''), 10);
-            var row = document.getElementById('flesh-ex-' + argID);
-            if (!row) return;
-            row.className = row.className
-                .replace(/pct\d+_\d+/g, '').replace(/half\d/g, '').replace(/\s+/g, ' ').trim();
-            row.classList.add('pct0_0', 'half1');
-            var span = row.querySelector('.inLinePct');
-            if (span) span.textContent = '';
-            listEl.appendChild(row);
-        });
+    fleshPool.forEach(function(item) {
+        var row = document.getElementById('flesh-' + item.id);
+        if (!row) return;
+        row.style.setProperty('--pct', '0');
+        var val = row.querySelector('.val');
+        if (val) val.textContent = '0%';
+        // neighbourhood (existing) rows return to the available pool
+        if (item.id.indexOf('ex-') === 0) listEl.appendChild(row);
+    });
     fleshPool = [];
     fleshTotalClicks = 0;
     fleshUpdateAll();
@@ -829,6 +805,53 @@ function fleshLoadMyWeights() {
     });
     fleshUpdateAll();
 }
+
+// ── Joystick weighting for pinned args (mirrors the index page) ───────────────
+// The first press of an unpinned arg keeps the existing bring-into-the-mix flow
+// (fleshBumpExisting animate+pin, or fleshBumpNew similarity modal/pin). Once an
+// arg is pinned, a press-and-hold runs the full joystick: accelerate up,
+// two-phase reduce down, enlarge/lift. The engine (startHold/stopHold + its
+// global pointerup/move listeners) lives in script_vestigette.js.
+function fleshReducePinned(item) {
+    if (item.clicks > 1) { item.clicks -= 1; fleshTotalClicks -= 1; fleshUpdateAll(); return; }
+    var raised = false;
+    fleshPool.forEach(function(x) { if (x !== item && x.clicks > 0) { x.clicks += 1; fleshTotalClicks += 1; raised = true; } });
+    if (raised) fleshUpdateAll();
+}
+function fleshSetReceiving(on, activeId) {
+    document.querySelectorAll('.flesh-row.receiving').forEach(function(r) { r.classList.remove('receiving'); });
+    if (!on) return;
+    fleshPool.forEach(function(x) {
+        if (x.id === activeId || x.clicks <= 0) return;
+        var row = document.getElementById('flesh-' + x.id);
+        if (row) row.classList.add('receiving');
+    });
+}
+document.querySelector('.flesh-list').addEventListener('pointerdown', function(e) {
+    if (!e.isPrimary) return;
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    var w = e.target.closest('.wrapper');
+    if (!w) return;
+    var row = w.closest('.flesh-row');
+    if (!row) return;
+    var id = row.id.replace('flesh-', '');                 // 'new-0' | 'ex-123'
+    var item = fleshPool.find(function(x) { return x.id === id; });
+    if (!item) {
+        // not pinned yet — run the existing first-press flow (may open a modal)
+        if (id.indexOf('new-') === 0) fleshBumpNew(parseInt(id.slice(4), 10));
+        else if (id.indexOf('ex-') === 0) fleshBumpExisting(parseInt(id.slice(3), 10));
+        return;
+    }
+    // already pinned — full joystick
+    e.preventDefault();
+    try { w.setPointerCapture(e.pointerId); } catch (err) {}
+    var up   = function() { item.clicks++; fleshTotalClicks++; fleshUpdateAll(); };
+    var down = function() { fleshReducePinned(item); };
+    var canReduce = function() { return fleshPool.some(function(x) { return x.id !== id && x.clicks > 0; }); };
+    var receiving = function(on) { fleshSetReceiving(on, id); };
+    up(); // the press counts as one add (tap = +1)
+    startHold({ ring: w, line: row, originY: e.clientY, up: up, down: down, canReduce: canReduce, receiving: receiving });
+});
 
 // ── Apply context from index page "More to Say" button ────────────────────────
 (function() {
