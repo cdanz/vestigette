@@ -290,6 +290,7 @@ function startHold(cfg) {
 	cfg.ring.style.setProperty('--glow', '0');
 	let g0 = cfg.ring.querySelector('.glyph'); if (g0) g0.textContent = '▲';
 	joy.delayTimer = setTimeout(function() {
+		cfg.ring.classList.add('grow'); // enlarge only on a real hold, not a tap
 		joy.dirStart = performance.now();
 		joy.last = performance.now();
 		joy.raf = requestAnimationFrame(joyLoop);
@@ -321,6 +322,7 @@ function stopHold() {
 	if (joy.delayTimer) clearTimeout(joy.delayTimer);
 	if (joy.raf) cancelAnimationFrame(joy.raf);
 	joy.cfg.line.classList.remove('active', 'reducing');
+	joy.cfg.ring.classList.remove('grow');
 	joy.cfg.ring.style.removeProperty('--glow');
 	if (joy.cfg.receiving) joy.cfg.receiving(false);
 	joy = null;

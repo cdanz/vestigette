@@ -2069,6 +2069,8 @@ body.weigh-page {
 	--drain: #8a9099;
 	--ringTrack: var(--percentage_bg);
 	--ring-stroke: 8px; /* ring line thickness (crisp, px-exact). 2px = row-divider weight, 3px = accept/reject weight, 5–8px = bolder */
+	--ring-size: 3.6rem; /* visible ring diameter. Growing this grows the row height too. */
+	--grow-scale: 1.85;  /* how much the ring enlarges while held (see .wrapper.grow) */
 }
 body.weigh-page #because     { --section: var(--because); }
 body.weigh-page #therefore   { --section: var(--therefore); }
@@ -2077,8 +2079,44 @@ body.weigh-page #phrasing,
 body.weigh-page #explication { --section: var(--cddbBlack); }
 
 body.weigh-page .wrapper {
+	width: var(--ring-size);
+	height: var(--ring-size);
 	overflow: visible;
-	transition: box-shadow .12s ease;
+	position: relative;
+	z-index: 1;                 /* keep the press layer above the row content */
+	transition: transform .16s cubic-bezier(.2,.85,.3,1.25), box-shadow .12s ease;
+}
+/* Enlarge while held: the pressed ring balloons and spills over its neighbours
+   so the % and fill read past the occluding finger. It grows from its LEFT edge
+   (never off-screen, and it pushes the readable centre out from under the
+   finger), with an opaque white backing so the % stays legible over the rows it
+   covers. The .grow class is added by the joystick once a real hold engages. */
+body.weigh-page .lineItem.active { position: relative; z-index: 20; }
+body.weigh-page .wrapper.grow {
+	transform: scale(var(--grow-scale));
+	transform-origin: left center;
+	background: var(--cddbWhite);
+	border-radius: 50%;
+	box-shadow: 0 10px 30px rgba(0,0,0,.35);
+	z-index: 5;
+}
+/* preserve the charge glow on top of the lift shadow while enlarged */
+body.weigh-page .lineItem.active:not(.reducing) .wrapper.grow {
+	box-shadow: 0 10px 30px rgba(0,0,0,.35),
+	            0 0 calc(6px + var(--glow,0) * 20px) calc(var(--glow,0) * 3px) color-mix(in srgb, var(--section) 65%, transparent);
+}
+@media (prefers-reduced-motion: reduce) {
+	body.weigh-page .wrapper { transition: box-shadow .12s ease; }
+}
+/* Forgiving press/gesture target: extend the hit area beyond the visible ring
+   into the row's existing dead space — the vertical margin and the gap before
+   the text — so starting a hold/swipe never needs a precise landing. It's an
+   absolutely-positioned pseudo-element, so it adds ZERO layout height, and it
+   stays clear of the argument text link on the right. */
+body.weigh-page .wrapper::after {
+	content: "";
+	position: absolute;
+	inset: -4px -16px -4px -14px;
 }
 body.weigh-page .wrapper::before {
 	content: "";
