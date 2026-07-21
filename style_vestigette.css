@@ -2065,7 +2065,11 @@ h2,
    colorblind-safe direction signal, and the arguments that gain weight during a
    reduce pulse. Scoped to body.weigh-page so flesh_out / add_more keep the
    legacy two-arc rendering untouched. */
-body.weigh-page { --drain: #8a9099; --ringTrack: var(--percentage_bg); }
+body.weigh-page {
+	--drain: #8a9099;
+	--ringTrack: var(--percentage_bg);
+	--ring-stroke: 5px; /* ring line thickness (crisp, px-exact). 2px = row-divider weight, 3px = accept/reject weight, 5–6px = bolder */
+}
 body.weigh-page #because     { --section: var(--because); }
 body.weigh-page #therefore   { --section: var(--therefore); }
 body.weigh-page #rebuttal    { --section: var(--rebuttal); }
@@ -2081,8 +2085,12 @@ body.weigh-page .wrapper::before {
 	position: absolute; inset: 0;
 	border-radius: 50%;
 	background: conic-gradient(var(--section, var(--cddbBlack)) calc(var(--pct,0) * 1%), var(--ringTrack) 0);
-	-webkit-mask: radial-gradient(circle at center, transparent 58%, #000 59%);
-	        mask: radial-gradient(circle at center, transparent 58%, #000 59%);
+	/* Punch out the centre so only a --ring-stroke-wide band of the conic shows.
+	   closest-side makes 100% == the circle radius, so the band is exactly the
+	   stroke width regardless of ring diameter; the 0.6px feather keeps the edge
+	   smooth rather than hard. */
+	-webkit-mask: radial-gradient(circle closest-side, #0000 calc(100% - var(--ring-stroke)), #000 calc(100% - var(--ring-stroke) + 0.6px));
+	        mask: radial-gradient(circle closest-side, #0000 calc(100% - var(--ring-stroke)), #000 calc(100% - var(--ring-stroke) + 0.6px));
 	transition: background .05s linear, filter .12s ease;
 }
 body.weigh-page .wrapper .val {
