@@ -291,6 +291,10 @@ function startHold(cfg) {
 	let g0 = cfg.ring.querySelector('.glyph'); if (g0) g0.textContent = '▲';
 	joy.delayTimer = setTimeout(function() {
 		cfg.ring.classList.add('grow'); // enlarge only on a real hold, not a tap
+		// Let the enlarged ring escape the section's clip box and paint in front
+		// of the header, instead of being hidden behind it for top-row items.
+		var c = cfg.line.closest('.container');
+		if (c) { c.classList.add('grabbing'); joy.container = c; }
 		joy.dirStart = performance.now();
 		joy.last = performance.now();
 		joy.raf = requestAnimationFrame(joyLoop);
@@ -324,6 +328,7 @@ function stopHold() {
 	joy.cfg.line.classList.remove('active', 'reducing');
 	joy.cfg.ring.classList.remove('grow');
 	joy.cfg.ring.style.removeProperty('--glow');
+	if (joy.container) joy.container.classList.remove('grabbing');
 	if (joy.cfg.receiving) joy.cfg.receiving(false);
 	joy = null;
 }
