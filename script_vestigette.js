@@ -1121,13 +1121,29 @@ function displayUserEndorsements(id) {
 Record a click on argID within the given section type and update the display.
 Uses per-section sectionState to prevent cross-section contamination.
 */
+// Clicks a brand-new item should enter the weighting with. Normally 1, but once
+// the existing total is large enough that a single click would be worth < 1% of
+// the resulting total, we seed it with the minimum clicks needed to clear 1% so
+// it never enters as an unreachable sliver. `others` = clicks already in play.
+//   1 click < 1%  ⇔  1/(others+1) < 0.01  ⇔  others > 99
+//   min clicks nc for nc/(others+nc) >= 1%  ⇔  nc >= others/99  ⇔  ceil(others/99)
+function floorClicksForNew(others) {
+	if (others <= 0) return 1;
+	return Math.max(1, Math.ceil(others / 99));
+}
+
 function bump(type, argID) {
 	let state = sectionState[type];
 	if (!state) return;
-	state.totalClicks++;
 	let ndx = state.clickArr.findIndex((tuple) => tuple[0] == argID);
-	if (ndx >= 0) state.clickArr[ndx][1] += 1;
-	else state.clickArr.push([argID, 1]);
+	if (ndx >= 0) {
+		state.clickArr[ndx][1] += 1;
+		state.totalClicks += 1;
+	} else {
+		let nc = floorClicksForNew(state.totalClicks);
+		state.clickArr.push([argID, nc]);
+		state.totalClicks += nc;
+	}
 	renderSection(type);
 }
 
@@ -1174,10 +1190,15 @@ function renderSection(type) {
 }
 
 function bumpPhrasing(phrasingID) {
-	phrasingTotalClicks++;
 	let ndx = phrasingClickArr.findIndex((tuple) => tuple[0] == phrasingID);
-	if (ndx >= 0) phrasingClickArr[ndx][1] += 1;
-	else phrasingClickArr.push([phrasingID, 1]);
+	if (ndx >= 0) {
+		phrasingClickArr[ndx][1] += 1;
+		phrasingTotalClicks += 1;
+	} else {
+		let nc = floorClicksForNew(phrasingTotalClicks);
+		phrasingClickArr.push([phrasingID, nc]);
+		phrasingTotalClicks += nc;
+	}
 	renderPhrasing();
 }
 
@@ -1221,10 +1242,15 @@ function updatePhrasingWeighInValue() {
 }
 
 function bumpExplication(explicationID) {
-	explicTotalClicks++;
 	let ndx = explicClickArr.findIndex((tuple) => tuple[0] == explicationID);
-	if (ndx >= 0) explicClickArr[ndx][1] += 1;
-	else explicClickArr.push([explicationID, 1]);
+	if (ndx >= 0) {
+		explicClickArr[ndx][1] += 1;
+		explicTotalClicks += 1;
+	} else {
+		let nc = floorClicksForNew(explicTotalClicks);
+		explicClickArr.push([explicationID, nc]);
+		explicTotalClicks += nc;
+	}
 	renderExplication();
 }
 
