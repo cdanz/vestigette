@@ -838,8 +838,16 @@ document.querySelector('.flesh-list').addEventListener('pointerdown', function(e
     var item = fleshPool.find(function(x) { return x.id === id; });
     if (!item) {
         // not pinned yet — run the existing first-press flow (may open a modal)
-        if (id.indexOf('new-') === 0) fleshBumpNew(parseInt(id.slice(4), 10));
-        else if (id.indexOf('ex-') === 0) fleshBumpExisting(parseInt(id.slice(3), 10));
+        if (id.indexOf('new-') === 0) {
+            // pointerdown fires BEFORE the textarea would blur, so the similarity
+            // prefetch (which runs on the textarea's focusout) hasn't started.
+            // Blur it now so the "similar existing arguments" check actually fires.
+            var ta = row.querySelector('.new-arg-text');
+            if (ta && document.activeElement === ta) ta.blur();
+            fleshBumpNew(parseInt(id.slice(4), 10));
+        } else if (id.indexOf('ex-') === 0) {
+            fleshBumpExisting(parseInt(id.slice(3), 10));
+        }
         return;
     }
     // already pinned — full joystick
