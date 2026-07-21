@@ -2068,7 +2068,7 @@ h2,
 body.weigh-page {
 	--drain: #8a9099;
 	--ringTrack: var(--percentage_bg);
-	--ring-stroke: 5px; /* ring line thickness (crisp, px-exact). 2px = row-divider weight, 3px = accept/reject weight, 5–6px = bolder */
+	--ring-stroke: 8px; /* ring line thickness (crisp, px-exact). 2px = row-divider weight, 3px = accept/reject weight, 5–8px = bolder */
 }
 body.weigh-page #because     { --section: var(--because); }
 body.weigh-page #therefore   { --section: var(--therefore); }
