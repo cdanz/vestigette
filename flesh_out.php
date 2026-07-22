@@ -362,6 +362,33 @@ var fleshStoredWeights = {}; // argID → past-endorsement pct, loaded from sess
 var fleshArgID       = <?php echo $argIDEsc; ?>;
 var fleshType        = '<?php echo $typeLabel; ?>';
 
+// Endorsement order as the server rendered the neighbourhood (getNeighborhood is
+// already sorted by how other users have weighted these), captured before any
+// client re-sort so the Available list can always fall back to it.
+var fleshServerOrder = {};
+(function() {
+    var list = document.querySelector('.flesh-list');
+    if (!list) return;
+    Array.prototype.forEach.call(list.querySelectorAll(':scope > .flesh-row[data-arg-id]'), function(row, i) {
+        fleshServerOrder[parseInt(row.dataset.argId, 10)] = i;
+    });
+})();
+// Order the Available (neighbourhood) rows: the user's own pre-existing weight
+// first (desc) so their likely picks stay near the top even after a reset, then
+// everything else in the endorsement order other users gave it.
+function fleshSortAvailable() {
+    var listEl = document.querySelector('.flesh-list');
+    if (!listEl) return;
+    var rows = Array.prototype.slice.call(listEl.querySelectorAll(':scope > .flesh-row[data-arg-id]'));
+    rows.sort(function(a, b) {
+        var aID = parseInt(a.dataset.argId, 10), bID = parseInt(b.dataset.argId, 10);
+        var aW = fleshStoredWeights[aID] || 0, bW = fleshStoredWeights[bID] || 0;
+        if (aW !== bW) return bW - aW;                                       // 1) pre-existing weight, desc
+        return (fleshServerOrder[aID] || 0) - (fleshServerOrder[bID] || 0);  // 2) others' endorsement order
+    });
+    rows.forEach(function(row) { listEl.appendChild(row); });
+}
+
 // ── Core weight helpers ───────────────────────────────────────────────────────
 
 function fleshGetPct(id) {
@@ -802,6 +829,9 @@ function fleshReset() {
     });
     fleshPool = [];
     fleshTotalClicks = 0;
+    // Return the freed-up rows to their canonical position (pre-existing weight
+    // first, then endorsement order) rather than the bottom of the list.
+    fleshSortAvailable();
     fleshUpdateAll();
 }
 
