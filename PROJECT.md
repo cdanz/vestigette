@@ -173,7 +173,12 @@ modify `ENDORSEMENT` (trigger can't write the table that fired it).
   action. `queueOpinionForSeeding` only triggers for public-affiliation users.
 - **`search_affiliations.php`** — AJAX endpoint for the Filter section's group search.
   Returns public affiliations matching a query string.
-- **`flesh_out.php`** — association-builder page (uses `getNeighborhood`).
+- **`flesh_out.php`** — association-builder ("+ More to Say") page (uses `getNeighborhood`).
+  Only meaningful when entered via index's More-to-Say hand-off (carries the user's weights +
+  target arg through `sessionStorage`); direct visits are intentionally unsupported. Reuses
+  the ring/joystick weighting UI on its own state model (`fleshPool`, click counts). A "type a
+  new argument" flow runs a `find_similar.php` check ("Keep mine / Use this"); Available list
+  sorts by the user's pre-existing weight, then endorsement order (preserved on Reset).
 - **`admin_tools.php`** — admin-only: merge arguments, Profile Picker config (`manual` /
   `auto`), flagged-args resolve, invite-code management, demo mode toggle.
 - **`register.php`** — invite-code registration. Validates `INVITATION` (handles NULL
@@ -198,6 +203,9 @@ modify `ENDORSEMENT` (trigger can't write the table that fired it).
     Promise page cites it as evidence. Keep the crawler list current.
 - **`style_vestigette.css`**, **`script_vestigette.js`** — front end. Palette includes
   `--cddbYellow` (#d4a017) for flagged state and persona badge, `--cddbBlue` for filter badge.
+  The **weighting circles** are the `body.weigh-page` ring system: tokens
+  `--pct`/`--ring-stroke` (8px)/`--ring-size`/`--grow-scale`/`--section`, and the `JOY`
+  press-and-hold engine + `growLift`/`growDrop` (fixed-position enlarge) in the JS.
 - **`bots/persona_bot.py`** — browser-session bot that navigates the web UI to cast
   opinions and weights. Called by `process_seed_queue.py`.
 - **`bots/process_seed_queue.py`** — drains `BOT_SEED_QUEUE`; pins bot `activeAffiliationID
@@ -212,6 +220,17 @@ modify `ENDORSEMENT` (trigger can't write the table that fired it).
 
 - Weighted **Because / Therefore / Rebuttal**, **phrasing**, and **explication**
   endorsement (100% per user per type).
+- **Ring / joystick weighting UI** (index B/T/R + phrasing + explication, and flesh_out) —
+  each weight control is a single conic-gradient **ring with the % inside**, driven by one
+  `--pct` custom property (replaced the old two-arc `.pointBtn` + inline-% system). Interaction
+  is a **press-and-hold joystick**: tap = +1; hold accelerates *up* along a logistic ramp;
+  pull *down* past a threshold flips to **reduce** (two-phase — decrement the held arg's own
+  clicks to a floor of 1, then raise every other weighted arg). Held rings **enlarge and lift**
+  (`position: fixed`, so they paint in front of the section header) to read past the finger,
+  with an opaque backing and a ▲/▼ direction badge. A newly-included argument enters at a
+  **1% floor** (`floorClicksForNew` = `ceil(others/99)` clicks). flesh_out reuses the whole
+  system and scales its hold-step to the running total (`FLESH_HOLD_FRAC ≈ 2%`) because its
+  weights persist and accumulate (the index resets each section to zero, so it keeps `+1`).
 - **Groups / scoped engagement** — users operate under a group context; all actions are
   attributed via SCOPE tables. Filter view is independent of operating context.
 - **Filter section** (always-on for logged-in users) — filter the argument graph by who
@@ -273,6 +292,10 @@ modify `ENDORSEMENT` (trigger can't write the table that fired it).
   Clear it there when verifying card changes (TTL 3600s otherwise).
 - **Light panel vs dark header** — the expanded argument panel is light; the header is dark.
   Style for the surface you're on.
+- **Weighting UI is `body.weigh-page`-scoped** — index gets the class; flesh_out gets
+  `flesh-out-page weigh-page`. The old two-arc `.pointBtn` / `pctX_Y` CSS is dead but retained.
+  flesh rows have `content-visibility:auto` **disabled** on weigh-page — its paint containment
+  trapped the `position: fixed` enlarged ring and dropped the `::before` stroke.
 - **Bot personas** — profileIDs 1–26 must always have `activeAffiliationID = 12`. Both
   `process_seed_queue.py` (DB update) and `persona_bot.py` (switchGroup POST) enforce this.
 
@@ -299,4 +322,4 @@ modify `ENDORSEMENT` (trigger can't write the table that fired it).
   feature is incomplete.
 - Cost monitoring & scale-back rules; branding pass.
 
-_Last refreshed: 2026-07-08._
+_Last refreshed: 2026-07-22._
