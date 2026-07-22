@@ -781,14 +781,22 @@ function pctToFleshClicks(storedArr) {
 
 function fleshReset() {
     var listEl = document.querySelector('.flesh-list');
+    var newArgZone = document.getElementById('new-arg-zone');
     fleshPool.forEach(function(item) {
         var row = document.getElementById('flesh-' + item.id);
         if (!row) return;
         row.style.setProperty('--pct', '0');
         var val = row.querySelector('.val');
         if (val) val.textContent = '0%';
-        // neighbourhood (existing) rows return to the available pool
-        if (item.id.indexOf('ex-') === 0) listEl.appendChild(row);
+        if (item.id.indexOf('ex-') === 0) {
+            // neighbourhood rows return to the available pool
+            listEl.appendChild(row);
+        } else if (item.id.indexOf('new-') === 0 && newArgZone) {
+            // coined rows return above the Weighted line, keeping their typed
+            // text; pressing them again re-runs the similarity check (their
+            // similarCache is untouched) before they re-enter Weighted.
+            newArgZone.appendChild(row);
+        }
     });
     fleshPool = [];
     fleshTotalClicks = 0;
