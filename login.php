@@ -92,7 +92,7 @@ mysqli_close($db);
 <body class="content-page">
 
 <div id="mastHead" class="container">
-    <h1><a href="/?arg=<?php echo $arg; ?>">AGITATE<span class="exclaim">!</span></a></h1>
+    <h1><a href="/?arg=<?php echo $arg; ?>"><img class="agi-ring" src="/agitate-ring.svg" alt="Agitate">AGITATE</a></h1>
     <?php if ($profile && $activeGroupName !== ''): ?>
     <a href="/Profile.php?arg=<?php echo intval($arg); ?>" class="group-badge" title="<?php echo htmlspecialchars($activeGroupName); ?>"><?php echo htmlspecialchars($activeGroupName); ?></a>
     <?php endif; ?>

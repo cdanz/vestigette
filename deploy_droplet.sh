@@ -52,6 +52,10 @@ STATIC_FILES=(
     script_vestigette.js
     robots.txt
     .htaccess
+    agitate-ring.svg
+    favicon.ico
+    favicon-32.png
+    apple-touch-icon.png
 )
 
 # Files under includes/ — synced to $WEB_ROOT/includes/ (not the flat web root).

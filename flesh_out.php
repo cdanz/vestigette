@@ -234,7 +234,7 @@ $baseURL      = '/';
 <body class="flesh-out-page weigh-page<?php if ($demoMode) echo ' demo-mode'; ?>">
 
 <div id="mastHead" class="container">
-    <h1><a href="/?arg=<?php echo $argIDEsc; ?>">AGITATE<span class="exclaim">!</span></a></h1>
+    <h1><a href="/?arg=<?php echo $argIDEsc; ?>"><img class="agi-ring" src="/agitate-ring.svg" alt="Agitate">AGITATE</a></h1>
     <div>
         <a href="About.php?arg=<?php echo $argIDEsc; ?>">About</a>
         <a href="Explore.php?arg=<?php echo $argIDEsc; ?>">Explore</a>

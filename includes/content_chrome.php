@@ -158,10 +158,10 @@ function content_header($title, $meta = []) {
 		body { margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; color:var(--ink); background:var(--bg); line-height:1.62; }
 		a { color: var(--blue); }
 		@font-face { font-family:'Anton'; font-style:normal; font-weight:400; font-display:swap; src:url('/fonts/anton.woff2') format('woff2'); }
+		@font-face { font-family:'Cabin'; font-style:normal; font-weight:500; font-display:swap; src:url('/fonts/cabin-500.woff2') format('woff2'); }
 		.masthead { background:#0e0e0e; padding:0.6rem 1rem; }
-		.masthead a { font-family:'Anton',Impact,'Arial Black',Arial,sans-serif; color:#fff; text-decoration:none; font-weight:normal; font-size:1.5rem;
-			text-shadow:0.4em 0em 0.05em #af1a17, 0em -0.4em 0.05em #2d58a8, 0em 0.4em 0.05em #10a020; }
-		.masthead a .exclaim { color:#d4a017; }
+		.masthead a { display:inline-flex; align-items:center; gap:0.34em; font-family:'Cabin','Gill Sans','Helvetica Neue',Arial,sans-serif; color:#fff; text-decoration:none; font-weight:500; font-size:1.5rem; letter-spacing:0.1em; text-transform:uppercase; line-height:0.9; }
+		.masthead a .agi-ring { display:block; flex:0 0 auto; width:0.96em; height:0.96em; }
 		.wrap { max-width:720px; margin:0 auto; padding:1.75rem 1.25rem 2.5rem; }
 		h1 { font-size:1.85rem; line-height:1.2; margin:0.75rem 0 0.4rem; }
 		.meta { color:var(--muted); font-size:0.85rem; margin-bottom:1.25rem; }
@@ -193,7 +193,7 @@ function content_header($title, $meta = []) {
 	</style>
 </head>
 <body>
-	<div class="masthead"><a href="/">AGITATE<span class="exclaim">!</span></a></div>
+	<div class="masthead"><a href="/"><img class="agi-ring" src="/agitate-ring.svg" alt="Agitate">AGITATE</a></div>
 	<div class="wrap">
 
 HTML;

@@ -138,7 +138,7 @@ mysqli_close($db);
 <body class="content-page">
 
 <div id="mastHead" class="container">
-	<h1><a href="/?arg=<?php echo $_SESSION['currentArg']; ?>">AGITATE<span class="exclaim">!</span></a></h1>
+	<h1><a href="/?arg=<?php echo $_SESSION['currentArg']; ?>"><img class="agi-ring" src="/agitate-ring.svg" alt="Agitate">AGITATE</a></h1>
 	<div>
 		<a href="About.php?arg=<?php echo $_SESSION['currentArg']; ?>">About</a>
 		<a href="Explore.php?arg=<?php echo $_SESSION['currentArg']; ?>">Explore</a>

@@ -1,11 +1,19 @@
-/* Anton is self-hosted (fonts/anton.woff2, SIL OFL) — no third-party font CDN,
-   per the Data Promise: the browser talks to agitate-discourse.org only. */
+/* Anton and Cabin are self-hosted (fonts/*.woff2, SIL OFL) — no third-party font CDN,
+   per the Data Promise: the browser talks to agitate-discourse.org only.
+   Cabin carries the AGITATE wordmark; Anton is retained for legacy/content use. */
 @font-face {
 	font-family: 'Anton';
 	font-style: normal;
 	font-weight: 400;
 	font-display: swap;
 	src: url('/fonts/anton.woff2') format('woff2');
+}
+@font-face {
+	font-family: 'Cabin';
+	font-style: normal;
+	font-weight: 500;
+	font-display: swap;
+	src: url('/fonts/cabin-500.woff2') format('woff2');
 }
 
 /* Color palette */
@@ -69,18 +77,29 @@ h1 {
 	font-weight: normal;
 }
 h1 a {
-	font-family: 'Anton', Impact, 'Arial Black', Arial, sans-serif;
-	font-size: 3rem;
-	font-weight: normal;
+	align-items: center;
 	color: var(--cddbWhite);
+	display: inline-flex;
+	font-family: 'Cabin', 'Gill Sans', 'Helvetica Neue', Arial, sans-serif;
+	font-size: 3rem;
+	font-weight: 500;
+	gap: 0.4em;
+	letter-spacing: 0.12em;
+	line-height: 0.9;
 	text-decoration: none;
-	text-shadow:
-		0.4em  0em    0.05em var(--cddbRed),
-		0em   -0.4em  0.05em var(--cddbBlue),
-		0em    0.4em  0.05em var(--cddbGreen);
+	text-transform: uppercase;
 }
-h1 a .exclaim {
-	color: var(--cddbYellow);
+/* Proportional tri-color ring mark (/agitate-ring.svg) — sized to the caps */
+h1 a .agi-ring {
+	display: block;
+	flex: 0 0 auto;
+	height: 0.96em;
+	width: 0.96em;
+}
+/* Cabin is wider than the old condensed Anton — shrink the wordmark on phones
+   so the ring + AGITATE clears the hamburger and Donate controls. */
+@media only screen and (max-width: 640px) {
+	h1 a { font-size: 1.75rem; letter-spacing: 0.1em; }
 }
 h2 {
 	font-weight: bold;
