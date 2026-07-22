@@ -828,10 +828,24 @@ function fleshLoadMyWeights() {
 // arg is pinned, a press-and-hold runs the full joystick: accelerate up,
 // two-phase reduce down, enlarge/lift. The engine (startHold/stopHold + its
 // global pointerup/move listeners) lives in script_vestigette.js.
+// Clicks added/removed per HOLD tick, scaled to the running total so the share
+// moves at a steady pace however large the total has grown (a fixed +1 barely
+// nudges a big total — the "snail's pace"). Small totals still step by 1, so a
+// quick tap stays a fine single-click nudge.
+var FLESH_HOLD_FRAC = 0.02;
+function fleshStep() { return Math.max(1, Math.round(fleshTotalClicks * FLESH_HOLD_FRAC)); }
+
 function fleshReducePinned(item) {
-    if (item.clicks > 1) { item.clicks -= 1; fleshTotalClicks -= 1; fleshUpdateAll(); return; }
+    var step = fleshStep();
+    if (item.clicks - step >= 1) {
+        item.clicks -= step; fleshTotalClicks -= step; fleshUpdateAll(); return;
+    }
+    if (item.clicks > 1) {           // a full step would undershoot — sit exactly on the floor
+        fleshTotalClicks -= (item.clicks - 1); item.clicks = 1; fleshUpdateAll(); return;
+    }
+    // at the floor of 1 — grow the denominator by raising every other weighted arg
     var raised = false;
-    fleshPool.forEach(function(x) { if (x !== item && x.clicks > 0) { x.clicks += 1; fleshTotalClicks += 1; raised = true; } });
+    fleshPool.forEach(function(x) { if (x !== item && x.clicks > 0) { x.clicks += step; fleshTotalClicks += step; raised = true; } });
     if (raised) fleshUpdateAll();
 }
 function fleshSetReceiving(on, activeId) {
@@ -869,12 +883,13 @@ document.querySelector('.flesh-list').addEventListener('pointerdown', function(e
     // already pinned — full joystick
     e.preventDefault();
     try { w.setPointerCapture(e.pointerId); } catch (err) {}
-    var up   = function() { item.clicks++; fleshTotalClicks++; fleshUpdateAll(); };
+    var tapUp  = function() { item.clicks++; fleshTotalClicks++; fleshUpdateAll(); };            // fine +1 on tap
+    var rampUp = function() { var inc = fleshStep(); item.clicks += inc; fleshTotalClicks += inc; fleshUpdateAll(); }; // steady share climb on hold
     var down = function() { fleshReducePinned(item); };
     var canReduce = function() { return fleshPool.some(function(x) { return x.id !== id && x.clicks > 0; }); };
     var receiving = function(on) { fleshSetReceiving(on, id); };
-    up(); // the press counts as one add (tap = +1)
-    startHold({ ring: w, line: row, originY: e.clientY, up: up, down: down, canReduce: canReduce, receiving: receiving });
+    tapUp(); // the press itself counts as one fine add
+    startHold({ ring: w, line: row, originY: e.clientY, up: rampUp, down: down, canReduce: canReduce, receiving: receiving });
 });
 
 // ── Apply context from index page "More to Say" button ────────────────────────
