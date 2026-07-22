@@ -437,8 +437,9 @@ function fleshBumpExisting(argID) {
         row.addEventListener('animationend', function() {
             row.classList.remove('departing');
             pinnedZone.appendChild(row);
-            fleshPool.push({id: id, clicks: 1});
-            fleshTotalClicks++;
+            var nc = floorClicksForNew(fleshTotalClicks); // >= 1% of the resulting total
+            fleshPool.push({id: id, clicks: nc});
+            fleshTotalClicks += nc;
             fleshUpdateAll();
         }, { once: true });
         return;
@@ -517,12 +518,13 @@ function fleshDoPinNew(n) {
     // clicks in fleshTotalClicks while fleshPool.find() only ever surfaces
     // the first entry, making the row's own weight look stuck.
     if (fleshPool.some(function(x) { return x.id === id; })) return;
-    fleshPool.push({id: id, clicks: 1});
+    var nc = floorClicksForNew(fleshTotalClicks); // >= 1% of the resulting total
+    fleshPool.push({id: id, clicks: nc});
+    fleshTotalClicks += nc;
     fleshNewCounter++;
     var pinnedRow = document.getElementById('flesh-new-' + n);
     // Leave a fresh empty row up top (inserted before the one we're committing).
     fleshAddNewRow(fleshNewCounter, pinnedRow);
-    fleshTotalClicks++;
     // Move the just-coined argument down into the Weighted zone, so every
     // weighted item lives together once the user commits to their assertion.
     var pinnedZone = document.getElementById('pinned-zone');
