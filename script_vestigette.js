@@ -647,6 +647,7 @@ function init() {
 			fit();
 		}
 
+		track.classList.add('carousel-ready');   // reveal the other slides now that JS sizes the track
 		fit();
 		window.addEventListener('resize', fit);
 

@@ -1484,6 +1484,13 @@ body.flesh-out-page .flesh-reciprocate input:focus + .toggle {
 	min-width: 0;
 	overflow: hidden;
 }
+/* Kill the pre-JS height flash: until the script adds .carousel-ready, only the
+   first slide contributes height, so the track can't balloon to a taller later
+   slide and then collapse when fit() runs. (Single-slide carousels never get
+   .carousel-ready, but they have no later slides to hide, so this is inert.) */
+.carousel-track:not(.carousel-ready) .carousel-slide:not(:first-child) {
+	display: none;
+}
 #argument .panel .explicationBox .carousel-slide a:not(.link-preview) {
 	border: 2px var(--cddbLiteGrey) solid;
 	box-sizing: border-box;
