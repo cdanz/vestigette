@@ -2119,6 +2119,10 @@ body.flesh-out-page #flesh-out { --section: var(--flesh-color, var(--cddbBlack))
 /* The new-argument row has a textarea just right of the ring, so keep the
    forgiving hit area from spilling right over it — extend left + vertical only. */
 body.flesh-out-page .wrapper::after { inset: -5px 0 -5px -8px; }
+/* content-visibility on flesh rows applies paint containment, which clips a
+   position:fixed descendant to its row — that was trapping the enlarged ring.
+   Drop it on the held row so the ring can lift out and grow in front. */
+body.flesh-out-page .flesh-row.active { content-visibility: visible; }
 /* Forgiving press/gesture target: extend the hit area beyond the visible ring
    into the row's existing dead space — the vertical margin and the gap before
    the text — so starting a hold/swipe never needs a precise landing. It's an

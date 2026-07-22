@@ -519,8 +519,14 @@ function fleshDoPinNew(n) {
     if (fleshPool.some(function(x) { return x.id === id; })) return;
     fleshPool.push({id: id, clicks: 1});
     fleshNewCounter++;
-    fleshAddNewRow(fleshNewCounter, document.getElementById('flesh-new-' + n));
+    var pinnedRow = document.getElementById('flesh-new-' + n);
+    // Leave a fresh empty row up top (inserted before the one we're committing).
+    fleshAddNewRow(fleshNewCounter, pinnedRow);
     fleshTotalClicks++;
+    // Move the just-coined argument down into the Weighted zone, so every
+    // weighted item lives together once the user commits to their assertion.
+    var pinnedZone = document.getElementById('pinned-zone');
+    if (pinnedZone && pinnedRow) pinnedZone.appendChild(pinnedRow);
     fleshUpdateAll();
 }
 
