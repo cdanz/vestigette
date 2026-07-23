@@ -258,12 +258,12 @@ feel can be adjusted without touching the loop.
 */
 const JOY = {
 	INITIAL_DELAY: 250, // ms held before the ramp engages (tap vs hold)
-	DOWN_FLIP: 40,      // px of downward pull to flip into reduce (strong up bias)
-	DOWN_RELEASE: 20,   // px back up to return to add (< DOWN_FLIP → hysteresis)
+	DOWN_FLIP: 24,      // px of downward pull to flip into reduce (gentler than the old 40)
+	DOWN_RELEASE: 16,   // px back up to return to add (< DOWN_FLIP → hysteresis)
 	UP_RANGE: 120,      // px of upward pull for full add speed
 	DOWN_RANGE: 120,    // px of downward pull (past the flip) for full reduce speed
-	RATE_MIN: 6,        // increments/sec at the gentle end
-	RATE_MAX: 48,       // increments/sec cap
+	RATE_MIN: 1,        // increments/sec at the gentle end
+	RATE_MAX: 10,       // increments/sec cap
 	FLOOR: 0.12         // fraction of range you still get holding at the start point
 };
 let joy = null; // active hold context, or null
