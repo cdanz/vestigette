@@ -6716,3 +6716,5 @@ body.demo-mode .flesh-list {
 /* link preview — drop the heavy boxy border */
 #argument .panel .explicationBox .carousel-slide a.link-preview { border: 0; margin: 0; padding: 0.3rem 0 0.1rem; width: 100%; }
 #argument .panel .explicationBox .carousel-slide a:not(.link-preview) { border: 0; margin: 0.3rem 0 0.1rem; padding: 0; width: 100%; }
+/* Collapse the OG image gutter when a supporting link has no image */
+#argument .panel .explicationBox a.link-preview:not(:has(img)) { grid-template-columns: 1fr; }
