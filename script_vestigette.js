@@ -418,6 +418,7 @@ function init() {
 				let up = null, down = null, canReduce = null, receiving = null;
 
 				if (type === 'phrasing') {
+						if (!document.querySelector('#phrasing .endorse')) return;   // must accept the argument to weigh in
 					if (sectionState.phrasing.mode === 'idle') {
 						sectionState.phrasing.mode = 'editing';
 						document.getElementById('phrasing').classList.add('edit');
@@ -433,6 +434,7 @@ function init() {
 					canReduce = function() { return countOthersWeighted(phrasingClickArr, pid) > 0; };
 					receiving = function(on) { setReceivingList('phrasing', 'phrasingId', pid, phrasingClickArr, on); };
 				} else if (type === 'explication') {
+						if (!document.querySelector('#explication .endorse')) return;   // must accept the argument to weigh in
 					if (sectionState.explication.mode === 'idle') {
 						sectionState.explication.mode = 'editing';
 						document.getElementById('explication').classList.add('edit');

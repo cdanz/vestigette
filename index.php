@@ -1088,6 +1088,8 @@ if ((isset($opinion)) && ($opinion > 0)) {
     }
 ?>
             <p class="overlay-gloss">The thrust of this argument can be phrased in many ways - endorse the phrasing(s) that best capture the spirit of the argument.</p>
+<?php if (!((isset($opinion)) && ($opinion > 0))): ?>						<p class="accept-prompt">Accept this argument to weigh-in on its phrasings.</p>
+<?php endif; ?>
 <?php
 if ((isset($opinion)) && ($opinion > 0)) {
 ?>
@@ -1134,6 +1136,8 @@ if ((isset($opinion)) && ($opinion > 0)) {
 	}
 ?>
 						<p class="overlay-gloss">Links that explicate this argument &mdash; an article, a study, a gif, anything that strengthens your assertion.</p>
+<?php if (!((isset($opinion)) && ($opinion > 0))): ?>						<p class="accept-prompt">Accept this argument to weigh-in on its linked content.</p>
+<?php endif; ?>
 <?php
 if ((isset($opinion)) && ($opinion > 0)) {
 ?>
