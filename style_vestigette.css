@@ -6786,3 +6786,23 @@ body.demo-mode .flesh-list {
 	cursor: pointer; font-size: 0.95rem; font-weight: 400; height: auto; padding: 0.26rem 0.55rem;
 }
 #phrasing .overlay-actions .reset:hover, #explication .overlay-actions .reset:hover { border-color: var(--cddbBlack); color: var(--cddbBlack); }
+/* Unify the modal header actions into one family: Endorse = filled primary; Reset + close-X = matching outlined secondary icons */
+#phrasing .overlay-actions form, #explication .overlay-actions form { display: contents; }
+#phrasing .overlay-actions .endorse, #explication .overlay-actions .endorse,
+#phrasing .overlay-actions .reset, #explication .overlay-actions .reset,
+#overlayP #closeP, #overlayE #closeE {
+	align-items: center; border-radius: 7px; box-sizing: border-box; cursor: pointer;
+	display: inline-flex; height: 1.9rem; justify-content: center; line-height: 1; margin: 0;
+}
+#phrasing .overlay-actions .endorse, #explication .overlay-actions .endorse {
+	background: var(--cddbBlack); border: 1px solid var(--cddbBlack); color: #fff;
+	font-size: 0.85rem; font-weight: 600; padding: 0 0.9rem; width: auto;
+}
+#phrasing .overlay-actions .endorse:hover, #explication .overlay-actions .endorse:hover { background: #2a2a2a; }
+#phrasing .overlay-actions .reset, #explication .overlay-actions .reset,
+#overlayP #closeP, #overlayE #closeE {
+	background: #fff; border: 1px solid #d6d9de; color: #6b7079;
+	font-size: 1rem; font-weight: 400; padding: 0; width: 1.9rem;
+}
+#phrasing .overlay-actions .reset:hover, #explication .overlay-actions .reset:hover,
+#overlayP #closeP:hover, #overlayE #closeE:hover { border-color: var(--cddbBlack); color: var(--cddbBlack); }
