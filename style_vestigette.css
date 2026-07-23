@@ -6772,3 +6772,17 @@ body.demo-mode .flesh-list {
 }
 #phrasing.container:not(:has(.endorse)) .wrapper,
 #explication.container:not(:has(.endorse)) .wrapper { cursor: default; }
+/* Modal action buttons were light for the old grey frame → invisible on the white card. Restyle. */
+#phrasing .overlay-actions, #explication .overlay-actions { display:flex; align-items:center; gap:0.4rem; }
+#phrasing .overlay-actions .endorse, #explication .overlay-actions .endorse,
+#phrasing .assert .addNew, #explication .assert .addNew {
+	background: var(--cddbBlack); border: 1px solid var(--cddbBlack); border-radius: 7px;
+	color: #fff; cursor: pointer; font-size: 0.85rem; font-weight: 600; height: auto; padding: 0.34rem 0.9rem;
+}
+#phrasing .overlay-actions .endorse:hover, #explication .overlay-actions .endorse:hover,
+#phrasing .assert .addNew:hover, #explication .assert .addNew:hover { background: #2a2a2a; }
+#phrasing .overlay-actions .reset, #explication .overlay-actions .reset {
+	background: #fff; border: 1px solid #d6d9de; border-radius: 7px; color: #6b7079;
+	cursor: pointer; font-size: 0.95rem; font-weight: 400; height: auto; padding: 0.26rem 0.55rem;
+}
+#phrasing .overlay-actions .reset:hover, #explication .overlay-actions .reset:hover { border-color: var(--cddbBlack); color: var(--cddbBlack); }
