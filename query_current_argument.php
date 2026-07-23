@@ -409,6 +409,15 @@ function cleanOgImage($val) {
 
 function storeOgMeta($db, $url, $explicationID) {
 	$og = fetchOgMeta($url);
+	// Guard: YouTube's generic homepage placeholder (returned while a video is still
+	// processing, or when the fetch hits a consent interstitial). Don't cache it —
+	// leave the fields empty so the card shows the clean domain and the link stays
+	// eligible for a later re-fetch instead of sticking with misleading text.
+	$titleLc = strtolower(trim($og['title'] ?? ''));
+	if ($titleLc === 'youtube' || $titleLc === '- youtube'
+	    || stripos($og['description'] ?? '', 'Enjoy the videos and music you love') === 0) {
+		$og = ['title' => null, 'image' => null, 'description' => null];
+	}
 	$id = intval($explicationID);
 	$t  = mysqli_real_escape_string($db, cleanOgText($og['title'] ?? '', 300));
 	$i  = mysqli_real_escape_string($db, cleanOgImage($og['image'] ?? ''));
