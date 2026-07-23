@@ -750,7 +750,7 @@ $carouselCount = count($carouselLinks);
 							</div>
 						</div>
 <?php else: ?>
-						<p class="carousel-empty">No supporting links yet, accept to weigh-in with one of your own.</p>
+						<p class="carousel-empty">No content linked yet, accept to weigh-in with your own.</p>
 <?php endif; ?>
 						<div class="carousel-actions">
 <?php if ($carouselCount > 1): ?>
