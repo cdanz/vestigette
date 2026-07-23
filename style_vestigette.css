@@ -6718,3 +6718,38 @@ body.demo-mode .flesh-list {
 #argument .panel .explicationBox .carousel-slide a:not(.link-preview) { border: 0; margin: 0.3rem 0 0.1rem; padding: 0; width: 100%; }
 /* Collapse the OG image gutter when a supporting link has no image */
 #argument .panel .explicationBox a.link-preview:not(:has(img)) { display: block; }
+
+/* ── Management-pane modals (#phrasing / #explication) refreshed to the panel look ── */
+#phrasing.container,
+#explication.container {
+	background: #fff;
+	border: 1px solid #e0e0e3;
+	border-radius: 12px;
+	box-shadow: 0 14px 44px rgba(14,14,14,0.30);
+	max-width: 640px;
+	padding: 0.9rem 1.1rem 1rem;
+	top: 2rem;
+}
+#phrasing .overlay-header,
+#explication .overlay-header {
+	border-bottom: 1px solid var(--cddbLiteGrey);
+	margin-bottom: 0.35rem;
+	padding: 0.1rem 0 0.7rem;
+}
+#phrasing .overlay-header h2,
+#explication .overlay-header h2 {
+	font-size: 1.4rem;
+	font-weight: 700;
+}
+/* Gloss note at the bottom of each list — teaches the term / reinforces the concept */
+#phrasing .overlay-gloss,
+#explication .overlay-gloss {
+	background: transparent;
+	border-top: 1px solid var(--cddbLiteGrey);
+	color: #6b7079;
+	font-size: 0.85rem;
+	line-height: 1.5;
+	margin: 0.5rem 0 0;
+	padding: 0.7rem 0.5rem 0.2rem;
+	width: 100%;
+}

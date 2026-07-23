@@ -1087,6 +1087,7 @@ if ((isset($opinion)) && ($opinion > 0)) {
         generatePhrasingLines($altPhrasings);
     }
 ?>
+            <p class="overlay-gloss">The thrust of this argument can be phrased in many ways - endorse the phrasing(s) that best capture the spirit of the argument.</p>
 <?php
 if ((isset($opinion)) && ($opinion > 0)) {
 ?>
@@ -1132,6 +1133,7 @@ if ((isset($opinion)) && ($opinion > 0)) {
 		generateLinkLines($links);
 	}
 ?>
+						<p class="overlay-gloss">Links that explicate this argument &mdash; an article, a study, a gif, anything that strengthens your assertion.</p>
 <?php
 if ((isset($opinion)) && ($opinion > 0)) {
 ?>
