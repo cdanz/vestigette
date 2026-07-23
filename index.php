@@ -676,26 +676,37 @@ $phrasingCount = count($phrasingList);
 ?>
 				<div class="phrasingBox carousel-box">
 					<div class="carousel-content">
+						<div class="zone-head">
+							<span class="zone-label">Put Another Way</span>
+<?php if ($phrasingCount > 1): ?>
+							<span class="zone-count"><?php echo $phrasingCount; ?> Alternative Phrasings</span>
+<?php endif; ?>
+						</div>
 <?php if ($phrasingCount > 1): ?>
 						<div class="carousel-track">
 							<div class="carousel-slides">
-<?php foreach ($phrasingList as $pline): ?>
-								<div class="carousel-slide"><p class="phrasing-slide"><?php echo htmlspecialchars($pline[2]); ?></p></div>
+<?php foreach ($phrasingList as $pi => $pline): ?>
+								<div class="carousel-slide"><p class="phrasing-slide"><?php echo htmlspecialchars($pline[2]); ?><?php if ($pi === 0): ?> <span class="pw-tag pw-lead">Leading</span><?php endif; ?></p></div>
 <?php endforeach; ?>
 							</div>
 						</div>
-						<div class="carousel-footer">
-							<button class="carousel-prev" aria-label="Previous phrasing">&#8592;</button>
-							<span class="carousel-count" data-label="alternative phrasings">1 of <?php echo $phrasingCount; ?> alternative phrasings</span>
-							<button class="carousel-next" aria-label="Next phrasing">&#8594;</button>
-						</div>
 <?php else: ?>
-						<p class="carousel-empty">No alternative phrasing - accept the argument to provide one.</p>
+						<p class="carousel-empty">Phrased only this one way so far - accept to weigh-in with one of your own.</p>
 <?php endif; ?>
+						<div class="carousel-actions">
+<?php if ($phrasingCount > 1): ?>
+							<div class="carousel-pager">
+								<button class="carousel-prev" aria-label="Previous phrasing">&#8249;</button>
+								<span class="carousel-dots" data-label="alternative phrasings"></span>
+								<button class="carousel-next" aria-label="Next phrasing">&#8250;</button>
+							</div>
+<?php endif; ?>
+							<button class="altPhraseBtn weigh-btn" name="buttonClicked" value="altPhrasing" title="Weigh-In on Phrasing" aria-label="Weigh-In on Phrasing">
+								<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>
+								<span class="weigh-btn-label">Weigh-In on Phrasing</span>
+							</button>
+						</div>
 					</div>
-					<button class="altPhraseBtn" name="buttonClicked" value="altPhrasing" title="Alternate phrasings" aria-label="Alternate phrasings">
-						<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
-					</button>
 				</div>
 				<div class="explicationBox carousel-box">
 <?php
@@ -703,6 +714,12 @@ $carouselLinks = isset($links) ? array_values(array_filter($links, function($l) 
 $carouselCount = count($carouselLinks);
 ?>
 					<div class="carousel-content">
+						<div class="zone-head">
+							<span class="zone-label">Supporting Links</span>
+<?php if ($carouselCount > 1): ?>
+							<span class="zone-count"><?php echo $carouselCount; ?> Additional Links</span>
+<?php endif; ?>
+						</div>
 <?php if ($carouselCount > 0): ?>
 						<div class="carousel-track">
 							<div class="carousel-slides">
@@ -715,6 +732,8 @@ $carouselCount = count($carouselLinks);
 	$showOg = ($ci < 5) && ($cOgT || $cOgI || $cOgD);
 ?>
 								<div class="carousel-slide">
+<?php if ($ci === 0 && $carouselCount > 1): ?>									<span class="pw-tag pw-lead pw-tag-float">Leading</span>
+<?php endif; ?>
 <?php if ($showOg): ?>
 									<a href="<?php echo htmlspecialchars($cUrl); ?>" target="_blank" class="link-preview">
 <?php if ($cOgI): ?>										<img src="<?php echo htmlspecialchars($cOgI); ?>" class="link-preview-img" alt="" loading="lazy">
@@ -731,18 +750,23 @@ $carouselCount = count($carouselLinks);
 <?php endforeach; ?>
 							</div>
 						</div>
-<?php if ($carouselCount > 1): ?>
-						<div class="carousel-footer">
-							<button class="carousel-prev" aria-label="Previous link">&#8592;</button>
-							<span class="carousel-count" data-label="explication links">1 of <?php echo $carouselCount; ?> explication links</span>
-							<button class="carousel-next" aria-label="Next link">&#8594;</button>
-						</div>
-<?php endif; ?>
 <?php else: ?>
-						<p class="carousel-empty">No explication links yet &mdash; accept the argument to add one.</p>
+						<p class="carousel-empty">No supporting links yet, accept to weigh-in with one of your own.</p>
 <?php endif; ?>
+						<div class="carousel-actions">
+<?php if ($carouselCount > 1): ?>
+							<div class="carousel-pager">
+								<button class="carousel-prev" aria-label="Previous link">&#8249;</button>
+								<span class="carousel-dots" data-label="explication links"></span>
+								<button class="carousel-next" aria-label="Next link">&#8250;</button>
+							</div>
+<?php endif; ?>
+							<button class="altExplicationBtn weigh-btn" title="Weigh-In on Links" aria-label="Weigh-In on Links">
+								<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+								<span class="weigh-btn-label">Weigh-In on Links</span>
+							</button>
+						</div>
 					</div>
-					<button class="altExplicationBtn" aria-label="Explication links">&#x2318;</button>
 				</div>
 				<div class="flag-row">
 <?php if ($profile): ?>

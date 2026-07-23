@@ -6679,3 +6679,40 @@ body.demo-mode .container .panel {
 body.demo-mode .flesh-list {
 	overscroll-behavior-y: contain;
 }
+
+/* ═══════════════════════════════════════════════════════════════════
+   Expanded argument panel — refreshed (2026-07). Calm zones + hairlines,
+   slim dot pagination, labeled "Weigh-In" actions, Leading/Yours tags.
+   Placed last: overrides the older nested-box / half-circle-button rules.
+   ═══════════════════════════════════════════════════════════════════ */
+#argument .panel .carousel-box { display: block; margin: 0; padding: 0; width: 100%; }
+#argument .panel .carousel-box:not(:last-child) { border-bottom: 1px solid var(--cddbLiteGrey); margin-bottom: 0; }
+#argument .panel .carousel-box .carousel-content { display: block; overflow: visible; padding: 0.55rem 0.85rem 0.65rem; width: 100%; }
+#argument .panel .zone-head { align-items: baseline; display: flex; gap: 0.6rem; justify-content: space-between; margin-bottom: 0.1rem; }
+#argument .panel .zone-label { color: #7a7f88; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.09em; text-transform: uppercase; }
+#argument .panel .zone-count { color: #a9adb4; font-size: 0.72rem; white-space: nowrap; }
+#argument .panel .carousel-box .phrasing-slide { border: 0; color: var(--cddbBlack); font-size: 1rem; line-height: 1.5; margin: 0; padding: 0.35rem 0 0.1rem; width: 100%; }
+#argument .panel .carousel-box .carousel-empty { border: 0; color: var(--cddbGrey); font-size: 0.9rem; margin: 0; padding: 0.35rem 0 0.2rem; }
+#argument .panel .carousel-slide { position: relative; }
+/* Leading / Yours tags */
+#argument .panel .pw-tag { border-radius: 3px; display: inline-block; font-size: 0.62rem; font-weight: 700; letter-spacing: 0.06em; line-height: 1.5; margin-left: 0.45em; padding: 0.02rem 0.4rem; text-transform: uppercase; vertical-align: middle; white-space: nowrap; }
+#argument .panel .pw-lead { background: rgba(212,160,23,0.16); color: #8a6a0c; }
+#argument .panel .pw-you  { background: rgba(45,88,168,0.14);  color: #274a86; }
+#argument .panel .pw-tag-float { margin-left: 0; position: absolute; right: 0.35rem; top: 0.3rem; z-index: 1; }
+/* actions: pager (left) + Weigh-In button (right) */
+#argument .panel .carousel-actions { align-items: center; display: flex; gap: 0.6rem; margin-top: 0.5rem; }
+#argument .panel .carousel-pager { align-items: center; display: flex; gap: 0.55rem; }
+#argument .panel .carousel-pager .carousel-prev,
+#argument .panel .carousel-pager .carousel-next { align-self: auto; background: transparent; border: 0; border-radius: 0; color: #9096a0; cursor: pointer; font-size: 1.15rem; height: auto; line-height: 1; min-width: 0; padding: 0 0.1rem; }
+#argument .panel .carousel-pager .carousel-prev:hover,
+#argument .panel .carousel-pager .carousel-next:hover { color: var(--cddbBlack); }
+#argument .panel .carousel-dots { align-items: center; display: inline-flex; gap: 6px; }
+#argument .panel .carousel-dots .dot { background: #d3d6db; border-radius: 50%; cursor: pointer; height: 6px; width: 6px; }
+#argument .panel .carousel-dots .dot.on { background: var(--cddbBlack); }
+/* Weigh-In button — replaces the black half-circle dialog-opener */
+#argument .panel .weigh-btn { align-items: center; align-self: auto; background: #fff; border: 1px solid #d6d9de; border-radius: 7px; color: var(--cddbBlack); cursor: pointer; display: inline-flex; flex: 0 0 auto; font-size: 0.8rem; font-weight: 500; gap: 0.4rem; height: auto; justify-content: center; margin-left: auto; min-width: 0; padding: 0.34rem 0.7rem; white-space: nowrap; }
+#argument .panel .weigh-btn:hover { border-color: var(--cddbBlack); }
+#argument .panel .weigh-btn svg { flex: 0 0 auto; height: 14px; width: 14px; }
+/* link preview — drop the heavy boxy border */
+#argument .panel .explicationBox .carousel-slide a.link-preview { border: 0; margin: 0; padding: 0.3rem 0 0.1rem; width: 100%; }
+#argument .panel .explicationBox .carousel-slide a:not(.link-preview) { border: 0; margin: 0.3rem 0 0.1rem; padding: 0; width: 100%; }

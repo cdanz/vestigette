@@ -630,9 +630,9 @@ function init() {
 
 		var prevBtn  = box.querySelector('.carousel-prev');
 		var nextBtn  = box.querySelector('.carousel-next');
-		var countEl  = box.querySelector('.carousel-count');
-		var label    = countEl ? (countEl.dataset.label || '') : '';
+		var dotsEl   = box.querySelector('.carousel-dots');
 		var current  = 0;
+		var dots     = [];
 
 		// Size the track to the visible slide so short slides don't inherit the
 		// tallest slide's height (which left a gap above the nav arrows).
@@ -643,12 +643,21 @@ function init() {
 		function goTo(n) {
 			current = ((n % total) + total) % total;
 			inner.style.transform = 'translateX(-' + (current * 100) + '%)';
-			if (countEl) countEl.textContent = (current + 1) + ' of ' + total + (label ? ' ' + label : '');
+			for (var k = 0; k < dots.length; k++) dots[k].classList.toggle('on', k === current);
 			fit();
 		}
 
 		track.classList.add('carousel-ready');   // reveal the other slides now that JS sizes the track
-		fit();
+		if (dotsEl) {
+			for (var di = 0; di < total; di++) {
+				var dot = document.createElement('span');
+				dot.className = 'dot';
+				(function (idx) { dot.addEventListener('click', function () { goTo(idx); }); })(di);
+				dotsEl.appendChild(dot);
+				dots.push(dot);
+			}
+		}
+		goTo(0);
 		window.addEventListener('resize', fit);
 
 		if (prevBtn) prevBtn.addEventListener('click', function() { goTo(current - 1); });
