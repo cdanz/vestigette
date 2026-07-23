@@ -716,9 +716,9 @@ $carouselCount = count($carouselLinks);
 ?>
 					<div class="carousel-content">
 						<div class="zone-head">
-							<span class="zone-label">Supporting Links</span>
+							<span class="zone-label">Linked Content</span>
 <?php if ($carouselCount > 1): ?>
-							<span class="zone-count"><?php echo $carouselCount; ?> Supporting Links</span>
+							<span class="zone-count"><?php echo $carouselCount; ?> External Links</span>
 <?php endif; ?>
 						</div>
 <?php if ($carouselCount > 0): ?>
