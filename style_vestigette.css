@@ -6753,3 +6753,8 @@ body.demo-mode .flesh-list {
 	padding: 0.7rem 0.5rem 0.2rem;
 	width: 100%;
 }
+/* Modal title + close were white for the old grey frame — dark now for the white card */
+#phrasing .overlay-header h2,
+#explication .overlay-header h2 { color: var(--cddbBlack); }
+#closeP, #closeE { background: transparent; border-color: var(--cddbLiteGrey); color: #6b7079; }
+#closeP:hover, #closeE:hover { color: var(--cddbBlack); border-color: var(--cddbBlack); }
