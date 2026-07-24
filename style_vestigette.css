@@ -31,6 +31,14 @@
 	--because: var(--cddbBlue);
 	--rebuttal: var(--cddbRed);
 	--therefore: var(--cddbGreen);
+
+	/* ── Type scale (rem) ── */
+	--text-2xs: 0.7rem;   --text-xs: 0.8rem;  --text-sm: 0.9rem;
+	--text-base: 1rem;    --text-md: 1.15rem; --text-lg: 1.5rem;
+	--text-xl: 1.9rem;    --text-2xl: 2.4rem; --text-3xl: 3rem;
+	/* ── Weight scale ── */
+	--weight-regular: 400; --weight-medium: 500;
+	--weight-semibold: 600; --weight-bold: 700;
 }
 
 /*This is a global, some add padding and margin where you don't call for it and this will 
@@ -104,6 +112,14 @@ h1 a .agi-ring {
 h2 {
 	font-weight: bold;
 	font-size: 2rem;
+}
+/* Section headers (Because/Therefore/Rebuttal/Find/Filter): dialed down from the
+   base h2 so they stop out-shouting the logo — but the bar stays a generous tap
+   target (height + weight signal expand/collapse, no chevrons). */
+.accordion > h2 {
+	font-size: var(--text-lg);
+	font-weight: var(--weight-semibold);
+	padding: 0.5rem 0;
 }
 
 
@@ -481,7 +497,7 @@ button.hidden {
 #argument .arg-phrasing {
 	margin: 0;
 	font-size: 1.3rem;
-	font-weight: bold;
+	font-weight: var(--weight-semibold);
 	line-height: 1.25;
 	color: var(--cddbWhite);
 	display: -webkit-box;
