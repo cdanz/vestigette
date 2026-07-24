@@ -64,6 +64,7 @@ INCLUDE_FILES=(
     content_chrome.php
     dbconnect.php
     hub_metrics.php
+    og_meta.php
 )
 
 BOT_FILES=(
@@ -73,6 +74,7 @@ BOT_FILES=(
     seed_cluster.py
     personas_all_26.json
     topic_clusters.json
+    refetch_og.php
 )
 
 deploy_php() {
