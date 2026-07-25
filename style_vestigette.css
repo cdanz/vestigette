@@ -44,6 +44,15 @@
 	--n-200: #dcdfe3; --n-300: #c4c8ce; --n-400: #9aa0a8;
 	--n-500: #6b7079; --n-600: #4b5158; --n-700: #2e3339;
 	--n-800: #1a1c1f; --n-900: #0e0e0e;
+	/* ââ Semantic accents (values preserved; tune here) ââ */
+	--danger: #a00; --danger-hover: #c00; --danger-bg: #fdecea; --danger-border: #f5c6c6;
+	--success: #2d6a4f; --success-bg: #e6f4ea; --success-border: #b2dfb9;
+	--info: #3a5bc7; --info-bg: #e8f0fe;
+	--link: #0085ff; --link-hover: #006ecc;
+	/* readable dark inks of brand hues, for text/edges on tinted fills */
+	--because-dark: #274a86; --rebuttal-dark: #561211; --gold-dark: #8a6a0c;
+	/* dark weighting-UI (joystick) */
+	--surface-dark: #1c1c2e; --surface-dark-2: #2e2e50; --on-dark-accent: #7b91ff;
 }
 
 /*This is a global, some add padding and margin where you don't call for it and this will 
@@ -133,7 +142,7 @@ h2 {
 	background-color: #000;
 	border: none;
 	border-radius: 0;
-	border-bottom: 2px solid #561211;
+	border-bottom: 2px solid var(--rebuttal-dark);
 	left: 0;
 	top: -55px;
 	margin: 0;
@@ -5547,7 +5556,7 @@ body.weigh-page .lineItem.receiving .wrapper { animation: weigh-recv-pulse .55s 
    ═══════════════════════════════════════════════════ */
 #adminPickerBar {
 	align-items: center;
-	background: #1c1c2e;
+	background: var(--surface-dark);
 	box-sizing: border-box;
 	color: var(--n-300);
 	display: flex;
@@ -5578,7 +5587,7 @@ body.weigh-page .lineItem.receiving .wrapper { animation: weigh-recv-pulse .55s 
 	gap: 0.3rem;
 }
 .admin-picker-option input[type="radio"] {
-	accent-color: #7b91ff;
+	accent-color: var(--on-dark-accent);
 	cursor: pointer;
 }
 /* Ideology-band pills (All Personas mode) */
@@ -5605,7 +5614,7 @@ body.weigh-page .lineItem.receiving .wrapper { animation: weigh-recv-pulse .55s 
 .picker-band-5 { background: #ef4444; color: #fff; }             /* right     +4 to +6 */
 .picker-band-6 { background: #7f1d1d; color: #fff; }             /* far-right ≥ +7 */
 .admin-bar-tools-link {
-	color: #7b91ff;
+	color: var(--on-dark-accent);
 	font-size: 0.72rem;
 	margin-left: auto;
 	text-decoration: none;
@@ -5628,7 +5637,7 @@ body.admin-page {
 /* Header */
 .at-header {
 	align-items: center;
-	background: #1c1c2e;
+	background: var(--surface-dark);
 	box-sizing: border-box;
 	color: white;
 	display: flex;
@@ -5678,14 +5687,14 @@ body.admin-page {
 	padding: 0.65rem 1rem;
 }
 .at-notice--success {
-	background: #e6f4ea;
-	border: 1px solid #b2dfb9;
-	color: #2d6a4f;
+	background: var(--success-bg);
+	border: 1px solid var(--success-border);
+	color: var(--success);
 }
 .at-notice--error {
-	background: #fdecea;
-	border: 1px solid #f5c6c6;
-	color: #922;
+	background: var(--danger-bg);
+	border: 1px solid var(--danger-border);
+	color: var(--danger);
 }
 
 /* Tool cards */
@@ -5746,7 +5755,7 @@ body.admin-page {
 	width: 120px;
 }
 .at-input:focus {
-	border-color: #7b91ff;
+	border-color: var(--on-dark-accent);
 	outline: none;
 }
 .at-toggle-row {
@@ -5765,11 +5774,11 @@ body.admin-page {
 	padding: 0.5rem 1.1rem;
 }
 .at-btn--primary {
-	background: #1c1c2e;
+	background: var(--surface-dark);
 	color: white;
 }
 .at-btn--primary:hover {
-	background: #2e2e50;
+	background: var(--surface-dark-2);
 }
 .at-btn--secondary {
 	background: var(--n-600);
@@ -5779,11 +5788,11 @@ body.admin-page {
 	background: var(--n-700);
 }
 .at-btn--danger {
-	background: #a00;
+	background: var(--danger);
 	color: white;
 }
 .at-btn--danger:not([disabled]):hover {
-	background: #c00;
+	background: var(--danger-hover);
 }
 .at-btn[disabled] {
 	cursor: not-allowed;
@@ -5826,9 +5835,9 @@ body.admin-page {
 	min-width: 200px;
 }
 .at-merge-col__tag {
-	background: #e8f0fe;
+	background: var(--info-bg);
 	border-radius: 3px;
-	color: #3a5bc7;
+	color: var(--info);
 	display: inline-block;
 	font-size: 0.72rem;
 	font-weight: 700;
@@ -5838,8 +5847,8 @@ body.admin-page {
 	text-transform: uppercase;
 }
 .at-merge-col__tag--absorb {
-	background: #fce8e8;
-	color: #a00;
+	background: var(--danger-bg);
+	color: var(--danger);
 }
 .at-merge-col__text {
 	color: var(--n-800);
@@ -6164,7 +6173,7 @@ body.content-page {
 	font-weight: bold;
 }
 .bluesky-follow {
-	background-color: #0085ff;
+	background-color: var(--link);
 	border-radius: 2rem;
 	color: #fff;
 	display: inline-block;
@@ -6175,7 +6184,7 @@ body.content-page {
 	text-decoration: none;
 }
 .bluesky-follow:hover {
-	background-color: #006ecc;
+	background-color: var(--link-hover);
 	color: #fff;
 }
 .bluesky-context {
@@ -6717,8 +6726,8 @@ body.demo-mode .flesh-list {
 #argument .panel .carousel-slide { position: relative; }
 /* Leading / Yours tags */
 #argument .panel .pw-tag { border-radius: 3px; display: inline-block; font-size: 0.62rem; font-weight: 700; letter-spacing: 0.06em; line-height: 1.5; margin-left: 0.45em; padding: 0.02rem 0.4rem; text-transform: uppercase; vertical-align: middle; white-space: nowrap; }
-#argument .panel .pw-lead { background: rgba(212,160,23,0.16); color: #8a6a0c; }
-#argument .panel .pw-you  { background: rgba(45,88,168,0.14);  color: #274a86; }
+#argument .panel .pw-lead { background: rgba(212,160,23,0.16); color: var(--gold-dark); }
+#argument .panel .pw-you  { background: rgba(45,88,168,0.14);  color: var(--because-dark); }
 #argument .panel .pw-tag-float { margin-left: 0; position: absolute; right: 0.35rem; top: 0.3rem; z-index: 1; }
 /* actions: pager (left) + Weigh-In button (right) */
 #argument .panel .carousel-actions { align-items: center; display: flex; gap: 0.6rem; margin-top: 0.5rem; }
@@ -6784,7 +6793,7 @@ body.demo-mode .flesh-list {
 #explication .accept-prompt {
 	background: rgba(212,160,23,0.12);
 	border-radius: 6px;
-	color: #7a5c0a;
+	color: var(--gold-dark);
 	font-size: 0.88rem;
 	font-weight: 600;
 	margin: 0.5rem 0 0;
