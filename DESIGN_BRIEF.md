@@ -123,13 +123,24 @@ alias into this scale.
 > the cool tint ever reads too blue, change the `--n-*` values in `:root` and the whole
 > site follows. Same leverage applies to every token category.
 
-### Accents — not yet rationalized (open)
+### Semantic accents (done)
 
-Beyond the four brand colors there's still a pile of one-off reds/blues/greens/golds
-(`#a00 #c00 #ef4444 #7f1d1d`, `#7b91ff #1e3a8a #2563eb #0085ff`, …). These carry
-*meaning* (error-red vs. brand-red, link-blue vs. brand-blue) so they should be
-rationalized into **semantic tokens** (`--danger`, `--link`, brand tints), never
-blind-snapped by lightness the way greys were.
+Beyond the four brand colors, ~20 one-off reds/blues/greens/golds were rationalized into
+**semantic tokens** (values preserved — named, not restyled), because they carry *meaning*
+that lightness-snapping would erase:
+
+- **`--danger` / `--danger-hover` / `--danger-bg` / `--danger-border`** — delete/error.
+- **`--success` / `-bg` / `-border`**, **`--info` / `-bg`** — status messages.
+- **`--link` / `--link-hover`** — bright-blue action button.
+- **`--because-dark` / `--rebuttal-dark` / `--gold-dark`** — readable dark "inks" of the
+  brand hues, for text/edges sitting on tinted fills.
+- **`--surface-dark` / `--surface-dark-2` / `--on-dark-accent`** — the dark weighting-UI
+  (joystick) theme.
+
+**Left intact on purpose:** the `.picker-band-0..6` diverging scale (blue → center → red)
+is a coherent, single-use *data ramp*; tokenizing it would add indirection with no
+control-point gain. Treat any future diverging/data scale the same way — a labeled ramp,
+not scattered semantic tokens.
 
 ---
 
@@ -139,7 +150,7 @@ blind-snapped by lightness the way greys were.
 inconsistency and a missed global lever. The categories, in priority order:
 
 1. **Type** — scale + weights ✅ defined
-2. **Color / neutrals** — 11-step scale ✅ done · **accents** ⏳ open
+2. **Color** — 11-step neutral scale ✅ done · semantic accents ✅ done
 3. **Breakpoints** — collapse ~16 → ~4 ⏳ (highest structural payoff; higher risk since
    it reflows layout — verify width-by-width)
 4. **Spacing** — snap to a scale ⏳
@@ -171,7 +182,6 @@ harmonize by tuning the token, not the usages.
 - **The full-bleed saturated section bars** are the last big "poster" element. Do they
   soften toward the reference register (color as an accent/edge rather than a saturated
   full-width fill) while staying semantically legible? Deliberately unresolved.
-- **Accent rationalization** (§4) — finish the color pass into semantic tokens.
 - **Breakpoints / spacing / radii** — remaining token categories.
 - **Sparse pages** (e.g. Explore) — noted as thin; not yet addressed.
 
