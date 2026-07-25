@@ -303,6 +303,8 @@ modify `ENDORSEMENT` (trigger can't write the table that fired it).
 
 ## Deeper references
 
+- **`DESIGN_BRIEF.md`** — creative north star (look & feel) + the design-token system
+  (type / color / neutral scale). Read before any visual/CSS work.
 - **`bots/PERSONA_SEEDING_PROCESS.md`** — persona seeding workflow.
 - **`DATA_CLEANUP_BACKLOG.md`** — known data-quality issues.
 - **`db/*_procedures.sql`** — canonical proc/trigger source (8 files).
