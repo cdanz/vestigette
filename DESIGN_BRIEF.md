@@ -151,13 +151,24 @@ inconsistency and a missed global lever. The categories, in priority order:
 
 1. **Type** — scale + weights ✅ defined
 2. **Color** — 11-step neutral scale ✅ done · semantic accents ✅ done
-3. **Breakpoints** — collapse ~16 → ~4 ⏳ (highest structural payoff; higher risk since
-   it reflows layout — verify width-by-width)
-4. **Spacing** — snap to a scale ⏳
-5. **Radii** — ~4 steps ⏳
+3. **Spacing** — 14-step `--sp-*` scale ✅ done
+4. **Radii** — `--radius-*` scale ✅ done
+5. **Breakpoints** — collapse ~16 → ~4 ⏳ **(last big one)** — highest structural payoff
+   but higher risk since it reflows layout; verify width-by-width.
 
 Migrate by **snapping to the nearest existing intent** (preserve the current look), then
 harmonize by tuning the token, not the usages.
+
+**Spacing** (`--sp-N`, where `N` = rem × 100 — so `--sp-50` = `0.5rem`): steps `10 20 25
+30 40 50 60 75 100 125 150 200 300 600`. High-frequency values were kept exact; only rare
+oddballs (0.35/0.45/0.55/0.65/0.9/1.1…) snapped to the nearest step. Applied **only inside
+`padding` / `margin` / `gap`** — negatives and `calc()`/`var()` left alone (can't `-var()`).
+Positioning offsets (`top/left`) and sizes (`width/height`) are deliberately **not** on
+this scale.
+
+**Radii:** `--radius-sm 4px` (was 3/4/5px/0.25rem) · `--radius-md 7px` (6/7/8px/0.55rem) ·
+`--radius-lg 11px` (11/12px) · `--radius-pill 999px` (2rem/34px pill buttons & toggles) ·
+`--radius-circle 50%`. Bare `0` stays inline.
 
 ---
 
@@ -182,7 +193,8 @@ harmonize by tuning the token, not the usages.
 - **The full-bleed saturated section bars** are the last big "poster" element. Do they
   soften toward the reference register (color as an accent/edge rather than a saturated
   full-width fill) while staying semantically legible? Deliberately unresolved.
-- **Breakpoints / spacing / radii** — remaining token categories.
+- **Breakpoints** — the last remaining token category (~16 → 4; reflows layout, so
+  verify width-by-width). Everything else (type, color, spacing, radii) is tokenized.
 - **Sparse pages** (e.g. Explore) — noted as thin; not yet addressed.
 
 ---
