@@ -270,6 +270,18 @@ function addCSRFtoken() {
 	echo "\n<input type=\"hidden\" name=\"csrfToken\" value=\"" . $csrfToken . "\" />";
 }
 
+// Read-view minor-point styling: a <1% aggregate weight collapses the ring to a
+// dot with a two-decimal value (a rounded "1%"/"0%" would mislead). Returns
+// array(classSuffix, valText). Shared by because/therefore/rebuttal, phrasing, and
+// explication so every read-only weighted row matches. See .lineItem.minor in CSS.
+function minorPointBits($percentage) {
+	if ($percentage < 1) {
+		$twoDec = number_format($percentage, 2);
+		return array(" minor", ($twoDec === "0.00") ? "&lt;0.01%" : ($twoDec . "%"));
+	}
+	return array("", round($percentage) . "%");
+}
+
 function generateTypeLines($type, $typeArray) {
 	global $baseURL;
 	global $opinion;
@@ -282,16 +294,7 @@ function generateTypeLines($type, $typeArray) {
 				$half = "half2";
 			}
 			$pct = strval(number_format($line[1], 1, '_', ''));
-			// Minor point (<1% aggregate): flag so the read view collapses the
-			// low-information ring sliver to a quiet dot, and show the precise value
-			// (round() would mislead as "1%"/"0%") as a whispered label below it.
-			$minorClass = ($line[1] < 1) ? " minor" : "";
-			if ($line[1] < 1) {
-				$twoDec = number_format($line[1], 2);
-				$valText = ($twoDec === "0.00") ? "&lt;0.01%" : ($twoDec . "%");
-			} else {
-				$valText = round($line[1]) . "%";
-			}
+			list($minorClass, $valText) = minorPointBits($line[1]);
 			echo "			<li class=\"lineItem ${half} pct${pct}${minorClass}\" data-arg-id=\"${line[0]}\" data-aggregate-weight=\"" . strval(number_format($line[1], 2, '.', '')) . "\" data-user-weight=\"" . ((isset($line[3])) ? strval(number_format($line[3], 2, '.', '')) : "0.00") . "\" style=\"--pct:" . strval(number_format($line[1], 2, '.', '')) . "\">
 				<div class=\"wrapper\"" . ((isset($onClick)) ? $onClick : "") . ">
 					<span class=\"glyph\"></span>
@@ -334,15 +337,16 @@ function generatePhrasingLines($alts) {
             }
 
             $pct = strval(number_format($percentage, 1, '_', ''));
+            list($minorClass, $valText) = minorPointBits($percentage);
             $userWeight = 0;
 
             $isUserChoice = (isset($userPhrasingID) && ($userPhrasingID == $line[3]));
             $userLabel = $isUserChoice ? " <span style=\"color: var(--cddbGrey);font-size: 0.75rem;\">(your preference)</span>" : "";
 
-            echo "            <li class=\"lineItem ${half} pct${pct}\" data-phrasing-id=\"${line[3]}\" data-aggregate-weight=\"" . strval(number_format($percentage, 2, '.', '')) . "\" data-user-weight=\"" . strval(number_format($userWeight, 2, '.', '')) . "\" style=\"--pct:" . strval(number_format($percentage, 2, '.', '')) . "\">
+            echo "            <li class=\"lineItem ${half} pct${pct}${minorClass}\" data-phrasing-id=\"${line[3]}\" data-aggregate-weight=\"" . strval(number_format($percentage, 2, '.', '')) . "\" data-user-weight=\"" . strval(number_format($userWeight, 2, '.', '')) . "\" style=\"--pct:" . strval(number_format($percentage, 2, '.', '')) . "\">
                 <div class=\"wrapper\">
                     <span class=\"glyph\"></span>
-                    <span class=\"val\">" . round($percentage) . "%</span>
+                    <span class=\"val\">" . $valText . "</span>
                 </div>
                 <p class=\"assocArg\">" . htmlspecialchars($line[2]) . $userLabel . "</p>
             </li>";
@@ -365,13 +369,14 @@ function generateLinkLines($links) {
 			$percentage = isset($line[0]) ? floatval($line[0]) : 0;
 			$half = $percentage <= 50 ? "half1" : "half2";
 			$pct = strval(number_format($percentage, 1, '_', ''));
+			list($minorClass, $valText) = minorPointBits($percentage);
 			$userWeight = 0;
 			$label = ($line[7] !== NULL && $line[7] !== '') ? htmlspecialchars($line[7]) : htmlspecialchars($line[3]);
 
-			echo "			<li class=\"lineItem ${half} pct${pct}\" data-explication-id=\"${line[2]}\" data-aggregate-weight=\"" . strval(number_format($percentage, 2, '.', '')) . "\" data-user-weight=\"" . strval(number_format($userWeight, 2, '.', '')) . "\" style=\"--pct:" . strval(number_format($percentage, 2, '.', '')) . "\">
+			echo "			<li class=\"lineItem ${half} pct${pct}${minorClass}\" data-explication-id=\"${line[2]}\" data-aggregate-weight=\"" . strval(number_format($percentage, 2, '.', '')) . "\" data-user-weight=\"" . strval(number_format($userWeight, 2, '.', '')) . "\" style=\"--pct:" . strval(number_format($percentage, 2, '.', '')) . "\">
 				<div class=\"wrapper\">
 					<span class=\"glyph\"></span>
-					<span class=\"val\">" . round($percentage) . "%</span>
+					<span class=\"val\">" . $valText . "</span>
 				</div>
 				<p class=\"assocArg\"><a href=\"${line[3]}\" target=\"_blank\">${label}</a></p>
 			</li>";

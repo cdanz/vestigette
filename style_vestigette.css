@@ -2262,15 +2262,15 @@ body.weigh-page .lineItem.receiving .wrapper { animation: weigh-recv-pulse .55s 
    — the dot alone is signal enough that the point is minor. Scoped to :not(.edit):
    the moment a section is unlocked for weighing the full live ring returns, so
    the item can still be adjusted normally. */
-.accordion:not(.edit) .lineItem.minor .wrapper::before {
+.container:not(.edit) .lineItem.minor .wrapper::before {
 	inset: calc(50% - 4px);
 	border-radius: var(--radius-circle);
 	background: var(--section, var(--cddbBlack));
 	-webkit-mask: none; mask: none;
 	filter: none;
 }
-.accordion:not(.edit) .lineItem.minor .wrapper .glyph { display: none; }
-.accordion:not(.edit) .lineItem.minor .wrapper .val {
+.container:not(.edit) .lineItem.minor .wrapper .glyph { display: none; }
+.container:not(.edit) .lineItem.minor .wrapper .val {
 	align-items: flex-end;       /* value drops below the dot, at the ring's normal size + colour */
 	padding-bottom: 0.15rem;
 }
