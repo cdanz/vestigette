@@ -287,8 +287,8 @@ function generateTypeLines($type, $typeArray) {
 			// (round() would mislead as "1%"/"0%") as a whispered label below it.
 			$minorClass = ($line[1] < 1) ? " minor" : "";
 			if ($line[1] < 1) {
-				$oneDec = number_format($line[1], 1);
-				$valText = ($oneDec === "0.0") ? "&lt;0.1%" : ($oneDec . "%");
+				$twoDec = number_format($line[1], 2);
+				$valText = ($twoDec === "0.00") ? "&lt;0.01%" : ($twoDec . "%");
 			} else {
 				$valText = round($line[1]) . "%";
 			}

@@ -2257,27 +2257,22 @@ body.weigh-page .lineItem.receiving .wrapper { animation: weigh-recv-pulse .55s 
 /* ── Minor points (<1% aggregate) — read view only ─────────────────────────
    At these weights the conic ring is a hair-thin, low-information sliver, and a
    long tail of them (e.g. 19 near-0% candidates under one hub) reads as loud as
-   the substantive arguments. Collapse each to a quiet dot where the % sat, with
-   the precise value whispered just below — minor points should recede, not
-   compete. Scoped to :not(.edit): the moment a section is unlocked for weighing
-   the full live ring returns, so the item can still be adjusted normally. */
+   the substantive arguments. Collapse each to a small dot where the % sat, with
+   the precise value (0.XX%) shown just below it at the ring's normal size/colour
+   — the dot alone is signal enough that the point is minor. Scoped to :not(.edit):
+   the moment a section is unlocked for weighing the full live ring returns, so
+   the item can still be adjusted normally. */
 .accordion:not(.edit) .lineItem.minor .wrapper::before {
 	inset: calc(50% - 4px);
 	border-radius: var(--radius-circle);
-	background: color-mix(in srgb, var(--section, var(--cddbBlack)) 60%, var(--n-300));
+	background: var(--section, var(--cddbBlack));
 	-webkit-mask: none; mask: none;
 	filter: none;
 }
 .accordion:not(.edit) .lineItem.minor .wrapper .glyph { display: none; }
 .accordion:not(.edit) .lineItem.minor .wrapper .val {
-	inset: 0;
-	align-items: flex-end;
-	justify-content: center;
-	padding-bottom: 0.28rem;
-	font-size: 0.5rem;
-	font-weight: 600;
-	color: var(--n-500);
-	letter-spacing: 0.02em;
+	align-items: flex-end;       /* value drops below the dot, at the ring's normal size + colour */
+	padding-bottom: 0.15rem;
 }
 
 .pointBtn {
