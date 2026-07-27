@@ -282,10 +282,20 @@ function generateTypeLines($type, $typeArray) {
 				$half = "half2";
 			}
 			$pct = strval(number_format($line[1], 1, '_', ''));
-			echo "			<li class=\"lineItem ${half} pct${pct}\" data-arg-id=\"${line[0]}\" data-aggregate-weight=\"" . strval(number_format($line[1], 2, '.', '')) . "\" data-user-weight=\"" . ((isset($line[3])) ? strval(number_format($line[3], 2, '.', '')) : "0.00") . "\" style=\"--pct:" . strval(number_format($line[1], 2, '.', '')) . "\">
+			// Minor point (<1% aggregate): flag so the read view collapses the
+			// low-information ring sliver to a quiet dot, and show the precise value
+			// (round() would mislead as "1%"/"0%") as a whispered label below it.
+			$minorClass = ($line[1] < 1) ? " minor" : "";
+			if ($line[1] < 1) {
+				$oneDec = number_format($line[1], 1);
+				$valText = ($oneDec === "0.0") ? "&lt;0.1%" : ($oneDec . "%");
+			} else {
+				$valText = round($line[1]) . "%";
+			}
+			echo "			<li class=\"lineItem ${half} pct${pct}${minorClass}\" data-arg-id=\"${line[0]}\" data-aggregate-weight=\"" . strval(number_format($line[1], 2, '.', '')) . "\" data-user-weight=\"" . ((isset($line[3])) ? strval(number_format($line[3], 2, '.', '')) : "0.00") . "\" style=\"--pct:" . strval(number_format($line[1], 2, '.', '')) . "\">
 				<div class=\"wrapper\"" . ((isset($onClick)) ? $onClick : "") . ">
 					<span class=\"glyph\"></span>
-					<span class=\"val\">" . round($line[1]) . "%</span>
+					<span class=\"val\">" . $valText . "</span>
 				</div>
 				<p class=\"assocArg\"><a href=\"${baseURL}?arg=${line[0]}\">".htmlspecialchars($line[2])."</a></p>
 			</li>";
