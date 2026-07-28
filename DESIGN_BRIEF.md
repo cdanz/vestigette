@@ -153,8 +153,7 @@ inconsistency and a missed global lever. The categories, in priority order:
 2. **Color** — 11-step neutral scale ✅ done · semantic accents ✅ done
 3. **Spacing** — 14-step `--sp-*` scale ✅ done
 4. **Radii** — `--radius-*` scale ✅ done
-5. **Breakpoints** — collapse ~16 → ~4 ⏳ **(last big one)** — highest structural payoff
-   but higher risk since it reflows layout; verify width-by-width.
+5. **Breakpoints** — canonical **480 / 640 / 768 / 1200** ✅ done
 
 Migrate by **snapping to the nearest existing intent** (preserve the current look), then
 harmonize by tuning the token, not the usages.
@@ -169,6 +168,21 @@ this scale.
 **Radii:** `--radius-sm 4px` (was 3/4/5px/0.25rem) · `--radius-md 7px` (6/7/8px/0.55rem) ·
 `--radius-lg 11px` (11/12px) · `--radius-pill 999px` (2rem/34px pill buttons & toggles) ·
 `--radius-circle 50%`. Bare `0` stays inline.
+
+**Breakpoints:** canonical **480 · 640 · 768 · 1200** (min/max pair at N-1/N — e.g. 767/768,
+1199/1200; CSS can't use `var()` in media conditions, so these are standardized values, not
+literal tokens). `<640` small-phone tweaks · `≥768` nav-under-logo (was 800) · `≥1200` the
+two-column desktop layout. Consolidated from 7 ad-hoc values (merged 759+800→768, 680→640).
+
+**The 1200 two-column ↔ one-column reflow is load-bearing design, not just responsiveness.**
+`#left-col`/`#right-col` are `display:contents` below 1200 (their sections stack in one column
+by flex `order`); at ≥1200 they become real **60/40 flex columns — left = the reasoning spine
+(because → argument → therefore), right = masthead + rebuttal + find + filter.** That
+spine-vs-rebuttal split visually suggests the shape of the argument graph — **preserve it
+through any future breakpoint change.** In the right column, **rebuttal keeps priority
+(`flex: 2`)** and Find/Filter (a mutually-exclusive pair) share the space beneath it; expanded
+Find is `flex: 1 1 0` so a long result list scrolls inside its own share instead of ballooning
+on `flex-basis:auto` and collapsing rebuttal (a bug fixed 2026-07-28).
 
 ---
 
@@ -193,8 +207,8 @@ this scale.
 - **The full-bleed saturated section bars** are the last big "poster" element. Do they
   soften toward the reference register (color as an accent/edge rather than a saturated
   full-width fill) while staying semantically legible? Deliberately unresolved.
-- **Breakpoints** — the last remaining token category (~16 → 4; reflows layout, so
-  verify width-by-width). Everything else (type, color, spacing, radii) is tokenized.
+- **All token categories are now done** — type, color, spacing, radii, breakpoints. Future
+  visual work should consume the existing tokens/scales rather than introduce new raw values.
 - **Sparse pages** (e.g. Explore) — noted as thin; not yet addressed.
 
 ---
