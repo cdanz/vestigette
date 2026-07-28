@@ -5348,7 +5348,7 @@ body.weigh-page .lineItem.receiving .wrapper { animation: weigh-recv-pulse .55s 
 }
 
 
-@media only screen and (min-width: 800px) {
+@media only screen and (min-width: 768px) {
 	/* put nav under logo */
 	a.closenav,
 	a.opennav {
@@ -6409,7 +6409,7 @@ body.content-page {
 	flex: 1;
 	height: 1px;
 }
-@media (max-width: 759px) {
+@media (max-width: 767px) {
 	.login-grid {
 		grid-template-columns: 1fr;
 	}
@@ -6547,7 +6547,7 @@ body.content-page {
 	gap: var(--sp-200);
 	grid-template-columns: 1fr 1fr;
 }
-@media only screen and (max-width: 680px) {
+@media only screen and (max-width: 640px) {
 	.explore-columns {
 		grid-template-columns: 1fr;
 	}
