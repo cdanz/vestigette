@@ -5411,9 +5411,14 @@ body.weigh-page .lineItem.receiving .wrapper { animation: weigh-recv-pulse .55s 
 	#therefore { flex: 1 1 0; min-height: 0; overflow: hidden; }
 	/* Right column: masthead sizes to content, rebuttal fills remaining space */
 	#mastHead  { flex: 0 0 auto; }
-	#rebuttal  { flex: 1 1 0; min-height: 0; overflow: hidden; }
+	/* Rebuttal keeps priority; Find/Filter (a mutually-exclusive pair) share the
+	   space below it. Expanded Find is flex 1 1 0 (basis 0) so a long result list
+	   scrolls inside its own share instead of ballooning on flex-basis:auto and
+	   collapsing rebuttal to nothing (the bug: rebuttal went to ~16px). */
+	#rebuttal  { flex: 2 1 0; min-height: 0; overflow: hidden; }
 	#find      { flex: 0 1 auto; min-height: 0; overflow: hidden; }
 	#find:not(.desktop-expanded) { flex: 0 0 auto; overflow: hidden; }
+	#find.desktop-expanded { flex: 1 1 0; }
 	#filter    { flex: 0 0 auto; }
 	#adminPickerBar {
 		left: 0;
