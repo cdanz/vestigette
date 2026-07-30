@@ -6278,222 +6278,124 @@ body.content-page {
 	text-decoration: none;
 }
 
-/* ── Login page ───────────────────────────────────────────────────────────── */
-.login-form {
-	display: flex;
-	flex-flow: column nowrap;
-	gap: var(--sp-60);
-	max-width: 340px;
+/* ═══ Entry pages (login.php + register.php) — welcoming, trust-first ══════════
+   Deliberately NOT the app's black section-bar chrome: light cards, calm
+   hierarchy, featured trust signals. Scoped to .login-main / .reg-main so the
+   other content pages (About/Explore) keep their own styling. */
+.login-main { max-width: 60rem; }
+.reg-main   { max-width: 34rem; }
+
+/* Welcoming hero (login) */
+.login-main .entry-hero  { text-align: center; max-width: 42rem; margin: 0 auto var(--sp-150); padding: 0 var(--sp-50); }
+.login-main .entry-lead  { font-size: 1.7rem; font-weight: var(--weight-semibold); color: var(--n-800); line-height: 1.2; margin: 0 0 var(--sp-60); }
+.login-main .entry-intro { font-size: 1rem; line-height: 1.65; color: var(--n-600); margin: 0; }
+.login-main .entry-intro a { color: var(--because); text-decoration: underline; }
+
+/* Trust strip */
+.login-main .trust-points {
+	list-style: none; display: flex; flex-flow: row wrap; justify-content: center;
+	gap: var(--sp-50) var(--sp-150); max-width: 52rem; margin: 0 auto var(--sp-100);
+	padding: var(--sp-75) var(--sp-100);
+	background: var(--n-50); border: 1px solid var(--n-200); border-radius: var(--radius-lg);
 }
-.login-form input[type="email"],
-.login-form input[type="password"] {
-	border: 1px solid var(--cddbGrey);
-	border-radius: var(--radius-sm);
-	font-size: 0.95rem;
-	padding: var(--sp-50) var(--sp-60);
-	width: 100%;
+.login-main .trust-points li { display: flex; align-items: center; gap: var(--sp-40); color: var(--n-700); font-size: 0.9rem; font-weight: var(--weight-medium); }
+.login-main .tp-ic { color: var(--because); font-size: 0.7rem; }
+
+/* Light cards (both pages use .login-card) */
+.login-main .login-card,
+.reg-main .login-card {
+	background: var(--cddbWhite); color: var(--cddbBlack);
+	border: 1px solid var(--n-200); border-radius: var(--radius-lg);
+	box-shadow: 0 1px 2px rgba(0,0,0,.05), 0 14px 32px rgba(0,0,0,.06);
+	overflow: hidden; padding: var(--sp-125) var(--sp-125) var(--sp-150); margin-bottom: var(--sp-100);
 }
-.login-form button {
-	align-self: flex-start;
-	background-color: var(--cddbBlack);
-	border-color: var(--cddbBlack);
-	border-radius: var(--radius-sm);
-	border-width: 0.15rem;
-	color: var(--cddbWhite);
-	font-size: 0.9rem;
-	height: auto;
-	padding: var(--sp-40) var(--sp-150);
+.login-main .login-card > h2,
+.reg-main .login-card > h2 {
+	color: var(--n-800); font-size: 1.2rem; font-weight: var(--weight-semibold); cursor: default;
+	background: transparent; margin: 0 0 var(--sp-100); padding: 0 0 var(--sp-50); border-bottom: 1px solid var(--n-100);
 }
-.login-remember {
-	align-items: center;
-	color: var(--cddbGrey);
-	display: flex;
-	font-size: 0.85rem;
-	gap: var(--sp-40);
+.login-main .login-card .panel, .login-main .login-card .panel.expanded,
+.reg-main .login-card .panel,   .reg-main .login-card .panel.expanded {
+	background: transparent; max-height: none; overflow: visible; margin: 0; padding: 0;
 }
-.login-remember input[type="checkbox"] {
-	margin: 0;
+.login-main .login-card p, .reg-main .login-card p { color: var(--n-600); font-size: 0.95rem; line-height: 1.6; }
+.login-main .login-card a, .reg-main .login-card a { color: var(--because); text-decoration: underline; }
+
+/* Login grid */
+.login-grid { display: grid; grid-template-columns: 1fr 1fr; align-items: start; gap: var(--sp-100); margin-bottom: var(--sp-100); }
+.login-grid .login-card { margin-bottom: 0; }
+
+/* Inputs */
+.login-main input[type=email], .login-main input[type=password], .login-main input[type=text],
+.reg-main input[type=email],   .reg-main input[type=password],   .reg-main input[type=text] {
+	border: 1px solid var(--n-300); border-radius: var(--radius-md); background: #fff;
+	font-size: 0.95rem; padding: var(--sp-60) var(--sp-75); width: 100%; box-sizing: border-box;
+	transition: border-color .15s, box-shadow .15s;
 }
-.login-error {
-	color: var(--cddbRed);
-	font-size: 0.9rem;
-	margin-bottom: var(--sp-25);
+.login-main input:focus, .reg-main input:focus {
+	outline: none; border-color: var(--because); box-shadow: 0 0 0 3px rgba(45,88,168,.15);
 }
-.login-main {
-	max-width: 880px;
+
+/* Primary pill buttons */
+.login-main .login-form button, .login-main .invite-code-row button, .reg-main .reg-form button[type=submit] {
+	align-self: flex-start; background: var(--because); border: none; color: #fff;
+	border-radius: var(--radius-pill); font-size: 0.95rem; font-weight: var(--weight-semibold);
+	height: auto; padding: var(--sp-60) var(--sp-150); cursor: pointer; transition: background .15s;
 }
-.login-grid {
-	align-items: stretch;
-	display: grid;
-	gap: var(--sp-40);
-	grid-template-columns: 1fr 1fr;
-	margin-bottom: var(--sp-40);
-}
-.login-grid .about-section {
-	margin-bottom: 0;
-}
-.login-card h2 {
-	cursor: default;
-}
-/* Intent banner — shown when a logged-out user tried to engage with an argument */
-.intent-banner {
-	background-color: var(--cddbBlack);
-	border-left: 0.35rem solid var(--cddbYellow);
-	border-radius: var(--radius-sm);
-	color: var(--cddbWhite);
-	margin-bottom: var(--sp-40);
-	padding: var(--sp-100) var(--sp-100);
-}
+.login-main .login-form button:hover, .login-main .invite-code-row button:hover, .reg-main .reg-form button:hover { background: var(--because-dark); }
+
+/* Login form bits */
+.login-form { display: flex; flex-flow: column nowrap; gap: var(--sp-75); }
+.login-remember { display: flex; align-items: center; gap: var(--sp-40); color: var(--n-500); font-size: 0.85rem; }
+.login-remember input[type=checkbox] { margin: 0; }
+.login-error { color: var(--danger); font-size: 0.9rem; margin-bottom: var(--sp-25); }
+
+/* Invite-code entry */
+.invite-code-form label { display: block; font-size: 0.9rem; font-weight: var(--weight-semibold); color: var(--because); margin-bottom: var(--sp-40); }
+.invite-code-row { display: flex; gap: var(--sp-40); }
+.invite-code-row input[type=text] { flex: 1; min-width: 0; }
+.join-divider { display: flex; align-items: center; gap: var(--sp-60); color: var(--n-400); font-size: 0.8rem; text-transform: uppercase; margin: var(--sp-100) 0 var(--sp-50); }
+.join-divider::before, .join-divider::after { content: ""; flex: 1; height: 1px; background: var(--n-200); }
+
+/* Bluesky — calmer outlined pill */
+.bluesky-follow { display: inline-block; background: #fff; color: var(--link); border: 1px solid var(--n-300);
+	border-radius: var(--radius-pill); font-size: 0.9rem; font-weight: var(--weight-semibold); text-decoration: none;
+	margin: var(--sp-50) 0 var(--sp-75); padding: var(--sp-50) var(--sp-125); }
+.bluesky-follow:hover { background: var(--n-50); color: var(--link-hover); }
+.bluesky-context { color: var(--n-500); font-size: 0.85rem; margin-bottom: var(--sp-50); }
+
+/* Privacy Policy accordion -> light */
+.login-main .accordion.about-section { background: transparent; margin-bottom: var(--sp-40); }
+.login-main .accordion.about-section > h2 { color: var(--n-700); background: transparent;
+	border: 1px solid var(--n-200); border-radius: var(--radius-md); padding: var(--sp-60) var(--sp-100); font-size: 1.05rem; }
+
+/* Intent banner (logged-out user tried to act) — stays dark, it's an alert */
+.intent-banner { background: var(--surface-dark); border-left: 0.35rem solid var(--cddbYellow); border-radius: var(--radius-md);
+	color: var(--n-100); margin-bottom: var(--sp-100); padding: var(--sp-100); }
 .intent-banner.intent-accept { border-left-color: var(--cddbGreen); }
 .intent-banner.intent-reject { border-left-color: var(--cddbRed); }
 .intent-banner.intent-flag   { border-left-color: var(--cddbYellow); }
-.intent-lead {
-	font-size: 0.95rem;
-	margin: 0 0 var(--sp-50);
-}
-.intent-phrasing {
-	border-left: 2px solid var(--cddbGrey);
-	font-size: 1.05rem;
-	font-style: italic;
-	line-height: 1.5;
-	margin: 0 0 var(--sp-50);
-	padding-left: var(--sp-75);
-}
-.intent-followup {
-	color: var(--cddbLiteGrey);
-	font-size: 0.85rem;
-	margin: 0;
-}
-/* Invite-code entry on the New Here card */
-.invite-code-form label {
-	display: block;
-	font-size: 0.9rem;
-	font-weight: bold;
-	margin-bottom: var(--sp-40);
-}
-.invite-code-row {
-	display: flex;
-	gap: var(--sp-40);
-}
-.invite-code-row input[type="text"] {
-	border: 1px solid var(--cddbGrey);
-	border-radius: var(--radius-sm);
-	flex: 1;
-	font-size: 0.95rem;
-	min-width: 0;
-	padding: var(--sp-50) var(--sp-60);
-}
-.invite-code-row button {
-	background-color: var(--cddbBlack);
-	border-color: var(--cddbBlack);
-	border-radius: var(--radius-sm);
-	border-width: 0.15rem;
-	color: var(--cddbWhite);
-	font-size: 0.9rem;
-	height: auto;
-	padding: var(--sp-40) var(--sp-100);
-}
-.join-divider {
-	align-items: center;
-	color: var(--cddbGrey);
-	display: flex;
-	font-size: 0.8rem;
-	gap: var(--sp-60);
-	margin: var(--sp-100) 0 var(--sp-50);
-	text-transform: uppercase;
-}
-.join-divider::before,
-.join-divider::after {
-	background-color: var(--cddbGrey);
-	content: "";
-	flex: 1;
-	height: 1px;
-}
-@media (max-width: 767px) {
-	.login-grid {
-		grid-template-columns: 1fr;
-	}
-}
-/* ── Register page ────────────────────────────────────────────────────────── */
-/* Plain-flow blocks inside the card — undo the .container div row-nowrap flex.
-   The panel is a flex column with align-items:flex-start, so span it explicitly. */
-.container .reg-pledge,
-.container .reg-errors,
-.container .reg-form .field {
-	display: block;
-}
-.reg-pledge,
-.reg-errors,
-.reg-form {
-	box-sizing: border-box;
-	width: 100%;
-}
-.reg-main {
-	max-width: 480px;
-}
-.reg-pledge {
-	background-color: rgba(16, 160, 32, 0.07);
-	border: 1px solid var(--cddbGrey);
-	border-left: 0.35rem solid var(--cddbGreen);
-	border-radius: var(--radius-sm);
-	font-size: 0.875rem;
-	line-height: 1.5;
-	margin-bottom: var(--sp-125);
-	padding: var(--sp-60) var(--sp-75);
-}
-.reg-errors {
-	background-color: rgba(175, 26, 23, 0.08);
-	border: 1px solid var(--cddbRed);
-	border-radius: var(--radius-sm);
-	font-size: 0.875rem;
-	margin-bottom: var(--sp-100);
-	padding: var(--sp-50) var(--sp-75);
-}
-.reg-errors p {
-	margin: var(--sp-20) 0;
-}
-.reg-form .field {
-	margin-bottom: var(--sp-100);
-}
-.reg-form label {
-	color: var(--cddbGrey);
-	display: block;
-	font-size: 0.8rem;
-	margin-bottom: var(--sp-30);
-}
-.reg-form input[type="text"],
-.reg-form input[type="email"],
-.reg-form input[type="password"] {
-	border: 1px solid var(--cddbGrey);
-	border-radius: var(--radius-sm);
-	box-sizing: border-box;
-	font-size: 0.95rem;
-	padding: var(--sp-50) var(--sp-60);
-	width: 100%;
-}
-.reg-form input:focus {
-	outline: 2px solid var(--cddbBlue);
-	outline-offset: 1px;
-}
-/* Two-up name fields that stack when the card gets narrow */
-.container .reg-name-row {
-	display: flex;
-	flex-flow: row wrap;
-	gap: 0 var(--sp-75);
-}
-.reg-name-row .field {
-	flex: 1 1 8rem;
-}
-.reg-form button[type="submit"] {
-	background-color: var(--cddbBlack);
-	border-color: var(--cddbBlack);
-	border-radius: var(--radius-sm);
-	border-width: 0.15rem;
-	color: var(--cddbWhite);
-	font-size: 0.9rem;
-	height: auto;
-	padding: var(--sp-40) var(--sp-150);
-}
+.intent-lead { font-size: 0.95rem; margin: 0 0 var(--sp-50); }
+.intent-phrasing { border-left: 2px solid var(--n-500); font-size: 1.05rem; font-style: italic; line-height: 1.5; margin: 0 0 var(--sp-50); padding-left: var(--sp-75); }
+.intent-followup { color: var(--n-300); font-size: 0.85rem; margin: 0; }
+
+/* Register: Data Promise pledge (featured) + fields */
+.container .reg-pledge, .container .reg-errors, .container .reg-form .field { display: block; }
+.reg-pledge, .reg-errors, .reg-form { box-sizing: border-box; width: 100%; }
+.reg-pledge { background: var(--success-bg); border: 1px solid var(--success-border); border-left: 0.35rem solid var(--success);
+	border-radius: var(--radius-md); color: var(--n-700); font-size: 0.9rem; line-height: 1.55; margin-bottom: var(--sp-125); padding: var(--sp-75) var(--sp-100); }
+.reg-pledge strong { color: var(--success); }
+.reg-pledge a { color: var(--success); }
+.reg-errors { background: var(--danger-bg); border: 1px solid var(--danger-border); border-radius: var(--radius-md);
+	color: var(--danger); font-size: 0.9rem; margin-bottom: var(--sp-100); padding: var(--sp-50) var(--sp-75); }
+.reg-errors p { margin: var(--sp-20) 0; }
+.reg-form .field { margin-bottom: var(--sp-100); }
+.reg-form label { display: block; color: var(--n-600); font-size: 0.85rem; margin-bottom: var(--sp-30); }
+.container .reg-name-row { display: flex; flex-flow: row wrap; gap: 0 var(--sp-75); }
+.reg-name-row .field { flex: 1 1 8rem; }
+
+/* Stack the two cards on phones */
+@media (max-width: 767px) { .login-grid { grid-template-columns: 1fr; } }
 
 /* Post-login resume pulse — highlights the control the user was reaching for */
 .resume-pulse {

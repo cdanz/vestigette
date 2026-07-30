@@ -123,6 +123,11 @@ mysqli_close($db);
 
 <?php else: ?>
 
+    <section class="entry-hero">
+        <h2 class="entry-lead">Welcome &mdash; see where you really stand.</h2>
+        <p class="entry-intro">Agitate maps a debate as a weighted graph: the reasons behind a claim, what follows from it, and what pushes back. It's invite-only while in alpha, so every profile is <a href="/ai-policy-pledge">one real human</a> &mdash; and it's a nonprofit that will never sell or monetize your data.</p>
+    </section>
+
     <?php if ($intent !== '' && $intentPhrasing !== ''): ?>
     <div class="intent-banner intent-<?php echo $intent; ?>">
         <p class="intent-lead">To <strong><?php echo $intentVerbs[$intent]; ?></strong> an argument, you need an account:</p>
@@ -174,6 +179,12 @@ mysqli_close($db);
         </div>
 
     </div>
+
+    <ul class="trust-points">
+        <li><span class="tp-ic">&#x25C6;</span> Nonprofit &mdash; never sold or monetized</li>
+        <li><span class="tp-ic">&#x25C6;</span> One real human per profile</li>
+        <li><span class="tp-ic">&#x25C6;</span> Delete anything, anytime</li>
+    </ul>
 
 <?php endif; ?>
 
