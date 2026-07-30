@@ -142,6 +142,21 @@ is a coherent, single-use *data ramp*; tokenizing it would add indirection with 
 control-point gain. Treat any future diverging/data scale the same way — a labeled ramp,
 not scattered semantic tokens.
 
+### Entry & front-facing pages (login, register — the template for About/Explore/Profile)
+
+The black full-bleed section bars are **app-interior chrome** — right for the dense weighing
+UI, wrong for a front door. Reusing them on the login/register pages is what read as
+"amateurish"; it was a violation of §1, not a gap in it. Entry pages get the **opposite**
+treatment: **light cards** (white, `--n-200` border, soft shadow, `--radius-lg`, dark-text
+headings — no black bars), generous whitespace, a short welcoming lead, `--because` pill
+CTAs, and — most importantly — **trust signals featured, not buried.** Agitate's trust story
+*is* the pitch: invite-only / **one real human**, nonprofit / never monetized, and the **Data
+Promise** (never sold, never advertised against, never AI-trained, aggregate-only, deletable,
+*binding*). Surface it; don't footnote it. Echoing "one real human" across the page is
+deliberate reinforcement — it's the core promise of how inputs are measured, not redundancy
+to trim. Shipped on login + register (2026-07-28), scoped to `.login-main`/`.reg-main`;
+About / Explore / Profile still wear the old chrome and are the next candidates.
+
 ---
 
 ## 5. Tokenization principle
@@ -209,9 +224,11 @@ on `flex-basis:auto` and collapsing rebuttal (a bug fixed 2026-07-28).
   full-width fill) while staying semantically legible? Deliberately unresolved.
 - **All token categories are now done** — type, color, spacing, radii, breakpoints. Future
   visual work should consume the existing tokens/scales rather than introduce new raw values.
-- **Sparse pages** (e.g. Explore) — noted as thin; not yet addressed.
+- **Other front-facing pages** (About, Explore, Profile) still wear the app's black
+  section-bar chrome — the login/register redesign (§4) is the template for bringing them
+  into the welcoming, trust-first entry style. Explore is also thin on content.
 
 ---
 
-_Last refreshed: 2026-07-25. Update the concrete numbers when they change; keep the
+_Last refreshed: 2026-07-28. Update the concrete numbers when they change; keep the
 register (§1) stable — it's the part that shouldn't drift._
