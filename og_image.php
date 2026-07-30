@@ -13,6 +13,8 @@
 // The renderer is a plain function so a CLI harness can include this file and
 // render fixture data; the web flow at the bottom only runs under a web SAPI.
 
+require_once __DIR__ . '/includes/negotiable_term.php';
+
 // ── Data fetch ────────────────────────────────────────────────────────────
 function ogFetchData($db, $argID) {
     $d = [
@@ -38,6 +40,17 @@ function ogFetchData($db, $argID) {
             $d['acceptPct']  = $d['assertions'] > 0 ? $row[4] * 100 : null;
         }
     });
+
+    // Bake a negotiable-term [[value]] token into the title (Because/Rebuttal
+    // already arrive baked via getAssociated's ntPhrasing wrap).
+    if (nt_has_token($d['phrasing'])) {
+        $ctv = null;
+        if ($cRes = mysqli_query($db, "SELECT currentTermValue FROM ARGUMENT WHERE argumentID = " . intval($argID))) {
+            if ($cRow = mysqli_fetch_row($cRes)) $ctv = $cRow[0];
+            mysqli_free_result($cRes);
+        }
+        $d['phrasing'] = nt_substitute_text($d['phrasing'], $ctv);
+    }
 
     // Rows arrive grouped by type, AggWeight DESC within each — the first
     // Because/Rebuttal row is the strongest.
@@ -78,9 +91,9 @@ function ogRenderCard($d) {
     $img = imagecreatetruecolor($W, $H);
 
     $cBlack  = imagecolorallocate($img, 14, 14, 14);    // #0e0e0e
-    $cPanel  = imagecolorallocate($img, 27, 27, 27);    // #1b1b1b
+    $cPanel  = imagecolorallocate($img, 26, 28, 31);    // --n-800 #1a1c1f
     $cWhite  = imagecolorallocate($img, 255, 255, 255);
-    $cGrey   = imagecolorallocate($img, 147, 147, 147); // #939393
+    $cGrey   = imagecolorallocate($img, 154, 160, 168); // --n-400 #9aa0a8
     $cRed    = imagecolorallocate($img, 175, 26, 23);   // --cddbRed
     $cGreen  = imagecolorallocate($img, 16, 160, 32);   // --cddbGreen
     $cBlue   = imagecolorallocate($img, 45, 88, 168);   // --cddbBlue
@@ -93,12 +106,20 @@ function ogRenderCard($d) {
     imagefilledrectangle($img, 400, 0, 800, 12, $cRed);
     imagefilledrectangle($img, 800, 0, $W,  12, $cGreen);
 
-    // Wordmark: AGITATE with the brand's tri-color offset shadow
+    // Wordmark: tri-color ring mark + clean AGITATE — matches the current site
+    // logo and drops the old RGB-split "glitch" shadow for the calmer register.
     $wmSize = 30; $wmY = 84; $wm = 'AGITATE';
-    imagettftext($img, $wmSize, 0, $mX + 5, $wmY,     $cRed,   $fontBold, $wm);
-    imagettftext($img, $wmSize, 0, $mX,     $wmY - 5, $cBlue,  $fontBold, $wm);
-    imagettftext($img, $wmSize, 0, $mX,     $wmY + 5, $cGreen, $fontBold, $wm);
-    imagettftext($img, $wmSize, 0, $mX,     $wmY,     $cWhite, $fontBold, $wm);
+    $ringPath = __DIR__ . '/agitate-ring-mark.png';
+    $textX = $mX;
+    if (is_file($ringPath) && ($ring = @imagecreatefrompng($ringPath))) {
+        $ringSz = 54;
+        imagealphablending($img, true);
+        imagecopyresampled($img, $ring, $mX, 32, 0, 0, $ringSz, $ringSz,
+                           imagesx($ring), imagesy($ring));
+        imagedestroy($ring);
+        $textX = $mX + $ringSz + 18;
+    }
+    imagettftext($img, $wmSize, 0, $textX, $wmY, $cWhite, $fontBold, $wm);
 
     // Argument ID, top-right corner
     if ($d['argID'] > 0) {
