@@ -518,15 +518,43 @@ button.hidden {
 }
 #argument .arg-phrasing {
 	margin: 0;
-	font-size: 1.3rem;
-	font-weight: var(--weight-semibold);
-	line-height: 1.25;
+	font-size: var(--text-md);
+	font-weight: var(--weight-regular);
+	line-height: 1.3;
 	color: var(--cddbWhite);
 	display: -webkit-box;
 	-webkit-line-clamp: 5;
 	-webkit-box-orient: vertical;
 	overflow: hidden;
 }
+/* Negotiable term — cddbYellow halo on the value + superscript "i" info icon.
+   Inline (not absolute) so it isn't clipped by the phrasing's line-clamp overflow. */
+#argument .arg-phrasing .nt-term {
+	white-space: nowrap;
+}
+#argument .arg-phrasing .nt-value {
+	display: inline-block;
+	padding: 0 0.32em;
+	border-radius: 0.5em;
+	color: inherit;
+	background: rgba(212, 160, 23, 0.14);
+	box-shadow: 0 0 0 1px rgba(212, 160, 23, 0.55),
+	            0 0 10px 2px rgba(212, 160, 23, 0.40);
+}
+#argument .arg-phrasing .nt-info {
+	display: inline-block;
+	vertical-align: super;
+	margin-left: 0.2em;
+	line-height: 0;
+	color: var(--cddbYellow);
+	text-decoration: none;
+}
+#argument .arg-phrasing .nt-info-ico {
+	display: block;
+	width: 0.72em;
+	height: 0.72em;
+}
+#argument .arg-phrasing .nt-info:hover { color: var(--cddbWhite); }
 #argument .arg-meta {
 	display: flex;
 	flex-flow: row nowrap;
@@ -1055,6 +1083,62 @@ body.flesh-out-page #flesh-out {
 	visibility: hidden;
 }
 #pinned-zone .flesh-reciprocate { visibility: visible; }
+
+/* Negotiable-term controls on the new-argument row (Option B) */
+.nt-toggle-btn {
+	flex: none;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 2rem;
+	height: 2rem;
+	margin-right: var(--sp-40);
+	padding: 0;
+	border: 1px solid var(--cddbLiteGrey);
+	border-radius: 50%;
+	background: transparent;
+	color: var(--cddbGrey);
+	cursor: pointer;
+}
+.nt-toggle-btn:hover { border-color: var(--cddbYellow); color: var(--cddbYellow); }
+.nt-toggle-btn.active {
+	border-color: var(--cddbYellow);
+	background: var(--cddbYellow);
+	color: #1a1a1a;
+}
+/* Once pinned, the term is set — hide the toggle so the slot reads as locked-in
+   (reciprocate takes over, mirroring its own zone-based visibility). */
+#pinned-zone .nt-toggle-btn { display: none; }
+/* When a term is active the row wraps so the value field drops to its own
+   full-width second line — keeps the compact first line from jumbling. */
+.flesh-row.nt-on { flex-flow: row wrap; }
+.nt-value-field {
+	flex-basis: 100%;
+	display: flex;
+	flex-flow: row wrap;
+	align-items: center;
+	gap: var(--sp-30);
+	margin-top: var(--sp-30);
+	padding-left: var(--sp-20);
+	font-size: 0.85rem;
+	color: var(--cddbGrey);
+}
+.nt-value-field[hidden] { display: none; }
+.nt-value-label { flex: none; }
+.nt-value-input {
+	width: 8rem;
+	max-width: 100%;
+	font-family: inherit;
+	font-size: 0.9rem;
+	padding: 0.15rem 0.4rem;
+	border: 1px solid var(--cddbLiteGrey);
+	border-radius: 4px;
+	background: #fff;
+	color: inherit;
+}
+.flesh-row.nt-invalid .nt-value-input { border-color: #c0392b; }
+.nt-hint { flex: none; color: #c0392b; font-size: 0.78rem; }
+.nt-hint[hidden] { display: none; }
 .pinned-label {
 	align-items: center;
 	background-color: var(--cddbLiteGrey);
@@ -6772,3 +6856,105 @@ body.demo-mode .flesh-list {
 }
 #phrasing .overlay-actions .reset:hover, #explication .overlay-actions .reset:hover,
 #overlayP #closeP:hover, #overlayE #closeE:hover { border-color: var(--cddbBlack); color: var(--cddbBlack); }
+
+/* ── Negotiable-term subsection (argument card) + modal ──────────────────── */
+/* Subsection reuses .carousel-box/.zone-head/.weigh-btn; only the value row is new. */
+.negotiate-current { margin: 0; padding: var(--sp-40) 0 0; font-size: 1rem; color: var(--cddbBlack); }
+.negotiate-current .nt-current-val {
+	display: inline-block;
+	padding: 0 0.35em;
+	border-radius: 0.45em;
+	font-weight: 600;
+	background: rgba(212,160,23,0.16);
+	box-shadow: 0 0 0 1px rgba(212,160,23,0.55), 0 0 8px 1px rgba(212,160,23,0.35);
+}
+/* Modal shell — mirrors the refreshed #phrasing / #explication white card. */
+#overlayT { background-color: rgba(0,0,0,0.65); height: 100%; position: fixed; top: 0; width: 100%; z-index: 2; }
+#negotiate.container {
+	background: #fff;
+	border: 1px solid var(--n-200);
+	border-radius: var(--radius-lg);
+	box-shadow: 0 14px 44px rgba(14,14,14,0.30);
+	display: flex;
+	flex-flow: column nowrap;
+	left: 50%;
+	max-width: 640px;
+	overflow: auto;
+	padding: var(--sp-100);
+	position: absolute;
+	top: 2rem;
+	transform: translate(-50%);
+	width: 90%;
+	z-index: 3;
+}
+#negotiate .overlay-header {
+	align-items: center;
+	border-bottom: 1px solid var(--cddbLiteGrey);
+	display: flex;
+	gap: var(--sp-40);
+	margin-bottom: var(--sp-30);
+	padding: var(--sp-10) 0 var(--sp-75);
+	width: 100%;
+}
+#negotiate .overlay-header h2 { color: var(--cddbBlack); flex: 1 1 auto; font-size: 1.4rem; font-weight: 700; margin: 0; }
+#closeT {
+	align-items: center;
+	background: #fff;
+	border: 1px solid var(--n-200);
+	border-radius: var(--radius-md);
+	box-sizing: border-box;
+	color: var(--n-500);
+	cursor: pointer;
+	display: inline-flex;
+	flex-shrink: 0;
+	height: 1.9rem;
+	justify-content: center;
+	width: 1.9rem;
+}
+#closeT:hover { border-color: var(--cddbBlack); color: var(--cddbBlack); }
+#negotiate .panel { background-color: #fff; border: none; color: var(--cddbBlack); }
+#negotiate .overlay-gloss {
+	border-top: 1px solid var(--cddbLiteGrey);
+	color: var(--n-500);
+	font-size: 0.85rem;
+	line-height: 1.5;
+	margin: var(--sp-50) 0 0;
+	padding: var(--sp-75) var(--sp-50) var(--sp-20);
+	width: 100%;
+}
+#negotiate .accept-prompt {
+	background: rgba(212,160,23,0.12);
+	border-radius: var(--radius-md);
+	color: var(--gold-dark);
+	font-size: 0.88rem;
+	font-weight: 600;
+	margin: var(--sp-50) 0 0;
+	padding: var(--sp-60) var(--sp-75);
+	width: 100%;
+}
+#negotiate .assert { display: block; padding: var(--sp-50); width: 100%; }
+#negotiate .assert .form-inline { display: flex; align-items: center; gap: var(--sp-40); }
+#negotiate #termValueInput {
+	border: 1px solid var(--n-200);
+	border-radius: var(--radius-md);
+	font-family: inherit;
+	font-size: 1rem;
+	max-width: 100%;
+	padding: var(--sp-30) var(--sp-40);
+	width: 10rem;
+}
+#negotiate .assert .endorse {
+	background: var(--cddbBlack);
+	border: 1px solid var(--cddbBlack);
+	border-radius: var(--radius-md);
+	color: #fff;
+	cursor: pointer;
+	font-size: 0.85rem;
+	font-weight: 600;
+	padding: var(--sp-30) var(--sp-100);
+}
+#negotiate .assert .endorse:hover { background: var(--n-700); }
+/* Value-distribution plot */
+#negotiate .nt-dist { display: block; padding: var(--sp-50) var(--sp-50) 0; width: 100%; }
+#negotiate .nt-dist svg { display: block; }
+#negotiate .nt-dist-empty { color: var(--n-500); font-size: 0.9rem; padding: var(--sp-40) 0; }
