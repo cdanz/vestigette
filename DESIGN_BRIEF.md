@@ -44,9 +44,10 @@ On any screen the eye should land in this order:
    need to be the *biggest* thing, but nothing in the masthead area should out-shout it.
 2. **Section headers** (Because / Rebuttal / Therefore / Find / Filter) — substantial and
    obviously tappable, but **below** the logo. They are chrome/navigation, not content.
-3. **The argument claim** — the content. Legible and impactful like a **microblog
-   missive**, but *not* headline-bold; it must not out-weigh the section headers that
-   frame it.
+3. **The argument claim** — the content. Set like a **post body on X / Bluesky**:
+   **regular weight** (`--text-md` / 400) — the largest *content* on the page, but
+   lighter than the chrome that frames it, and light enough to fit more text before the
+   5-line clamp. Never headline-bold; that reads as shouting.
 
 The mistake we corrected this session: section headers were larger **and** heavier than
 the logo (32px/700 vs. logo 28px/500), so the chrome shouted over the anchor and the
@@ -58,7 +59,7 @@ Concrete result (mobile):
 |---|---|---|
 | Logo | 28px / 500 | 28px / 500 *(unchanged — the anchor)* |
 | Section headers | 32px / **700** | **24px / 600** |
-| Claim (`.arg-phrasing`) | 21px / 700 | 21px / **600** (microblog weight) |
+| Claim (`.arg-phrasing`) | 21px / 700 | **18px / 400** (`--text-md`, true microblog post weight) |
 
 ---
 
