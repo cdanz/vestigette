@@ -158,6 +158,20 @@ deliberate reinforcement — it's the core promise of how inputs are measured, n
 to trim. Shipped on login + register (2026-07-28), scoped to `.login-main`/`.reg-main`;
 About / Explore / Profile still wear the old chrome and are the next candidates.
 
+### The share card (`og_image.php`) + brand voice
+
+The OG/social card is the same thinking on a social surface: the tri-color **ring logo +
+clean wordmark** (dropped the old RGB-split "glitch"), the cooler neutral tokens
+(`--n-400`/`--n-800`), and mechanics left untouched. It stays **dark on purpose** — a
+deliberate exception to the light entry-page rule, because a social preview needs presence
+in a feed, not the welcoming on-site treatment.
+
+Its footer is the load-bearing voice note: it reads **"The discourse is taking shape"** — an
+*observation*, not a call-to-action. **Agitate's own copy stays observational; the platform
+describes the state of the discourse and lets the map speak. Sloganeering, persuasion, and
+opinion are the human's department, not the layout's.** Keep that line out of any surface we
+control (cards, empty states, headers).
+
 ---
 
 ## 5. Tokenization principle

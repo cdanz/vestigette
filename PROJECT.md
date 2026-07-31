@@ -182,7 +182,9 @@ modify `ENDORSEMENT` (trigger can't write the table that fired it).
 - **`admin_tools.php`** — admin-only: merge arguments, Profile Picker config (`manual` /
   `auto`), flagged-args resolve, invite-code management, demo mode toggle.
 - **`register.php`** — invite-code registration. Validates `INVITATION` (handles NULL
-  `expiresAt` and `usesRemaining`); decrements `usesRemaining` on success.
+  `expiresAt` and `usesRemaining`); decrements `usesRemaining` on success. Login + register
+  got a **welcoming light-card redesign** (2026-07; hero, trust strip, featured Data
+  Promise) — distinct from the app's dark chrome; see `DESIGN_BRIEF.md` §4.
 - **`find_similar.php`** — full-text + SOUNDEX similarity search. Used by `flesh_out.php`
   (duplicate detection) and `Explore.php` (live search).
 - **`neighborhood.php`** — lazy-load endpoint for Find ▸ Neighborhood list.
@@ -201,8 +203,11 @@ modify `ENDORSEMENT` (trigger can't write the table that fired it).
     Amendment Log line.** See `pages/README.md` for the amend/publish workflow.
   - `robots.txt` (deployed to web root) blocks AI-training crawlers; the Data
     Promise page cites it as evidence. Keep the crawler list current.
-- **`style_vestigette.css`**, **`script_vestigette.js`** — front end. Palette includes
-  `--cddbYellow` (#d4a017) for flagged state and persona badge, `--cddbBlue` for filter badge.
+- **`style_vestigette.css`**, **`script_vestigette.js`** — front end. **Fully tokenized**
+  (2026-07): type/weight scales, an 11-step neutral ramp (`--n-*`), semantic accents,
+  spacing (`--sp-*`), radii (`--radius-*`), and canonical breakpoints (480/640/768/1200) —
+  the 1200 two-column↔one-column reflow is load-bearing; see `DESIGN_BRIEF.md`. Palette
+  includes `--cddbYellow` (#d4a017) for flagged state and persona badge, `--cddbBlue` for filter badge.
   The **weighting circles** are the `body.weigh-page` ring system: tokens
   `--pct`/`--ring-stroke` (8px)/`--ring-size`/`--grow-scale`/`--section`, and the `JOY`
   press-and-hold engine + `growLift`/`growDrop` (fixed-position enlarge) in the JS.
@@ -231,6 +236,9 @@ modify `ENDORSEMENT` (trigger can't write the table that fired it).
   **1% floor** (`floorClicksForNew` = `ceil(others/99)` clicks). flesh_out reuses the whole
   system and scales its hold-step to the running total (`FLESH_HOLD_FRAC ≈ 2%`) because its
   weights persist and accumulate (the index resets each section to zero, so it keeps `+1`).
+  On the **read-only view**, weights **<1%** render as a small section-color **dot** +
+  two-decimal value instead of a near-empty ring sliver (minor points recede); the full
+  live ring returns once a section is unlocked (`.edit`).
 - **Groups / scoped engagement** — users operate under a group context; all actions are
   attributed via SCOPE tables. Filter view is independent of operating context.
 - **Filter section** (always-on for logged-in users) — filter the argument graph by who
@@ -262,8 +270,10 @@ modify `ENDORSEMENT` (trigger can't write the table that fired it).
   (`includes/hub_metrics.php`): when opinions concentrate on an argument's Therefore
   fan-out (T≥25; dialectic dormant: D<25 or T≥8D; ≥4 effective engaged children; T≥2×own
   opinions), the card swaps the two panels for a full-width Therefore panel listing the
-  top 3 positions by engagement ("Which do you back?"). Fires on e.g. arg 1963 (2028
-  candidates).
+  top positions by engagement. Fires on e.g. arg 1963 (2028 candidates). **Styling refresh
+  (2026-07):** tri-color ring logo + clean AGITATE wordmark (dropped the RGB-split glitch),
+  cooler neutral tokens; both variants close on an observational footer — "The discourse is
+  taking shape" — not a CTA slogan. Card cache lives in Apache PrivateTmp (see Gotchas).
 - **Demo mode** — admin toggle that suppresses iOS auto-zoom / scroll jumps for screen
   recording. Site-wide while enabled.
 - **Donate button** — masthead on every page; mobile hamburger on left to avoid crowding.
@@ -303,8 +313,9 @@ modify `ENDORSEMENT` (trigger can't write the table that fired it).
 
 ## Deeper references
 
-- **`DESIGN_BRIEF.md`** — creative north star (look & feel) + the design-token system
-  (type / color / neutral scale). Read before any visual/CSS work.
+- **`DESIGN_BRIEF.md`** — creative north star (look & feel) + the full design-token system
+  (type · color/neutral scale · spacing · radii · breakpoints) and page patterns (entry
+  pages, share card). Read before any visual/CSS work.
 - **`bots/PERSONA_SEEDING_PROCESS.md`** — persona seeding workflow.
 - **`DATA_CLEANUP_BACKLOG.md`** — known data-quality issues.
 - **`db/*_procedures.sql`** — canonical proc/trigger source (8 files).
@@ -324,4 +335,4 @@ modify `ENDORSEMENT` (trigger can't write the table that fired it).
   feature is incomplete.
 - Cost monitoring & scale-back rules; branding pass.
 
-_Last refreshed: 2026-07-22._
+_Last refreshed: 2026-07-28._
