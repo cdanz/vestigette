@@ -112,9 +112,9 @@ function ogRenderCard($d) {
     $ringPath = __DIR__ . '/agitate-ring-mark.png';
     $textX = $mX;
     if (is_file($ringPath) && ($ring = @imagecreatefrompng($ringPath))) {
-        $ringSz = 54;
+        $ringSz = 62;
         imagealphablending($img, true);
-        imagecopyresampled($img, $ring, $mX, 32, 0, 0, $ringSz, $ringSz,
+        imagecopyresampled($img, $ring, $mX, 38, 0, 0, $ringSz, $ringSz,
                            imagesx($ring), imagesy($ring));
         imagedestroy($ring);
         $textX = $mX + $ringSz + 18;
@@ -245,7 +245,7 @@ function ogRenderCard($d) {
     // ── Footer: CTA + domain ───────────────────────────────────────────────
     $footY = 604;
     imagettftext($img, 23, 0, $mX, $footY, $cYellow, $fontBold,
-                 $isHub ? 'Which do you back?' : 'Where do you stand?');
+                 'The discourse is taking shape');
     $domain = 'agitate-discourse.org';
     imagettftext($img, 19, 0, $W - $mX - ogTextW(19, $font, $domain), $footY,
                  $cGrey, $font, $domain);
