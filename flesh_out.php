@@ -723,17 +723,20 @@ function ntInsertToken(ta) {
     if (ntCountToken(ta.value) > 0) return;
     var start = ta.selectionStart, end = ta.selectionEnd;
     if (typeof start === 'number' && typeof end === 'number') {
-        var before = ta.value.slice(0, start), after = ta.value.slice(end);
-        var lsp = (before.length && !/\s$/.test(before)) ? ' ' : '';
-        var rsp = (after.length && !/^\s/.test(after)) ? ' ' : '';
-        ta.value = before + lsp + NT_TOKEN + rsp + after;
+        // Insert exactly at the cursor — NO auto-spacing, so the phrasing can label
+        // the value flush against it ($[[value]], [[value]]lbs). Spacing is the
+        // author's to type.
+        ta.value = ta.value.slice(0, start) + NT_TOKEN + ta.value.slice(end);
+        var pos = start + NT_TOKEN.length;
+        try { ta.setSelectionRange(pos, pos); ta.focus(); } catch (e) {}
     } else {
-        ta.value = (ta.value ? ta.value.replace(/\s+$/, '') + ' ' : '') + NT_TOKEN;
+        ta.value = ta.value + NT_TOKEN;
     }
     autoResizeNewArg(ta);
 }
 function ntRemoveToken(ta) {
-    ta.value = ta.value.replace(/\s*\[\[value\]\]\s*/g, ' ').replace(/\s{2,}/g, ' ').trim();
+    // Delete the token only; collapse a resulting double space, don't inject one.
+    ta.value = ta.value.replace(/\[\[value\]\]/g, '').replace(/\s{2,}/g, ' ').trim();
     autoResizeNewArg(ta);
 }
 

@@ -56,5 +56,5 @@ if ($tags) {
 	echo '</div>';
 }
 
-echo '<div class="prose">' . content_render_markdown($post['body']) . '</div>';
+echo '<div class="prose">' . content_render_markdown_with_anchors($post['body']) . '</div>';
 content_footer();

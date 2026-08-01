@@ -44,7 +44,7 @@ function nt_render_header($rawPhrasing, $value) {
     $fmt = nt_format_value($value);
     if ($fmt === '') return $safe;
     $valHtml = htmlspecialchars($fmt, ENT_QUOTES, 'UTF-8');
-    $icon = '<a class="nt-info" href="/post.php?slug=glossary"'
+    $icon = '<a class="nt-info" href="/post.php?slug=glossary#negotiable-terms"'
           . ' title="This is a negotiable term, accept to weigh-in"'
           . ' aria-label="This is a negotiable term, accept to weigh in">'
           . '<svg class="nt-info-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor"'
