@@ -8,6 +8,8 @@ persona_credentials.json
 *.sql
 !*_procedures.sql
 !*_seed.sql
+!*_schema.sql
+!*_functions.sql
 dumps/
 db/backups/
 

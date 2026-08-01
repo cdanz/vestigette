@@ -20,9 +20,20 @@ DROP PROCEDURE IF EXISTS mergeArguments;
 DELIMITER //
 CREATE PROCEDURE mergeArguments(IN keepID INT UNSIGNED, IN dropID INT UNSIGNED)
 BEGIN
+    DECLARE keepNT TINYINT DEFAULT 0;
+    DECLARE dropNT TINYINT DEFAULT 0;
 
     IF keepID = dropID THEN
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Cannot merge an argument with itself';
+    END IF;
+
+    -- A negotiable term is a fundamentally different kind of assertion, so refuse to
+    -- merge a term-bearing argument with a non-term one. Two term args may merge
+    -- (their values fold together in step 8b).
+    SELECT hasNegotiableTerm INTO keepNT FROM ARGUMENT WHERE argumentID = keepID;
+    SELECT hasNegotiableTerm INTO dropNT FROM ARGUMENT WHERE argumentID = dropID;
+    IF keepNT <> dropNT THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Cannot merge a negotiable-term argument with a non-term argument';
     END IF;
 
     -- ── 1. OPINION — keep wins ──────────────────────────────────────────────
@@ -141,6 +152,38 @@ BEGIN
            ON pa_keep.argumentID = keepID AND pa_keep.putForthID = pa_drop.putForthID
     WHERE  pa_drop.argumentID = dropID;
     UPDATE PUT_FORTH_ARCHIVE SET argumentID = keepID WHERE argumentID = dropID;
+
+    -- ── 8b. TERM_VALUE (negotiable term) — keep wins, fold under keep's term ─
+    -- Runs only when both args are term-bearing (the guard guarantees they match).
+    IF keepNT = 1 THEN
+        -- Keep wins: deactivate drop's value for any user who already has an active
+        -- value on keep, preserving one active value per user.
+        UPDATE TERM_VALUE tv_drop
+        INNER  JOIN TERM_VALUE tv_keep
+               ON tv_keep.argumentID = keepID AND tv_keep.profileID = tv_drop.profileID
+               AND tv_keep.active = TRUE
+        SET    tv_drop.active = FALSE
+        WHERE  tv_drop.argumentID = dropID AND tv_drop.active = TRUE;
+        -- Repoint drop's values onto keep's argument + keep's term row.
+        UPDATE TERM_VALUE tv
+        INNER  JOIN NEGOTIABLE_TERM nt_keep ON nt_keep.argumentID = keepID
+        SET    tv.argumentID = keepID, tv.termID = nt_keep.termID
+        WHERE  tv.argumentID = dropID;
+        -- Migrate scope rows (dedupe on the composite PK).
+        DELETE stv_drop
+        FROM   SCOPE_TERM_VALUE stv_drop
+        INNER  JOIN SCOPE_TERM_VALUE stv_keep
+               ON stv_keep.profileID = stv_drop.profileID
+               AND stv_keep.argumentID = keepID
+               AND stv_keep.affiliationID = stv_drop.affiliationID
+        WHERE  stv_drop.argumentID = dropID;
+        UPDATE SCOPE_TERM_VALUE SET argumentID = keepID WHERE argumentID = dropID;
+        -- Drop's term definition is now orphaned (no TERM_VALUE references it) and
+        -- would block the final ARGUMENT delete via FK — remove it.
+        DELETE FROM NEGOTIABLE_TERM WHERE argumentID = dropID;
+        -- Recompute keep's median over the merged value set.
+        CALL updateTermCache(keepID);
+    END IF;
 
     -- ── 9. Cache, redirect, delete source ───────────────────────────────────
     CALL updatePhrasingCache(keepID);

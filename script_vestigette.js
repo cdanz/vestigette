@@ -559,6 +559,73 @@ function init() {
 		});
 	}
 
+	// negotiable term -- open/close overlay + render the value distribution
+	let overlayT  = document.getElementById("overlayT");
+	let negotiate = document.getElementById("negotiate");
+	let openNegotiate = document.querySelector(".negotiateBtn");
+	if (openNegotiate && overlayT && negotiate) {
+		openNegotiate.addEventListener("click", function() {
+			overlayT.classList.toggle("hidden");
+			negotiate.classList.toggle("hidden");
+			renderTermDist(negotiate.querySelector(".nt-dist"));
+		});
+	}
+	let closeT = document.getElementById("closeT");
+	if (closeT && overlayT && negotiate) {
+		closeT.addEventListener("click", function() {
+			overlayT.classList.toggle("hidden");
+			negotiate.classList.toggle("hidden");
+		});
+	}
+	// Dot/strip plot that graduates to a binned histogram as N grows, with the
+	// median marked in cddbYellow. Panel is light, so dark-blue marks read well.
+	function renderTermDist(el) {
+		if (!el) el = document.querySelector(".nt-dist");
+		if (!el || el.dataset.rendered) return;
+		let vals = [];
+		try { vals = JSON.parse(el.getAttribute("data-values") || "[]"); } catch (e) { vals = []; }
+		let median = parseFloat(el.getAttribute("data-median"));
+		let W = 340, H = 96, padL = 12, padR = 12, padT = 14, padB = 24;
+		let plotW = W - padL - padR, plotH = H - padT - padB, baseY = padT + plotH;
+		if (!vals.length) { el.innerHTML = '<p class="nt-dist-empty">No values submitted yet.</p>'; el.dataset.rendered = "1"; return; }
+		let min = Math.min.apply(null, vals), max = Math.max.apply(null, vals);
+		if (min === max) { min -= 1; max += 1; }
+		let span = max - min;
+		let sx = function(v) { return padL + (v - min) / span * plotW; };
+		let rn = function(n) { return Math.round(n * 100) / 100; };
+		let svg = '<svg viewBox="0 0 ' + W + ' ' + H + '" width="100%" role="img" aria-label="Distribution of submitted values">';
+		svg += '<line x1="' + padL + '" y1="' + baseY + '" x2="' + (padL + plotW) + '" y2="' + baseY + '" stroke="#ccc" stroke-width="1"/>';
+		if (vals.length <= 24) {
+			let stack = {};
+			vals.forEach(function(v) {
+				let px = Math.round(sx(v));
+				stack[px] = (stack[px] || 0);
+				svg += '<circle cx="' + px + '" cy="' + (baseY - 6 - stack[px] * 9) + '" r="3.5" fill="#2d58a8"/>';
+				stack[px]++;
+			});
+		} else {
+			let bins = Math.min(20, Math.ceil(Math.sqrt(vals.length)));
+			let binW = span / bins, freq = new Array(bins).fill(0);
+			vals.forEach(function(v) { let b = Math.min(bins - 1, Math.floor((v - min) / binW)); freq[b]++; });
+			let fmax = Math.max.apply(null, freq);
+			for (let b = 0; b < bins; b++) {
+				let bh = freq[b] / fmax * (plotH - 6);
+				let bxl = padL + b / bins * plotW;
+				svg += '<rect x="' + (bxl + 1) + '" y="' + (baseY - bh) + '" width="' + (plotW / bins - 2) + '" height="' + bh + '" fill="#2d58a8"/>';
+			}
+		}
+		if (isFinite(median)) {
+			let mx = sx(median);
+			svg += '<line x1="' + mx + '" y1="' + padT + '" x2="' + mx + '" y2="' + baseY + '" stroke="#d4a017" stroke-width="2"/>';
+			svg += '<text x="' + mx + '" y="' + (padT - 4) + '" text-anchor="middle" font-size="11" fill="#b8860b">median ' + el.getAttribute("data-median") + '</text>';
+		}
+		svg += '<text x="' + padL + '" y="' + (H - 7) + '" font-size="10" fill="#888">' + rn(min) + '</text>';
+		svg += '<text x="' + (padL + plotW) + '" y="' + (H - 7) + '" text-anchor="end" font-size="10" fill="#888">' + rn(max) + '</text>';
+		svg += "</svg>";
+		el.innerHTML = svg;
+		el.dataset.rendered = "1";
+	}
+
 
 
 

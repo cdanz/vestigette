@@ -64,6 +64,7 @@ INCLUDE_FILES=(
     content_chrome.php
     dbconnect.php
     hub_metrics.php
+    negotiable_term.php
     og_meta.php
 )
 

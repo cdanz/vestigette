@@ -243,6 +243,28 @@ if (mysqli_multi_query($db, $sql)) {
 // admin = 28). Gates the social-proof copy in index.php's og:description —
 // headcounts only appear once SOCIAL_PROOF_MIN_HUMANS real humans have
 // weighed in. og_image.php runs the same check for the card itself.
+// Current argument's cached median (negotiable-term value), NULL for non-term args.
+// The index header substitutes this into the phrasing's [[value]] token with a halo;
+// list/associated sites bake it at the SQL source via ntPhrasing() instead.
+$currentTermValue = null;
+$hasNegotiableTerm = 0;
+$termDistribution = array();   // all active submitted values (MVP: unscoped), for the dialog plot
+$ctvRes = mysqli_query($db,
+  "SELECT hasNegotiableTerm, currentTermValue FROM ARGUMENT WHERE argumentID = " . intval($argID));
+if ($ctvRes && ($ctvRow = mysqli_fetch_row($ctvRes))) {
+  $hasNegotiableTerm = intval($ctvRow[0]);
+  $currentTermValue  = $ctvRow[1];
+  mysqli_free_result($ctvRes);
+}
+if ($hasNegotiableTerm) {
+  $tdRes = mysqli_query($db,
+    "SELECT value FROM TERM_VALUE WHERE argumentID = " . intval($argID) . " AND active = TRUE ORDER BY value ASC");
+  if ($tdRes) {
+    while ($tdRow = mysqli_fetch_row($tdRes)) { $termDistribution[] = (float) $tdRow[0]; }
+    mysqli_free_result($tdRes);
+  }
+}
+
 $humanOpinions = 0;
 $hoRes = mysqli_query($db,
   "SELECT COUNT(*) FROM OPINION
@@ -261,10 +283,10 @@ if ($hoRes && ($hoRow = mysqli_fetch_row($hoRes))) {
 $recent = array();
 $recentRes = mysqli_query($db,
   "SELECT a.argumentID, 0,
-          COALESCE(a.currentPhrasing,
+          ntPhrasing(COALESCE(a.currentPhrasing,
                    (SELECT phrasing FROM PHRASING
                     WHERE argumentID = a.argumentID
-                    ORDER BY createdDate ASC LIMIT 1))
+                    ORDER BY createdDate ASC LIMIT 1)), a.currentTermValue)
    FROM ARGUMENT a
    WHERE a.createdBy > 26
    ORDER BY a.createdDate DESC

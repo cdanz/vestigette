@@ -55,7 +55,7 @@ function hubMetrics($db, $argID) {
 
 	if ($h['fires']) {
 		$tRes = mysqli_query($db,
-			"SELECT e.supportingArgID, a.currentPhrasing,
+			"SELECT e.supportingArgID, ntPhrasing(a.currentPhrasing, a.currentTermValue) AS currentPhrasing,
 					(SELECT COUNT(*) FROM OPINION o WHERE o.argumentID = e.supportingArgID) AS ops
 			 FROM ENDORSEMENT e
 			 JOIN ARGUMENT a ON a.argumentID = e.supportingArgID

@@ -30,6 +30,7 @@ $profileID = intval($_SESSION['profile']);
 $_SESSION['currentArg'] = $argID;
 
 include("${_SERVER['DOCUMENT_ROOT']}/includes/dbconnect.php");
+require_once("${_SERVER['DOCUMENT_ROOT']}/includes/negotiable_term.php");
 
 // ── POST handler ──────────────────────────────────────────────────────────────
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -57,6 +58,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $itemType = $item['type'] ?? '';
         if ($itemType === 'new') {
             $text = isset($item['text']) ? substr(trim($item['text']), 0, 300) : '';
+
+            // Negotiable term: create one only when the flag is set AND the phrasing
+            // carries exactly one [[value]] token AND a numeric initial value is given.
+            // Otherwise never persist a raw token (strip it → plain argument).
+            $isNT       = !empty($item['negotiableTerm']);
+            $termVal    = (isset($item['termValue']) && is_numeric($item['termValue']))
+                          ? floatval($item['termValue']) : null;
+            $tokenCount = substr_count($text, NT_TOKEN);
+            $makeTerm   = $isNT && $tokenCount === 1 && $termVal !== null;
+            if (!$makeTerm && strpos($text, NT_TOKEN) !== false) {
+                $text = substr(nt_strip_token($text), 0, 300);
+            }
             if ($text === '') continue;
 
             $escaped = mysqli_real_escape_string($db, $text);
@@ -64,8 +77,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $recip   = !empty($item['reciprocate']);
 
             // Create ARGUMENT
-            mysqli_query($db, "INSERT INTO ARGUMENT (createdBy, createdDate, lastVisited)
-                               VALUES ($profileID, NOW(), NOW())");
+            mysqli_query($db, "INSERT INTO ARGUMENT (createdBy, createdDate, lastVisited, hasNegotiableTerm)
+                               VALUES ($profileID, NOW(), NOW(), " . ($makeTerm ? 1 : 0) . ")");
             $freshArgID = mysqli_insert_id($db);
 
             // Create PHRASING
@@ -86,6 +99,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Update phrasing cache
             mysqli_query($db, "CALL updatePhrasingCache($freshArgID)");
             while (mysqli_more_results($db)) { mysqli_next_result($db); if ($r = mysqli_store_result($db)) mysqli_free_result($r); }
+
+            // Negotiable term: register the term + seed the author's first value so the
+            // median is never empty, then cache it. Value is one absolute number per
+            // user (not an ENDORSEMENT), so the 100% invariant is untouched.
+            if ($makeTerm) {
+                mysqli_query($db, "INSERT INTO NEGOTIABLE_TERM (argumentID, createdBy, createdDate)
+                                   VALUES ($freshArgID, $profileID, NOW())");
+                $freshTermID = mysqli_insert_id($db);
+                $valSql = sprintf('%.8F', $termVal); // fixed decimal, no scientific notation
+                mysqli_query($db, "INSERT INTO TERM_VALUE
+                                       (argumentID, termID, profileID, value, firstVisit, lastVisit, active)
+                                   VALUES ($freshArgID, $freshTermID, $profileID, $valSql, NOW(), NOW(), TRUE)");
+                mysqli_query($db, "INSERT IGNORE INTO SCOPE_TERM_VALUE (profileID, argumentID, affiliationID)
+                                   VALUES ($profileID, $freshArgID, @active_aff_id)");
+                mysqli_query($db, "CALL updateTermCache($freshArgID)");
+                while (mysqli_more_results($db)) { mysqli_next_result($db); if ($r = mysqli_store_result($db)) mysqli_free_result($r); }
+            }
 
             $allWeighted[] = ['argID' => $freshArgID, 'weight' => $weight, 'reciprocate' => $recip];
             $newArgIDs[]   = $freshArgID;
@@ -270,12 +300,20 @@ $baseURL      = '/';
                 <div class="flesh-text-col">
                     <textarea class="new-arg-text" placeholder="Type a new argument…" rows="1"></textarea>
                 </div>
+                <button type="button" class="nt-toggle-btn" title="Add a negotiable term" aria-label="Add a negotiable term" aria-pressed="false">
+                    <svg class="nt-ico" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="4" y1="8" x2="20" y2="8"/><line x1="4" y1="16" x2="20" y2="16"/><circle cx="9" cy="8" r="2.5" fill="currentColor" stroke="none"/><circle cx="15" cy="16" r="2.5" fill="currentColor" stroke="none"/></svg>
+                </button>
 <?php if ($showRecipCol): ?>
                 <label class="switch flesh-reciprocate" title="Reciprocate">
                     <input type="checkbox" class="reciprocate-toggle" checked>
                     <span class="toggle round"></span>
                 </label>
 <?php endif; ?>
+                <div class="nt-value-field" hidden>
+                    <span class="nt-value-label">Value to negotiate:</span>
+                    <input type="number" class="nt-value-input" step="any" inputmode="decimal" placeholder="Any Decimal">
+                    <span class="nt-hint" hidden></span>
+                </div>
             </div>
         </div>
 
@@ -514,6 +552,13 @@ function fleshBumpNew(n) {
     var item = fleshPool.find(function(x) { return x.id === id; });
 
     if (!item) {
+        // A term row can't be weighted until its [[value]] token + number are valid.
+        var ntRow = document.getElementById('flesh-new-' + n);
+        if (ntRow && ntRowActive(ntRow) && !ntValidate(ntRow)) {
+            var ntVi = ntRow.querySelector('.nt-value-input');
+            if (ntVi && ntVi.value.trim() === '') ntVi.focus();
+            return;
+        }
         // Suggestion already showing for this row — don't stack another
         if (document.getElementById('similar-' + n)) return;
         // Already waiting on the similarity check for this row — rapid
@@ -591,6 +636,7 @@ function fleshAddNewRow(n, beforeEl) {
     var row       = document.createElement('div');
     row.className = 'flesh-row lineItem pct0_0 half1';
     row.id        = 'flesh-new-' + n;
+    var ntIco = '<svg class="nt-ico" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="4" y1="8" x2="20" y2="8"/><line x1="4" y1="16" x2="20" y2="16"/><circle cx="9" cy="8" r="2.5" fill="currentColor" stroke="none"/><circle cx="15" cy="16" r="2.5" fill="currentColor" stroke="none"/></svg>';
     row.innerHTML =
         '<div class="wrapper">'
         + '<span class="glyph"></span>'
@@ -599,7 +645,13 @@ function fleshAddNewRow(n, beforeEl) {
         + '<div class="flesh-text-col">'
         + '<textarea class="new-arg-text" placeholder="Type a new argument…" rows="1"></textarea>'
         + '</div>'
-        + recipHtml;
+        + '<button type="button" class="nt-toggle-btn" title="Add a negotiable term" aria-label="Add a negotiable term" aria-pressed="false">' + ntIco + '</button>'
+        + recipHtml
+        + '<div class="nt-value-field" hidden>'
+        + '<span class="nt-value-label">Value to negotiate:</span>'
+        + '<input type="number" class="nt-value-input" step="any" inputmode="decimal" placeholder="Any Decimal">'
+        + '<span class="nt-hint" hidden></span>'
+        + '</div>';
 
     beforeEl.parentNode.insertBefore(row, beforeEl);
 }
@@ -626,7 +678,11 @@ function fleshSerialize() {
             var text    = row ? row.querySelector('.new-arg-text').value.trim() : '';
             var toggle  = row ? row.querySelector('.reciprocate-toggle') : null;
             var recip   = toggle ? toggle.checked : false;
-            items.push({type: 'new', text: text, weight: weight, reciprocate: recip});
+            var ntOn    = row ? ntRowActive(row) : false;
+            var ntInput = row ? row.querySelector('.nt-value-input') : null;
+            var ntValue = (ntOn && ntInput) ? ntInput.value.trim() : null;
+            items.push({type: 'new', text: text, weight: weight, reciprocate: recip,
+                        negotiableTerm: ntOn, termValue: ntValue});
         } else {
             var argID  = parseInt(poolItem.id.replace('ex-', ''), 10);
             var exRow  = document.getElementById('flesh-ex-' + argID);
@@ -649,6 +705,84 @@ function autoResizeNewArg(ta) {
 
 document.getElementById('new-arg-zone').addEventListener('input', function(e) {
     if (e.target.classList.contains('new-arg-text')) autoResizeNewArg(e.target);
+    var r = e.target.closest ? e.target.closest('.flesh-row') : null;
+    if (r && ntRowActive(r) &&
+        (e.target.classList.contains('new-arg-text') || e.target.classList.contains('nt-value-input'))) {
+        ntValidate(r);
+    }
+});
+
+// ── Negotiable term (Option B) ────────────────────────────────────────────────
+// The [[value]] token marks the slot in the phrasing; the number field seeds the
+// author's first value. A row can't be weighted while its term is invalid.
+var NT_TOKEN = '[[value]]';
+function ntCountToken(s) { return (String(s).match(/\[\[value\]\]/g) || []).length; }
+function ntRowActive(row) { return !!row && row.classList.contains('nt-on'); }
+
+function ntInsertToken(ta) {
+    if (ntCountToken(ta.value) > 0) return;
+    var start = ta.selectionStart, end = ta.selectionEnd;
+    if (typeof start === 'number' && typeof end === 'number') {
+        var before = ta.value.slice(0, start), after = ta.value.slice(end);
+        var lsp = (before.length && !/\s$/.test(before)) ? ' ' : '';
+        var rsp = (after.length && !/^\s/.test(after)) ? ' ' : '';
+        ta.value = before + lsp + NT_TOKEN + rsp + after;
+    } else {
+        ta.value = (ta.value ? ta.value.replace(/\s+$/, '') + ' ' : '') + NT_TOKEN;
+    }
+    autoResizeNewArg(ta);
+}
+function ntRemoveToken(ta) {
+    ta.value = ta.value.replace(/\s*\[\[value\]\]\s*/g, ' ').replace(/\s{2,}/g, ' ').trim();
+    autoResizeNewArg(ta);
+}
+
+// True when the row's term state is valid (or the row isn't a term row).
+function ntValidate(row) {
+    if (!ntRowActive(row)) return true;
+    var ta   = row.querySelector('.new-arg-text');
+    var vi   = row.querySelector('.nt-value-input');
+    var hint = row.querySelector('.nt-hint');
+    var cnt  = ta ? ntCountToken(ta.value) : 0;
+    var valOk = vi && vi.value.trim() !== '' && isFinite(parseFloat(vi.value));
+    var msg = '';
+    if (cnt === 0)    msg = 'Put the value placeholder back into your phrasing.';
+    else if (cnt > 1) msg = 'Use the value placeholder only once.';
+    if (hint) { hint.textContent = msg; hint.hidden = !msg; }
+    row.classList.toggle('nt-invalid', !!msg); // red styling only for token errors
+    return (cnt === 1 && valOk);               // a value is still required to weigh (silently)
+}
+
+function ntSetActive(row, on) {
+    if (!row) return;
+    var btn  = row.querySelector('.nt-toggle-btn');
+    var vf   = row.querySelector('.nt-value-field');
+    var ta   = row.querySelector('.new-arg-text');
+    var vi   = row.querySelector('.nt-value-input');
+    var hint = row.querySelector('.nt-hint');
+    if (on) {
+        row.classList.add('nt-on');
+        if (btn) { btn.classList.add('active'); btn.setAttribute('aria-pressed', 'true'); btn.title = 'Remove negotiable term'; btn.setAttribute('aria-label', 'Remove negotiable term'); }
+        if (vf) vf.hidden = false;
+        if (ta) ntInsertToken(ta);
+        ntValidate(row);
+        if (vi) vi.focus();
+    } else {
+        row.classList.remove('nt-on', 'nt-invalid');
+        if (btn) { btn.classList.remove('active'); btn.setAttribute('aria-pressed', 'false'); btn.title = 'Add a negotiable term'; btn.setAttribute('aria-label', 'Add a negotiable term'); }
+        if (vf) vf.hidden = true;
+        if (vi) vi.value = '';
+        if (ta) ntRemoveToken(ta);
+        if (hint) { hint.hidden = true; hint.textContent = ''; }
+    }
+}
+
+document.getElementById('new-arg-zone').addEventListener('click', function(e) {
+    var btn = e.target.closest ? e.target.closest('.nt-toggle-btn') : null;
+    if (!btn) return;
+    e.preventDefault();
+    var row = btn.closest('.flesh-row');
+    if (row) ntSetActive(row, !ntRowActive(row));
 });
 
 // ── Duplicate detection ───────────────────────────────────────────────────────
@@ -685,7 +819,8 @@ document.getElementById('new-arg-zone').addEventListener('focusout', function(e)
         delete similarFlight[n];
     };
     xhr.onerror = function() { similarCache[n] = []; delete similarFlight[n]; };
-    xhr.send('q=' + encodeURIComponent(text) + '&arg=<?php echo $argIDEsc; ?>');
+    xhr.send('q=' + encodeURIComponent(text) + '&arg=<?php echo $argIDEsc; ?>'
+             + '&nt=' + (ntRowActive(row) ? '1' : '0'));
 });
 
 function fleshShowSuggestion(n, matches) {
@@ -744,6 +879,7 @@ function fleshCancelNew(n) {
     similarCache[n] = [];
     var row = document.getElementById('flesh-new-' + n);
     if (row) {
+        ntSetActive(row, false);
         var input = row.querySelector('.new-arg-text');
         if (input) { input.value = ''; autoResizeNewArg(input); input.focus(); }
     }
@@ -754,6 +890,7 @@ function fleshUseSuggestion(n, argID, phrasing) {
     // Clear the typed text so the input row resets cleanly for new entries
     var srcRow = document.getElementById('flesh-new-' + n);
     if (srcRow) {
+        ntSetActive(srcRow, false);
         var input = srcRow.querySelector('.new-arg-text');
         if (input) { input.value = ''; autoResizeNewArg(input); }
     }

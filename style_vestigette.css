@@ -6858,16 +6858,13 @@ body.demo-mode .flesh-list {
 #overlayP #closeP:hover, #overlayE #closeE:hover { border-color: var(--cddbBlack); color: var(--cddbBlack); }
 
 /* ── Negotiable-term subsection (argument card) + modal ──────────────────── */
-/* Subsection reuses .carousel-box/.zone-head/.weigh-btn; only the value row is new. */
-.negotiate-current { margin: 0; padding: var(--sp-40) 0 0; font-size: 1rem; color: var(--cddbBlack); }
-.negotiate-current .nt-current-val {
-	display: inline-block;
-	padding: 0 0.35em;
-	border-radius: 0.45em;
-	font-weight: 600;
-	background: rgba(212,160,23,0.16);
-	box-shadow: 0 0 0 1px rgba(212,160,23,0.55), 0 0 8px 1px rgba(212,160,23,0.35);
-}
+/* Compact single row (label + count on the left, Weigh-In on the right). The
+   value itself lives in the header halo + the dialog, so it isn't repeated here. */
+#argument .panel .negotiateBox .negotiate-row { align-items: center; display: flex; gap: var(--sp-40); }
+#argument .panel .negotiateBox .negotiate-row .negotiateBtn { margin-left: auto; }
+/* Phrasing-modal hint for NT arguments (keep the [[value]] placeholder) */
+#phrasing .nt-phrase-hint { color: var(--gold-dark); display: block; font-size: 0.8rem; margin-top: var(--sp-20); }
+#phrasing .nt-phrase-hint code { font-family: var(--font-mono, monospace); font-size: 0.9em; }
 /* Modal shell — mirrors the refreshed #phrasing / #explication white card. */
 #overlayT { background-color: rgba(0,0,0,0.65); height: 100%; position: fixed; top: 0; width: 100%; z-index: 2; }
 #negotiate.container {

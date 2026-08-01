@@ -1,4 +1,6 @@
 <?php
+	require_once(__DIR__ . '/includes/negotiable_term.php');
+
 	// Queue an existing argument for bot seeding when a genuine external human
 	// (non-admin, non-persona) forms an opinion on it. parentArgID is NULL — a
 	// direct human opinion on an existing argument is itself the validation
@@ -323,8 +325,44 @@
 					echo "Query Failed";
             	break;
 
+            case "weighTerm":
+                $argAtHand = intval($_SESSION['currentArg']);
+                $profileID = intval($_SESSION['profile']);
+                $rawVal    = $_POST['termValue'] ?? '';
+                if (!is_numeric($rawVal)) { header('Location: /?arg='.$argAtHand); exit; }
+                // Resolve the argument's term (must exist and be a term-bearing arg).
+                $termID = null;
+                $tRes = mysqli_query($db, "SELECT termID FROM NEGOTIABLE_TERM WHERE argumentID = ".$argAtHand);
+                if ($tRes && ($tRow = mysqli_fetch_row($tRes))) { $termID = intval($tRow[0]); mysqli_free_result($tRes); }
+                if ($termID === null) { header('Location: /?arg='.$argAtHand); exit; }
+                $val = sprintf('%.8F', floatval($rawVal)); // fixed decimal, no scientific notation
+                // Stating a value implies acceptance; then swap the user's active value.
+                $query  = "CALL assertOpinion(1,".$argAtHand.",".$profileID.");";
+                $query .= "CALL prepareForNewTermValue(".$argAtHand.",".$profileID.");";
+                $query .= "INSERT INTO TERM_VALUE (argumentID, termID, profileID, value, active) VALUES(".$argAtHand.",".$termID.",".$profileID.",".$val.",TRUE);";
+                $query .= "INSERT IGNORE INTO SCOPE_TERM_VALUE (profileID, argumentID, affiliationID) VALUES(".$profileID.",".$argAtHand.",@active_aff_id);";
+                $query .= "CALL updateTermCache(".$argAtHand.");";
+                if (mysqli_multi_query($db, $query)) {
+                    do { if ($r = mysqli_store_result($db)) mysqli_free_result($r); } while (mysqli_more_results($db) && mysqli_next_result($db));
+                    header('Location: /?arg='.$argAtHand);
+                } else {
+                    echo "Query Failed";
+                }
+                break;
+
             case "newPutForth":
             	$phrased = trim($_POST["newPutForth"] ?? '');
+            	$argAtHand = intval($_SESSION['currentArg']);
+            	// Negotiable-term integrity: an NT argument's phrasings MUST carry the
+            	// [[value]] token exactly once; a non-term argument's must carry none.
+            	$isNTarg = false;
+            	if ($ntChk = mysqli_query($db, "SELECT hasNegotiableTerm FROM ARGUMENT WHERE argumentID = ".$argAtHand)) {
+            		if ($ntRow = mysqli_fetch_row($ntChk)) { $isNTarg = (intval($ntRow[0]) === 1); }
+            		mysqli_free_result($ntChk);
+            	}
+            	if (!$isNTarg && strpos($phrased, NT_TOKEN) !== false) {
+            		$phrased = trim(nt_strip_token($phrased)); // strip a stray token off a plain arg
+            	}
             	// Server-side validation: must be human-readable text, not a URL or HTML
             	$phrasingError = null;
             	if (strlen($phrased) < 5) {
@@ -337,13 +375,14 @@
             		$phrasingError = 'HTML tags are not allowed in phrasings.';
             	} elseif (!preg_match('/[a-zA-Z\x{00C0}-\x{024F}]/u', $phrased)) {
             		$phrasingError = 'Phrasings must contain readable text with letters.';
+            	} elseif ($isNTarg && substr_count($phrased, NT_TOKEN) !== 1) {
+            		$phrasingError = 'This argument has a negotiable term — its phrasing must include the value placeholder [[value]] exactly once.';
             	}
             	if ($phrasingError) {
             		$_SESSION['formError'] = $phrasingError;
             		header('Location: /?arg='.$_SESSION['currentArg']);
             		exit;
             	}
-	            $argAtHand = intval($_SESSION['currentArg']);
 	            $profileID = intval($_SESSION['profile']);
 	            $phrased = mysqli_real_escape_string($db, $phrased);
 	            $query = "CALL newPutForth(".$argAtHand.",".$profileID.",\"".$phrased."\");";
@@ -358,17 +397,32 @@
 
     			//Replace user's existing preferred putforth if they are its only endorser
             case "replacePutForth":
-            	$phrased = mysqli_real_escape_string($db,trim($_POST["replacement"]));
-            	$phraseID = $_POST["userPhraseID"]; 
-	            $argAtHand = intval($_SESSION['currentArg']);
-	            $profileID = intval($_SESSION['profile']);
+	            $argAtHand   = intval($_SESSION['currentArg']);
+	            $profileID   = intval($_SESSION['profile']);
+	            $phraseID    = intval($_POST["userPhraseID"] ?? 0);
+	            $replacement = trim($_POST["replacement"] ?? '');
+	            // Negotiable-term integrity guard (mirrors newPutForth).
+	            $isNTarg = false;
+	            if ($ntChk = mysqli_query($db, "SELECT hasNegotiableTerm FROM ARGUMENT WHERE argumentID = ".$argAtHand)) {
+	            	if ($ntRow = mysqli_fetch_row($ntChk)) { $isNTarg = (intval($ntRow[0]) === 1); }
+	            	mysqli_free_result($ntChk);
+	            }
+	            if (!$isNTarg && strpos($replacement, NT_TOKEN) !== false) {
+	            	$replacement = trim(nt_strip_token($replacement));
+	            }
+	            if ($isNTarg && substr_count($replacement, NT_TOKEN) !== 1) {
+	            	$_SESSION['formError'] = 'This argument has a negotiable term — its phrasing must include the value placeholder [[value]] exactly once.';
+	            	header('Location: /?arg='.$argAtHand);
+	            	exit;
+	            }
+	            $phrased = mysqli_real_escape_string($db, $replacement);
 	            $query = "CALL replacePutForth(".$argAtHand.",".$profileID.",".$phraseID.",\"".$phrased."\");";
 
 				/*Execute queries */
 				if(mysqli_query($db, $query)){
 					header('Location: /?arg='.$_SESSION['currentArg']);
 				}
-				else 
+				else
 					echo "Query Failed";
             	break;
 

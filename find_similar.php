@@ -22,6 +22,15 @@ if (!$isExplore && !isset($_SESSION['profile'])) {
 $q     = trim($_POST['q'] ?? '');
 $argID = intval($_POST['arg'] ?? 0);
 
+// Negotiable-term duplicate check (from flesh_out): the [[value]] token must not
+// drive matching, and candidates are limited to other term-bearing arguments.
+$isNT     = !empty($_POST['nt']);
+$ntFilter = '';
+if ($isNT) {
+    $q = trim(str_replace('[[value]]', ' ', $q));
+    $ntFilter = ' AND a.hasNegotiableTerm = 1';
+}
+
 $minLen = $isExplore ? 3 : 10;
 if (mb_strlen($q) < $minLen) {
     echo json_encode([]);
@@ -51,11 +60,11 @@ include("${_SERVER['DOCUMENT_ROOT']}/includes/dbconnect.php");
 $limit = $isExplore ? 20 : 3;
 $sql = $isExplore
     ? "SELECT a.argumentID,
-              COALESCE(a.currentPhrasing,
+              ntPhrasing(COALESCE(a.currentPhrasing,
                   (SELECT p2.phrasing FROM PHRASING p2
                    WHERE p2.argumentID = a.argumentID
                    ORDER BY p2.createdDate ASC LIMIT 1)
-              ) AS bestPhrasing,
+              ), a.currentTermValue) AS bestPhrasing,
               MAX(MATCH(p.phrasing) AGAINST (? IN BOOLEAN MODE)) AS score
        FROM PHRASING p
        JOIN ARGUMENT a ON p.argumentID = a.argumentID
@@ -64,16 +73,16 @@ $sql = $isExplore
        ORDER BY score DESC
        LIMIT $limit"
     : "SELECT a.argumentID,
-              COALESCE(a.currentPhrasing,
+              ntPhrasing(COALESCE(a.currentPhrasing,
                   (SELECT p2.phrasing FROM PHRASING p2
                    WHERE p2.argumentID = a.argumentID
                    ORDER BY p2.createdDate ASC LIMIT 1)
-              ) AS bestPhrasing,
+              ), a.currentTermValue) AS bestPhrasing,
               MAX(MATCH(p.phrasing) AGAINST (? IN BOOLEAN MODE)) AS score
        FROM PHRASING p
        JOIN ARGUMENT a ON p.argumentID = a.argumentID
        WHERE MATCH(p.phrasing) AGAINST (? IN BOOLEAN MODE)
-         AND a.argumentID != ?
+         AND a.argumentID != ?$ntFilter
        GROUP BY a.argumentID
        ORDER BY score DESC
        LIMIT $limit";

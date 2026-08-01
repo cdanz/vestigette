@@ -27,6 +27,11 @@ if ($_SESSION['currentArg'] > 0) {
 }
 // End redirect check
 require_once("${_SERVER['DOCUMENT_ROOT']}/query_current_argument.php");
+require_once("${_SERVER['DOCUMENT_ROOT']}/includes/negotiable_term.php");
+// Baked phrasing (negotiable-term [[value]] -> cached median) for the plain-text
+// share/OG title and the carousel dedup; the visible header uses nt_render_header()
+// for the haloed version. No-op for the tokenless phrasings that exist today.
+$phrasingDisplay = isset($phrasing) ? nt_substitute_text($phrasing, $currentTermValue ?? null) : ($phrasing ?? '');
 //To do history - add to array of past arguments visited
 if (isset($_SESSION['history'])) {
 	$limit = sizeof($_SESSION['history']);
@@ -36,7 +41,7 @@ if (isset($_SESSION['history'])) {
 			break;
 		}
 	}
-	$arr = array($_SESSION['currentArg'],$opinion,$phrasing);
+	$arr = array($_SESSION['currentArg'],$opinion,$phrasingDisplay);
 	array_push($_SESSION['history'],$arr);
 	if(sizeof($_SESSION['history']) >= 10) {
 		$_SESSION['history'] = array_slice($_SESSION['history'], -9); //no more than 
@@ -46,7 +51,7 @@ if (isset($_SESSION['history'])) {
 else {
 	$_SESSION['history'] = array();
 	$_SESSION['history'][0] = array(75,0,"This is my first visit to Agitate"); //Start off with welcome arg
-	$arr = array($_SESSION['currentArg'],$opinion,$phrasing);
+	$arr = array($_SESSION['currentArg'],$opinion,$phrasingDisplay);
 	array_push($_SESSION['history'],$arr);
 }
 $baseURL = "/";
@@ -423,7 +428,7 @@ function generateFindLines($results) {
 		// ── Social share (Open Graph / Twitter Card) values ──────────────
 		$shareArgID = intval($_SESSION['currentArg']);
 		$shareValid = isset($phrasing) && $phrasing !== 'Invalid Argument Identifier';
-		$shareTitle = $shareValid ? $phrasing : 'Agitate — structured public debate';
+		$shareTitle = $shareValid ? $phrasingDisplay : 'Agitate — structured public debate';
 		// Social proof only once enough real humans have weighed in
 		// (SOCIAL_PROOF_MIN_HUMANS in dbconnect.php) — persona-inflated
 		// headcounts on shared links are a credibility risk.
@@ -453,7 +458,7 @@ function generateFindLines($results) {
 		))), 0, 10);
 		$shareImage = 'https://agitate-discourse.org/og_image.php?arg=' . $shareArgID . '&v=' . $shareVer;
 		$e = function ($s) { return htmlspecialchars($s, ENT_QUOTES, 'UTF-8'); };
-		$titleText  = $shareValid ? mb_strimwidth($phrasing, 0, 70, '…') . ' — Agitate' : 'Agitate';
+		$titleText  = $shareValid ? mb_strimwidth($phrasingDisplay, 0, 70, '…') . ' — Agitate' : 'Agitate';
 ?>
 		<title><?php echo $e($titleText); ?></title>
 		<meta charset="utf-8"/>
@@ -612,7 +617,7 @@ else {
 			<div class="arg-header">
 				<div class="arg-header-text">
 					<div class="arg-phrasing-wrap">
-						<p class="arg-phrasing"><?php echo htmlspecialchars($phrasing); ?></p>
+						<p class="arg-phrasing"><?php echo nt_render_header($phrasing, $currentTermValue ?? null); ?></p>
 						<a href="#" class="arg-phrasing-more hidden">(more)</a>
 					</div>
 					<div class="arg-meta">
@@ -687,9 +692,28 @@ echo "\n</form>";
 <?php
 // ── Phrasing carousel (an argument always has ≥1 phrasing) ──────────────────
 $phrasingList     = isset($altPhrasings) ? array_values($altPhrasings) : [];
-$altPhrasingList  = array_values(array_filter($phrasingList, function ($p) use ($phrasing) { return $p[2] !== $phrasing; }));
+$altPhrasingList  = array_values(array_filter($phrasingList, function ($p) use ($phrasingDisplay) { return $p[2] !== $phrasingDisplay; }));
 $altPhrasingCount = count($altPhrasingList);
 ?>
+<?php if (!empty($hasNegotiableTerm)):
+	$ntDisplay = nt_format_value($currentTermValue);
+	$ntCount   = count($termDistribution);
+?>
+				<div class="negotiateBox carousel-box">
+					<div class="carousel-content">
+						<div class="negotiate-row">
+							<span class="zone-label">Negotiate the Term</span>
+<?php if ($ntCount >= 1): ?>
+							<span class="zone-count"><?php echo $ntCount; ?> value<?php echo $ntCount === 1 ? '' : 's'; ?></span>
+<?php endif; ?>
+							<button class="negotiateBtn weigh-btn" title="Negotiate the value" aria-label="Negotiate the value">
+								<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="4" y1="8" x2="20" y2="8"/><line x1="4" y1="16" x2="20" y2="16"/><circle cx="9" cy="8" r="2.5" fill="currentColor" stroke="none"/><circle cx="15" cy="16" r="2.5" fill="currentColor" stroke="none"/></svg>
+								<span class="weigh-btn-label">Weigh-In</span>
+							</button>
+						</div>
+					</div>
+				</div>
+<?php endif; ?>
 				<div class="phrasingBox carousel-box">
 					<div class="carousel-content">
 						<div class="zone-head">
@@ -1110,10 +1134,13 @@ if ((isset($opinion)) && ($opinion > 0)) {
 ?>
             <div class="assert">
                 <form class="form-inline" method="POST" accept-charset="utf-8">
-                    <input type="text" id="newPutForthInput" placeholder="Better said..." name="newPutForth" maxlength="300">
+                    <input type="text" id="newPutForthInput" placeholder="<?php echo !empty($hasNegotiableTerm) ? 'Better said… (keep [[value]])' : 'Better said...'; ?>" name="newPutForth" maxlength="300"<?php if (!empty($hasNegotiableTerm)): ?> value="[[value]]" data-nt="1"<?php endif; ?>>
                     <button type="submit" class="button addNew" name="buttonClicked" value="newPutForth">Introduce</button>
                     <?php addCSRFtoken() ?>
                 </form>
+<?php if (!empty($hasNegotiableTerm)): ?>
+                <span class="nt-phrase-hint">This argument has a negotiable term — keep the <code>[[value]]</code> placeholder where the number belongs.</span>
+<?php endif; ?>
                 <span id="phrasingError" class="validation-error hidden" role="alert"></span>
             </div>
 <?php
@@ -1122,6 +1149,33 @@ if ((isset($opinion)) && ($opinion > 0)) {
         </div>
     </div>
 </div>
+
+<!-- Negotiable Term Modal -->
+<?php if (!empty($hasNegotiableTerm)): ?>
+<div id="overlayT" class="hidden">
+    <div id="negotiate" class="container hidden">
+        <div class="overlay-header">
+            <h2>Negotiate the Term</h2>
+            <button id="closeT" class="button">X</button>
+        </div>
+        <div class="panel expanded" data-container-id="negotiate">
+            <p class="overlay-gloss">Everyone who accepts this argument suggests the value they believe is right &mdash; the headline is the <strong>median</strong> of them all, so no lone outlier can skew it.</p>
+            <div class="nt-dist" data-values="<?php echo htmlspecialchars(json_encode($termDistribution), ENT_QUOTES, 'UTF-8'); ?>" data-median="<?php echo htmlspecialchars(nt_format_value($currentTermValue), ENT_QUOTES, 'UTF-8'); ?>"></div>
+<?php if ((isset($opinion)) && ($opinion > 0)): ?>
+            <div class="assert">
+                <form class="form-inline" method="POST" accept-charset="utf-8">
+                    <input type="number" id="termValueInput" name="termValue" step="any" inputmode="decimal" placeholder="Any Decimal" required>
+                    <button type="submit" class="button endorse" name="buttonClicked" value="weighTerm">Endorse</button>
+                    <?php addCSRFtoken() ?>
+                </form>
+            </div>
+<?php else: ?>
+            <p class="accept-prompt">Accept this argument to weigh-in with your own value.</p>
+<?php endif; ?>
+        </div>
+    </div>
+</div>
+<?php endif; ?>
 
 			<div id="overlayE" class="hidden">
 				<div id="explication" class="container hidden">

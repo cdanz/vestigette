@@ -96,11 +96,11 @@ BEGIN
     IF filtered = 1 THEN
         SELECT E1.targArgID, E1.endorseType, E1.supportingArgID,
                SUM(E1.weight)/TotalUsers AS AggWeight,
-               COALESCE(A1.currentPhrasing,
+               ntPhrasing(COALESCE(A1.currentPhrasing,
                    (SELECT phrasing FROM PHRASING
                     WHERE argumentID = A1.argumentID
                     ORDER BY createdDate ASC LIMIT 1)
-               ) AS phrasing
+               ), A1.currentTermValue) AS phrasing
         FROM ENDORSEMENT E1
         INNER JOIN FILTER_PROFILES fp1 ON E1.profileID = fp1.profileID
         JOIN (
@@ -124,11 +124,11 @@ BEGIN
     ELSE
         SELECT E1.targArgID, E1.endorseType, E1.supportingArgID,
                SUM(E1.weight)/TotalUsers AS AggWeight,
-               COALESCE(A1.currentPhrasing,
+               ntPhrasing(COALESCE(A1.currentPhrasing,
                    (SELECT phrasing FROM PHRASING
                     WHERE argumentID = A1.argumentID
                     ORDER BY createdDate ASC LIMIT 1)
-               ) AS phrasing
+               ), A1.currentTermValue) AS phrasing
         FROM ENDORSEMENT E1
         INNER JOIN SCOPE_ENDORSEMENT SE1 ON E1.profileID = SE1.profileID AND E1.targArgID = SE1.targArgID AND SE1.affiliationID = @active_aff_id
         JOIN (
