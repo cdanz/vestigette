@@ -172,6 +172,25 @@ describes the state of the discourse and lets the map speak. Sloganeering, persu
 opinion are the human's department, not the layout's.** Keep that line out of any surface we
 control (cards, empty states, headers).
 
+### Negotiable-term treatment (the gold accent, put to work)
+
+Negotiable terms are the one place gold (`--cddbYellow`) earns a content role rather than a
+chrome one, and it stays disciplined:
+
+- **The value gets a halo, not glowing text.** In the header the dynamic value sits in a small
+  rounded pill — faint gold tint + 1px gold ring + soft glow — with the text itself normal
+  color. It signals "this figure is alive/negotiated" without shouting (an earlier text-shadow
+  glow read as loud; rejected).
+- **The tuner/sliders glyph = "adjust this value."** One icon, reused everywhere the term is
+  actionable — the header's info affordance (→ glossary), the "Negotiate the Term" subsection
+  button, and the flesh_out create toggle. Don't introduce a second metaphor for it.
+- **The distribution is a labeled data plot, kept in the dialog.** A dot-plot that graduates to
+  a histogram as votes grow, median marked in gold — treated like the `.picker-band` ramp
+  (§4): a single-use data viz, not scattered tokens. It lives **in the weigh-in dialog**, not
+  on the argument card — the card's "Negotiate the Term" row stays a compact single line
+  (register: reference, not poster; promoting the plot onto the card made the section
+  prohibitively tall and squeezed the reasoning spine — reverted).
+
 ---
 
 ## 5. Tokenization principle
@@ -245,5 +264,5 @@ on `flex-basis:auto` and collapsing rebuttal (a bug fixed 2026-07-28).
 
 ---
 
-_Last refreshed: 2026-07-28. Update the concrete numbers when they change; keep the
+_Last refreshed: 2026-08-01. Update the concrete numbers when they change; keep the
 register (§1) stable — it's the part that shouldn't drift._

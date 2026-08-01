@@ -114,13 +114,15 @@ engagement code.
 
 ## Data model
 
-23 tables. Run `SHOW TABLES` / `SHOW PROCEDURE STATUS WHERE Db='vestigette'` for the live list.
+26 tables. Run `SHOW TABLES` / `SHOW PROCEDURE STATUS WHERE Db='vestigette'` for the live list.
 
 | Table | Role |
 |---|---|
-| `ARGUMENT` | Claim shell; caches `currentPhrasing` / `currentPhrasingID` |
+| `ARGUMENT` | Claim shell; caches `currentPhrasing` / `currentPhrasingID`; `hasNegotiableTerm` flag + cached `currentTermValue` (median) |
 | `PHRASING` | Alternate wordings |
 | `PHRASE_ENDORSE` | Per-user phrasing weights |
+| `NEGOTIABLE_TERM` | Marks a term-bearing argument (1:1); `termType` (`decimal`) — the dispatch seam for future types |
+| `TERM_VALUE` | Per-user submitted value (one absolute number/user, active-swap; NOT an ENDORSEMENT, so the 100% invariant doesn't apply) |
 | `ENDORSEMENT` | Weighted edges. PK `(targArgID, profileID, endorseType, supportingArgID, active)` |
 | `OPINION` | Accept/reject. PK `(argumentID, profileID)`, col `acceptance` |
 | `EXPLICATION` | External links. UNIQUE `(argumentID, profileID)` |
@@ -131,6 +133,7 @@ engagement code.
 | `SCOPE_ENDORSEMENT` | Group context for each ENDORSEMENT action |
 | `SCOPE_PHRASE_ENDORSE` | Group context for phrasing endorsements |
 | `SCOPE_EXPLICATION_ENDORSE` | Group context for explication endorsements |
+| `SCOPE_TERM_VALUE` | Group context for each negotiable-term value submission |
 | `USER_PROFILE` | Accounts. Personas = profileID 1–26, admin = 28. `activeAffiliationID` col |
 | `ADMIN_SETTINGS` | Per-admin prefs: `pickerType` (`none`/`manual`/`auto`), `demoMode` |
 | `INVITATION` | Invite codes for registration. `usesRemaining` (NULL = unlimited), `expiresAt` (NULL = never) |
@@ -145,13 +148,22 @@ engagement code.
 acceptance of the supporting argument AND inserts a `SCOPE_OPINION` row. Must **not**
 modify `ENDORSEMENT` (trigger can't write the table that fired it).
 
-**Procedures (38 total):** `assertOpinion` (accept/reject + cascade; reject calls
+**Procedures:** `assertOpinion` (accept/reject + cascade; reject calls
 `rebalanceRecentRejections`), `getDetail` / `getAssociated` / `getAltPhrasing` /
 `getExplication` (all take a `filtered` param — when 1, JOIN `FILTER_PROFILES` temp table),
-`getNeighborhood` / `getNeighborhoodAll`, `mergeArguments`, `flagArgument` /
+`getNeighborhood` / `getNeighborhoodAll`, `mergeArguments` (refuses term↔non-term; folds
+term↔term values keep-wins), `flagArgument` /
 `unflagArgument` / `resolveArgumentFlags`, `prepareForNewEndorse` /
 `resolveOldWithNewEndorse`, `updatePhrasingCache`, `foldInAssertion`,
 `retirePersonaFromArgument`, `getTrending`, `getMostContested`, and others.
+
+**Negotiable-term procs/fn:** `updateTermCache` (recompute GLOBAL median → `currentTermValue`),
+`getTermValue(argID, filtered)` (scoped median + count), `prepareForNewTermValue` (active-swap),
+and the SQL function **`ntPhrasing(phrasing, value)`** — bakes the `[[value]]` token into a
+phrasing at the SQL source (DETERMINISTIC NO SQL; no-op when no token). List/associated procs
+(`getAssociated`, `getAltPhrasing`, `getNeighborhood(All)`, `hub_metrics`, `find_similar`,
+recent-assertions) wrap phrasing in `ntPhrasing` so the token never renders raw; the index
+header keeps the raw token so PHP can wrap the value in the cddbYellow halo.
 
 ---
 
@@ -190,6 +202,16 @@ modify `ENDORSEMENT` (trigger can't write the table that fired it).
 - **`neighborhood.php`** — lazy-load endpoint for Find ▸ Neighborhood list.
 - **`includes/dbconnect.php`** — provides `$db`; defines `ALL_PUBLIC_AFF_ID = 12`; sets
   `@active_aff_id` session variable from `USER_PROFILE.activeAffiliationID` on every request.
+- **`includes/negotiable_term.php`** — negotiable-term display helpers: `nt_render_header`
+  (escape + wrap the value in the cddbYellow halo + tuner-icon link to the glossary),
+  `nt_substitute_plain` / `nt_substitute_text`, `nt_strip_token` (for search matching), and
+  `nt_format_value`. Token is `[[value]]` (survives `htmlspecialchars` untouched → substitute
+  after escaping). `db/negotiable_term_{schema,functions,procedures}.sql` are the canonical
+  source (deployed by piping to the droplet; the schema/functions files are now git-tracked
+  via `.gitignore` exceptions). Creation lives in `flesh_out.php` ("+Negotiable Term" toggle,
+  Option B literal-token insert + author value seed); the weigh-in dialog + `weighTerm` action
+  (`functions.php`) let accepters submit their own value. `newPutForth`/`replacePutForth` guard:
+  an NT arg's phrasing must contain exactly one `[[value]]`.
 - **Blog & standing pages** — two content types (posts argue; pages promise):
   - *Posts* (dated writing): `CONTENT` table → listed at `blog.php`, read at
     `post.php?slug=…`, authored in `admin_content.php`.
@@ -223,6 +245,13 @@ modify `ENDORSEMENT` (trigger can't write the table that fired it).
 
 ## Current feature set
 
+- **Negotiable terms** — an argument can carry a dynamic numeric value (the `[[value]]`
+  token in its phrasing) adjudicated separately from the wording: each accepter submits one
+  value, the headline is the **median** (outlier-proof). Author toggles it on at creation in
+  flesh_out; the value renders in the header with a cddbYellow **halo + tuner icon**; a
+  compact "Negotiate the Term" subsection opens a weigh-in dialog with a dot→histogram
+  distribution. Every phrasing of a term arg must contain the token (guarded server-side).
+  Merge refuses term↔non-term. See `includes/negotiable_term.php` + `db/negotiable_term_*.sql`.
 - Weighted **Because / Therefore / Rebuttal**, **phrasing**, and **explication**
   endorsement (100% per user per type).
 - **Ring / joystick weighting UI** (index B/T/R + phrasing + explication, and flesh_out) —
@@ -292,7 +321,13 @@ modify `ENDORSEMENT` (trigger can't write the table that fired it).
   can only enter the filter via `switchGroup` auto-apply, not via manual group search.
 - **`@active_aff_id`** must be set before any SCOPE insert. It's set by `dbconnect.php` on
   every PHP request; the bot explicitly calls `switchGroup` to pin it to 12.
-- **100% invariant** — preserve it on any `ENDORSEMENT` change.
+- **100% invariant** — preserve it on any `ENDORSEMENT` change. `TERM_VALUE` is exempt: it's
+  one absolute value per user (like `OPINION`), not a distribution.
+- **Negotiable terms** — a term arg's phrasings must contain the `[[value]]` token exactly
+  once; non-term phrasings must contain none. Guard both on any phrasing write. Never persist a
+  raw token without a backing term row. When editing a phrasing-returning proc, wrap it in
+  `ntPhrasing()` or the token renders raw. Canonical proc source drifts from prod — always
+  `SHOW CREATE PROCEDURE` before editing (`getAltPhrasing` had a stale param count).
 - **`impliedAssertion` trigger** — can't touch `ENDORSEMENT`; also inserts `SCOPE_OPINION`.
 - **`rebalanceRecentRejections`** loops must stay scoped per `endorseType` (unscoped once
   caused an infinite loop).
@@ -335,4 +370,4 @@ modify `ENDORSEMENT` (trigger can't write the table that fired it).
   feature is incomplete.
 - Cost monitoring & scale-back rules; branding pass.
 
-_Last refreshed: 2026-07-28._
+_Last refreshed: 2026-08-01._
