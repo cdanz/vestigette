@@ -6772,6 +6772,9 @@ body.demo-mode .flesh-list {
 #argument .panel .zone-count { color: var(--n-400); font-size: 0.72rem; white-space: nowrap; }
 #argument .panel .carousel-box .phrasing-slide { border: 0; color: var(--cddbBlack); font-size: 1rem; line-height: 1.5; margin: 0; padding: var(--sp-30) 0 var(--sp-10); width: 100%; }
 #argument .panel .carousel-box .carousel-empty { border: 0; color: var(--cddbGrey); font-size: 0.9rem; margin: 0; padding: var(--sp-30) 0 var(--sp-20); }
+/* Section empty state (Because/Therefore/Rebuttal "No Results …") — muted prompt that
+   matches the argument card's .carousel-empty rather than reading as full-weight content. */
+.section-empty { color: var(--n-400); font-size: var(--text-sm); margin: 0; padding: var(--sp-60) var(--sp-75); }
 #argument .panel .carousel-slide { position: relative; }
 /* Leading / Yours tags */
 #argument .panel .pw-tag { border-radius: var(--radius-sm); display: inline-block; font-size: 0.62rem; font-weight: 700; letter-spacing: 0.06em; line-height: 1.5; margin-left: 0.45em; padding: var(--sp-10) var(--sp-40); text-transform: uppercase; vertical-align: middle; white-space: nowrap; }

@@ -287,6 +287,13 @@ function minorPointBits($percentage) {
 	return array("", round($percentage) . "%");
 }
 
+// Section empty state (Because/Therefore/Rebuttal), styled to match the platform's
+// other muted empty prompts (see .section-empty) — not full-black body text.
+function sectionEmptyState($type) {
+	$verb = ($type === 'rebuttal') ? 'Reject' : 'Accept';
+	return "<p class=\"section-empty\">No Results - {$verb} the argument to be the first to endorse</p>";
+}
+
 function generateTypeLines($type, $typeArray) {
 	global $baseURL;
 	global $opinion;
@@ -311,12 +318,7 @@ function generateTypeLines($type, $typeArray) {
 		echo "</ul>\n";
 		unset($line);
 	} else {
-		if ($type == "rebuttal") {
-			echo "No Results - Reject the argument to be the first to endorse";
-		}
-		else {
-			echo "No Results - Accept the argument to be the first to endorse";
-		}
+		echo sectionEmptyState($type);
 	}
 }
 function generatePhrasingLines($alts) {
@@ -602,7 +604,7 @@ if (isset($because)) {
 	generateTypeLines("because", $because);
 }
 else {
-	echo "No Results - Accept the argument to be the first to endorse";
+	echo sectionEmptyState('because');
 }
 ?>
 <?php if ((isset($opinion)) && ($opinion > 0)): ?>
@@ -858,7 +860,7 @@ $canWeightTherefore = isset($opinion) && ($opinion > 0);
 		generateTypeLines("therefore", $therefore);
 	}
 	else {
-		echo "No Results - Accept the argument to be the first to endorse";
+		echo sectionEmptyState('therefore');
 	}
 ?>
 <?php if ((isset($opinion)) && ($opinion > 0)): ?>
@@ -935,7 +937,7 @@ if (isset($rebuttal)) {
 	generateTypeLines("rebuttal", $rebuttal);
 }
 else {
-	echo "No Results - Reject the argument to be the first to endorse";
+	echo sectionEmptyState('rebuttal');
 }
 ?>
 <?php if ((isset($opinion)) && ($opinion < 0)): ?>
