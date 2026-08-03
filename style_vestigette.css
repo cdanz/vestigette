@@ -6783,18 +6783,20 @@ body.demo-mode .flesh-list {
 /* Empty phrasing/explication zones collapse to a single row (label · message · Weigh-In),
    reclaiming the stacked whitespace so the argument card stops crowding Because/Therefore.
    Scoped to :has(.carousel-empty) — a real phrasing carousel or link-preview card stays full.
-   The message uses flex:1 1 0 so it never forces a wrap when there's room; on narrow widths
-   the row wraps gracefully (button drops below). */
-#argument .panel .carousel-box:has(.carousel-empty) .carousel-content {
-	display: flex;
-	flex-flow: row wrap;
-	align-items: center;
-	column-gap: var(--sp-75);
-	row-gap: var(--sp-20);
+   Desktop-only (≥768): on mobile the narrow message cell would wrap the sentence to many
+   lines (taller than the original stack), so phones keep the stacked layout. */
+@media (min-width: 768px) {
+	#argument .panel .carousel-box:has(.carousel-empty) .carousel-content {
+		display: flex;
+		flex-flow: row wrap;
+		align-items: center;
+		column-gap: var(--sp-75);
+		row-gap: var(--sp-20);
+	}
+	#argument .panel .carousel-box:has(.carousel-empty) .zone-head { margin: 0; flex: 0 0 auto; }
+	#argument .panel .carousel-box:has(.carousel-empty) .carousel-empty { margin: 0; padding: 0; flex: 1 1 0; min-width: 0; }
+	#argument .panel .carousel-box:has(.carousel-empty) .carousel-actions { margin: 0 0 0 auto; flex: 0 0 auto; }
 }
-#argument .panel .carousel-box:has(.carousel-empty) .zone-head { margin: 0; flex: 0 0 auto; }
-#argument .panel .carousel-box:has(.carousel-empty) .carousel-empty { margin: 0; padding: 0; flex: 1 1 0; min-width: 0; }
-#argument .panel .carousel-box:has(.carousel-empty) .carousel-actions { margin: 0 0 0 auto; flex: 0 0 auto; }
 #argument .panel .carousel-pager { align-items: center; display: flex; gap: var(--sp-60); }
 #argument .panel .carousel-pager .carousel-prev,
 #argument .panel .carousel-pager .carousel-next { align-self: auto; background: transparent; border: 0; border-radius: 0; color: var(--n-400); cursor: pointer; font-size: 1.15rem; height: auto; line-height: 1; min-width: 0; padding: 0 var(--sp-10); }
