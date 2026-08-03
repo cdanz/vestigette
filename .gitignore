@@ -30,3 +30,4 @@ bots/candidate_seeding/corpus_snapshot.tsv
 
 # Claude working docs — never commit
 scratch/
+scratch_*
