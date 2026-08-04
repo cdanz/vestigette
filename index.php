@@ -291,7 +291,7 @@ function minorPointBits($percentage) {
 // other muted empty prompts (see .section-empty) — not full-black body text.
 function sectionEmptyState($type) {
 	$verb = ($type === 'rebuttal') ? 'Reject' : 'Accept';
-	return "<p class=\"section-empty\">No Results - {$verb} the argument to be the first to endorse</p>";
+	return "<p class=\"section-empty\">No connections of this type yet - {$verb} the argument to be the first to endorse</p>";
 }
 
 function generateTypeLines($type, $typeArray) {
@@ -361,7 +361,7 @@ function generatePhrasingLines($alts) {
         echo "</ul>\n";
         unset($line);
     } else {
-        echo "No alternative phrasings yet - be the first to introduce one!";
+        echo "<p class=\"section-empty\">No alternative phrasings yet - be the first to introduce one!</p>";
     }
 }
 function generateLinkLines($links) {
@@ -391,7 +391,7 @@ function generateLinkLines($links) {
 		echo "</ul>\n";
 		unset($line);
 	} else {
-		echo "No explication links yet - be the first to introduce one!";
+		echo "<p class=\"section-empty\">No explication links yet - be the first to introduce one!</p>";
 	}
 }
 function generateFindLines($results) {
