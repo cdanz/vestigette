@@ -31,3 +31,6 @@ bots/candidate_seeding/corpus_snapshot.tsv
 # Claude working docs — never commit
 scratch/
 scratch_*
+
+# Source→Agitate run specs are disposable local artifacts — the live graph is the record
+bots/source_ingest/*.json

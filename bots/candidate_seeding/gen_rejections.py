@@ -53,6 +53,16 @@ import json, sys
 def esc(s):
     return s.replace("\\", "\\\\").replace("'", "\\'")
 
+def emit_expl(w, expr, pid, node):
+    """If a node carries an "explication": {"url": ...} key, attach that link
+    to the node for this persona via the app-native promoteExplication proc
+    (creates EXPLICATION + the creator's EXPLICATION_ENDORSE @100 +
+    SCOPE_EXPLICATION_ENDORSE off @active_aff_id). Idempotent-ish: the proc
+    UPDATEs if the (arg, profile) explication already exists."""
+    ex = node.get("explication")
+    if ex:
+        w(f"CALL promoteExplication({expr}, {pid}, '{esc(ex['url'])}');")
+
 def main(path):
     spec = json.load(open(path))
     out = []
@@ -111,22 +121,25 @@ def process_block(spec_block, cand, etype, out, w, refs, var_box):
                     rv = refs[k["ref"]]
                     w(f"INSERT INTO ENDORSEMENT (targArgID, profileID, endorseType, supportingArgID, weight, active)"
                       f" VALUES ({parent_expr}, {pid}, 'Because', {rv}, 1, 1);")
+                    emit_expl(w, rv, pid, k)
                     continue
                 if "argID" in k:
                     w(f"INSERT INTO ENDORSEMENT (targArgID, profileID, endorseType, supportingArgID, weight, active)"
                       f" VALUES ({parent_expr}, {pid}, 'Because', {k['argID']}, 1, 1);")
                     if k.get("putForth"):
                         w(f"CALL newPutForth({k['argID']}, {pid}, '{esc(k['putForth'])}');")
+                    emit_expl(w, k["argID"], pid, k)
                     if k.get("because"):
                         emit_because(str(k["argID"]), k["because"])
                 else:
                     w(f"CALL foldAndReciprocate('{esc(k['text'])}', 'Because', {parent_expr}, {pid});")
-                    if k.get("because") or k.get("id"):
+                    if k.get("because") or k.get("id") or k.get("explication"):
                         var_n += 1
                         cv = f"@c{var_n}"
                         w(f"SET {cv} = (SELECT MAX(argumentID) FROM ARGUMENT WHERE createdBy = {pid});")
                         if k.get("id"):
                             refs[k["id"]] = cv
+                        emit_expl(w, cv, pid, k)
                         if k.get("because"):
                             emit_because(cv, k["because"])
             share = round(100.0 / len(kids), 5)
@@ -140,6 +153,7 @@ def process_block(spec_block, cand, etype, out, w, refs, var_box):
                 rv = refs[r["ref"]]
                 w(f"INSERT INTO ENDORSEMENT (targArgID, profileID, endorseType, supportingArgID, weight, active)"
                   f" VALUES ({cand}, {pid}, '{etype}', {rv}, 1, 1);")
+                emit_expl(w, rv, pid, r)
                 norm.append((rv, wt))
                 continue
             if "argID" in r:
@@ -152,6 +166,7 @@ def process_block(spec_block, cand, etype, out, w, refs, var_box):
                 norm.append((str(r["argID"]), wt))
                 if r.get("putForth"):
                     w(f"CALL newPutForth({r['argID']}, {pid}, '{esc(r['putForth'])}');")
+                emit_expl(w, r["argID"], pid, r)
                 if r.get("because"):
                     emit_because(str(r["argID"]), r["because"])
                 continue
@@ -162,6 +177,7 @@ def process_block(spec_block, cand, etype, out, w, refs, var_box):
             w(f"SET {hv} = (SELECT MAX(argumentID) FROM ARGUMENT WHERE createdBy = {pid});")
             if r.get("id"):
                 refs[r["id"]] = hv
+            emit_expl(w, hv, pid, r)
             norm.append((hv, wt))
             if r.get("because"):
                 emit_because(hv, r["because"])
