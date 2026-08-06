@@ -169,6 +169,19 @@ topic this is often a null pass; the confirmation *is* the value. (Kelly run:
 Karen's electability ranking collided live and was rescaled inline; the post-apply
 sweep then found nothing external.)
 
+**The inviolable rule — never break an association entirely (Craig, 2026-08-05).**
+Rerouting a node *through* a gather-node is fine — it preserves the connection
+(node → gather → target) while improving organization. What you must never do is
+**orphan a useful edge**: if an edit would zero out the *last* endorsement holding
+an argument-to-argument connection, keep it alive (retain the single minor weight,
+or reassign it) so others can build on it. Connections are the graph's value — a
+strained-but-real one beats none. The one exception is a connection that **never
+fit**; before letting any sole association break, confirm with judgment that
+losing it is a genuine benefit, not just tidy. (Newsom run: 2506 (PG&E) rerouted
+from a direct rebuttal of 2001 to a Because of gather-node 3014 — the 2506→3014→2001
+path kept it connected; 2504/2505 were left direct because they don't fit "capital
+over workers" and their direct ties are useful.)
+
 ---
 
 ## 6. Casting
@@ -179,8 +192,16 @@ this run: **Sandra (19)**, a law-firm partner, on the legal-duty claims;
 **Alfred (1)**, the roster's only actual veteran, as the non-caricature
 chain-of-command voice. Spectrum-of-lanes pattern (maximalist → cynic → builder)
 and the party-coherent cast tables carry over from
-`bots/candidate_seeding/PLAYBOOK.md`. **Never flip a persona's existing accept to
-reject** to fit a slot — pick a bench persona (preflight catches this).
+`bots/candidate_seeding/PLAYBOOK.md`.
+
+**Flipping a persona's opinion is allowed (Craig, 2026-08-05)** — we're feeding in
+new information, and a persona changing its mind is discourse working, not a
+failure. Preflight still flags an opinion conflict, but treat it as a *decision
+point*, not an auto-recast: flip when the new source justifies it. The only guard
+is the association rule in §5 — a flip deactivates that persona's weights on the
+old side, so before flipping, check it won't orphan the *last* endorsement holding
+a useful edge. (Newsom run: could have flipped Yvonne's bare 2001 accept safely —
+no associations hung under it — but Zachary was the better voice anyway.)
 
 ---
 
