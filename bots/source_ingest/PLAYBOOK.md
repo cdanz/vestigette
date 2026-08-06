@@ -323,3 +323,13 @@ explication URL still resolves if you later tweak the post.
   known (DATA_CLEANUP_BACKLOG.md) — ignore them in the post-apply check.
 - `preflight.py` can't check `targetRef` blocks (target not yet coined) — those
   target fresh nodes with no priors, so they're safe by construction.
+- **Adding `because` children to an ADOPTED node (argID) whose coining persona
+  already has Becauses there OVER-WEIGHTS the pool.** `emit_because` blindly
+  equal-splits assuming only the new children — there's no because-level
+  `already: true`. So a persona's pre-existing Becauses on that node get reset to
+  the new share and the pool blows past 100. **Guard:** don't hang new `because`
+  children under an `argID` the voicing persona already structured; if you must,
+  fix the sum by hand and re-run the invariant check. (Caught live 2026-08-05:
+  adding 2415 under Zachary's own 2359 doubled his pool to 200 — the built-in
+  invariant check flagged it; rebalanced 2005/2415 to 50/50. The invariant check
+  at the end of every apply is what catches this — always read it.)
