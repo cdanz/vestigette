@@ -174,6 +174,28 @@ in bad faith* — not the most emotionally satisfying one.
 is surfaced to Craig and left alone. The point is to lay clearer initial paths
 for humans, never to move a human's stated position.
 
+**4d. Named individuals & allegations in sourced discourse (Craig, 2026-08-05).**
+- **Public office-seekers are fair game.** Anyone who files to run for office has
+  opened themselves to open public discussion — including of accusations. Don't
+  take a broad view of "public figure," though: a minor celebrity hasn't knowingly
+  surrendered their privacy the way a candidate has.
+- **Phrase an allegation AS an allegation** — attributed, with the subject's denial
+  and any corroboration noted in the same node, so it reads balanced on its face.
+  Never assert it as fact.
+- **Leave accusers/victims out entirely** unless they have *purposefully* made
+  themselves public and open to public scrutiny — a higher bar than coming forward
+  once (someone stepping forward at personal cost has not surrendered privacy).
+  Their name is rarely load-bearing; use "a former partner," "a woman." Default to
+  omission — it's the safe direction.
+- **Attribute critics and commentators to the persona cast, not to the real
+  sources.** The only real people who appear by name in nodes are the subject and
+  other public figures already in play. (Platner run 2026-08-05: Platner + Hegseth
+  named; the accuser and every quoted veteran/critic left out, voiced by personas.)
+- **Pause for Craig's sign-off before applying** when a source puts genuinely
+  reputationally-sensitive content (e.g. a criminal allegation against a named
+  person) into the live graph — auto-approval covers routine tool use, not that
+  editorial call.
+
 ---
 
 ## 5. Phase-2 reroute review (standard step)
