@@ -65,6 +65,23 @@ in-app browser were both blocked on The Atlantic, and the live page never idled
      Kelly deflects his status, joking he carries his own makeup" — reads as an
      excerpt with an unstated point; the claim ("status hasn't made him
      self-important") was never asserted.
+   - **Every node must STAND ALONE — self-containment (Craig, 2026-08-05).**
+     Atomizing is not just deconstructing to the smallest defensible claim; the
+     claim must also be legible to a reader who lands on it cold, with none of its
+     neighbors in view. **Name the subject in the node itself** — the specific
+     merger, person, bill, ruling, study — even when the parent already names it.
+     Resolve every context-borrowed reference to its referent: no bare "the deal,"
+     "the merger," "the report," "those studies," "that speech," "the proposed
+     punishment," nor dangling "this / it / the two / these traits / his" whose
+     antecedent lives only in an adjacent node. Test each draft node by imagining
+     it surfaced alone in search: would a stranger know what's being discussed?
+     **Retroactive sweep 2026-08-05:** fixed 20 args that failed this — the Newsom
+     "the deal / the merger / the report" set (3078/3080/3083/3084…) now name the
+     Paramount–Warner Bros. merger; Kelly's "his party's nominee / his admirers /
+     that speech" (3040/3043/3030/3037) name the people and the case; the IRA
+     "those studies" (3103) and trans-cluster "it / this / the two / these traits"
+     (2814/2821/2824/2833) name their referents. Run this check on every node
+     before the redline, and re-sweep new batches.
 4. **Map & dedup** — run every atom against the neighborhood (§7) and
    `check_dupes.py`. Existing home → **adopt** (`argID`, optional `putForth`),
    never re-coin. Duplicates are the cardinal failure; annotate each atom
