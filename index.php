@@ -623,8 +623,8 @@ else {
 						<a href="#" class="arg-phrasing-more hidden">(more)</a>
 					</div>
 					<div class="arg-meta">
-						<span class="arg-id">Argument ID: <?php echo intval($arg); ?></span>
-						<span class="arg-view-count">View includes <?php echo intval($assertions) . (($assertions == 1) ? ' user' : ' users'); ?></span>
+						<span class="arg-id">ID <?php echo intval($arg); ?></span>
+						<span class="arg-view-count"><?php echo intval($assertions); ?> in view</span>
 <?php if ($hasPersonaOpinion):
 	// Once the AI Policy and Pledge is published the badge links to the policy itself.
 	$personaBadgeSvg = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">

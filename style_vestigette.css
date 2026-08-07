@@ -583,6 +583,7 @@ button.hidden {
 	font-size: 0.7rem;
 	letter-spacing: 0.03em;
 	color: var(--cddbGrey);
+	white-space: nowrap;
 }
 /* View-scoped headcount, moved out of the verdict stack into the meta row so the
    header's default height drops. Reflects the current (possibly filtered) view. */
@@ -590,6 +591,7 @@ button.hidden {
 	font-size: 0.7rem;
 	letter-spacing: 0.03em;
 	color: var(--cddbGrey);
+	white-space: nowrap;
 }
 #argument .arg-view-count::before {
 	content: "·";
