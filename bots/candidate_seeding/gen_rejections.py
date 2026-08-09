@@ -50,8 +50,35 @@ accept-side weights; the script will not protect you from that):
 """
 import json, sys
 
+# Hard platform limit: foldAndReciprocate(words VARCHAR(300), ...) — a coined
+# phrasing longer than this is silently truncated / errors mid-transaction and
+# rolls back the whole apply. Catch it here, before any SQL is emitted.
+PHRASING_MAX = 300
+
 def esc(s):
     return s.replace("\\", "\\\\").replace("'", "\\'")
+
+def check_lengths(blocks):
+    """Walk every coined `text` (headings + nested becauses) and reject any
+    over PHRASING_MAX chars. Adopted args (argID) carry no new phrasing, so
+    they are exempt. Reports id/first-40-chars for each offender."""
+    bad = []
+    def walk(node):
+        t = node.get("text")
+        if t is not None and len(t) > PHRASING_MAX:
+            label = node.get("id") or (t[:40] + "…")
+            bad.append((len(t), label, t))
+        for kid in node.get("because", []):
+            walk(kid)
+    for b in blocks:
+        for p in b.get("personas", []):
+            for r in p.get("rebuttals", []):
+                walk(r)
+    if bad:
+        sys.stderr.write(f"PHRASING TOO LONG (cap {PHRASING_MAX}) — nothing generated:\n")
+        for n, label, _ in bad:
+            sys.stderr.write(f"  {n} chars  {label}\n")
+        sys.exit(1)
 
 def emit_expl(w, expr, pid, node):
     """If a node carries an "explication": {"url": ...} key, attach that link
@@ -65,6 +92,8 @@ def emit_expl(w, expr, pid, node):
 
 def main(path):
     spec = json.load(open(path))
+    check_lengths(spec["blocks"] if "blocks" in spec
+                  else [{"personas": spec["personas"]}])
     out = []
     w = out.append
     w("SET NAMES utf8mb4;")

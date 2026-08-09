@@ -326,6 +326,14 @@ before it's referenced (`ref` / `targetRef`).** `already: true` is mandatory for
 **every** active edge already in a persona's (target, edgeType) pool, or
 normalization breaks the sum — preflight enforces this.
 
+**Coined phrasings are capped at 300 chars** — the hard limit is
+`foldAndReciprocate(words VARCHAR(300), …)`; an over-length heading errors
+mid-transaction and rolls the **whole** apply back. `gen_rejections.py` now
+fails fast (`PHRASING TOO LONG`, exit 1, nothing emitted) before any SQL, naming
+each offender by `id`. Adopted args (`argID`) are exempt — they carry no new
+phrasing. If you hit it, trim to ≤300 (front-load the subject to keep it
+self-contained) and regenerate.
+
 ```bash
 cd bots/candidate_seeding    # shared tooling lives here
 python3 preflight.py  ../source_ingest/<spec>.json | ssh …mysql -N -B      # any row = STOP
@@ -372,3 +380,16 @@ explication URL still resolves if you later tweak the post.
   adding 2415 under Zachary's own 2359 doubled his pool to 200 — the built-in
   invariant check flagged it; rebalanced 2005/2415 to 50/50. The invariant check
   at the end of every apply is what catches this — always read it.)
+- **The coin-reciprocal variant of the same trap.** Coining an anchor as a
+  **Therefore** of a hub creates a reciprocal edge where the hub becomes a
+  **Because** of the anchor (held by the coining persona @ its reciprocal
+  weight). If that same persona then adds more Becauses under the anchor, the
+  reciprocal hub-edge is an unlisted member of the pool → over-sum. (Caught live
+  2026-08-08: Fauci anchor 3189 as a Therefore of 505 left Irene's 505 reciprocal
+  out of her Because reweight → 133.33.) **Preferred pattern: attach the anchor
+  upward via `Because`, not `Therefore`.** Then the reciprocal lands as a
+  *Therefore* on the anchor (a different endorseType), leaving the anchor's
+  Because pool clean for the persona's own supporting reasons. (Used on the
+  Huffman anchor 3209 as a Because of 1908 — invariant came back clean, no
+  hand-rebalance.) If you genuinely need the Therefore direction, list the hub in
+  the persona's anchor-Because pool with an explicit weight and rebalance.
