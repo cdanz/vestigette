@@ -50,7 +50,8 @@ in-app browser were both blocked on The Atlantic, and the live page never idled
 1. **Ingest** — read the source for *argumentative moves*, not prose.
 2. **Atomize** — one terse single claim per node; bundled reasons drop to
    second-jump Because children (no em-dash lists, no "X, not Y" contrast
-   smuggling). See `feedback_argument_phrasing_granularity`.
+   smuggling). See `feedback_argument_phrasing_granularity` and the
+   **decomposition tests in §2b**.
 3. **Sloganize + generalize** — lift each atom from the source's specific,
    time-bound wording to the **generalized reusable claim** (registry-grade).
    Where the source's own wording is vivid, keep it as a competing **phrasing**
@@ -97,6 +98,64 @@ in-app browser were both blocked on The Atlantic, and the live page never idled
 10. **Apply** — one SSH transaction, `--default-character-set=utf8mb4`.
 11. **Phase-2 reroute review** (§5) — standard, not optional.
 12. **Verify** — new-args list + 100% invariant check (built into the SQL).
+
+---
+
+## 2b. Decomposition tests — what splits, what stays (Craig audit, 2026-08-11)
+
+Motivated by an audit of persona-coined phrasings that had drifted from §2.2:
+bundled claims, "X not Y" contrast-smuggling, undefined coined terms, causal
+chains flattened into one node. "One claim per node" is the rule; these are the
+tests that operationalize it. **Atomize first, phrase second** — a shorter
+sentence still carrying three claims is still wrong. Brevity/teeth is a goal to
+reach for *only when it costs no fact and no thrust*, never a gate, never a reason
+to drop a number, name, or citation.
+
+**The independent-weighability test — the master rule.** Of each clause ask:
+*could a reader accept or reject this on its own?*
+- **Yes → its own node.** Thesis + independent reasons split: the thesis is the
+  node; each reason becomes a Because-child.
+- **No — it only illustrates the one claim → stays fused.** A list of tactics all
+  instancing "acts like a lobbyist" is one node with color, not five nodes.
+
+**A causal/temporal chain is NOT illustration — decompose it.** "capped in '98 →
+lobbied it off in 2015 → the chain bought it" is three independently-true,
+independently-disputable facts. Make each a standalone node (actors named) wired
+as a Because-chain under the thesis they evidence. Don't fuse a chain to *make the
+point land* — the goal is analytic decomposition, not persuasion.
+
+**Prioritization is first-class — never flatten it (the "X not Y" trap).** §2.2
+bans the smuggling; here's the why and the fix. "The real problem is X, not Y" /
+"spend on X instead of Y" is a **ranking over competing priorities**, not a
+fact-claim. Decompose: name each candidate priority as its own node (e.g.
+treatment · rent relief · supportive housing · prevention), state the ranking as
+the assertion, and leave room for other voices' priorities to slot in as siblings.
+(Agitate expresses "supports," not yet "rank-above" — model the ranking as its own
+accept/reject claim; surface genuine ranking needs as a product thread.)
+- *Audit case:* arg 3246 buried "treatment should rank above housing-cost relief"
+  inside a two-populations claim, and its causal half ("driven by addiction, not
+  cost") already existed as arg 3245 — so the flattened node both hid a ranking and
+  duplicated an existing one.
+
+**Terms — define, two ways:**
+- **Author-coined label** with no shared meaning (e.g. "options-first") → **define
+  it inline** in the phrasing.
+- **Established term of art** (e.g. "regulatory capture") → keep it (precise, has
+  teeth) but attach a **weak** definitional Because gloss — weak so it's reachable
+  without over-weighting the pool (§11 traps).
+
+**Check the neighborhood BEFORE spinning off — a dupe is a signal, not just a
+failure.** §2.4 makes duplicates the cardinal failure; the audit adds the positive
+read: when a clause you're about to spin off **already exists** as a sibling or
+parent, that's the graph handing you a richer pool — adopt it (`argID`), don't
+re-coin. The un-spun-off remainder was probably being discussed in isolation, and
+wiring to the existing node *is* the value. (3246's "addiction not cost" → adopt
+3245.)
+
+**Per-node checklist:** one assertion? · would any clause survive alone as a
+claim? · actors named (no bare "the merger / the report / it")? · coined term
+defined inline, term-of-art glossed weakly? · an "X not Y" hiding a
+prioritization? · does the spin-off already exist in the cluster?
 
 ---
 
