@@ -27,6 +27,9 @@ rather than harvesting the graph for a latent debate.
   points here, and pastes the source (intake below). Claude reads this file +
   PROJECT.md, surveys the graph neighborhood (§7), then returns the tiered
   **redline** for markup before writing anything.
+  - **§2b decomposition tests are the most common miss — check them at redline**
+    (bundled claims, "X not Y" prioritization smuggling, undefined coined terms,
+    fused causal chains, would-be dupes that should adopt an existing node).
 
 ---
 
