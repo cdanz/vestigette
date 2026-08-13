@@ -114,6 +114,27 @@ sentence still carrying three claims is still wrong. Brevity/teeth is a goal to
 reach for *only when it costs no fact and no thrust*, never a gate, never a reason
 to drop a number, name, or citation.
 
+**Expect to expand, not compress (Craig, 2026-08-13).** A single source sentence
+usually hides a whole tree — a general thesis on top, the specific evidence
+descending as Because-children. Deconstruct until each node is one
+independently-weighable claim, then let each atom find its *natural* home; don't
+bend the article's presentation to fit the format. **Coverage is not the goal.**
+We are not trying to represent an entire article — we want well-deconstructed
+*net-new* nodes and *new connections*. Drop color you can't turn into a standalone
+claim, and **adopt aggressively**: an atom that already exists is a connection to
+make, not a node to coin. (The source's real payoff is often just the explication
+link it hands you, otherwise hard to find — §4b.)
+- **General up top, specifics descending.** "Politicians disappoint by choosing
+  office over the movement" (thesis) ← "they campaign on it then deprioritize it"
+  (pattern) ← the named instances + "it doesn't poll well" (evidence) ← the
+  separate poll facts. Each hop is the size of step an advocate actually takes.
+- **Separate what merely travels together.** Police abolition ≠ prison abolition;
+  "property owners" ≠ "slaveholders" (a real escalation, its own node); a 10%/90%
+  stat is two claims. Bundling *because the source did* is the mistake.
+- **No "also."** A persona endorsing several Becauses already implies every
+  "also" — never write "X *also* Y"; state Y as its own node. (Purnell run,
+  2026-08-13: args 3382–3404, a handful of paragraphs → 23 deconstructed nodes.)
+
 **The independent-weighability test — the master rule.** Of each clause ask:
 *could a reader accept or reject this on its own?*
 - **Yes → its own node.** Thesis + independent reasons split: the thesis is the
@@ -212,6 +233,11 @@ in bad faith* — not the most emotionally satisfying one.
   freelance on the chain of command."
 
 **4b. Explication — link where the source makes the point, either side.**
+- **The link is a first-class reason to run a source (Craig, 2026-08-13).** A
+  well-formed argument's hardest-to-find asset is a citation that actually makes
+  its point; the source hands you one for free. Link *generously* across the
+  source's real claims — the Purnell run linked 19 of 23 — since a strategic,
+  verifiable link is often more valuable than the node's novelty.
 - Link a node wherever the **source itself clearly makes that claim**, regardless
   of which side the node is on. Rebuttals *usually* won't link (they contradict
   the source) — but do when the source makes the unfavorable point (Kelly's own
