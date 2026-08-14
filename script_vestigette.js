@@ -95,45 +95,27 @@ function getExistingPct(element) {
 
 
 /*
-Return multidimensional array with number of clicks pushed to end of row that 
-already includes percents, el gives position of el to perform on
+Convert saved percentages (arr[i][el]) into a bounded click array for refining.
+
+Resolution is LOAD_CLICK_SCALE clicks per 1% → ~0.1% per click, total ≈ 1000. That
+is fine enough to preserve the loaded weights (65.53% → 655/1000) and to let a
+single tap nudge a share by a fraction of a percent, yet bounded so the total never
+explodes. Reconstructing the 5-decimal saved percentages EXACTLY would drive the
+resolution to ~0.00001 — a ~10,000,000-click denominator that no tap or hold can
+move (the bug this replaces). Big moves instead come from the proportional hold
+step (holdStep), which scales to the total, so tap precision and hold speed are
+decoupled: a tap is a fine nudge, a hold covers large ground. Each weighted item
+keeps >= 1 click so a small (> 0) weight never vanishes on load.
 */
-function pctToClicks(arr, el) { 
+const LOAD_CLICK_SCALE = 10;
+function pctToClicks(arr, el) {
 	let clickArr = [];
-	let min = 100;
-	let limit = arr.length;
-	let i; 
-	let splitBy = 1;
-	let commonMultiplier;
-	let isMultiple = true;
-	let number;
-	let whole;
-	let leftover;
-	let clickNum;
-	for (i = 0; i < limit; i++) {
-		if (parseFloat(arr[i][el]) < min) {
-			min = parseFloat(arr[i][el]);
-		}
-	}
-	do {
-		commonMultiplier = min / splitBy;
-		isMultiple = true;
-		for (i = 0; i < limit; i++) {
-			if (arr[i][el]) {
-				number = parseFloat(arr[i][el]) / commonMultiplier;
-				whole = Math.round(number);
-				leftover = Math.abs(number - whole);
-				if (leftover > 0.0001) {
-					isMultiple = false;
-				}
-			}
-		}
-		splitBy++;
-	} while (!isMultiple);
-	for (i = 0; i < limit; i++) {
+	for (let i = 0; i < arr.length; i++) {
 		if (arr[i][el]) {
-			clickNum = parseFloat(arr[i][el]) / commonMultiplier;
-			clickArr.push([arr[i][0],clickNum]);
+			let pct = parseFloat(arr[i][el]);
+			if (pct > 0) {
+				clickArr.push([arr[i][0], Math.max(1, Math.round(pct * LOAD_CLICK_SCALE))]);
+			}
 		}
 	}
 	return clickArr;
@@ -416,6 +398,9 @@ function init() {
 				if (!line) return;
 
 				let up = null, down = null, canReduce = null, receiving = null;
+				// Hold-tick variants (proportional step) for B/T/R; null → the hold
+				// reuses `up`/`down` (phrasing/explication keep their +1 tick).
+				let rampUp = null, rampDown = null;
 
 				if (type === 'phrasing') {
 						if (!document.querySelector('#phrasing .endorse')) return;   // must accept the argument to weigh in
@@ -468,8 +453,9 @@ function init() {
 						neutralizeSection(type);
 					}
 					let aid = line.dataset.argId;
-					up = function() { bump(type, aid); };
-					down = function() { reduceOthers(type, aid); };
+					up = function() { bump(type, aid); };                            // tap = fine +1
+					rampUp = function() { bump(type, aid, holdStep(type)); };         // hold = proportional
+					down = rampDown = function() { reduceOthers(type, aid, holdStep(type)); }; // reduce only on hold
 					canReduce = function() { return countOthersWeighted(state.clickArr, aid) > 0; };
 					receiving = function(on) { setReceivingList(type, 'argId', aid, state.clickArr, on); };
 				}
@@ -483,7 +469,7 @@ function init() {
 
 				up(); // the press counts as one add (tap = +1)
 				startHold({ ring: ring, line: line, originY: evt.clientY,
-				            up: up, down: down, canReduce: canReduce, receiving: receiving });
+				            up: rampUp || up, down: rampDown || down, canReduce: canReduce, receiving: receiving });
 			});
 	}
 	// reset button — neutralize circles and clear click state
@@ -1243,13 +1229,24 @@ function floorClicksForNew(others) {
 	return Math.max(1, Math.ceil(others / 99));
 }
 
-function bump(type, argID) {
+// Clicks added/removed per HOLD tick, scaled to the section's running total so the
+// share climbs at a steady pace however large the total (a fixed +1 barely nudges a
+// big loaded total — the "snail's pace"). A single tap still steps by 1, so tapping
+// stays a fine sub-percent nudge. Mirrors flesh_out's FLESH_HOLD_FRAC / fleshStep().
+const HOLD_FRAC = 0.02;
+function holdStep(type) {
+	let state = sectionState[type];
+	return state ? Math.max(1, Math.round(state.totalClicks * HOLD_FRAC)) : 1;
+}
+
+function bump(type, argID, step) {
 	let state = sectionState[type];
 	if (!state) return;
+	step = step > 0 ? step : 1;
 	let ndx = state.clickArr.findIndex((tuple) => tuple[0] == argID);
 	if (ndx >= 0) {
-		state.clickArr[ndx][1] += 1;
-		state.totalClicks += 1;
+		state.clickArr[ndx][1] += step;
+		state.totalClicks += step;
 	} else {
 		let nc = floorClicksForNew(state.totalClicks);
 		state.clickArr.push([argID, nc]);
@@ -1266,21 +1263,29 @@ function bump(type, argID) {
 //   2. Once it bottoms out at 1 click, switch to raising every OTHER weighted
 //      argument instead, so the denominator grows and its share keeps falling
 //      without ever dropping the argument below a single click.
-function reduceOthers(type, argID) {
+function reduceOthers(type, argID, step) {
 	let state = sectionState[type];
 	if (!state) return;
+	step = step > 0 ? step : 1;
 	let ndx = state.clickArr.findIndex((tuple) => tuple[0] == argID);
+	if (ndx >= 0 && state.clickArr[ndx][1] - step >= 1) {
+		state.clickArr[ndx][1] -= step;
+		state.totalClicks -= step;
+		renderSection(type);
+		return;
+	}
 	if (ndx >= 0 && state.clickArr[ndx][1] > 1) {
-		state.clickArr[ndx][1] -= 1;
-		state.totalClicks -= 1;
+		// a full step would undershoot the 1-click floor — sit exactly on it
+		state.totalClicks -= (state.clickArr[ndx][1] - 1);
+		state.clickArr[ndx][1] = 1;
 		renderSection(type);
 		return;
 	}
 	let raised = false;
 	for (let j = 0; j < state.clickArr.length; j++) {
 		if (state.clickArr[j][0] != argID && state.clickArr[j][1] > 0) {
-			state.clickArr[j][1] += 1;
-			state.totalClicks++;
+			state.clickArr[j][1] += step;
+			state.totalClicks += step;
 			raised = true;
 		}
 	}
