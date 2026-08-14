@@ -19,6 +19,8 @@
 			 WHERE u.profileID = $profileID AND u.isAdmin = 0
 			   AND EXISTS (SELECT 1 FROM AFFILIATION a
 			               WHERE a.affiliationID = u.activeAffiliationID AND a.public = 1)
+			   AND NOT EXISTS (SELECT 1 FROM ARGUMENT arg
+			                   WHERE arg.argumentID = $argID AND arg.hasNegotiableTerm = 1)
 			   AND NOT EXISTS (SELECT 1 FROM BOT_SEED_QUEUE q
 			                   WHERE q.argumentID = $argID
 			                     AND q.status IN ('pending','processing','done'))

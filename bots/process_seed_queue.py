@@ -112,6 +112,18 @@ def check_entry(db, entry) -> tuple:
         if row['isAdmin']:
             return SKIP, f'admin user (profileID={created_by})'
 
+    # Negotiable-term check — bots never opine on arguments carrying a negotiable
+    # term. The value distribution must reflect genuine human judgment, so persona
+    # seeding is excluded (admin policy 2026-08-03). Terminal: NT status is one-way.
+    with db.cursor() as cur:
+        cur.execute(
+            "SELECT hasNegotiableTerm FROM ARGUMENT WHERE argumentID = %s",
+            (arg_id,)
+        )
+        row = cur.fetchone()
+        if row and row['hasNegotiableTerm']:
+            return SKIP, 'negotiable-term argument (bots excluded)'
+
     # Not already seeded
     with db.cursor() as cur:
         cur.execute(
