@@ -142,6 +142,32 @@ link it hands you, otherwise hard to find — §4b.)
 - **No — it only illustrates the one claim → stays fused.** A list of tactics all
   instancing "acts like a lobbyist" is one node with color, not five nodes.
 
+**The split tells — scan every node, even the ones that feel atomic (Craig,
+2026-08-14).** The master rule is the *why*; these surface words are the *where*.
+Rereading this file does not substitute for running the scan on each node — the
+Farrell run under-deconstructed *right after* a fresh reread, because the tells
+below weren't enumerated. Any of them inside one phrasing is a near-certain second
+claim:
+- **em-dash** joining two clauses (not mere apposition);
+- **"so" / "because" / "which is why"** — the clause after is a separate node,
+  wired as the relationship the connective names: **"so" → a Therefore**,
+  **"because" → a Because**;
+- **"not Y" / "rather than Y" / "instead of Y"** — an X-not-Y ranking (see below)
+  *or* two facts to separate;
+- **semicolon**, or **"and"** joining two independently-true clauses.
+Two splits that hide with no connective at all:
+- **Fact vs. motive/actor.** "Zuckerberg reshaped Meta's algorithms *to curry
+  favor with Trump*" is two claims — the algorithmic fact and the imputed motive;
+  a reader can accept one and reject the other. Split them.
+- **The verifiable example → its own Because-child.** A concrete, checkable
+  example (a statistic, a named instance, a dated act) does *not* stay as em-dash
+  color — push it one rung down as evidence, where the explication link belongs
+  (the porn stat under the algorithm claim; the Obama-secret-Muslim poll under
+  shibboleths). This is the counterpart to "a bare rhetorical list stays fused": a
+  *list of tactics* instancing one claim is color; a *single example with its own
+  facts* is a child. (Farrell run, 2026-08-14: a dense theory essay → 19 nodes;
+  took two redline passes to reach this grain.)
+
 **A causal/temporal chain is NOT illustration — decompose it.** "capped in '98 →
 lobbied it off in 2015 → the chain bought it" is three independently-true,
 independently-disputable facts. Make each a standalone node (actors named) wired
@@ -176,10 +202,12 @@ re-coin. The un-spun-off remainder was probably being discussed in isolation, an
 wiring to the existing node *is* the value. (3246's "addiction not cost" → adopt
 3245.)
 
-**Per-node checklist:** one assertion? · would any clause survive alone as a
-claim? · actors named (no bare "the merger / the report / it")? · coined term
-defined inline, term-of-art glossed weakly? · an "X not Y" hiding a
-prioritization? · does the spin-off already exist in the cluster?
+**Per-node checklist:** scanned for the split tells (em-dash · so · because · not-Y
+· semicolon · fact-vs-motive)? · one assertion? · would any clause survive alone as
+a claim? · verifiable example pushed to a Because-child? · actors named (no bare
+"the merger / the report / it")? · coined term defined inline, term-of-art glossed
+weakly? · an "X not Y" hiding a prioritization? · does the spin-off already exist in
+the cluster?
 
 ---
 
