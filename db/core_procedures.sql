@@ -24,8 +24,11 @@ BEGIN
         ELSE
             INSERT INTO OPINION VALUES (argID, proID, FALSE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
         END IF;
+        -- Guard: a session that never SET @active_aff_id (e.g. a bot/seed script
+        -- bypassing dbconnect.php) leaves it NULL, which coerces to 0 on insert and
+        -- orphans the scope row. Default 0/NULL to ALL_PUBLIC_AFF_ID (12).
         INSERT IGNORE INTO SCOPE_OPINION (argumentID, profileID, affiliationID)
-        VALUES (argID, proID, @active_aff_id);
+        VALUES (argID, proID, COALESCE(NULLIF(@active_aff_id, 0), 12));
 
         -- Probabilistic persona retirement: fires only for real human users (not personas 1-26).
         -- Probability = (humanCount / 100)^2, giving an S-curve that accelerates through
@@ -391,8 +394,9 @@ BEGIN
         INSERT INTO OPINION
             VALUES (NEW.supportingArgID, NEW.profileID, TRUE,
                     CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+        -- Default 0/NULL @active_aff_id to ALL_PUBLIC_AFF_ID (12); see assertOpinion.
         INSERT IGNORE INTO SCOPE_OPINION (argumentID, profileID, affiliationID)
-        VALUES (NEW.supportingArgID, NEW.profileID, @active_aff_id);
+        VALUES (NEW.supportingArgID, NEW.profileID, COALESCE(NULLIF(@active_aff_id, 0), 12));
     END IF;
 END //
 DELIMITER ;

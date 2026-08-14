@@ -57,8 +57,9 @@ BEGIN
                       WHERE explicationID = thisExplID AND profileID = proID) THEN
             INSERT INTO EXPLICATION_ENDORSE (explicationID, argumentID, profileID, weight, active)
             VALUES (thisExplID, argID, proID, 100, TRUE);
+            -- Default 0/NULL @active_aff_id to ALL_PUBLIC_AFF_ID (12); see assertOpinion.
             INSERT IGNORE INTO SCOPE_EXPLICATION_ENDORSE (profileID, argumentID, affiliationID)
-            VALUES (proID, argID, @active_aff_id);
+            VALUES (proID, argID, COALESCE(NULLIF(@active_aff_id, 0), 12));
         ELSE
             UPDATE EXPLICATION_ENDORSE SET active = TRUE
             WHERE explicationID = thisExplID AND profileID = proID;
@@ -74,8 +75,9 @@ BEGIN
 
         INSERT INTO EXPLICATION_ENDORSE (explicationID, argumentID, profileID, weight, active)
         VALUES (thisExplID, argID, proID, 100, TRUE);
+        -- Default 0/NULL @active_aff_id to ALL_PUBLIC_AFF_ID (12); see assertOpinion.
         INSERT IGNORE INTO SCOPE_EXPLICATION_ENDORSE (profileID, argumentID, affiliationID)
-        VALUES (proID, argID, @active_aff_id);
+        VALUES (proID, argID, COALESCE(NULLIF(@active_aff_id, 0), 12));
     END IF;
 END //
 DELIMITER ;
