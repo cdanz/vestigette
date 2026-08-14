@@ -168,7 +168,11 @@ For a given element el, set all of its wrapper children to neutral.
 function paintLine(el, pct) {
 	el.style.setProperty('--pct', pct.toFixed(2));
 	let val = el.querySelector('.val');
-	if (val) val.textContent = Math.round(pct) + '%';
+	// A positive weight under 1% shows its two-decimal value rather than rounding to
+	// "0%" (or up to "1%"), which would misrepresent a real, still-endorsed weight —
+	// the live-edit counterpart of the read view's <1% minor-point treatment. A
+	// genuine 0 still reads "0%".
+	if (val) val.textContent = (pct > 0 && pct < 1) ? pct.toFixed(2) + '%' : Math.round(pct) + '%';
 	let m = el.className.match(pctRE);
 	if (m) el.classList.remove(m[0]);
 	el.classList.remove('half1', 'half2');
@@ -1229,14 +1233,21 @@ function floorClicksForNew(others) {
 	return Math.max(1, Math.ceil(others / 99));
 }
 
-// Clicks added/removed per HOLD tick, scaled to the section's running total so the
-// share climbs at a steady pace however large the total (a fixed +1 barely nudges a
-// big loaded total — the "snail's pace"). A single tap still steps by 1, so tapping
-// stays a fine sub-percent nudge. Mirrors flesh_out's FLESH_HOLD_FRAC / fleshStep().
+// Clicks added/removed per HOLD tick, scaled to the running total so the share
+// climbs at a steady pace however large the total (a fixed +1 barely nudges a big
+// loaded total — the "snail's pace"). A single tap still steps by 1, so tapping stays
+// a fine sub-percent nudge.
+//
+// holdStepForTotal is the single source of truth for this math and the HOLD_FRAC
+// knob: the index sections call it via holdStep(type), and flesh_out's fleshStep()
+// calls it too, so the two pages share one 2%-of-total feel and can't drift apart.
 const HOLD_FRAC = 0.02;
+function holdStepForTotal(total) {
+	return Math.max(1, Math.round(total * HOLD_FRAC));
+}
 function holdStep(type) {
 	let state = sectionState[type];
-	return state ? Math.max(1, Math.round(state.totalClicks * HOLD_FRAC)) : 1;
+	return state ? holdStepForTotal(state.totalClicks) : 1;
 }
 
 function bump(type, argID, step) {

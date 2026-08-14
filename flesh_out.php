@@ -1001,9 +1001,10 @@ function fleshLoadMyWeights() {
 // Clicks added/removed per HOLD tick, scaled to the running total so the share
 // moves at a steady pace however large the total has grown (a fixed +1 barely
 // nudges a big total — the "snail's pace"). Small totals still step by 1, so a
-// quick tap stays a fine single-click nudge.
-var FLESH_HOLD_FRAC = 0.02;
-function fleshStep() { return Math.max(1, Math.round(fleshTotalClicks * FLESH_HOLD_FRAC)); }
+// quick tap stays a fine single-click nudge. Delegates to holdStepForTotal in
+// script_vestigette.js (loaded above) so this page and the index sections share
+// one HOLD_FRAC knob and can't drift apart.
+function fleshStep() { return holdStepForTotal(fleshTotalClicks); }
 
 function fleshReducePinned(item) {
     var step = fleshStep();
