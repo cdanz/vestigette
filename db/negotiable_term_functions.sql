@@ -23,11 +23,22 @@ RETURNS VARCHAR(400)
 DETERMINISTIC
 NO SQL
 BEGIN
+    DECLARE s   VARCHAR(64);
+    DECLARE ip  VARCHAR(48);
+    DECLARE fp  VARCHAR(16);
+    DECLARE res VARCHAR(64);
     IF p IS NULL OR v IS NULL OR LOCATE('[[value]]', p) = 0 THEN
         RETURN p;
     END IF;
     -- Trim trailing zeros then a dangling decimal point: 3.50000000 -> 3.5, 4.00000000 -> 4.
-    RETURN REPLACE(p, '[[value]]',
-        TRIM(TRAILING '.' FROM TRIM(TRAILING '0' FROM CAST(v AS CHAR))));
+    SET s  = TRIM(TRAILING '.' FROM TRIM(TRAILING '0' FROM CAST(v AS CHAR)));
+    SET ip = SUBSTRING_INDEX(s, '.', 1);                                  -- integer part (keeps sign)
+    SET fp = IF(LOCATE('.', s) > 0, SUBSTRING_INDEX(s, '.', -1), '');     -- trimmed fraction, if any
+    -- Group the integer part in threes with commas (matches PHP nt_format_value).
+    SET res = FORMAT(CAST(ip AS DECIMAL(24,0)), 0);
+    IF fp <> '' THEN
+        SET res = CONCAT(res, '.', fp);
+    END IF;
+    RETURN REPLACE(p, '[[value]]', res);
 END //
 DELIMITER ;

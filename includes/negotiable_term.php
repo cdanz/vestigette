@@ -13,14 +13,26 @@
 if (!defined('NT_TOKEN')) define('NT_TOKEN', '[[value]]');
 
 // Format a DECIMAL(24,8) value for display: trim trailing zeros and any dangling
-// decimal point (3.50000000 -> "3.5", 4.00000000 -> "4"). Returns '' for NULL.
+// decimal point (3.50000000 -> "3.5", 4.00000000 -> "4"), then group the integer
+// part in threes with commas (1000000 -> "1,000,000"). Values are STORED
+// unformatted; grouping is a display-only default. Returns '' for NULL.
+// String-based (no float round-trip) so 16-digit integers keep full precision.
 function nt_format_value($v) {
     if ($v === null || $v === '') return '';
     $s = (string) $v;
-    if (strpos($s, '.') !== false) {
-        $s = rtrim(rtrim($s, '0'), '.');
+    $sign = '';
+    if (isset($s[0]) && $s[0] === '-') { $sign = '-'; $s = substr($s, 1); }
+    $dot = strpos($s, '.');
+    if ($dot !== false) {
+        $int  = substr($s, 0, $dot);
+        $frac = rtrim(substr($s, $dot + 1), '0');
+    } else {
+        $int  = $s;
+        $frac = '';
     }
-    return $s;
+    if ($int === '') $int = '0';
+    $int = preg_replace('/(?<=\d)(?=(?:\d{3})+$)/', ',', $int);
+    return $sign . $int . ($frac !== '' ? '.' . $frac : '');
 }
 
 function nt_has_token($text) {
