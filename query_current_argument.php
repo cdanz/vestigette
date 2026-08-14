@@ -273,14 +273,17 @@ if ($hoRes && ($hoRow = mysqli_fetch_row($hoRes))) {
   $humanOpinions = intval($hoRow[0]);
 }
 
-// Recent Assertions (Find section): the 20 newest arguments by creation date.
-// Excludes bot-persona-created nodes (createdBy <= 26) so the list surfaces
-// human/admin-authored arguments as navigation entry points rather than being
-// flooded by bot scaffolding (rebuttals/becauses/therefores).
+// Recent Assertions (Find section): the 20 newest arguments by creation date —
+// the latest net-new nodes to discover. Respects the active filter: when a filter
+// is applied, only nodes authored by profiles in view (FILTER_PROFILES) surface;
+// unfiltered, it shows everyone's — personas included — so freshly seeded
+// scaffolding is visible for review (personas author the bulk of new nodes).
 // Uses the currentPhrasing cache (falls back to oldest phrasing) so it stays cheap.
 // The middle value (0) is the color/weight slot generateFindLines() expects; recent
-// items carry no endorsement signal, so they render neutral.
+// items carry no endorsement signal, so they render neutral. argumentID DESC breaks
+// ties when a seed batch shares one createdDate, keeping the order stable/newest-first.
 $recent = array();
+$recentWhere = $filtered ? "WHERE a.createdBy IN (SELECT profileID FROM FILTER_PROFILES)" : "";
 $recentRes = mysqli_query($db,
   "SELECT a.argumentID, 0,
           ntPhrasing(COALESCE(a.currentPhrasing,
@@ -288,8 +291,8 @@ $recentRes = mysqli_query($db,
                     WHERE argumentID = a.argumentID
                     ORDER BY createdDate ASC LIMIT 1)), a.currentTermValue)
    FROM ARGUMENT a
-   WHERE a.createdBy > 26
-   ORDER BY a.createdDate DESC
+   $recentWhere
+   ORDER BY a.createdDate DESC, a.argumentID DESC
    LIMIT 20");
 if ($recentRes) {
   while ($r = mysqli_fetch_row($recentRes)) {
