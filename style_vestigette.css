@@ -801,17 +801,10 @@ button.hidden {
 	margin-top: var(--sp-50);
 	max-height: 0;
 	overflow: auto;
-	/* overflow:auto keeps content clipped during the max-height open/close animation,
-	   but leaves a native overlay scrollbar (a stray rounded thumb in the corner) when
-	   a panel's content is slightly taller than its resting height. Hide the scrollbar
-	   chrome without disabling scroll. */
-	scrollbar-width: none;        /* Firefox */
-	-ms-overflow-style: none;     /* legacy Edge */
 	cursor: default;
 	transition: max-height 0.3s ease-out, margin-bottom 0.1s ease-out 0.1s;
 	width: 100%;
 }
-.container .panel::-webkit-scrollbar { display: none; } /* Chrome/Safari overlay thumb */
 #phrasing p,
 #explication p {
 	background-color: white;
