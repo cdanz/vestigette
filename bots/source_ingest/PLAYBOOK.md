@@ -374,7 +374,7 @@ SELECT o.profileID, o.acceptance FROM OPINION o WHERE o.argumentID=<anchor>;
 ```
 
 Connect via SSH (batch — fail2ban trips on rapid repeats):
-`ssh root@178.128.74.45 "MYSQL_PWD=\$(cat /root/.digitalocean_password) mysql -u root -N -B vestigette"`
+`ssh root@<production-host> "MYSQL_PWD=\$(cat <path-to-root-only-password-file>) mysql -u root -N -B vestigette"`
 
 ---
 

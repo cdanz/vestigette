@@ -16,7 +16,7 @@ arg" annotation produced by reading the candidate's full existing neighborhood.
 
 Usage:
     python3 check_dupes.py spec.json > dupecheck.sql
-    ssh root@178.128.74.45 'MYSQL_PWD=$(cat /root/.digitalocean_password) \
+    ssh root@<production-host> 'MYSQL_PWD=$(cat <path-to-root-only-password-file>) \
         mysql --default-character-set=utf8mb4 -u root vestigette -t' < dupecheck.sql
 """
 import json, sys

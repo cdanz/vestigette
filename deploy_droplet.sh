@@ -16,10 +16,14 @@
 
 set -euo pipefail
 
-DROPLET="root@178.128.74.45"
+# Host lives in a local, gitignored file (deploy.local.env) or the
+# VESTIGETTE_DROPLET env var — never committed. See deploy.local.env.example.
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+[ -f "$SCRIPT_DIR/deploy.local.env" ] && source "$SCRIPT_DIR/deploy.local.env"
+DROPLET="${VESTIGETTE_DROPLET:?Set VESTIGETTE_DROPLET or create deploy.local.env (see deploy.local.env.example)}"
 WEB_ROOT="/var/www/html"
 BOT_DIR="/var/www/bot"
-SRC="/Users/Razzmatazz/vestigette-dev"
+SRC="$SCRIPT_DIR"
 
 PHP_FILES=(
     functions.php

@@ -10,8 +10,8 @@
 -- ($[[value]], [[value]] lbs). The [[value]] token marks the slot in every phrasing.
 --
 -- Deploy (MySQL 8 on the droplet):
---   cat db/negotiable_term_schema.sql | ssh root@178.128.74.45 \
---     'cat > /tmp/nt.sql && MYSQL_PWD=$(cat /root/.digitalocean_password) mysql -u root vestigette < /tmp/nt.sql'
+--   cat db/negotiable_term_schema.sql | ssh root@<production-host> \
+--     'cat > /tmp/nt.sql && MYSQL_PWD=$(cat <path-to-root-only-password-file>) mysql -u root vestigette < /tmp/nt.sql'
 -- The ALTER is one-time (MySQL 8 has no ADD COLUMN IF NOT EXISTS); re-running it errors
 -- harmlessly on "Duplicate column". The CREATE TABLEs are idempotent.
 

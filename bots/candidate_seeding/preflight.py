@@ -14,7 +14,7 @@ previously manual:
 
 Usage:
     python3 preflight.py spec.json > preflight.sql
-    ssh root@178.128.74.45 '...mysql -N -B...' < preflight.sql   # any output = STOP
+    ssh root@<production-host> '...mysql -N -B...' < preflight.sql   # any output = STOP
 """
 import json, sys
 

@@ -40,14 +40,15 @@ Anything touching `ENDORSEMENT` must preserve this.
 
 ## Infrastructure & operational workflow
 
-- **Production:** DigitalOcean droplet `root@178.128.74.45` (= agitate-discourse.org).
-  Apache + PHP 8 + MySQL 8. Web root `/var/www/html`, bot scripts in `/var/www/bot`.
+- **Production:** a DigitalOcean droplet (= agitate-discourse.org), connection details in
+  a local-only ops file, not in this repo. Apache + PHP 8 + MySQL 8. Web root
+  `/var/www/html`, bot scripts in `/var/www/bot`.
 - **Database access:**
   - App connects via credentials in `/var/www/html/includes/config.local.php` on the
     droplet (gitignored, manually placed — follows the `config.local.php` branch in
     `dbconnect.php`).
-  - MySQL root for maintenance/backups:
-    `MYSQL_PWD=$(cat /root/.digitalocean_password) mysql -u root vestigette`
+  - MySQL root for maintenance/backups: password read at runtime from a root-only file
+    on the host (never committed, never typed inline).
   - Use `-N -B` flags for terse script output. **Batch SSH** — rapid repeated connections
     trip **fail2ban** and produce "Connection refused" for several minutes.
 - **No git on the server.** Deploy via **`./deploy_droplet.sh {php|bot|all}`** — batches
@@ -64,7 +65,7 @@ Anything touching `ENDORSEMENT` must preserve this.
 - **Secrets:** `.env` and `persona_credentials.json` (in `bots/`) are gitignored.
 - **DB backup:** full backup (structure + data + procedures + triggers) at
   `db/backups/vestigette_backup_2026-07-08.sql` — gitignored, keep a copy off-machine.
-  To take a fresh backup: `MYSQL_PWD=$(cat /root/.digitalocean_password) mysqldump --user=root --routines --triggers --events --single-transaction --add-drop-table --add-drop-trigger --databases vestigette > /tmp/backup.sql` then scp it down.
+  To take a fresh backup: `mysqldump --user=root --routines --triggers --events --single-transaction --add-drop-table --add-drop-trigger --databases vestigette > /tmp/backup.sql` (root password supplied the same way as above) then scp it down.
 
 ---
 

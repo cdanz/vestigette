@@ -1,7 +1,7 @@
 -- Stored procedures for Negotiable Terms (per-user value, median consensus).
 -- Canonical source. Deploy by piping to the droplet as root:
---   cat db/negotiable_term_procedures.sql | ssh root@178.128.74.45 \
---     'MYSQL_PWD=$(cat /root/.digitalocean_password) mysql -u root vestigette'
+--   cat db/negotiable_term_procedures.sql | ssh root@<production-host> \
+--     'MYSQL_PWD=$(cat <path-to-root-only-password-file>) mysql -u root vestigette'
 -- MySQL 8 (not MariaDB): DROP + CREATE, no CREATE OR REPLACE.
 --
 -- Median (not mean) is deliberate: one absolute value per user, so a lone extreme

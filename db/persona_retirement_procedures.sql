@@ -4,7 +4,7 @@
 -- explications they submitted are pruned only if no active human endorsements remain.
 --
 -- Deploy this file BEFORE core_procedures.sql — assertOpinion calls this procedure.
--- Deploy: ssh root@178.128.74.45 "mysql vestigette" < persona_retirement_procedures.sql
+-- Deploy: ssh root@<production-host> "mysql vestigette" < persona_retirement_procedures.sql
 
 USE vestigette;
 

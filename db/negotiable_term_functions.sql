@@ -1,7 +1,7 @@
 -- Negotiable Terms — SQL helper function.
 -- Deploy FIRST (before redeploying any proc that calls it), as root:
---   cat db/negotiable_term_functions.sql | ssh root@178.128.74.45 \
---     'MYSQL_PWD=$(cat /root/.digitalocean_password) mysql -u root vestigette'
+--   cat db/negotiable_term_functions.sql | ssh root@<production-host> \
+--     'MYSQL_PWD=$(cat <path-to-root-only-password-file>) mysql -u root vestigette'
 --
 -- ntPhrasing(phrasing, value): bakes a term-bearing argument's median value into
 -- its phrasing by replacing the [[value]] token with the formatted number. Used at

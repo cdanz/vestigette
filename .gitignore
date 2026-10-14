@@ -2,6 +2,7 @@
 includes/config.local.php
 includes/stripe.local.php
 persona_credentials.json
+deploy.local.env
 .env
 
 # Database dumps (allow procedure definition scripts)
