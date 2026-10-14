@@ -76,7 +76,7 @@ Anything touching `ENDORSEMENT` must preserve this.
 includes/           dbconnect.php, content_chrome.php, Parsedown.php
 pages/              Standing-page markdown (ai-policy-pledge, data-promise) — see pages/README.md
 db/                 Active stored-procedure SQL files (*_procedures.sql)
-db/seeds/           Historical one-time data-seed SQL (persona seeds, wiki, etc.)
+db/seeds/           Removed from repo 2026-10-14 (one-off, already-run — see git history)
 db/backups/         DB dumps — gitignored (contain user data)
 bots/               Bot scripts (active + archived), JSON data, seeding docs
 ```
@@ -355,7 +355,8 @@ header keeps the raw token so PHP can wrap the value in the cddbYellow halo.
 - **`bots/PERSONA_SEEDING_PROCESS.md`** — persona seeding workflow.
 - **`DATA_CLEANUP_BACKLOG.md`** — known data-quality issues.
 - **`db/*_procedures.sql`** — canonical proc/trigger source (8 files).
-- **`db/seeds/`** — 84 historical seed SQL files (forensic reference, not re-run).
+- **`db/seeds/`** — removed from the tracked repo 2026-10-14 (84 one-off, already-run seed
+  files; repo cleanup ahead of going public). Still in git history if ever needed.
 - **`deploy_droplet.sh`** — source of truth for which files ship and how.
 
 ---
